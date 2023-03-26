@@ -1,1 +1,0 @@
-The memory.ROMRAM board is an 8-bit wide memory board of up to 4MB of Flash ROM and/or SRAM in 512KB increments.  For booting the system, Flash ROM must be in the first position.  Supports RTC and limited user debugging features.
