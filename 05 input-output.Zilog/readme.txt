@@ -1,1 +1,0 @@
-The input-output.Zilog board provides system timer/counter, dual serial ports, and dual general purpose parallel IO.  It also supports a dedicated controller for extended interrupts.  Designed for IM2, it is intended to be the primary console interface.
