@@ -1,1 +1,0 @@
-The input-output.Multi board provides optional rich IO features such as dual 16C550 compatible UART serial ports, an IBM PC compatible bidirectional parallel printer port, a PS/2 keyboard and mouse interface, and a USB/SD interface for mass storage.
