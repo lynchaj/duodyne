@@ -1,0 +1,2620 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr B 17000 11000
+encoding utf-8
+Sheet 4 4
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+NoConn ~ 3600 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BB156
+P 3800 4050
+AR Path="/641BB156" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BB156" Ref="J2"  Part="1" 
+F 0 "J2" H 3878 4091 50  0000 L CNN
+F 1 "PTH" H 3878 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 4050 50  0001 C CNN
+F 3 "" H 3800 4050 50  0001 C CNN
+	1    3800 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BB481
+P 3800 4250
+AR Path="/641BB481" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BB481" Ref="J3"  Part="1" 
+F 0 "J3" H 3878 4291 50  0000 L CNN
+F 1 "PTH" H 3878 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 4250 50  0001 C CNN
+F 3 "" H 3800 4250 50  0001 C CNN
+	1    3800 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BB48C
+P 3800 4450
+AR Path="/641BB48C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BB48C" Ref="J4"  Part="1" 
+F 0 "J4" H 3878 4491 50  0000 L CNN
+F 1 "PTH" H 3878 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 4450 50  0001 C CNN
+F 3 "" H 3800 4450 50  0001 C CNN
+	1    3800 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BBA9F
+P 3800 4650
+AR Path="/641BBA9F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BBA9F" Ref="J5"  Part="1" 
+F 0 "J5" H 3878 4691 50  0000 L CNN
+F 1 "PTH" H 3878 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 4650 50  0001 C CNN
+F 3 "" H 3800 4650 50  0001 C CNN
+	1    3800 4650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BBAAA
+P 3800 4850
+AR Path="/641BBAAA" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BBAAA" Ref="J6"  Part="1" 
+F 0 "J6" H 3878 4891 50  0000 L CNN
+F 1 "PTH" H 3878 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 4850 50  0001 C CNN
+F 3 "" H 3800 4850 50  0001 C CNN
+	1    3800 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BBAB5
+P 3800 5050
+AR Path="/641BBAB5" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BBAB5" Ref="J7"  Part="1" 
+F 0 "J7" H 3878 5091 50  0000 L CNN
+F 1 "PTH" H 3878 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 5050 50  0001 C CNN
+F 3 "" H 3800 5050 50  0001 C CNN
+	1    3800 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BBAC0
+P 3800 5250
+AR Path="/641BBAC0" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BBAC0" Ref="J8"  Part="1" 
+F 0 "J8" H 3878 5291 50  0000 L CNN
+F 1 "PTH" H 3878 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 5250 50  0001 C CNN
+F 3 "" H 3800 5250 50  0001 C CNN
+	1    3800 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6405E31E
+P 3800 3850
+AR Path="/6405E31E" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6405E31E" Ref="J1"  Part="1" 
+F 0 "J1" H 3878 3891 50  0000 L CNN
+F 1 "PTH" H 3878 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 3850 50  0001 C CNN
+F 3 "" H 3800 3850 50  0001 C CNN
+	1    3800 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE92B
+P 3800 5450
+AR Path="/641BE92B" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE92B" Ref="J9"  Part="1" 
+F 0 "J9" H 3878 5491 50  0000 L CNN
+F 1 "PTH" H 3878 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 5450 50  0001 C CNN
+F 3 "" H 3800 5450 50  0001 C CNN
+	1    3800 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3600 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE936
+P 3800 5650
+AR Path="/641BE936" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE936" Ref="J10"  Part="1" 
+F 0 "J10" H 3878 5691 50  0000 L CNN
+F 1 "PTH" H 3878 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 3800 5650 50  0001 C CNN
+F 3 "" H 3800 5650 50  0001 C CNN
+	1    3800 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE941
+P 4350 3650
+AR Path="/641BE941" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE941" Ref="J11"  Part="1" 
+F 0 "J11" H 4428 3691 50  0000 L CNN
+F 1 "PTH" H 4428 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 3650 50  0001 C CNN
+F 3 "" H 4350 3650 50  0001 C CNN
+	1    4350 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE94C
+P 4350 3850
+AR Path="/641BE94C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE94C" Ref="J12"  Part="1" 
+F 0 "J12" H 4428 3891 50  0000 L CNN
+F 1 "PTH" H 4428 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 3850 50  0001 C CNN
+F 3 "" H 4350 3850 50  0001 C CNN
+	1    4350 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE957
+P 4350 4050
+AR Path="/641BE957" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE957" Ref="J13"  Part="1" 
+F 0 "J13" H 4428 4091 50  0000 L CNN
+F 1 "PTH" H 4428 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 4050 50  0001 C CNN
+F 3 "" H 4350 4050 50  0001 C CNN
+	1    4350 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE962
+P 4350 4250
+AR Path="/641BE962" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE962" Ref="J14"  Part="1" 
+F 0 "J14" H 4428 4291 50  0000 L CNN
+F 1 "PTH" H 4428 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 4250 50  0001 C CNN
+F 3 "" H 4350 4250 50  0001 C CNN
+	1    4350 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE96D
+P 4350 4450
+AR Path="/641BE96D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE96D" Ref="J15"  Part="1" 
+F 0 "J15" H 4428 4491 50  0000 L CNN
+F 1 "PTH" H 4428 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 4450 50  0001 C CNN
+F 3 "" H 4350 4450 50  0001 C CNN
+	1    4350 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641BE978
+P 4350 4650
+AR Path="/641BE978" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641BE978" Ref="J16"  Part="1" 
+F 0 "J16" H 4428 4691 50  0000 L CNN
+F 1 "PTH" H 4428 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 4650 50  0001 C CNN
+F 3 "" H 4350 4650 50  0001 C CNN
+	1    4350 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641C9D77
+P 4350 4850
+AR Path="/641C9D77" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641C9D77" Ref="J17"  Part="1" 
+F 0 "J17" H 4428 4891 50  0000 L CNN
+F 1 "PTH" H 4428 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 4850 50  0001 C CNN
+F 3 "" H 4350 4850 50  0001 C CNN
+	1    4350 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641C9E4E
+P 4350 5050
+AR Path="/641C9E4E" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641C9E4E" Ref="J18"  Part="1" 
+F 0 "J18" H 4428 5091 50  0000 L CNN
+F 1 "PTH" H 4428 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 5050 50  0001 C CNN
+F 3 "" H 4350 5050 50  0001 C CNN
+	1    4350 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641C9E59
+P 4350 5250
+AR Path="/641C9E59" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641C9E59" Ref="J19"  Part="1" 
+F 0 "J19" H 4428 5291 50  0000 L CNN
+F 1 "PTH" H 4428 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 5250 50  0001 C CNN
+F 3 "" H 4350 5250 50  0001 C CNN
+	1    4350 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641C9E64
+P 4350 5450
+AR Path="/641C9E64" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641C9E64" Ref="J20"  Part="1" 
+F 0 "J20" H 4428 5491 50  0000 L CNN
+F 1 "PTH" H 4428 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 5450 50  0001 C CNN
+F 3 "" H 4350 5450 50  0001 C CNN
+	1    4350 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4150 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F2C0F
+P 4900 5450
+AR Path="/641F2C0F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F2C0F" Ref="J31"  Part="1" 
+F 0 "J31" H 4978 5491 50  0000 L CNN
+F 1 "PTH" H 4978 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 5450 50  0001 C CNN
+F 3 "" H 4900 5450 50  0001 C CNN
+	1    4900 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 5450
+NoConn ~ 4150 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F4971
+P 4350 5650
+AR Path="/641F4971" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F4971" Ref="J21"  Part="1" 
+F 0 "J21" H 4428 5691 50  0000 L CNN
+F 1 "PTH" H 4428 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4350 5650 50  0001 C CNN
+F 3 "" H 4350 5650 50  0001 C CNN
+	1    4350 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F497C
+P 4900 3650
+AR Path="/641F497C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F497C" Ref="J22"  Part="1" 
+F 0 "J22" H 4978 3691 50  0000 L CNN
+F 1 "PTH" H 4978 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 3650 50  0001 C CNN
+F 3 "" H 4900 3650 50  0001 C CNN
+	1    4900 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F4987
+P 4900 3850
+AR Path="/641F4987" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F4987" Ref="J23"  Part="1" 
+F 0 "J23" H 4978 3891 50  0000 L CNN
+F 1 "PTH" H 4978 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 3850 50  0001 C CNN
+F 3 "" H 4900 3850 50  0001 C CNN
+	1    4900 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F4992
+P 4900 4050
+AR Path="/641F4992" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F4992" Ref="J24"  Part="1" 
+F 0 "J24" H 4978 4091 50  0000 L CNN
+F 1 "PTH" H 4978 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 4050 50  0001 C CNN
+F 3 "" H 4900 4050 50  0001 C CNN
+	1    4900 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F499D
+P 4900 4250
+AR Path="/641F499D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F499D" Ref="J25"  Part="1" 
+F 0 "J25" H 4978 4291 50  0000 L CNN
+F 1 "PTH" H 4978 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 4250 50  0001 C CNN
+F 3 "" H 4900 4250 50  0001 C CNN
+	1    4900 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49A8
+P 4900 4450
+AR Path="/641F49A8" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49A8" Ref="J26"  Part="1" 
+F 0 "J26" H 4978 4491 50  0000 L CNN
+F 1 "PTH" H 4978 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 4450 50  0001 C CNN
+F 3 "" H 4900 4450 50  0001 C CNN
+	1    4900 4450
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49B2
+P 4900 4650
+AR Path="/641F49B2" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49B2" Ref="J27"  Part="1" 
+F 0 "J27" H 4978 4691 50  0000 L CNN
+F 1 "PTH" H 4978 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 4650 50  0001 C CNN
+F 3 "" H 4900 4650 50  0001 C CNN
+	1    4900 4650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49BD
+P 4900 4850
+AR Path="/641F49BD" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49BD" Ref="J28"  Part="1" 
+F 0 "J28" H 4978 4891 50  0000 L CNN
+F 1 "PTH" H 4978 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 4850 50  0001 C CNN
+F 3 "" H 4900 4850 50  0001 C CNN
+	1    4900 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49C8
+P 4900 5050
+AR Path="/641F49C8" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49C8" Ref="J29"  Part="1" 
+F 0 "J29" H 4978 5091 50  0000 L CNN
+F 1 "PTH" H 4978 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 5050 50  0001 C CNN
+F 3 "" H 4900 5050 50  0001 C CNN
+	1    4900 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49D3
+P 4900 5250
+AR Path="/641F49D3" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49D3" Ref="J30"  Part="1" 
+F 0 "J30" H 4978 5291 50  0000 L CNN
+F 1 "PTH" H 4978 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 5250 50  0001 C CNN
+F 3 "" H 4900 5250 50  0001 C CNN
+	1    4900 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 641F49DE
+P 4900 5650
+AR Path="/641F49DE" Ref="J?"  Part="1" 
+AR Path="/64058FA4/641F49DE" Ref="J32"  Part="1" 
+F 0 "J32" H 4978 5691 50  0000 L CNN
+F 1 "PTH" H 4978 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 4900 5650 50  0001 C CNN
+F 3 "" H 4900 5650 50  0001 C CNN
+	1    4900 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 4700 5650
+NoConn ~ 5250 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642186A0
+P 5450 5650
+AR Path="/642186A0" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642186A0" Ref="J43"  Part="1" 
+F 0 "J43" H 5528 5691 50  0000 L CNN
+F 1 "PTH" H 5528 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 5650 50  0001 C CNN
+F 3 "" H 5450 5650 50  0001 C CNN
+	1    5450 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64218695
+P 5450 5250
+AR Path="/64218695" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64218695" Ref="J41"  Part="1" 
+F 0 "J41" H 5528 5291 50  0000 L CNN
+F 1 "PTH" H 5528 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 5250 50  0001 C CNN
+F 3 "" H 5450 5250 50  0001 C CNN
+	1    5450 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6421868A
+P 5450 5050
+AR Path="/6421868A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6421868A" Ref="J40"  Part="1" 
+F 0 "J40" H 5528 5091 50  0000 L CNN
+F 1 "PTH" H 5528 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 5050 50  0001 C CNN
+F 3 "" H 5450 5050 50  0001 C CNN
+	1    5450 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6421867F
+P 5450 4850
+AR Path="/6421867F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6421867F" Ref="J39"  Part="1" 
+F 0 "J39" H 5528 4891 50  0000 L CNN
+F 1 "PTH" H 5528 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 4850 50  0001 C CNN
+F 3 "" H 5450 4850 50  0001 C CNN
+	1    5450 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64218674
+P 5450 4650
+AR Path="/64218674" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64218674" Ref="J38"  Part="1" 
+F 0 "J38" H 5528 4691 50  0000 L CNN
+F 1 "PTH" H 5528 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 4650 50  0001 C CNN
+F 3 "" H 5450 4650 50  0001 C CNN
+	1    5450 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6421866A
+P 5450 4450
+AR Path="/6421866A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6421866A" Ref="J37"  Part="1" 
+F 0 "J37" H 5528 4491 50  0000 L CNN
+F 1 "PTH" H 5528 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 4450 50  0001 C CNN
+F 3 "" H 5450 4450 50  0001 C CNN
+	1    5450 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6421865F
+P 5450 4250
+AR Path="/6421865F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6421865F" Ref="J36"  Part="1" 
+F 0 "J36" H 5528 4291 50  0000 L CNN
+F 1 "PTH" H 5528 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 4250 50  0001 C CNN
+F 3 "" H 5450 4250 50  0001 C CNN
+	1    5450 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64218654
+P 5450 4050
+AR Path="/64218654" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64218654" Ref="J35"  Part="1" 
+F 0 "J35" H 5528 4091 50  0000 L CNN
+F 1 "PTH" H 5528 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 4050 50  0001 C CNN
+F 3 "" H 5450 4050 50  0001 C CNN
+	1    5450 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64218649
+P 5450 3850
+AR Path="/64218649" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64218649" Ref="J34"  Part="1" 
+F 0 "J34" H 5528 3891 50  0000 L CNN
+F 1 "PTH" H 5528 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 3850 50  0001 C CNN
+F 3 "" H 5450 3850 50  0001 C CNN
+	1    5450 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6421863E
+P 5450 3650
+AR Path="/6421863E" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6421863E" Ref="J33"  Part="1" 
+F 0 "J33" H 5528 3691 50  0000 L CNN
+F 1 "PTH" H 5528 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 3650 50  0001 C CNN
+F 3 "" H 5450 3650 50  0001 C CNN
+	1    5450 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5250 3650
+NoConn ~ 5250 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642184A6
+P 5450 5450
+AR Path="/642184A6" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642184A6" Ref="J42"  Part="1" 
+F 0 "J42" H 5528 5491 50  0000 L CNN
+F 1 "PTH" H 5528 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 5450 5450 50  0001 C CNN
+F 3 "" H 5450 5450 50  0001 C CNN
+	1    5450 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423901E
+P 6000 5650
+AR Path="/6423901E" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423901E" Ref="J54"  Part="1" 
+F 0 "J54" H 6078 5691 50  0000 L CNN
+F 1 "PTH" H 6078 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 5650 50  0001 C CNN
+F 3 "" H 6000 5650 50  0001 C CNN
+	1    6000 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64239029
+P 6000 5250
+AR Path="/64239029" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64239029" Ref="J52"  Part="1" 
+F 0 "J52" H 6078 5291 50  0000 L CNN
+F 1 "PTH" H 6078 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 5250 50  0001 C CNN
+F 3 "" H 6000 5250 50  0001 C CNN
+	1    6000 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64239034
+P 6000 5050
+AR Path="/64239034" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64239034" Ref="J51"  Part="1" 
+F 0 "J51" H 6078 5091 50  0000 L CNN
+F 1 "PTH" H 6078 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 5050 50  0001 C CNN
+F 3 "" H 6000 5050 50  0001 C CNN
+	1    6000 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423903F
+P 6000 4850
+AR Path="/6423903F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423903F" Ref="J50"  Part="1" 
+F 0 "J50" H 6078 4891 50  0000 L CNN
+F 1 "PTH" H 6078 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 4850 50  0001 C CNN
+F 3 "" H 6000 4850 50  0001 C CNN
+	1    6000 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423904A
+P 6000 4650
+AR Path="/6423904A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423904A" Ref="J49"  Part="1" 
+F 0 "J49" H 6078 4691 50  0000 L CNN
+F 1 "PTH" H 6078 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 4650 50  0001 C CNN
+F 3 "" H 6000 4650 50  0001 C CNN
+	1    6000 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64239054
+P 6000 4450
+AR Path="/64239054" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64239054" Ref="J48"  Part="1" 
+F 0 "J48" H 6078 4491 50  0000 L CNN
+F 1 "PTH" H 6078 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 4450 50  0001 C CNN
+F 3 "" H 6000 4450 50  0001 C CNN
+	1    6000 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423905F
+P 6000 4250
+AR Path="/6423905F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423905F" Ref="J47"  Part="1" 
+F 0 "J47" H 6078 4291 50  0000 L CNN
+F 1 "PTH" H 6078 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 4250 50  0001 C CNN
+F 3 "" H 6000 4250 50  0001 C CNN
+	1    6000 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423906A
+P 6000 4050
+AR Path="/6423906A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423906A" Ref="J46"  Part="1" 
+F 0 "J46" H 6078 4091 50  0000 L CNN
+F 1 "PTH" H 6078 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 4050 50  0001 C CNN
+F 3 "" H 6000 4050 50  0001 C CNN
+	1    6000 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64239075
+P 6000 3850
+AR Path="/64239075" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64239075" Ref="J45"  Part="1" 
+F 0 "J45" H 6078 3891 50  0000 L CNN
+F 1 "PTH" H 6078 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 3850 50  0001 C CNN
+F 3 "" H 6000 3850 50  0001 C CNN
+	1    6000 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64239080
+P 6000 3650
+AR Path="/64239080" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64239080" Ref="J44"  Part="1" 
+F 0 "J44" H 6078 3691 50  0000 L CNN
+F 1 "PTH" H 6078 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 3650 50  0001 C CNN
+F 3 "" H 6000 3650 50  0001 C CNN
+	1    6000 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5800 3650
+NoConn ~ 5800 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6423908C
+P 6000 5450
+AR Path="/6423908C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6423908C" Ref="J53"  Part="1" 
+F 0 "J53" H 6078 5491 50  0000 L CNN
+F 1 "PTH" H 6078 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6000 5450 50  0001 C CNN
+F 3 "" H 6000 5450 50  0001 C CNN
+	1    6000 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E24
+P 7100 3650
+AR Path="/64249E24" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E24" Ref="J66"  Part="1" 
+F 0 "J66" H 7178 3691 50  0000 L CNN
+F 1 "PTH" H 7178 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 3650 50  0001 C CNN
+F 3 "" H 7100 3650 50  0001 C CNN
+	1    7100 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E2F
+P 6550 5250
+AR Path="/64249E2F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E2F" Ref="J63"  Part="1" 
+F 0 "J63" H 6628 5291 50  0000 L CNN
+F 1 "PTH" H 6628 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 5250 50  0001 C CNN
+F 3 "" H 6550 5250 50  0001 C CNN
+	1    6550 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E3A
+P 6550 5050
+AR Path="/64249E3A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E3A" Ref="J62"  Part="1" 
+F 0 "J62" H 6628 5091 50  0000 L CNN
+F 1 "PTH" H 6628 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 5050 50  0001 C CNN
+F 3 "" H 6550 5050 50  0001 C CNN
+	1    6550 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E45
+P 6550 4850
+AR Path="/64249E45" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E45" Ref="J61"  Part="1" 
+F 0 "J61" H 6628 4891 50  0000 L CNN
+F 1 "PTH" H 6628 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 4850 50  0001 C CNN
+F 3 "" H 6550 4850 50  0001 C CNN
+	1    6550 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E50
+P 6550 4650
+AR Path="/64249E50" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E50" Ref="J60"  Part="1" 
+F 0 "J60" H 6628 4691 50  0000 L CNN
+F 1 "PTH" H 6628 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 4650 50  0001 C CNN
+F 3 "" H 6550 4650 50  0001 C CNN
+	1    6550 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E5A
+P 6550 4450
+AR Path="/64249E5A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E5A" Ref="J59"  Part="1" 
+F 0 "J59" H 6628 4491 50  0000 L CNN
+F 1 "PTH" H 6628 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 4450 50  0001 C CNN
+F 3 "" H 6550 4450 50  0001 C CNN
+	1    6550 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E65
+P 6550 4250
+AR Path="/64249E65" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E65" Ref="J58"  Part="1" 
+F 0 "J58" H 6628 4291 50  0000 L CNN
+F 1 "PTH" H 6628 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 4250 50  0001 C CNN
+F 3 "" H 6550 4250 50  0001 C CNN
+	1    6550 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E70
+P 6550 4050
+AR Path="/64249E70" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E70" Ref="J57"  Part="1" 
+F 0 "J57" H 6628 4091 50  0000 L CNN
+F 1 "PTH" H 6628 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 4050 50  0001 C CNN
+F 3 "" H 6550 4050 50  0001 C CNN
+	1    6550 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E7B
+P 6550 3850
+AR Path="/64249E7B" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E7B" Ref="J56"  Part="1" 
+F 0 "J56" H 6628 3891 50  0000 L CNN
+F 1 "PTH" H 6628 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 3850 50  0001 C CNN
+F 3 "" H 6550 3850 50  0001 C CNN
+	1    6550 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E86
+P 6550 3650
+AR Path="/64249E86" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E86" Ref="J55"  Part="1" 
+F 0 "J55" H 6628 3691 50  0000 L CNN
+F 1 "PTH" H 6628 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 3650 50  0001 C CNN
+F 3 "" H 6550 3650 50  0001 C CNN
+	1    6550 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 3650
+NoConn ~ 6350 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64249E92
+P 6550 5650
+AR Path="/64249E92" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64249E92" Ref="J65"  Part="1" 
+F 0 "J65" H 6628 5691 50  0000 L CNN
+F 1 "PTH" H 6628 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 5650 50  0001 C CNN
+F 3 "" H 6550 5650 50  0001 C CNN
+	1    6550 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6350 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6426C49D
+P 6550 5450
+AR Path="/6426C49D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6426C49D" Ref="J64"  Part="1" 
+F 0 "J64" H 6628 5491 50  0000 L CNN
+F 1 "PTH" H 6628 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 6550 5450 50  0001 C CNN
+F 3 "" H 6550 5450 50  0001 C CNN
+	1    6550 5450
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F5A7
+P 7100 5650
+AR Path="/6427F5A7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F5A7" Ref="J76"  Part="1" 
+F 0 "J76" H 7178 5691 50  0000 L CNN
+F 1 "PTH" H 7178 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 5650 50  0001 C CNN
+F 3 "" H 7100 5650 50  0001 C CNN
+	1    7100 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 5650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F59C
+P 7650 3650
+AR Path="/6427F59C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F59C" Ref="J77"  Part="1" 
+F 0 "J77" H 7728 3691 50  0000 L CNN
+F 1 "PTH" H 7728 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 3650 50  0001 C CNN
+F 3 "" H 7650 3650 50  0001 C CNN
+	1    7650 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 3650
+NoConn ~ 6900 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F590
+P 7100 4050
+AR Path="/6427F590" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F590" Ref="J68"  Part="1" 
+F 0 "J68" H 7178 4091 50  0000 L CNN
+F 1 "PTH" H 7178 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 4050 50  0001 C CNN
+F 3 "" H 7100 4050 50  0001 C CNN
+	1    7100 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F585
+P 7100 4250
+AR Path="/6427F585" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F585" Ref="J69"  Part="1" 
+F 0 "J69" H 7178 4291 50  0000 L CNN
+F 1 "PTH" H 7178 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 4250 50  0001 C CNN
+F 3 "" H 7100 4250 50  0001 C CNN
+	1    7100 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F57A
+P 7100 4450
+AR Path="/6427F57A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F57A" Ref="J70"  Part="1" 
+F 0 "J70" H 7178 4491 50  0000 L CNN
+F 1 "PTH" H 7178 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 4450 50  0001 C CNN
+F 3 "" H 7100 4450 50  0001 C CNN
+	1    7100 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F56F
+P 7100 4650
+AR Path="/6427F56F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F56F" Ref="J71"  Part="1" 
+F 0 "J71" H 7178 4691 50  0000 L CNN
+F 1 "PTH" H 7178 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 4650 50  0001 C CNN
+F 3 "" H 7100 4650 50  0001 C CNN
+	1    7100 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F565
+P 7100 4850
+AR Path="/6427F565" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F565" Ref="J72"  Part="1" 
+F 0 "J72" H 7178 4891 50  0000 L CNN
+F 1 "PTH" H 7178 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 4850 50  0001 C CNN
+F 3 "" H 7100 4850 50  0001 C CNN
+	1    7100 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F55A
+P 7100 5050
+AR Path="/6427F55A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F55A" Ref="J73"  Part="1" 
+F 0 "J73" H 7178 5091 50  0000 L CNN
+F 1 "PTH" H 7178 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 5050 50  0001 C CNN
+F 3 "" H 7100 5050 50  0001 C CNN
+	1    7100 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F54F
+P 7100 5250
+AR Path="/6427F54F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F54F" Ref="J74"  Part="1" 
+F 0 "J74" H 7178 5291 50  0000 L CNN
+F 1 "PTH" H 7178 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 5250 50  0001 C CNN
+F 3 "" H 7100 5250 50  0001 C CNN
+	1    7100 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6427F544
+P 7100 5450
+AR Path="/6427F544" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6427F544" Ref="J75"  Part="1" 
+F 0 "J75" H 7178 5491 50  0000 L CNN
+F 1 "PTH" H 7178 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 5450 50  0001 C CNN
+F 3 "" H 7100 5450 50  0001 C CNN
+	1    7100 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64290E9D
+P 7100 3850
+AR Path="/64290E9D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64290E9D" Ref="J67"  Part="1" 
+F 0 "J67" H 7178 3891 50  0000 L CNN
+F 1 "PTH" H 7178 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7100 3850 50  0001 C CNN
+F 3 "" H 7100 3850 50  0001 C CNN
+	1    7100 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 6900 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF1A8
+P 7650 5650
+AR Path="/642BF1A8" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF1A8" Ref="J87"  Part="1" 
+F 0 "J87" H 7728 5691 50  0000 L CNN
+F 1 "PTH" H 7728 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 5650 50  0001 C CNN
+F 3 "" H 7650 5650 50  0001 C CNN
+	1    7650 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 5650
+NoConn ~ 7450 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF55C
+P 7650 4050
+AR Path="/642BF55C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF55C" Ref="J79"  Part="1" 
+F 0 "J79" H 7728 4091 50  0000 L CNN
+F 1 "PTH" H 7728 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 4050 50  0001 C CNN
+F 3 "" H 7650 4050 50  0001 C CNN
+	1    7650 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF567
+P 7650 4250
+AR Path="/642BF567" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF567" Ref="J80"  Part="1" 
+F 0 "J80" H 7728 4291 50  0000 L CNN
+F 1 "PTH" H 7728 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 4250 50  0001 C CNN
+F 3 "" H 7650 4250 50  0001 C CNN
+	1    7650 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF572
+P 7650 4450
+AR Path="/642BF572" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF572" Ref="J81"  Part="1" 
+F 0 "J81" H 7728 4491 50  0000 L CNN
+F 1 "PTH" H 7728 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 4450 50  0001 C CNN
+F 3 "" H 7650 4450 50  0001 C CNN
+	1    7650 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF57D
+P 7650 4650
+AR Path="/642BF57D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF57D" Ref="J82"  Part="1" 
+F 0 "J82" H 7728 4691 50  0000 L CNN
+F 1 "PTH" H 7728 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 4650 50  0001 C CNN
+F 3 "" H 7650 4650 50  0001 C CNN
+	1    7650 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF587
+P 7650 4850
+AR Path="/642BF587" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF587" Ref="J83"  Part="1" 
+F 0 "J83" H 7728 4891 50  0000 L CNN
+F 1 "PTH" H 7728 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 4850 50  0001 C CNN
+F 3 "" H 7650 4850 50  0001 C CNN
+	1    7650 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF592
+P 7650 5050
+AR Path="/642BF592" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF592" Ref="J84"  Part="1" 
+F 0 "J84" H 7728 5091 50  0000 L CNN
+F 1 "PTH" H 7728 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 5050 50  0001 C CNN
+F 3 "" H 7650 5050 50  0001 C CNN
+	1    7650 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF59D
+P 7650 5250
+AR Path="/642BF59D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF59D" Ref="J85"  Part="1" 
+F 0 "J85" H 7728 5291 50  0000 L CNN
+F 1 "PTH" H 7728 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 5250 50  0001 C CNN
+F 3 "" H 7650 5250 50  0001 C CNN
+	1    7650 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF5A8
+P 7650 5450
+AR Path="/642BF5A8" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF5A8" Ref="J86"  Part="1" 
+F 0 "J86" H 7728 5491 50  0000 L CNN
+F 1 "PTH" H 7728 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 5450 50  0001 C CNN
+F 3 "" H 7650 5450 50  0001 C CNN
+	1    7650 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 642BF5B3
+P 7650 3850
+AR Path="/642BF5B3" Ref="J?"  Part="1" 
+AR Path="/64058FA4/642BF5B3" Ref="J78"  Part="1" 
+F 0 "J78" H 7728 3891 50  0000 L CNN
+F 1 "PTH" H 7728 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 7650 3850 50  0001 C CNN
+F 3 "" H 7650 3850 50  0001 C CNN
+	1    7650 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7450 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643220F4
+P 8200 3650
+AR Path="/643220F4" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643220F4" Ref="J88"  Part="1" 
+F 0 "J88" H 8278 3691 50  0000 L CNN
+F 1 "PTH" H 8278 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 3650 50  0001 C CNN
+F 3 "" H 8200 3650 50  0001 C CNN
+	1    8200 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6432251F
+P 8200 5650
+AR Path="/6432251F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6432251F" Ref="J98"  Part="1" 
+F 0 "J98" H 8278 5691 50  0000 L CNN
+F 1 "PTH" H 8278 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 5650 50  0001 C CNN
+F 3 "" H 8200 5650 50  0001 C CNN
+	1    8200 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 5650
+NoConn ~ 8000 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6432252B
+P 8200 4050
+AR Path="/6432252B" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6432252B" Ref="J90"  Part="1" 
+F 0 "J90" H 8278 4091 50  0000 L CNN
+F 1 "PTH" H 8278 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 4050 50  0001 C CNN
+F 3 "" H 8200 4050 50  0001 C CNN
+	1    8200 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322536
+P 8200 4250
+AR Path="/64322536" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322536" Ref="J91"  Part="1" 
+F 0 "J91" H 8278 4291 50  0000 L CNN
+F 1 "PTH" H 8278 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 4250 50  0001 C CNN
+F 3 "" H 8200 4250 50  0001 C CNN
+	1    8200 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322541
+P 8200 4450
+AR Path="/64322541" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322541" Ref="J92"  Part="1" 
+F 0 "J92" H 8278 4491 50  0000 L CNN
+F 1 "PTH" H 8278 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 4450 50  0001 C CNN
+F 3 "" H 8200 4450 50  0001 C CNN
+	1    8200 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6432254C
+P 8200 4650
+AR Path="/6432254C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6432254C" Ref="J93"  Part="1" 
+F 0 "J93" H 8278 4691 50  0000 L CNN
+F 1 "PTH" H 8278 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 4650 50  0001 C CNN
+F 3 "" H 8200 4650 50  0001 C CNN
+	1    8200 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322556
+P 8200 4850
+AR Path="/64322556" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322556" Ref="J94"  Part="1" 
+F 0 "J94" H 8278 4891 50  0000 L CNN
+F 1 "PTH" H 8278 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 4850 50  0001 C CNN
+F 3 "" H 8200 4850 50  0001 C CNN
+	1    8200 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322561
+P 8200 5050
+AR Path="/64322561" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322561" Ref="J95"  Part="1" 
+F 0 "J95" H 8278 5091 50  0000 L CNN
+F 1 "PTH" H 8278 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 5050 50  0001 C CNN
+F 3 "" H 8200 5050 50  0001 C CNN
+	1    8200 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6432256C
+P 8200 5250
+AR Path="/6432256C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6432256C" Ref="J96"  Part="1" 
+F 0 "J96" H 8278 5291 50  0000 L CNN
+F 1 "PTH" H 8278 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 5250 50  0001 C CNN
+F 3 "" H 8200 5250 50  0001 C CNN
+	1    8200 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322577
+P 8200 5450
+AR Path="/64322577" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322577" Ref="J97"  Part="1" 
+F 0 "J97" H 8278 5491 50  0000 L CNN
+F 1 "PTH" H 8278 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 5450 50  0001 C CNN
+F 3 "" H 8200 5450 50  0001 C CNN
+	1    8200 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64322582
+P 8200 3850
+AR Path="/64322582" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64322582" Ref="J89"  Part="1" 
+F 0 "J89" H 8278 3891 50  0000 L CNN
+F 1 "PTH" H 8278 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8200 3850 50  0001 C CNN
+F 3 "" H 8200 3850 50  0001 C CNN
+	1    8200 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8000 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433CE9C
+P 8700 3650
+AR Path="/6433CE9C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433CE9C" Ref="J99"  Part="1" 
+F 0 "J99" H 8778 3691 50  0000 L CNN
+F 1 "PTH" H 8778 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 3650 50  0001 C CNN
+F 3 "" H 8700 3650 50  0001 C CNN
+	1    8700 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D2D3
+P 8700 5650
+AR Path="/6433D2D3" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D2D3" Ref="J109"  Part="1" 
+F 0 "J109" H 8778 5691 50  0000 L CNN
+F 1 "PTH" H 8778 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 5650 50  0001 C CNN
+F 3 "" H 8700 5650 50  0001 C CNN
+	1    8700 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 5650
+NoConn ~ 8500 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D2DF
+P 8700 4050
+AR Path="/6433D2DF" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D2DF" Ref="J101"  Part="1" 
+F 0 "J101" H 8778 4091 50  0000 L CNN
+F 1 "PTH" H 8778 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 4050 50  0001 C CNN
+F 3 "" H 8700 4050 50  0001 C CNN
+	1    8700 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D2EA
+P 8700 4250
+AR Path="/6433D2EA" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D2EA" Ref="J102"  Part="1" 
+F 0 "J102" H 8778 4291 50  0000 L CNN
+F 1 "PTH" H 8778 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 4250 50  0001 C CNN
+F 3 "" H 8700 4250 50  0001 C CNN
+	1    8700 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D2F5
+P 8700 4450
+AR Path="/6433D2F5" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D2F5" Ref="J103"  Part="1" 
+F 0 "J103" H 8778 4491 50  0000 L CNN
+F 1 "PTH" H 8778 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 4450 50  0001 C CNN
+F 3 "" H 8700 4450 50  0001 C CNN
+	1    8700 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D300
+P 8700 4650
+AR Path="/6433D300" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D300" Ref="J104"  Part="1" 
+F 0 "J104" H 8778 4691 50  0000 L CNN
+F 1 "PTH" H 8778 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 4650 50  0001 C CNN
+F 3 "" H 8700 4650 50  0001 C CNN
+	1    8700 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D30A
+P 8700 4850
+AR Path="/6433D30A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D30A" Ref="J105"  Part="1" 
+F 0 "J105" H 8778 4891 50  0000 L CNN
+F 1 "PTH" H 8778 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 4850 50  0001 C CNN
+F 3 "" H 8700 4850 50  0001 C CNN
+	1    8700 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D315
+P 8700 5050
+AR Path="/6433D315" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D315" Ref="J106"  Part="1" 
+F 0 "J106" H 8778 5091 50  0000 L CNN
+F 1 "PTH" H 8778 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 5050 50  0001 C CNN
+F 3 "" H 8700 5050 50  0001 C CNN
+	1    8700 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D320
+P 8700 5250
+AR Path="/6433D320" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D320" Ref="J107"  Part="1" 
+F 0 "J107" H 8778 5291 50  0000 L CNN
+F 1 "PTH" H 8778 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 5250 50  0001 C CNN
+F 3 "" H 8700 5250 50  0001 C CNN
+	1    8700 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D32B
+P 8700 5450
+AR Path="/6433D32B" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D32B" Ref="J108"  Part="1" 
+F 0 "J108" H 8778 5491 50  0000 L CNN
+F 1 "PTH" H 8778 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 5450 50  0001 C CNN
+F 3 "" H 8700 5450 50  0001 C CNN
+	1    8700 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6433D336
+P 8700 3850
+AR Path="/6433D336" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6433D336" Ref="J100"  Part="1" 
+F 0 "J100" H 8778 3891 50  0000 L CNN
+F 1 "PTH" H 8778 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 8700 3850 50  0001 C CNN
+F 3 "" H 8700 3850 50  0001 C CNN
+	1    8700 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8500 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64367E04
+P 9300 3650
+AR Path="/64367E04" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64367E04" Ref="J110"  Part="1" 
+F 0 "J110" H 9378 3691 50  0000 L CNN
+F 1 "PTH" H 9378 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 3650 50  0001 C CNN
+F 3 "" H 9300 3650 50  0001 C CNN
+	1    9300 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682BF
+P 9300 5650
+AR Path="/643682BF" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682BF" Ref="J120"  Part="1" 
+F 0 "J120" H 9378 5691 50  0000 L CNN
+F 1 "PTH" H 9378 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 5650 50  0001 C CNN
+F 3 "" H 9300 5650 50  0001 C CNN
+	1    9300 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 5650
+NoConn ~ 9100 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682CB
+P 9300 4050
+AR Path="/643682CB" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682CB" Ref="J112"  Part="1" 
+F 0 "J112" H 9378 4091 50  0000 L CNN
+F 1 "PTH" H 9378 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 4050 50  0001 C CNN
+F 3 "" H 9300 4050 50  0001 C CNN
+	1    9300 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682D6
+P 9300 4250
+AR Path="/643682D6" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682D6" Ref="J113"  Part="1" 
+F 0 "J113" H 9378 4291 50  0000 L CNN
+F 1 "PTH" H 9378 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 4250 50  0001 C CNN
+F 3 "" H 9300 4250 50  0001 C CNN
+	1    9300 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682E1
+P 9300 4450
+AR Path="/643682E1" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682E1" Ref="J114"  Part="1" 
+F 0 "J114" H 9378 4491 50  0000 L CNN
+F 1 "PTH" H 9378 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 4450 50  0001 C CNN
+F 3 "" H 9300 4450 50  0001 C CNN
+	1    9300 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682EC
+P 9300 4650
+AR Path="/643682EC" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682EC" Ref="J115"  Part="1" 
+F 0 "J115" H 9378 4691 50  0000 L CNN
+F 1 "PTH" H 9378 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 4650 50  0001 C CNN
+F 3 "" H 9300 4650 50  0001 C CNN
+	1    9300 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643682F6
+P 9300 4850
+AR Path="/643682F6" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643682F6" Ref="J116"  Part="1" 
+F 0 "J116" H 9378 4891 50  0000 L CNN
+F 1 "PTH" H 9378 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 4850 50  0001 C CNN
+F 3 "" H 9300 4850 50  0001 C CNN
+	1    9300 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64368301
+P 9300 5050
+AR Path="/64368301" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64368301" Ref="J117"  Part="1" 
+F 0 "J117" H 9378 5091 50  0000 L CNN
+F 1 "PTH" H 9378 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 5050 50  0001 C CNN
+F 3 "" H 9300 5050 50  0001 C CNN
+	1    9300 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6436830C
+P 9300 5250
+AR Path="/6436830C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6436830C" Ref="J118"  Part="1" 
+F 0 "J118" H 9378 5291 50  0000 L CNN
+F 1 "PTH" H 9378 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 5250 50  0001 C CNN
+F 3 "" H 9300 5250 50  0001 C CNN
+	1    9300 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64368317
+P 9300 5450
+AR Path="/64368317" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64368317" Ref="J119"  Part="1" 
+F 0 "J119" H 9378 5491 50  0000 L CNN
+F 1 "PTH" H 9378 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 5450 50  0001 C CNN
+F 3 "" H 9300 5450 50  0001 C CNN
+	1    9300 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64368322
+P 9300 3850
+AR Path="/64368322" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64368322" Ref="J111"  Part="1" 
+F 0 "J111" H 9378 3891 50  0000 L CNN
+F 1 "PTH" H 9378 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9300 3850 50  0001 C CNN
+F 3 "" H 9300 3850 50  0001 C CNN
+	1    9300 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9100 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64381EE0
+P 9900 3650
+AR Path="/64381EE0" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64381EE0" Ref="J121"  Part="1" 
+F 0 "J121" H 9978 3691 50  0000 L CNN
+F 1 "PTH" H 9978 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 3650 50  0001 C CNN
+F 3 "" H 9900 3650 50  0001 C CNN
+	1    9900 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64381EEB
+P 9900 5650
+AR Path="/64381EEB" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64381EEB" Ref="J131"  Part="1" 
+F 0 "J131" H 9978 5691 50  0000 L CNN
+F 1 "PTH" H 9978 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 5650 50  0001 C CNN
+F 3 "" H 9900 5650 50  0001 C CNN
+	1    9900 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 5650
+NoConn ~ 9700 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64381EF7
+P 9900 4050
+AR Path="/64381EF7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64381EF7" Ref="J123"  Part="1" 
+F 0 "J123" H 9978 4091 50  0000 L CNN
+F 1 "PTH" H 9978 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 4050 50  0001 C CNN
+F 3 "" H 9900 4050 50  0001 C CNN
+	1    9900 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64381F02
+P 9900 4250
+AR Path="/64381F02" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64381F02" Ref="J124"  Part="1" 
+F 0 "J124" H 9978 4291 50  0000 L CNN
+F 1 "PTH" H 9978 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 4250 50  0001 C CNN
+F 3 "" H 9900 4250 50  0001 C CNN
+	1    9900 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64381F0D
+P 9900 4450
+AR Path="/64381F0D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64381F0D" Ref="J125"  Part="1" 
+F 0 "J125" H 9978 4491 50  0000 L CNN
+F 1 "PTH" H 9978 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 4450 50  0001 C CNN
+F 3 "" H 9900 4450 50  0001 C CNN
+	1    9900 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6438247C
+P 9900 4650
+AR Path="/6438247C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6438247C" Ref="J126"  Part="1" 
+F 0 "J126" H 9978 4691 50  0000 L CNN
+F 1 "PTH" H 9978 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 4650 50  0001 C CNN
+F 3 "" H 9900 4650 50  0001 C CNN
+	1    9900 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64382486
+P 9900 4850
+AR Path="/64382486" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64382486" Ref="J127"  Part="1" 
+F 0 "J127" H 9978 4891 50  0000 L CNN
+F 1 "PTH" H 9978 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 4850 50  0001 C CNN
+F 3 "" H 9900 4850 50  0001 C CNN
+	1    9900 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 64382491
+P 9900 5050
+AR Path="/64382491" Ref="J?"  Part="1" 
+AR Path="/64058FA4/64382491" Ref="J128"  Part="1" 
+F 0 "J128" H 9978 5091 50  0000 L CNN
+F 1 "PTH" H 9978 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 5050 50  0001 C CNN
+F 3 "" H 9900 5050 50  0001 C CNN
+	1    9900 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6438249C
+P 9900 5250
+AR Path="/6438249C" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6438249C" Ref="J129"  Part="1" 
+F 0 "J129" H 9978 5291 50  0000 L CNN
+F 1 "PTH" H 9978 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 5250 50  0001 C CNN
+F 3 "" H 9900 5250 50  0001 C CNN
+	1    9900 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643824A7
+P 9900 5450
+AR Path="/643824A7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643824A7" Ref="J130"  Part="1" 
+F 0 "J130" H 9978 5491 50  0000 L CNN
+F 1 "PTH" H 9978 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 5450 50  0001 C CNN
+F 3 "" H 9900 5450 50  0001 C CNN
+	1    9900 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643824B2
+P 9900 3850
+AR Path="/643824B2" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643824B2" Ref="J122"  Part="1" 
+F 0 "J122" H 9978 3891 50  0000 L CNN
+F 1 "PTH" H 9978 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 9900 3850 50  0001 C CNN
+F 3 "" H 9900 3850 50  0001 C CNN
+	1    9900 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 9700 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DA4B
+P 10500 3650
+AR Path="/6439DA4B" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DA4B" Ref="J132"  Part="1" 
+F 0 "J132" H 10578 3691 50  0000 L CNN
+F 1 "PTH" H 10578 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 3650 50  0001 C CNN
+F 3 "" H 10500 3650 50  0001 C CNN
+	1    10500 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DF8A
+P 10500 5650
+AR Path="/6439DF8A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DF8A" Ref="J142"  Part="1" 
+F 0 "J142" H 10578 5691 50  0000 L CNN
+F 1 "PTH" H 10578 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 5650 50  0001 C CNN
+F 3 "" H 10500 5650 50  0001 C CNN
+	1    10500 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 5650
+NoConn ~ 10300 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DF96
+P 10500 4050
+AR Path="/6439DF96" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DF96" Ref="J134"  Part="1" 
+F 0 "J134" H 10578 4091 50  0000 L CNN
+F 1 "PTH" H 10578 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 4050 50  0001 C CNN
+F 3 "" H 10500 4050 50  0001 C CNN
+	1    10500 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFA1
+P 10500 4250
+AR Path="/6439DFA1" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFA1" Ref="J135"  Part="1" 
+F 0 "J135" H 10578 4291 50  0000 L CNN
+F 1 "PTH" H 10578 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 4250 50  0001 C CNN
+F 3 "" H 10500 4250 50  0001 C CNN
+	1    10500 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFAC
+P 10500 4450
+AR Path="/6439DFAC" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFAC" Ref="J136"  Part="1" 
+F 0 "J136" H 10578 4491 50  0000 L CNN
+F 1 "PTH" H 10578 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 4450 50  0001 C CNN
+F 3 "" H 10500 4450 50  0001 C CNN
+	1    10500 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFB7
+P 10500 4650
+AR Path="/6439DFB7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFB7" Ref="J137"  Part="1" 
+F 0 "J137" H 10578 4691 50  0000 L CNN
+F 1 "PTH" H 10578 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 4650 50  0001 C CNN
+F 3 "" H 10500 4650 50  0001 C CNN
+	1    10500 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFC1
+P 10500 4850
+AR Path="/6439DFC1" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFC1" Ref="J138"  Part="1" 
+F 0 "J138" H 10578 4891 50  0000 L CNN
+F 1 "PTH" H 10578 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 4850 50  0001 C CNN
+F 3 "" H 10500 4850 50  0001 C CNN
+	1    10500 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFCC
+P 10500 5050
+AR Path="/6439DFCC" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFCC" Ref="J139"  Part="1" 
+F 0 "J139" H 10578 5091 50  0000 L CNN
+F 1 "PTH" H 10578 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 5050 50  0001 C CNN
+F 3 "" H 10500 5050 50  0001 C CNN
+	1    10500 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFD7
+P 10500 5250
+AR Path="/6439DFD7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFD7" Ref="J140"  Part="1" 
+F 0 "J140" H 10578 5291 50  0000 L CNN
+F 1 "PTH" H 10578 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 5250 50  0001 C CNN
+F 3 "" H 10500 5250 50  0001 C CNN
+	1    10500 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFE2
+P 10500 5450
+AR Path="/6439DFE2" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFE2" Ref="J141"  Part="1" 
+F 0 "J141" H 10578 5491 50  0000 L CNN
+F 1 "PTH" H 10578 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 5450 50  0001 C CNN
+F 3 "" H 10500 5450 50  0001 C CNN
+	1    10500 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6439DFED
+P 10500 3850
+AR Path="/6439DFED" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6439DFED" Ref="J133"  Part="1" 
+F 0 "J133" H 10578 3891 50  0000 L CNN
+F 1 "PTH" H 10578 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 10500 3850 50  0001 C CNN
+F 3 "" H 10500 3850 50  0001 C CNN
+	1    10500 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10300 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BD7EC
+P 11100 3650
+AR Path="/643BD7EC" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BD7EC" Ref="J143"  Part="1" 
+F 0 "J143" H 11178 3691 50  0000 L CNN
+F 1 "PTH" H 11178 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 3650 50  0001 C CNN
+F 3 "" H 11100 3650 50  0001 C CNN
+	1    11100 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCA7
+P 11100 5650
+AR Path="/643BDCA7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCA7" Ref="J153"  Part="1" 
+F 0 "J153" H 11178 5691 50  0000 L CNN
+F 1 "PTH" H 11178 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 5650 50  0001 C CNN
+F 3 "" H 11100 5650 50  0001 C CNN
+	1    11100 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 5650
+NoConn ~ 10900 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCB3
+P 11100 4050
+AR Path="/643BDCB3" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCB3" Ref="J145"  Part="1" 
+F 0 "J145" H 11178 4091 50  0000 L CNN
+F 1 "PTH" H 11178 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 4050 50  0001 C CNN
+F 3 "" H 11100 4050 50  0001 C CNN
+	1    11100 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCBE
+P 11100 4250
+AR Path="/643BDCBE" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCBE" Ref="J146"  Part="1" 
+F 0 "J146" H 11178 4291 50  0000 L CNN
+F 1 "PTH" H 11178 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 4250 50  0001 C CNN
+F 3 "" H 11100 4250 50  0001 C CNN
+	1    11100 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCC9
+P 11100 4450
+AR Path="/643BDCC9" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCC9" Ref="J147"  Part="1" 
+F 0 "J147" H 11178 4491 50  0000 L CNN
+F 1 "PTH" H 11178 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 4450 50  0001 C CNN
+F 3 "" H 11100 4450 50  0001 C CNN
+	1    11100 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCD4
+P 11100 4650
+AR Path="/643BDCD4" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCD4" Ref="J148"  Part="1" 
+F 0 "J148" H 11178 4691 50  0000 L CNN
+F 1 "PTH" H 11178 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 4650 50  0001 C CNN
+F 3 "" H 11100 4650 50  0001 C CNN
+	1    11100 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCDE
+P 11100 4850
+AR Path="/643BDCDE" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCDE" Ref="J149"  Part="1" 
+F 0 "J149" H 11178 4891 50  0000 L CNN
+F 1 "PTH" H 11178 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 4850 50  0001 C CNN
+F 3 "" H 11100 4850 50  0001 C CNN
+	1    11100 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCE9
+P 11100 5050
+AR Path="/643BDCE9" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCE9" Ref="J150"  Part="1" 
+F 0 "J150" H 11178 5091 50  0000 L CNN
+F 1 "PTH" H 11178 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 5050 50  0001 C CNN
+F 3 "" H 11100 5050 50  0001 C CNN
+	1    11100 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCF4
+P 11100 5250
+AR Path="/643BDCF4" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCF4" Ref="J151"  Part="1" 
+F 0 "J151" H 11178 5291 50  0000 L CNN
+F 1 "PTH" H 11178 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 5250 50  0001 C CNN
+F 3 "" H 11100 5250 50  0001 C CNN
+	1    11100 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDCFF
+P 11100 5450
+AR Path="/643BDCFF" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDCFF" Ref="J152"  Part="1" 
+F 0 "J152" H 11178 5491 50  0000 L CNN
+F 1 "PTH" H 11178 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 5450 50  0001 C CNN
+F 3 "" H 11100 5450 50  0001 C CNN
+	1    11100 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643BDD0A
+P 11100 3850
+AR Path="/643BDD0A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643BDD0A" Ref="J144"  Part="1" 
+F 0 "J144" H 11178 3891 50  0000 L CNN
+F 1 "PTH" H 11178 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11100 3850 50  0001 C CNN
+F 3 "" H 11100 3850 50  0001 C CNN
+	1    11100 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 10900 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D81AD
+P 11700 3650
+AR Path="/643D81AD" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D81AD" Ref="J154"  Part="1" 
+F 0 "J154" H 11778 3691 50  0000 L CNN
+F 1 "PTH" H 11778 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 3650 50  0001 C CNN
+F 3 "" H 11700 3650 50  0001 C CNN
+	1    11700 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D8668
+P 11700 5650
+AR Path="/643D8668" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D8668" Ref="J164"  Part="1" 
+F 0 "J164" H 11778 5691 50  0000 L CNN
+F 1 "PTH" H 11778 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 5650 50  0001 C CNN
+F 3 "" H 11700 5650 50  0001 C CNN
+	1    11700 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 5650
+NoConn ~ 11500 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D8674
+P 11700 4050
+AR Path="/643D8674" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D8674" Ref="J156"  Part="1" 
+F 0 "J156" H 11778 4091 50  0000 L CNN
+F 1 "PTH" H 11778 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 4050 50  0001 C CNN
+F 3 "" H 11700 4050 50  0001 C CNN
+	1    11700 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D867F
+P 11700 4250
+AR Path="/643D867F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D867F" Ref="J157"  Part="1" 
+F 0 "J157" H 11778 4291 50  0000 L CNN
+F 1 "PTH" H 11778 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 4250 50  0001 C CNN
+F 3 "" H 11700 4250 50  0001 C CNN
+	1    11700 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D868A
+P 11700 4450
+AR Path="/643D868A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D868A" Ref="J158"  Part="1" 
+F 0 "J158" H 11778 4491 50  0000 L CNN
+F 1 "PTH" H 11778 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 4450 50  0001 C CNN
+F 3 "" H 11700 4450 50  0001 C CNN
+	1    11700 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D8695
+P 11700 4650
+AR Path="/643D8695" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D8695" Ref="J159"  Part="1" 
+F 0 "J159" H 11778 4691 50  0000 L CNN
+F 1 "PTH" H 11778 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 4650 50  0001 C CNN
+F 3 "" H 11700 4650 50  0001 C CNN
+	1    11700 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D869F
+P 11700 4850
+AR Path="/643D869F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D869F" Ref="J160"  Part="1" 
+F 0 "J160" H 11778 4891 50  0000 L CNN
+F 1 "PTH" H 11778 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 4850 50  0001 C CNN
+F 3 "" H 11700 4850 50  0001 C CNN
+	1    11700 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D86AA
+P 11700 5050
+AR Path="/643D86AA" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D86AA" Ref="J161"  Part="1" 
+F 0 "J161" H 11778 5091 50  0000 L CNN
+F 1 "PTH" H 11778 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 5050 50  0001 C CNN
+F 3 "" H 11700 5050 50  0001 C CNN
+	1    11700 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D86B5
+P 11700 5250
+AR Path="/643D86B5" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D86B5" Ref="J162"  Part="1" 
+F 0 "J162" H 11778 5291 50  0000 L CNN
+F 1 "PTH" H 11778 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 5250 50  0001 C CNN
+F 3 "" H 11700 5250 50  0001 C CNN
+	1    11700 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D86C0
+P 11700 5450
+AR Path="/643D86C0" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D86C0" Ref="J163"  Part="1" 
+F 0 "J163" H 11778 5491 50  0000 L CNN
+F 1 "PTH" H 11778 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 5450 50  0001 C CNN
+F 3 "" H 11700 5450 50  0001 C CNN
+	1    11700 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643D86CB
+P 11700 3850
+AR Path="/643D86CB" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643D86CB" Ref="J155"  Part="1" 
+F 0 "J155" H 11778 3891 50  0000 L CNN
+F 1 "PTH" H 11778 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 11700 3850 50  0001 C CNN
+F 3 "" H 11700 3850 50  0001 C CNN
+	1    11700 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 11500 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F4BA7
+P 12300 3650
+AR Path="/643F4BA7" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F4BA7" Ref="J165"  Part="1" 
+F 0 "J165" H 12378 3691 50  0000 L CNN
+F 1 "PTH" H 12378 3600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 3650 50  0001 C CNN
+F 3 "" H 12300 3650 50  0001 C CNN
+	1    12300 3650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 3650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F5062
+P 12300 5650
+AR Path="/643F5062" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F5062" Ref="J175"  Part="1" 
+F 0 "J175" H 12378 5691 50  0000 L CNN
+F 1 "PTH" H 12378 5600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 5650 50  0001 C CNN
+F 3 "" H 12300 5650 50  0001 C CNN
+	1    12300 5650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 5650
+NoConn ~ 12100 4050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F506E
+P 12300 4050
+AR Path="/643F506E" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F506E" Ref="J167"  Part="1" 
+F 0 "J167" H 12378 4091 50  0000 L CNN
+F 1 "PTH" H 12378 4000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 4050 50  0001 C CNN
+F 3 "" H 12300 4050 50  0001 C CNN
+	1    12300 4050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 4250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F5079
+P 12300 4250
+AR Path="/643F5079" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F5079" Ref="J168"  Part="1" 
+F 0 "J168" H 12378 4291 50  0000 L CNN
+F 1 "PTH" H 12378 4200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 4250 50  0001 C CNN
+F 3 "" H 12300 4250 50  0001 C CNN
+	1    12300 4250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 4450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F5084
+P 12300 4450
+AR Path="/643F5084" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F5084" Ref="J169"  Part="1" 
+F 0 "J169" H 12378 4491 50  0000 L CNN
+F 1 "PTH" H 12378 4400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 4450 50  0001 C CNN
+F 3 "" H 12300 4450 50  0001 C CNN
+	1    12300 4450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 4650
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F508F
+P 12300 4650
+AR Path="/643F508F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F508F" Ref="J170"  Part="1" 
+F 0 "J170" H 12378 4691 50  0000 L CNN
+F 1 "PTH" H 12378 4600 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 4650 50  0001 C CNN
+F 3 "" H 12300 4650 50  0001 C CNN
+	1    12300 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F5099
+P 12300 4850
+AR Path="/643F5099" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F5099" Ref="J171"  Part="1" 
+F 0 "J171" H 12378 4891 50  0000 L CNN
+F 1 "PTH" H 12378 4800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 4850 50  0001 C CNN
+F 3 "" H 12300 4850 50  0001 C CNN
+	1    12300 4850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 4850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F50A4
+P 12300 5050
+AR Path="/643F50A4" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F50A4" Ref="J172"  Part="1" 
+F 0 "J172" H 12378 5091 50  0000 L CNN
+F 1 "PTH" H 12378 5000 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 5050 50  0001 C CNN
+F 3 "" H 12300 5050 50  0001 C CNN
+	1    12300 5050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 5050
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F50AF
+P 12300 5250
+AR Path="/643F50AF" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F50AF" Ref="J173"  Part="1" 
+F 0 "J173" H 12378 5291 50  0000 L CNN
+F 1 "PTH" H 12378 5200 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 5250 50  0001 C CNN
+F 3 "" H 12300 5250 50  0001 C CNN
+	1    12300 5250
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 5250
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F50BA
+P 12300 5450
+AR Path="/643F50BA" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F50BA" Ref="J174"  Part="1" 
+F 0 "J174" H 12378 5491 50  0000 L CNN
+F 1 "PTH" H 12378 5400 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 5450 50  0001 C CNN
+F 3 "" H 12300 5450 50  0001 C CNN
+	1    12300 5450
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 5450
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 643F50C5
+P 12300 3850
+AR Path="/643F50C5" Ref="J?"  Part="1" 
+AR Path="/64058FA4/643F50C5" Ref="J166"  Part="1" 
+F 0 "J166" H 12378 3891 50  0000 L CNN
+F 1 "PTH" H 12378 3800 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12300 3850 50  0001 C CNN
+F 3 "" H 12300 3850 50  0001 C CNN
+	1    12300 3850
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12100 3850
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F082
+P 12900 3600
+AR Path="/6440F082" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F082" Ref="J176"  Part="1" 
+F 0 "J176" H 12978 3641 50  0000 L CNN
+F 1 "PTH" H 12978 3550 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 3600 50  0001 C CNN
+F 3 "" H 12900 3600 50  0001 C CNN
+	1    12900 3600
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 3600
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F53D
+P 12900 5600
+AR Path="/6440F53D" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F53D" Ref="J186"  Part="1" 
+F 0 "J186" H 12978 5641 50  0000 L CNN
+F 1 "PTH" H 12978 5550 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 5600 50  0001 C CNN
+F 3 "" H 12900 5600 50  0001 C CNN
+	1    12900 5600
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 5600
+NoConn ~ 12700 4000
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F549
+P 12900 4000
+AR Path="/6440F549" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F549" Ref="J178"  Part="1" 
+F 0 "J178" H 12978 4041 50  0000 L CNN
+F 1 "PTH" H 12978 3950 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 4000 50  0001 C CNN
+F 3 "" H 12900 4000 50  0001 C CNN
+	1    12900 4000
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 4200
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F554
+P 12900 4200
+AR Path="/6440F554" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F554" Ref="J179"  Part="1" 
+F 0 "J179" H 12978 4241 50  0000 L CNN
+F 1 "PTH" H 12978 4150 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 4200 50  0001 C CNN
+F 3 "" H 12900 4200 50  0001 C CNN
+	1    12900 4200
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 4400
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F55F
+P 12900 4400
+AR Path="/6440F55F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F55F" Ref="J180"  Part="1" 
+F 0 "J180" H 12978 4441 50  0000 L CNN
+F 1 "PTH" H 12978 4350 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 4400 50  0001 C CNN
+F 3 "" H 12900 4400 50  0001 C CNN
+	1    12900 4400
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 4600
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F56A
+P 12900 4600
+AR Path="/6440F56A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F56A" Ref="J181"  Part="1" 
+F 0 "J181" H 12978 4641 50  0000 L CNN
+F 1 "PTH" H 12978 4550 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 4600 50  0001 C CNN
+F 3 "" H 12900 4600 50  0001 C CNN
+	1    12900 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F574
+P 12900 4800
+AR Path="/6440F574" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F574" Ref="J182"  Part="1" 
+F 0 "J182" H 12978 4841 50  0000 L CNN
+F 1 "PTH" H 12978 4750 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 4800 50  0001 C CNN
+F 3 "" H 12900 4800 50  0001 C CNN
+	1    12900 4800
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 4800
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F57F
+P 12900 5000
+AR Path="/6440F57F" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F57F" Ref="J183"  Part="1" 
+F 0 "J183" H 12978 5041 50  0000 L CNN
+F 1 "PTH" H 12978 4950 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 5000 50  0001 C CNN
+F 3 "" H 12900 5000 50  0001 C CNN
+	1    12900 5000
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 5000
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F58A
+P 12900 5200
+AR Path="/6440F58A" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F58A" Ref="J184"  Part="1" 
+F 0 "J184" H 12978 5241 50  0000 L CNN
+F 1 "PTH" H 12978 5150 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 5200 50  0001 C CNN
+F 3 "" H 12900 5200 50  0001 C CNN
+	1    12900 5200
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 5200
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F595
+P 12900 5400
+AR Path="/6440F595" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F595" Ref="J185"  Part="1" 
+F 0 "J185" H 12978 5441 50  0000 L CNN
+F 1 "PTH" H 12978 5350 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 5400 50  0001 C CNN
+F 3 "" H 12900 5400 50  0001 C CNN
+	1    12900 5400
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 5400
+$Comp
+L conn:CONN_01X01 J?
+U 1 1 6440F5A0
+P 12900 3800
+AR Path="/6440F5A0" Ref="J?"  Part="1" 
+AR Path="/64058FA4/6440F5A0" Ref="J177"  Part="1" 
+F 0 "J177" H 12978 3841 50  0000 L CNN
+F 1 "PTH" H 12978 3750 50  0000 L CNN
+F 2 "PTHelement:PTHelement" H 12900 3800 50  0001 C CNN
+F 3 "" H 12900 3800 50  0001 C CNN
+	1    12900 3800
+	1    0    0    -1  
+$EndComp
+NoConn ~ 12700 3800
+$EndSCHEMATC

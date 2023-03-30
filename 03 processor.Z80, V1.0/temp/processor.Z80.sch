@@ -1,0 +1,256 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr B 17000 11000
+encoding utf-8
+Sheet 1 11
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 1100 750  2750 2650
+U 6416C532
+F0 "bus" 60
+F1 "bus.sch" 60
+$EndSheet
+$Sheet
+S 4050 750  2750 2650
+U 643138DC
+F0 "power" 60
+F1 "power.sch" 60
+$EndSheet
+$Sheet
+S 4050 3650 2750 2650
+U 640C66B9
+F0 "GALS" 60
+F1 "GALS.sch" 60
+$EndSheet
+$Sheet
+S 7000 750  2750 2650
+U 6439F52F
+F0 "buffers" 60
+F1 "buffers.sch" 60
+$EndSheet
+$Sheet
+S 7000 3650 2750 2650
+U 6468C3E4
+F0 "IM2" 60
+F1 "IM2.sch" 60
+$EndSheet
+$Sheet
+S 9950 750  2750 2650
+U 64137070
+F0 "fpanel" 60
+F1 "fpanel.sch" 60
+$EndSheet
+$Sheet
+S 9950 3650 2750 2650
+U 6418A3F3
+F0 "waitstate" 60
+F1 "waitstate.sch" 60
+$EndSheet
+$Sheet
+S 12900 750  2750 2650
+U 640FA3F5
+F0 "Z80CPU" 60
+F1 "Z80CPU.sch" 60
+$EndSheet
+$Comp
+L conn:DIL14 J?
+U 1 1 6417964C
+P 8200 7550
+AR Path="/646800AA/6417964C" Ref="J?"  Part="1" 
+AR Path="/6417964C" Ref="J5"  Part="1" 
+F 0 "J5" H 8200 8065 50  0000 C CNN
+F 1 "DIL14" H 8200 7974 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 8200 7550 50  0001 C CNN
+F 3 "" H 8200 7550 50  0001 C CNN
+	1    8200 7550
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:DIL16 J?
+U 1 1 64179652
+P 8200 8600
+AR Path="/646800AA/64179652" Ref="J?"  Part="1" 
+AR Path="/64179652" Ref="J7"  Part="1" 
+F 0 "J7" H 8200 9165 50  0000 C CNN
+F 1 "DIL16" H 8200 9074 50  0000 C CNN
+F 2 "Package_DIP:DIP-16_W7.62mm" H 8200 8600 50  0001 C CNN
+F 3 "" H 8200 8600 50  0001 C CNN
+	1    8200 8600
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:DIL20 J?
+U 1 1 64179658
+P 8200 9750
+AR Path="/646800AA/64179658" Ref="J?"  Part="1" 
+AR Path="/64179658" Ref="J9"  Part="1" 
+F 0 "J9" H 8200 10415 50  0000 C CNN
+F 1 "DIL20" H 8200 10324 50  0000 C CNN
+F 2 "Package_DIP:DIP-20_W7.62mm" H 8200 9750 50  0001 C CNN
+F 3 "" H 8200 9750 50  0001 C CNN
+	1    8200 9750
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:DIL14 J?
+U 1 1 6417965E
+P 9100 7550
+AR Path="/646800AA/6417965E" Ref="J?"  Part="1" 
+AR Path="/6417965E" Ref="J6"  Part="1" 
+F 0 "J6" H 9100 8065 50  0000 C CNN
+F 1 "DIL14" H 9100 7974 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 9100 7550 50  0001 C CNN
+F 3 "" H 9100 7550 50  0001 C CNN
+	1    9100 7550
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:DIL16 J?
+U 1 1 64179664
+P 9100 8600
+AR Path="/646800AA/64179664" Ref="J?"  Part="1" 
+AR Path="/64179664" Ref="J8"  Part="1" 
+F 0 "J8" H 9100 9165 50  0000 C CNN
+F 1 "DIL16" H 9100 9074 50  0000 C CNN
+F 2 "Package_DIP:DIP-16_W7.62mm" H 9100 8600 50  0001 C CNN
+F 3 "" H 9100 8600 50  0001 C CNN
+	1    9100 8600
+	1    0    0    -1  
+$EndComp
+$Comp
+L conn:DIL20 J?
+U 1 1 6417966A
+P 9100 9750
+AR Path="/646800AA/6417966A" Ref="J?"  Part="1" 
+AR Path="/6417966A" Ref="J10"  Part="1" 
+F 0 "J10" H 9100 10415 50  0000 C CNN
+F 1 "DIL20" H 9100 10324 50  0000 C CNN
+F 2 "Package_DIP:DIP-20_W7.62mm" H 9100 9750 50  0001 C CNN
+F 3 "" H 9100 9750 50  0001 C CNN
+	1    9100 9750
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7850 7250
+NoConn ~ 7850 7350
+NoConn ~ 7850 7450
+NoConn ~ 7850 7550
+NoConn ~ 7850 7650
+NoConn ~ 7850 7750
+NoConn ~ 7850 7850
+NoConn ~ 7850 8250
+NoConn ~ 7850 8350
+NoConn ~ 7850 8450
+NoConn ~ 7850 8550
+NoConn ~ 7850 8650
+NoConn ~ 7850 8750
+NoConn ~ 7850 8850
+NoConn ~ 7850 8950
+NoConn ~ 7850 9300
+NoConn ~ 7850 9400
+NoConn ~ 7850 9500
+NoConn ~ 7850 9600
+NoConn ~ 7850 9700
+NoConn ~ 7850 9800
+NoConn ~ 7850 9900
+NoConn ~ 7850 10000
+NoConn ~ 7850 10100
+NoConn ~ 7850 10200
+NoConn ~ 8550 7250
+NoConn ~ 8550 7350
+NoConn ~ 8550 7450
+NoConn ~ 8550 7550
+NoConn ~ 8550 7650
+NoConn ~ 8550 7750
+NoConn ~ 8550 7850
+NoConn ~ 8550 8250
+NoConn ~ 8550 8350
+NoConn ~ 8550 8450
+NoConn ~ 8550 8550
+NoConn ~ 8550 8650
+NoConn ~ 8550 8750
+NoConn ~ 8550 8850
+NoConn ~ 8550 8950
+NoConn ~ 8550 9300
+NoConn ~ 8550 9400
+NoConn ~ 8550 9500
+NoConn ~ 8550 9600
+NoConn ~ 8550 9700
+NoConn ~ 8550 9800
+NoConn ~ 8550 9900
+NoConn ~ 8550 10000
+NoConn ~ 8550 10100
+NoConn ~ 8550 10200
+NoConn ~ 8750 7250
+NoConn ~ 8750 7350
+NoConn ~ 8750 7450
+NoConn ~ 8750 7550
+NoConn ~ 8750 7650
+NoConn ~ 8750 7750
+NoConn ~ 8750 7850
+NoConn ~ 8750 8250
+NoConn ~ 8750 8350
+NoConn ~ 8750 8450
+NoConn ~ 8750 8550
+NoConn ~ 8750 8650
+NoConn ~ 8750 8750
+NoConn ~ 8750 8850
+NoConn ~ 8750 8950
+NoConn ~ 8750 9300
+NoConn ~ 8750 9400
+NoConn ~ 8750 9500
+NoConn ~ 8750 9600
+NoConn ~ 8750 9700
+NoConn ~ 8750 9800
+NoConn ~ 8750 9900
+NoConn ~ 8750 10000
+NoConn ~ 8750 10100
+NoConn ~ 8750 10200
+NoConn ~ 9450 7250
+NoConn ~ 9450 7350
+NoConn ~ 9450 7450
+NoConn ~ 9450 7550
+NoConn ~ 9450 7650
+NoConn ~ 9450 7750
+NoConn ~ 9450 7850
+NoConn ~ 9450 8250
+NoConn ~ 9450 8350
+NoConn ~ 9450 8450
+NoConn ~ 9450 8550
+NoConn ~ 9450 8650
+NoConn ~ 9450 8750
+NoConn ~ 9450 8850
+NoConn ~ 9450 8950
+NoConn ~ 9450 9300
+NoConn ~ 9450 9400
+NoConn ~ 9450 9500
+NoConn ~ 9450 9600
+NoConn ~ 9450 9700
+NoConn ~ 9450 9800
+NoConn ~ 9450 9900
+NoConn ~ 9450 10000
+NoConn ~ 9450 10100
+NoConn ~ 9450 10200
+Text Notes 9250 6950 2    100  ~ 0
+SPARE SOCKETS\nFOR DEBUGGING
+$Sheet
+S 1100 3650 2750 2650
+U 646800AA
+F0 "DMA" 60
+F1 "DMA.sch" 60
+$EndSheet
+$Sheet
+S 12900 3650 2750 2650
+U 64122C47
+F0 "mapper" 60
+F1 "mapper.sch" 60
+$EndSheet
+$EndSCHEMATC

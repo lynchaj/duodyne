@@ -1,0 +1,1298 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr B 17000 11000
+encoding utf-8
+Sheet 10 11
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L 74xx:74LS07 U4
+U 4 1 603A7A86
+P 6500 6150
+F 0 "U4" H 6500 6200 50  0000 C CNN
+F 1 "74LS07" H 6500 6100 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 6500 6150 50  0001 C CNN
+F 3 "" H 6500 6150 50  0001 C CNN
+	4    6500 6150
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:LED D6
+U 1 1 62D7CB90
+P 6800 5950
+F 0 "D6" H 6800 6050 50  0000 C CNN
+F 1 "LED" H 6800 5850 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 6800 5950 60  0001 C CNN
+F 3 "" H 6800 5950 60  0001 C CNN
+	1    6800 5950
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7600 6150 7750 6150
+Wire Wire Line
+	6800 6150 6800 6100
+Wire Wire Line
+	6200 6150 5800 6150
+Text GLabel 7750 6150 2    40   Output ~ 0
+~INT0
+$Comp
+L device:Jumper JP5
+U 1 1 64156A26
+P 7300 6150
+F 0 "JP5" H 7300 6414 50  0000 C CNN
+F 1 "INT EN" H 7300 6323 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal" H 7300 6150 50  0001 C CNN
+F 3 "~" H 7300 6150 50  0001 C CNN
+	1    7300 6150
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	7000 6150 6800 6150
+$Comp
+L Zilog_Z80_Peripherals:DMA-PLCC-44-CMOS U19
+U 1 1 6411C17D
+P 4150 1000
+F 0 "U19" H 4600 1100 50  0000 C CNN
+F 1 "DMA-PLCC-44-CMOS" H 3950 1100 50  0000 C CNN
+F 2 "Package_LCC:PLCC-44_THT-Socket" H 4550 2850 50  0001 L CNN
+F 3 "" H 3350 -150 50  0001 L CNN
+F 4 "6 MHZ Z80 CMOS SIO/2 , Z84C4206PEG Zilog Z84C4206PEG, 8bit Z8 Microcontroller, 6MHz ROMLess, 40-Pin PDIP" H 4550 2650 50  0001 L CNN "Description"
+F 5 "4.06" H 4550 2550 50  0001 L CNN "Height"
+F 6 "Zilog" H 4550 2450 50  0001 L CNN "Manufacturer_Name"
+F 7 "Z84C4206PEG" H 4550 2350 50  0001 L CNN "Manufacturer_Part_Number"
+F 8 "692-Z84C4206PEG" H 4550 2250 50  0001 L CNN "Mouser Part Number"
+F 9 "https://www.mouser.com/Search/Refine.aspx?Keyword=692-Z84C4206PEG" H 4550 2150 50  0001 L CNN "Mouser Price/Stock"
+F 10 "6600766" H 4550 2050 50  0001 L CNN "RS Part Number"
+F 11 "https://uk.rs-online.com/web/p/products/6600766" H 4550 1950 50  0001 L CNN "RS Price/Stock"
+F 12 "R1000052" H 4550 1850 50  0001 L CNN "Allied_Number"
+F 13 "https://www.alliedelec.com/zilog-z84c4206peg/R1000052/" H 4550 1750 50  0001 L CNN "Allied Price/Stock"
+	1    4150 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR013
+U 1 1 6421F6C2
+P 4450 800
+F 0 "#PWR013" H 4450 650 50  0001 C CNN
+F 1 "VCC" H 4450 950 50  0000 C CNN
+F 2 "" H 4450 800 50  0001 C CNN
+F 3 "" H 4450 800 50  0001 C CNN
+	1    4450 800 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3150 2100 3950 2100
+$Comp
+L power:GND #PWR021
+U 1 1 64367CF0
+P 3700 3600
+F 0 "#PWR021" H 3700 3350 50  0001 C CNN
+F 1 "GND" H 3705 3427 50  0000 C CNN
+F 2 "" H 3700 3600 50  0001 C CNN
+F 3 "" H 3700 3600 50  0001 C CNN
+	1    3700 3600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 1550 5600 1550
+Wire Wire Line
+	4950 1650 5600 1650
+Wire Wire Line
+	4950 1750 5600 1750
+Wire Wire Line
+	4950 1850 5600 1850
+Wire Wire Line
+	4950 1950 5600 1950
+Wire Wire Line
+	4950 2050 5600 2050
+Wire Wire Line
+	4950 2150 5600 2150
+Wire Wire Line
+	4950 2250 5600 2250
+Wire Wire Line
+	4950 2350 5600 2350
+Wire Wire Line
+	4950 2450 5600 2450
+Wire Wire Line
+	4950 2550 5600 2550
+Wire Wire Line
+	4950 1050 5600 1050
+Wire Wire Line
+	4950 1150 5600 1150
+Wire Wire Line
+	4950 1250 5600 1250
+Wire Wire Line
+	4950 1350 5600 1350
+Wire Wire Line
+	4950 1450 5600 1450
+Wire Wire Line
+	3150 1050 3950 1050
+Wire Wire Line
+	3150 1150 3950 1150
+Wire Wire Line
+	3150 1250 3950 1250
+Wire Wire Line
+	3150 1350 3950 1350
+Wire Wire Line
+	3150 1450 3950 1450
+Wire Wire Line
+	3150 1550 3950 1550
+Wire Wire Line
+	3150 1650 3950 1650
+Wire Wire Line
+	3150 1750 3950 1750
+Wire Wire Line
+	3950 2250 3150 2250
+Wire Wire Line
+	3150 2450 3950 2450
+Wire Wire Line
+	3150 2550 3950 2550
+Wire Wire Line
+	3150 2650 3950 2650
+Wire Wire Line
+	3950 2350 3150 2350
+Wire Wire Line
+	3300 3100 3950 3100
+Text GLabel 3300 3100 0    40   Input ~ 0
+CLK
+Wire Wire Line
+	3150 1900 3950 1900
+NoConn ~ -5550 23850
+Text Notes 1050 8400 0    60   ~ 0
+Note: IO Address Port $08-$0B\n1-2 =on - A7 (low)\n3-4 =on - A6 (low)\n5-6 =on - A5 (low)\n7-8 =on - A4 (low)\n9-10 =off - A3 (high)\n11-12 =on - A2 (low)
+$Comp
+L conn:CONN_02X06 JP4
+U 1 1 6402E84A
+P 1550 9250
+F 0 "JP4" H 1550 9700 50  0000 C CNN
+F 1 "IO PORT ADDR" H 1550 8800 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical" H 1550 9250 50  0001 C CNN
+F 3 "" H 1550 9250 50  0001 C CNN
+	1    1550 9250
+	1    0    0    1   
+$EndComp
+$Comp
+L 74xx:74LS688 U21
+U 1 1 6402E854
+P 4000 8800
+F 0 "U21" H 3700 9850 50  0000 C CNN
+F 1 "74LS688" H 3700 7750 50  0000 C CNN
+F 2 "Package_DIP:DIP-20_W7.62mm" H 4000 8800 50  0001 C CNN
+F 3 "" H 4000 8800 50  0001 C CNN
+	1    4000 8800
+	1    0    0    -1  
+$EndComp
+Text Notes 900  7450 0    60   ~ 0
+IO ADDRESS SELECT CIRCUIT
+Connection ~ 1300 9300
+Connection ~ 1300 9400
+Wire Wire Line
+	1800 9200 2200 9200
+Wire Wire Line
+	1800 9300 2100 9300
+Wire Wire Line
+	1800 9400 2000 9400
+Wire Wire Line
+	1800 9500 1900 9500
+Wire Wire Line
+	1900 9700 1900 9500
+Connection ~ 1900 9500
+Wire Wire Line
+	2000 9700 2000 9400
+Connection ~ 2000 9400
+Wire Wire Line
+	2100 9700 2100 9300
+Connection ~ 2100 9300
+Wire Wire Line
+	2200 9700 2200 9200
+Connection ~ 2200 9200
+Wire Wire Line
+	1300 9200 1300 9300
+Wire Wire Line
+	1300 9300 1300 9400
+Wire Wire Line
+	1300 9400 1300 9500
+Wire Wire Line
+	2000 9400 3500 9400
+Wire Wire Line
+	2100 9300 3500 9300
+Wire Wire Line
+	2200 9200 3500 9200
+Wire Wire Line
+	1900 9500 3500 9500
+$Comp
+L power:VCC #PWR0101
+U 1 1 6402E87C
+P 4000 7600
+F 0 "#PWR0101" H 4000 7450 50  0001 C CNN
+F 1 "VCC" H 4015 7773 50  0000 C CNN
+F 2 "" H 4000 7600 50  0001 C CNN
+F 3 "" H 4000 7600 50  0001 C CNN
+	1    4000 7600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0103
+U 1 1 6402E890
+P 4000 10000
+F 0 "#PWR0103" H 4000 9750 50  0001 C CNN
+F 1 "GND" H 4005 9827 50  0000 C CNN
+F 2 "" H 4000 10000 50  0001 C CNN
+F 3 "" H 4000 10000 50  0001 C CNN
+	1    4000 10000
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R_Network08 RN3
+U 1 1 6402E89A
+P 2300 9900
+F 0 "RN3" H 1820 9854 50  0000 R CNN
+F 1 "10K" H 1820 9945 50  0000 R CNN
+F 2 "Resistor_THT:R_Array_SIP9" V 2775 9900 50  0001 C CNN
+F 3 "http://www.vishay.com/docs/31509/csc.pdf" H 2300 9900 50  0001 C CNN
+	1    2300 9900
+	1    0    0    1   
+$EndComp
+Wire Wire Line
+	1600 10200 1900 10200
+Text Label 1650 10200 0    60   ~ 0
+VCC
+Wire Wire Line
+	1900 10200 1900 10100
+Wire Wire Line
+	2300 9700 2300 9100
+Wire Wire Line
+	2400 9700 2400 9000
+Wire Wire Line
+	2400 9000 3500 9000
+Wire Wire Line
+	2300 9100 3500 9100
+Wire Wire Line
+	1800 9100 2300 9100
+Connection ~ 2300 9100
+Wire Wire Line
+	2400 9000 1800 9000
+Connection ~ 2400 9000
+Wire Wire Line
+	1300 9200 1300 9100
+Connection ~ 1300 9200
+Connection ~ 1300 9100
+Wire Wire Line
+	1300 9100 1300 9000
+Text Notes 3500 7300 0    40   ~ 0
+Z80 DMA IO PORT DECODER\n
+Wire Wire Line
+	2500 9700 2500 8900
+Wire Wire Line
+	2500 8900 3500 8900
+Wire Wire Line
+	4500 7900 4600 7900
+Wire Wire Line
+	2850 8400 3500 8400
+Wire Wire Line
+	2850 8500 3500 8500
+Wire Wire Line
+	2850 8600 3500 8600
+Wire Wire Line
+	2850 7900 3500 7900
+Wire Wire Line
+	2850 8100 3500 8100
+Wire Wire Line
+	2850 8200 3500 8200
+Wire Wire Line
+	2850 8300 3500 8300
+Wire Wire Line
+	4950 2800 5550 2800
+Text Notes 2700 7700 0    40   ~ 0
+INTERRUPT FILTER CIRCUIT
+Wire Wire Line
+	4950 2700 5550 2700
+Wire Wire Line
+	4950 3000 5550 3000
+$Comp
+L MCU_Microchip_ATtiny:ATtiny13-20PU U32
+U 1 1 5DCDF135
+P 8350 8700
+F 0 "U32" H 8000 9250 50  0000 R CNN
+F 1 "ATtiny13-20PU" H 9000 8150 50  0000 R CNN
+F 2 "Package_DIP:DIP-8_W7.62mm" H 8350 8700 50  0001 C CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc2535.pdf" H 8350 8700 50  0001 C CNN
+	1    8350 8700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR067
+U 1 1 5DCE30E5
+P 8350 8100
+F 0 "#PWR067" H 8350 7950 50  0001 C CNN
+F 1 "VCC" H 8367 8273 50  0000 C CNN
+F 2 "" H 8350 8100 50  0001 C CNN
+F 3 "" H 8350 8100 50  0001 C CNN
+	1    8350 8100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR073
+U 1 1 5DCE36BC
+P 8350 9300
+F 0 "#PWR073" H 8350 9050 50  0001 C CNN
+F 1 "GND" H 8355 9127 50  0000 C CNN
+F 2 "" H 8350 9300 50  0001 C CNN
+F 3 "" H 8350 9300 50  0001 C CNN
+	1    8350 9300
+	1    0    0    -1  
+$EndComp
+NoConn ~ 8950 8800
+NoConn ~ 8950 8700
+NoConn ~ 8950 8400
+$Comp
+L device:LED D10
+U 1 1 5DF62F8A
+P 9850 9050
+F 0 "D10" H 9843 9357 50  0000 C CNN
+F 1 "LED" H 9843 9266 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 9843 9175 50  0001 C CNN
+F 3 "~" H 9850 9050 50  0001 C CNN
+	1    9850 9050
+	0    -1   -1   0   
+$EndComp
+$Comp
+L device:R R21
+U 1 1 5DF99DAB
+P 9850 8750
+F 0 "R21" H 9920 8796 50  0000 L CNN
+F 1 "470" H 9920 8705 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" V 9780 8750 50  0001 C CNN
+F 3 "~" H 9850 8750 50  0001 C CNN
+	1    9850 8750
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	8950 8500 9450 8500
+Text Notes 8600 10200 0    60   ~ 0
+DMA Transfer LED triggered \nwhenever a DMA\ntransfer is in progress and\nthe pulse signal is active.\nDMA software configuration\nneeds to program the\nactivation of the pulse signal.
+Wire Wire Line
+	8950 8600 9850 8600
+$Comp
+L power:GND #PWR072
+U 1 1 61411E28
+P 9850 9200
+F 0 "#PWR072" H 9850 8950 50  0001 C CNN
+F 1 "GND" H 9855 9027 50  0000 C CNN
+F 2 "" H 9850 9200 50  0001 C CNN
+F 3 "" H 9850 9200 50  0001 C CNN
+	1    9850 9200
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS175 U20
+U 1 1 6AD0BA6F
+P 6550 8750
+F 0 "U20" H 6300 9300 50  0000 C CNN
+F 1 "74LS175" H 6750 8100 50  0000 C CNN
+F 2 "Package_DIP:DIP-16_W7.62mm" H 6550 8750 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS175" H 6550 8750 50  0001 C CNN
+	1    6550 8750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5550 8350 6050 8350
+Wire Wire Line
+	5550 8550 6050 8550
+Wire Wire Line
+	5550 8750 6050 8750
+Wire Wire Line
+	5550 8950 6050 8950
+$Comp
+L power:GND #PWR0105
+U 1 1 6AF34346
+P 6550 9550
+F 0 "#PWR0105" H 6550 9300 50  0001 C CNN
+F 1 "GND" H 6555 9377 50  0000 C CNN
+F 2 "" H 6550 9550 50  0001 C CNN
+F 3 "" H 6550 9550 50  0001 C CNN
+	1    6550 9550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0106
+U 1 1 6AF34CD1
+P 6550 8050
+F 0 "#PWR0106" H 6550 7900 50  0001 C CNN
+F 1 "VCC" H 6565 8223 50  0000 C CNN
+F 2 "" H 6550 8050 50  0001 C CNN
+F 3 "" H 6550 8050 50  0001 C CNN
+	1    6550 8050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3550 2750 3950 2750
+$Comp
+L device:LED D8
+U 1 1 6DCE87ED
+P 15800 7050
+F 0 "D8" H 15800 6850 50  0000 C CNN
+F 1 "LED" H 15800 6950 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 15793 7175 50  0001 C CNN
+F 3 "~" H 15800 7050 50  0001 C CNN
+	1    15800 7050
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	15100 7200 15200 7200
+Text Notes 16150 7100 1    40   ~ 0
+DMA1 READY LED
+Wire Wire Line
+	14050 7700 14200 7700
+Text GLabel 14200 7700 2    40   Output ~ 0
+~TEND0
+Text GLabel 14200 8100 2    40   Output ~ 0
+~TEND1
+$Comp
+L 74xx:74LS07 U?
+U 2 1 6E82534B
+P 13750 7700
+AR Path="/643138DC/6E82534B" Ref="U?"  Part="2" 
+AR Path="/646800AA/6E82534B" Ref="U4"  Part="2" 
+F 0 "U4" H 13700 7750 50  0000 C CNN
+F 1 "74LS07" H 13700 7650 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 13750 7700 50  0001 C CNN
+F 3 "" H 13750 7700 50  0001 C CNN
+	2    13750 7700
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS07 U?
+U 1 1 6E825351
+P 13750 8100
+AR Path="/643138DC/6E825351" Ref="U?"  Part="1" 
+AR Path="/646800AA/6E825351" Ref="U4"  Part="1" 
+F 0 "U4" H 13700 8150 50  0000 C CNN
+F 1 "74LS07" H 13700 8050 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 13750 8100 50  0001 C CNN
+F 3 "" H 13750 8100 50  0001 C CNN
+	1    13750 8100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 2900 5550 2900
+Wire Wire Line
+	4950 3100 5550 3100
+Wire Wire Line
+	3150 2000 3950 2000
+$Comp
+L 74xx:SN74LS07N U?
+U 4 1 74969F7A
+P 11200 8450
+AR Path="/643138DC/74969F7A" Ref="U?"  Part="4" 
+AR Path="/646800AA/74969F7A" Ref="U17"  Part="4" 
+F 0 "U17" H 11050 8500 50  0000 L CNN
+F 1 "74LS07" H 10950 8400 50  0000 L CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 11200 8450 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 11200 8450 50  0001 C CNN
+	4    11200 8450
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:SN74LS07N U?
+U 6 1 74969F80
+P 11250 9850
+AR Path="/643138DC/74969F80" Ref="U?"  Part="6" 
+AR Path="/646800AA/74969F80" Ref="U17"  Part="6" 
+F 0 "U17" H 11100 9900 50  0000 L CNN
+F 1 "74LS07" H 11000 9800 50  0000 L CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 11250 9850 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 11250 9850 50  0001 C CNN
+	6    11250 9850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10800 9850 10950 9850
+$Comp
+L device:LED D9
+U 1 1 64474B42
+P 11550 9700
+F 0 "D9" H 11550 9800 50  0000 C CNN
+F 1 "LED" H 11550 9600 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 11550 9700 60  0001 C CNN
+F 3 "" H 11550 9700 60  0001 C CNN
+	1    11550 9700
+	0    -1   -1   0   
+$EndComp
+Text GLabel 1300 9500 0    40   Input ~ 0
+ZERO
+Text Notes 11800 9850 1    40   ~ 0
+DMA2 CHIP SELECT LED
+Text Notes 7050 5950 1    40   ~ 0
+INTERRUPT
+Text Notes 10050 9000 1    40   ~ 0
+DMA XFER
+$Comp
+L Zilog_Z80_Peripherals:DMA-PLCC-44-CMOS U18
+U 1 1 64234025
+P 9350 1000
+F 0 "U18" H 9800 1100 50  0000 C CNN
+F 1 "DMA-PLCC-44-CMOS" H 9150 1100 50  0000 C CNN
+F 2 "Package_LCC:PLCC-44_THT-Socket" H 9750 2850 50  0001 L CNN
+F 3 "" H 8550 -150 50  0001 L CNN
+F 4 "6 MHZ Z80 CMOS SIO/2 , Z84C4206PEG Zilog Z84C4206PEG, 8bit Z8 Microcontroller, 6MHz ROMLess, 40-Pin PDIP" H 9750 2650 50  0001 L CNN "Description"
+F 5 "4.06" H 9750 2550 50  0001 L CNN "Height"
+F 6 "Zilog" H 9750 2450 50  0001 L CNN "Manufacturer_Name"
+F 7 "Z84C4206PEG" H 9750 2350 50  0001 L CNN "Manufacturer_Part_Number"
+F 8 "692-Z84C4206PEG" H 9750 2250 50  0001 L CNN "Mouser Part Number"
+F 9 "https://www.mouser.com/Search/Refine.aspx?Keyword=692-Z84C4206PEG" H 9750 2150 50  0001 L CNN "Mouser Price/Stock"
+F 10 "6600766" H 9750 2050 50  0001 L CNN "RS Part Number"
+F 11 "https://uk.rs-online.com/web/p/products/6600766" H 9750 1950 50  0001 L CNN "RS Price/Stock"
+F 12 "R1000052" H 9750 1850 50  0001 L CNN "Allied_Number"
+F 13 "https://www.alliedelec.com/zilog-z84c4206peg/R1000052/" H 9750 1750 50  0001 L CNN "Allied Price/Stock"
+	1    9350 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR032
+U 1 1 64235743
+P 9650 800
+F 0 "#PWR032" H 9650 650 50  0001 C CNN
+F 1 "VCC" H 9650 950 50  0000 C CNN
+F 2 "" H 9650 800 50  0001 C CNN
+F 3 "" H 9650 800 50  0001 C CNN
+	1    9650 800 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8350 2100 9150 2100
+Wire Wire Line
+	10150 1550 10800 1550
+Wire Wire Line
+	10150 1650 10800 1650
+Wire Wire Line
+	10150 1750 10800 1750
+Wire Wire Line
+	10150 1850 10800 1850
+Wire Wire Line
+	10150 1950 10800 1950
+Wire Wire Line
+	10150 2050 10800 2050
+Wire Wire Line
+	10150 2150 10800 2150
+Wire Wire Line
+	10150 2250 10800 2250
+Wire Wire Line
+	10150 2350 10800 2350
+Wire Wire Line
+	10150 2450 10800 2450
+Wire Wire Line
+	10150 2550 10800 2550
+Wire Wire Line
+	10150 1050 10800 1050
+Wire Wire Line
+	10150 1150 10800 1150
+Wire Wire Line
+	10150 1250 10800 1250
+Wire Wire Line
+	10150 1350 10800 1350
+Wire Wire Line
+	10150 1450 10800 1450
+Wire Wire Line
+	8350 1050 9150 1050
+Wire Wire Line
+	8350 1150 9150 1150
+Wire Wire Line
+	8350 1250 9150 1250
+Wire Wire Line
+	8350 1350 9150 1350
+Wire Wire Line
+	8350 1450 9150 1450
+Wire Wire Line
+	8350 1550 9150 1550
+Wire Wire Line
+	8350 1650 9150 1650
+Wire Wire Line
+	8350 1750 9150 1750
+Wire Wire Line
+	9150 2250 8350 2250
+Wire Wire Line
+	8350 2450 9150 2450
+Wire Wire Line
+	8350 2550 9150 2550
+Wire Wire Line
+	8350 2650 9150 2650
+Wire Wire Line
+	9150 2350 8350 2350
+Wire Wire Line
+	8350 3100 9150 3100
+Text GLabel 8350 3100 0    40   Input ~ 0
+CLK
+Wire Wire Line
+	8350 1900 9150 1900
+Wire Wire Line
+	10150 2800 10750 2800
+Wire Wire Line
+	10150 2700 10750 2700
+Wire Wire Line
+	10150 3000 10750 3000
+Wire Wire Line
+	8350 2750 9150 2750
+Wire Wire Line
+	10150 2900 10750 2900
+Wire Wire Line
+	10150 3100 10750 3100
+Wire Wire Line
+	8350 2000 9150 2000
+Wire Wire Line
+	2500 8000 2500 8800
+Wire Wire Line
+	2500 8000 3500 8000
+Connection ~ 2500 8900
+Wire Wire Line
+	10750 8450 10900 8450
+$Comp
+L device:LED D11
+U 1 1 648B371B
+P 11500 8300
+F 0 "D11" H 11500 8400 50  0000 C CNN
+F 1 "LED" H 11500 8200 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 11500 8300 60  0001 C CNN
+F 3 "" H 11500 8300 60  0001 C CNN
+	1    11500 8300
+	0    -1   -1   0   
+$EndComp
+Text Notes 11750 8450 1    40   ~ 0
+DMA1 CHIP SELECT LED
+Text Notes 12800 8500 0    60   ~ 0
+TEND IS AN OUTPUT FROM DMA
+$Comp
+L device:LED D12
+U 1 1 66096B27
+P 15800 8350
+F 0 "D12" H 15800 8150 50  0000 C CNN
+F 1 "LED" H 15800 8250 50  0000 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm" H 15793 8475 50  0001 C CNN
+F 3 "~" H 15800 8350 50  0001 C CNN
+	1    15800 8350
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	15100 8500 15200 8500
+Text Notes 16150 8400 1    40   ~ 0
+DMA2 READY LED
+$Comp
+L 74xx:74LS06 U24
+U 2 1 66C5AF1A
+P 15500 7200
+F 0 "U24" H 15450 7250 50  0000 C CNN
+F 1 "74LS06" H 15450 7150 50  0000 C CNN
+F 2 "" H 15500 7200 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS06" H 15500 7200 50  0001 C CNN
+	2    15500 7200
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS06 U24
+U 1 1 66CD6817
+P 15500 8500
+F 0 "U24" H 15450 8550 50  0000 C CNN
+F 1 "74LS06" H 15450 8450 50  0000 C CNN
+F 2 "" H 15500 8500 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS06" H 15500 8500 50  0001 C CNN
+	1    15500 8500
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:SN74LS07N U?
+U 3 1 6770E875
+P 9650 6700
+AR Path="/643138DC/6770E875" Ref="U?"  Part="3" 
+AR Path="/646800AA/6770E875" Ref="U17"  Part="3" 
+F 0 "U17" H 9500 6750 50  0000 L CNN
+F 1 "74LS07" H 9400 6650 50  0000 L CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 9650 6700 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 9650 6700 50  0001 C CNN
+	3    9650 6700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	14050 8100 14200 8100
+$Comp
+L device:R R24
+U 1 1 6503527C
+P 3850 3600
+F 0 "R24" V 3930 3600 50  0000 C CNN
+F 1 "0" V 3850 3600 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" H 3850 3600 60  0001 C CNN
+F 3 "" H 3850 3600 60  0001 C CNN
+	1    3850 3600
+	0    -1   -1   0   
+$EndComp
+Text Label 4100 3600 0    40   ~ 0
+GND-DMA1
+Wire Wire Line
+	4450 3600 4050 3600
+Text Label 9300 3600 0    40   ~ 0
+GND-DMA2
+Wire Wire Line
+	4450 3400 4450 3600
+$Comp
+L power:PWR_FLAG #FLG0101
+U 1 1 655E6E80
+P 4050 3600
+F 0 "#FLG0101" H 4050 3675 50  0001 C CNN
+F 1 "PWR_FLAG" H 4050 3773 50  0000 C CNN
+F 2 "" H 4050 3600 50  0001 C CNN
+F 3 "~" H 4050 3600 50  0001 C CNN
+	1    4050 3600
+	1    0    0    -1  
+$EndComp
+Connection ~ 4050 3600
+Wire Wire Line
+	4050 3600 4000 3600
+$Comp
+L power:GND #PWR0102
+U 1 1 655E7DCB
+P 8900 3600
+F 0 "#PWR0102" H 8900 3350 50  0001 C CNN
+F 1 "GND" H 8905 3427 50  0000 C CNN
+F 2 "" H 8900 3600 50  0001 C CNN
+F 3 "" H 8900 3600 50  0001 C CNN
+	1    8900 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R R26
+U 1 1 655E7E8B
+P 9050 3600
+F 0 "R26" V 9130 3600 50  0000 C CNN
+F 1 "0" V 9050 3600 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" H 9050 3600 60  0001 C CNN
+F 3 "" H 9050 3600 60  0001 C CNN
+	1    9050 3600
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	9650 3600 9250 3600
+Wire Wire Line
+	9650 3400 9650 3600
+$Comp
+L power:PWR_FLAG #FLG0102
+U 1 1 655E7E98
+P 9250 3600
+F 0 "#FLG0102" H 9250 3675 50  0001 C CNN
+F 1 "PWR_FLAG" H 9250 3773 50  0000 C CNN
+F 2 "" H 9250 3600 50  0001 C CNN
+F 3 "~" H 9250 3600 50  0001 C CNN
+	1    9250 3600
+	1    0    0    -1  
+$EndComp
+Connection ~ 9250 3600
+Wire Wire Line
+	9250 3600 9200 3600
+Text Notes 4700 3850 0    60   ~ 0
+NOTE: PROCESSOR BOARD MUST\nBE THE START OF THE BAI/BAO CHAIN.\nBAO ORIGINATES WITH CPU BUSACK.\nNO BAI SIGNAL TO PROCESSOR BOARD.
+Connection ~ 6800 6150
+Text GLabel 10250 6700 2    40   Output ~ 0
+~BAO
+Wire Wire Line
+	9950 6700 10250 6700
+$Comp
+L 74xx:74LS07 U17
+U 1 1 69A52522
+P 6500 6500
+AR Path="/646800AA/69A52522" Ref="U17"  Part="1" 
+AR Path="/643138DC/69A52522" Ref="U?"  Part="1" 
+F 0 "U17" H 6450 6550 50  0000 C CNN
+F 1 "74LS07" H 6500 6450 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 6500 6500 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 6500 6500 50  0001 C CNN
+	1    6500 6500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5800 6850 6200 6850
+Wire Wire Line
+	5800 6500 6200 6500
+$Comp
+L 74xx:SN74LS07N U17
+U 2 1 69A52528
+P 6500 6850
+AR Path="/646800AA/69A52528" Ref="U17"  Part="2" 
+AR Path="/643138DC/69A52528" Ref="U?"  Part="2" 
+F 0 "U17" H 6450 6900 50  0000 C CNN
+F 1 "74LS07" H 6500 6800 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 6500 6850 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 6500 6850 50  0001 C CNN
+	2    6500 6850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6800 6150 6800 6500
+Connection ~ 6800 6500
+$Comp
+L conn:CONN_01X04 JP8
+U 1 1 64159EEF
+P 4450 4450
+F 0 "JP8" H 4450 4700 50  0000 C CNN
+F 1 "DMA1 BYPASS" H 4450 4200 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 4450 4450 50  0001 C CNN
+F 3 "" H 4450 4450 50  0001 C CNN
+	1    4450 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3450 4600 4250 4600
+Wire Wire Line
+	3450 4500 4250 4500
+Wire Wire Line
+	3450 4400 4250 4400
+Wire Wire Line
+	3450 4300 4250 4300
+Text Notes 4650 4500 0    40   ~ 0
+NOTE: DMA1 BYPASS\nINSTALL JUMPERS ON\nPINS 1-2 AND 3-4 IF NO DMA
+$Comp
+L conn:CONN_01X04 JP6
+U 1 1 64470F74
+P 7700 4450
+F 0 "JP6" H 7700 4700 50  0000 C CNN
+F 1 "DMA2 BYPASS" H 7700 4200 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 7700 4450 50  0001 C CNN
+F 3 "" H 7700 4450 50  0001 C CNN
+	1    7700 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6700 4600 7500 4600
+Wire Wire Line
+	6700 4500 7500 4500
+Wire Wire Line
+	6700 4400 7500 4400
+Wire Wire Line
+	6700 4300 7500 4300
+Text Notes 7900 4500 0    40   ~ 0
+NOTE: DMA2 BYPASS\nINSTALL JUMPERS ON\nPINS 1-2 AND 3-4 IF NO DMA
+Wire Wire Line
+	5550 9250 6050 9250
+NoConn ~ 7050 8450
+NoConn ~ 7050 8650
+NoConn ~ 7050 8750
+NoConn ~ 7050 8950
+Text GLabel 4600 7900 2    40   Output ~ 0
+~DMA-ADDR
+Text GLabel 10750 3100 2    40   Output ~ 0
+~DMA-IEO2
+Text GLabel 5550 2900 2    40   Output ~ 0
+~DMA-INT-PULSE1
+Text GLabel 10750 2900 2    40   Output ~ 0
+~DMA-INT-PULSE2
+Text GLabel 5550 2800 2    40   Input ~ 0
+~DMA-CS1
+Text GLabel 10750 2800 2    40   Input ~ 0
+~DMA-CS2
+Text GLabel 9450 8500 2    40   Input ~ 0
+DATA_XFER
+Text GLabel 7050 8350 2    40   Output ~ 0
+RDY_Q0
+Text GLabel 7050 8550 2    40   Output ~ 0
+RDY_Q1
+Text GLabel 7050 8850 2    40   Output ~ 0
+~USR-RESET1
+Text GLabel 7050 9050 2    40   Output ~ 0
+~USR-RESET2
+Text GLabel 8350 2100 0    40   Output ~ 0
+~DMA-BAO2
+Text GLabel 5550 2700 2    40   Input ~ 0
+DMA-RDY1
+Text GLabel 10750 2700 2    40   Input ~ 0
+DMA-RDY2
+Text GLabel 3550 2750 0    40   Input ~ 0
+~DMA-RESET1
+Text GLabel 8350 2750 0    40   Input ~ 0
+~DMA-RESET2
+Text GLabel 5550 9150 0    40   Input ~ 0
+~DMA_RDY_WR
+Wire Wire Line
+	5550 9150 6050 9150
+$Comp
+L conn:CONN_01X03 JP9
+U 1 1 64190410
+P 8450 6700
+F 0 "JP9" H 8450 6950 50  0000 C CNN
+F 1 "BAO SEL" H 8450 6500 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 8450 6700 50  0001 C CNN
+F 3 "" H 8450 6700 50  0001 C CNN
+	1    8450 6700
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	8650 6700 9350 6700
+Text GLabel 5800 6150 0    40   Input ~ 0
+~IM2-INT
+Text GLabel 3150 2250 0    40   Input ~ 0
+~CPU-M1
+Text GLabel 3150 2350 0    40   BiDi ~ 0
+~CPU-IORQ
+Text GLabel 3150 2450 0    40   BiDi ~ 0
+~CPU-MREQ
+Text GLabel 3150 2550 0    40   BiDi ~ 0
+~CPU-RD
+Text GLabel 3150 2650 0    40   BiDi ~ 0
+~CPU-WR
+Wire Wire Line
+	1150 1800 1800 1800
+Wire Wire Line
+	1150 1900 1800 1900
+Wire Wire Line
+	1150 2100 1800 2100
+Wire Wire Line
+	1150 1700 1800 1700
+Wire Wire Line
+	1150 2200 1800 2200
+Wire Wire Line
+	1150 2300 1800 2300
+Wire Wire Line
+	1150 2400 1800 2400
+$Comp
+L power:VCC #PWR0151
+U 1 1 64146DE8
+P 750 1700
+AR Path="/646800AA/64146DE8" Ref="#PWR0151"  Part="1" 
+AR Path="/640FA3F5/64146DE8" Ref="#PWR?"  Part="1" 
+F 0 "#PWR0151" H 750 1550 50  0001 C CNN
+F 1 "VCC" H 765 1873 50  0000 C CNN
+F 2 "" H 750 1700 50  0001 C CNN
+F 3 "" H 750 1700 50  0001 C CNN
+	1    750  1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R_Network08 RN6
+U 1 1 64146DEE
+P 950 2100
+AR Path="/646800AA/64146DEE" Ref="RN6"  Part="1" 
+AR Path="/640FA3F5/64146DEE" Ref="RN?"  Part="1" 
+F 0 "RN6" V 333 2100 50  0000 C CNN
+F 1 "4700" V 424 2100 50  0000 C CNN
+F 2 "Resistor_THT:R_Array_SIP9" V 1525 2100 50  0001 C CNN
+F 3 "http://www.vishay.com/docs/31509/csc.pdf" H 950 2100 50  0001 C CNN
+	1    950  2100
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	1150 2000 1800 2000
+Text GLabel 1800 2100 2    40   Output ~ 0
+~DMA-BAO1
+Text GLabel 1800 2200 2    40   Output ~ 0
+~DMA-IEO1
+Text GLabel 1800 2300 2    40   Output ~ 0
+~DMA-BAO2
+Text GLabel 1800 2400 2    40   Output ~ 0
+~DMA-IEO2
+Text GLabel 3150 2100 0    40   Output ~ 0
+~DMA-BAO1
+Text GLabel 5550 3100 2    40   Output ~ 0
+~DMA-IEO1
+Text GLabel 8350 2250 0    40   Input ~ 0
+~CPU-M1
+Text GLabel 8350 2350 0    40   BiDi ~ 0
+~CPU-IORQ
+Text GLabel 8350 2450 0    40   BiDi ~ 0
+~CPU-MREQ
+Text GLabel 8350 2550 0    40   BiDi ~ 0
+~CPU-RD
+Text GLabel 8350 2650 0    40   BiDi ~ 0
+~CPU-WR
+Text GLabel 3150 1050 0    40   BiDi ~ 0
+CPU-D0
+Text GLabel 3150 1150 0    40   BiDi ~ 0
+CPU-D1
+Text GLabel 3150 1250 0    40   BiDi ~ 0
+CPU-D2
+Text GLabel 3150 1350 0    40   BiDi ~ 0
+CPU-D3
+Text GLabel 3150 1450 0    40   BiDi ~ 0
+CPU-D4
+Text GLabel 3150 1550 0    40   BiDi ~ 0
+CPU-D5
+Text GLabel 3150 1650 0    40   BiDi ~ 0
+CPU-D6
+Text GLabel 3150 1750 0    40   BiDi ~ 0
+CPU-D7
+Text GLabel 8350 1050 0    40   BiDi ~ 0
+CPU-D0
+Text GLabel 8350 1150 0    40   BiDi ~ 0
+CPU-D1
+Text GLabel 8350 1250 0    40   BiDi ~ 0
+CPU-D2
+Text GLabel 8350 1350 0    40   BiDi ~ 0
+CPU-D3
+Text GLabel 8350 1450 0    40   BiDi ~ 0
+CPU-D4
+Text GLabel 8350 1550 0    40   BiDi ~ 0
+CPU-D5
+Text GLabel 8350 1650 0    40   BiDi ~ 0
+CPU-D6
+Text GLabel 8350 1750 0    40   BiDi ~ 0
+CPU-D7
+Text GLabel 5600 1050 2    40   Output ~ 0
+CPU-A0
+Text GLabel 5600 1150 2    40   Output ~ 0
+CPU-A1
+Text GLabel 5600 1250 2    40   Output ~ 0
+CPU-A2
+Text GLabel 5600 1350 2    40   Output ~ 0
+CPU-A3
+Text GLabel 5600 1450 2    40   Output ~ 0
+CPU-A4
+Text GLabel 5600 1550 2    40   Output ~ 0
+CPU-A5
+Text GLabel 5600 1650 2    40   Output ~ 0
+CPU-A6
+Text GLabel 5600 1750 2    40   Output ~ 0
+CPU-A7
+Text GLabel 5600 1850 2    40   Output ~ 0
+CPU-A8
+Text GLabel 5600 1950 2    40   Output ~ 0
+CPU-A9
+Text GLabel 5600 2050 2    40   Output ~ 0
+CPU-A10
+Text GLabel 5600 2150 2    40   Output ~ 0
+CPU-A11
+Text GLabel 5600 2250 2    40   Output ~ 0
+CPU-A12
+Text GLabel 5600 2350 2    40   Output ~ 0
+CPU-A13
+Text GLabel 5600 2450 2    40   Output ~ 0
+CPU-A14
+Text GLabel 5600 2550 2    40   Output ~ 0
+CPU-A15
+Text GLabel 10800 1050 2    40   Output ~ 0
+CPU-A0
+Text GLabel 10800 1150 2    40   Output ~ 0
+CPU-A1
+Text GLabel 10800 1250 2    40   Output ~ 0
+CPU-A2
+Text GLabel 10800 1350 2    40   Output ~ 0
+CPU-A3
+Text GLabel 10800 1450 2    40   Output ~ 0
+CPU-A4
+Text GLabel 10800 1550 2    40   Output ~ 0
+CPU-A5
+Text GLabel 10800 1650 2    40   Output ~ 0
+CPU-A6
+Text GLabel 10800 1750 2    40   Output ~ 0
+CPU-A7
+Text GLabel 10800 1850 2    40   Output ~ 0
+CPU-A8
+Text GLabel 10800 1950 2    40   Output ~ 0
+CPU-A9
+Text GLabel 10800 2050 2    40   Output ~ 0
+CPU-A10
+Text GLabel 10800 2150 2    40   Output ~ 0
+CPU-A11
+Text GLabel 10800 2250 2    40   Output ~ 0
+CPU-A12
+Text GLabel 10800 2350 2    40   Output ~ 0
+CPU-A13
+Text GLabel 10800 2450 2    40   Output ~ 0
+CPU-A14
+Text GLabel 10800 2550 2    40   Output ~ 0
+CPU-A15
+Text GLabel 3150 1900 0    40   BiDi ~ 0
+~BUSRQ
+Text GLabel 8350 1900 0    40   BiDi ~ 0
+~BUSRQ
+Text GLabel 3150 2000 0    40   Input ~ 0
+~CPU-BUSACK
+Text GLabel 5550 3000 2    40   Input ~ 0
+~DMA-IEI1
+Text GLabel 8350 2000 0    40   Input ~ 0
+~DMA-BAO1
+Text GLabel 10750 3000 2    40   Input ~ 0
+~DMA-IEO1
+Text GLabel 5800 6500 0    40   Input ~ 0
+~DMA-INT-PULSE1
+Text GLabel 5800 6850 0    40   Input ~ 0
+~DMA-INT-PULSE2
+Text GLabel 2850 7900 0    40   Input ~ 0
+~CPU-M1
+Text GLabel 2850 8100 0    40   Input ~ 0
+CPU-A2
+Text GLabel 2850 8200 0    40   Input ~ 0
+CPU-A3
+Text GLabel 2850 8300 0    40   Input ~ 0
+CPU-A4
+Text GLabel 2850 8400 0    40   Input ~ 0
+CPU-A5
+Text GLabel 2850 8500 0    40   Input ~ 0
+CPU-A6
+Text GLabel 2850 8600 0    40   Input ~ 0
+CPU-A7
+Text GLabel 5550 8350 0    40   BiDi ~ 0
+CPU-D0
+Text GLabel 5550 8550 0    40   BiDi ~ 0
+CPU-D1
+Text GLabel 5550 8750 0    40   BiDi ~ 0
+CPU-D2
+Text GLabel 5550 8950 0    40   BiDi ~ 0
+CPU-D3
+Text GLabel 5550 9250 0    40   Input ~ 0
+~CPU-RESET
+Text GLabel 9100 8900 2    40   Input ~ 0
+~CPU-RESET
+Wire Wire Line
+	9100 8900 8950 8900
+Text GLabel 10750 8450 0    40   Input ~ 0
+~DMA-CS1
+Text GLabel 10800 9850 0    40   Input ~ 0
+~DMA-CS2
+Text GLabel 13300 7700 0    40   Input ~ 0
+~DMA-INT-PULSE1
+Text GLabel 13300 8100 0    40   Input ~ 0
+~DMA-INT-PULSE2
+Text GLabel 15100 7200 0    40   Input ~ 0
+DMA-RDY1
+Text GLabel 15100 8500 0    40   Input ~ 0
+DMA-RDY2
+Text GLabel 8650 6600 2    40   Input ~ 0
+~DMA-BAO1
+Text GLabel 8650 6800 2    40   Input ~ 0
+~DMA-BAO2
+Text GLabel 3500 9700 0    40   Input ~ 0
+~CPU-IORQ
+Text GLabel 3450 4300 0    40   Input ~ 0
+~DMA-IEI1
+Text GLabel 3450 4400 0    40   Output ~ 0
+~DMA-IEO1
+Text GLabel 3450 4500 0    40   Input ~ 0
+~CPU-BUSACK
+Text GLabel 3450 4600 0    40   Output ~ 0
+~DMA-BAO1
+Text GLabel 6700 4300 0    40   Input ~ 0
+~DMA-IEO1
+Text GLabel 6700 4400 0    40   Output ~ 0
+~DMA-IEO2
+Text GLabel 6700 4500 0    40   Input ~ 0
+~DMA-BAO1
+Text GLabel 6700 4600 0    40   Output ~ 0
+~DMA-BAO2
+$Comp
+L 74xx:SN74LS07N U?
+U 5 1 641E82B5
+P 9650 7350
+AR Path="/643138DC/641E82B5" Ref="U?"  Part="5" 
+AR Path="/646800AA/641E82B5" Ref="U17"  Part="5" 
+AR Path="/6439F52F/641E82B5" Ref="U?"  Part="5" 
+F 0 "U17" H 9600 7400 50  0000 C CNN
+F 1 "74LS07" H 9600 7300 50  0000 C CNN
+F 2 "Package_DIP:DIP-14_W7.62mm" H 9650 7350 50  0001 C CNN
+F 3 "www.ti.com/lit/ds/symlink/sn74ls07.pdf" H 9650 7350 50  0001 C CNN
+	5    9650 7350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10250 7350 9950 7350
+Text GLabel 10250 7350 2    40   Output ~ 0
+~IEO
+Text GLabel 8950 7350 0    40   Input ~ 0
+~IM2-IEO
+Wire Wire Line
+	8950 7350 9350 7350
+Text GLabel 1800 1700 2    40   Output ~ 0
+~IEO
+Wire Wire Line
+	6800 6500 6800 6850
+Wire Wire Line
+	2500 8800 3500 8800
+Connection ~ 2500 8800
+Wire Wire Line
+	2500 8800 2500 8900
+Wire Wire Line
+	13300 7700 13450 7700
+Wire Wire Line
+	13300 8100 13450 8100
+Text GLabel 1800 1800 2    40   Output ~ 0
+~DMA-INT-PULSE1
+Text GLabel 1800 1900 2    40   Output ~ 0
+~DMA-INT-PULSE2
+Wire Wire Line
+	12450 6050 13100 6050
+Wire Wire Line
+	12450 6150 13100 6150
+Wire Wire Line
+	12450 6350 13100 6350
+Wire Wire Line
+	12450 5950 13100 5950
+Wire Wire Line
+	12450 6450 13100 6450
+Wire Wire Line
+	12450 6550 13100 6550
+Wire Wire Line
+	12450 6650 13100 6650
+$Comp
+L power:VCC #PWR0107
+U 1 1 64377763
+P 12050 5950
+AR Path="/646800AA/64377763" Ref="#PWR0107"  Part="1" 
+AR Path="/640FA3F5/64377763" Ref="#PWR?"  Part="1" 
+F 0 "#PWR0107" H 12050 5800 50  0001 C CNN
+F 1 "VCC" H 12065 6123 50  0000 C CNN
+F 2 "" H 12050 5950 50  0001 C CNN
+F 3 "" H 12050 5950 50  0001 C CNN
+	1    12050 5950
+	1    0    0    -1  
+$EndComp
+$Comp
+L device:R_Network08 RN9
+U 1 1 6437776D
+P 12250 6350
+AR Path="/646800AA/6437776D" Ref="RN9"  Part="1" 
+AR Path="/640FA3F5/6437776D" Ref="RN?"  Part="1" 
+F 0 "RN9" V 11633 6350 50  0000 C CNN
+F 1 "470" V 11724 6350 50  0000 C CNN
+F 2 "Resistor_THT:R_Array_SIP9" V 12825 6350 50  0001 C CNN
+F 3 "http://www.vishay.com/docs/31509/csc.pdf" H 12250 6350 50  0001 C CNN
+	1    12250 6350
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	12450 6250 13100 6250
+Text GLabel 13100 6350 2    40   Output ~ 0
+470E
+Text GLabel 13100 6450 2    40   Output ~ 0
+470F
+Text GLabel 13100 6550 2    40   Output ~ 0
+470G
+Text GLabel 13100 6650 2    40   Output ~ 0
+470H
+Text GLabel 13100 5950 2    40   Output ~ 0
+470A
+Text GLabel 13100 6050 2    40   Output ~ 0
+470B
+Text GLabel 13100 6150 2    40   Output ~ 0
+470C
+Text GLabel 13100 6250 2    40   Output ~ 0
+470D
+Text GLabel 15800 6900 1    40   Input ~ 0
+470F
+Text GLabel 15800 8200 1    40   Input ~ 0
+470H
+Text GLabel 11500 8150 1    40   Input ~ 0
+470E
+Text GLabel 11550 9550 1    40   Input ~ 0
+470G
+Text GLabel 6800 5800 1    40   Input ~ 0
+470B
+NoConn ~ 1800 2000
+Text GLabel 2650 9650 2    40   Output ~ 0
+10KA
+Wire Wire Line
+	2600 9650 2650 9650
+Wire Wire Line
+	2600 9650 2600 9700
+$EndSCHEMATC

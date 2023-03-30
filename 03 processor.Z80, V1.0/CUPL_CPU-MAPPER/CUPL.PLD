@@ -1,0 +1,31 @@
+Name     CPU-MAPPER.tru ;
+PartNo   00 ;
+Date     23.03.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 5 = CPUA14;
+PIN 6 = CPUA15;
+PIN 3 = CPUA2;
+PIN 9 = CPUxIORQ;
+PIN 2 = CPUxWR;
+PIN 4 = CSxMAP;
+PIN 7 = mA14;
+PIN 8 = mA15;
+
+/* outputs */
+PIN 19 = PAGExWR;
+PIN 18 = PGENxWR;
+PIN 17 = SELA14;
+PIN 16 = SELA15;
+
+/* combinatorial logic */
+PAGExWR = CPUA2 # CPUxWR # CSxMAP;
+PGENxWR = !CPUA2 # CPUxWR # CSxMAP;
+SELA14 = (CPUA14 & !CPUxIORQ) # (mA14 & CPUxIORQ);
+SELA15 = (CPUA15 & !CPUxIORQ) # (mA15 & CPUxIORQ);

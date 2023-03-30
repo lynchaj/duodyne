@@ -1,0 +1,49 @@
+Name     multi-GAL1.tru ;
+PartNo   00 ;
+Date     12.03.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 10 = ACK;
+PIN 8 = CSxDUART;
+PIN 7 = CSxPAR;
+PIN 11 = P24OB;
+PIN 13 = P25BF;
+PIN 9 = PARINT;
+PIN 4 = bA0;
+PIN 5 = bA1;
+PIN 6 = bA2;
+PIN 2 = bRD;
+PIN 3 = bWR;
+
+/* outputs */
+PIN 23 = PARIN0;
+PIN 22 = PARIN1;
+PIN 21 = PARIN2;
+PIN 20 = PAROUT0;
+PIN 19 = PAROUT2;
+PIN 18 = CSxKM;
+PIN 17 = CSxUS;
+PIN 15 = INTxPAR;
+PIN 16 = BUSxEN;
+PIN 14 = INTxKM;
+
+/* combinatorial logic */
+BUSxEN = CSxDUART & CSxPAR;
+CSxKM = bA1 # !bA2 # CSxPAR;
+CSxUS = !bA1 # !bA2 # CSxPAR;
+INTxKM = P24OB # P25BF;
+INTxPAR = !ACK & PARINT;
+PARIN0 = bA0 # bA1 # bA2 # CSxPAR # bRD;
+PARIN1 = !bA0 # bA1 # bA2 # CSxPAR # bRD;
+PARIN2 = bA0 # !bA1 # bA2 # CSxPAR # bRD;
+PAROUT0 = bA0 # bA1 # bA2 # CSxPAR # bWR;
+PAROUT2 = bA0 # !bA1 # bA2 # CSxPAR # bWR;
