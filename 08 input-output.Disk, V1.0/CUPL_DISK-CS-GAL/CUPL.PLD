@@ -1,0 +1,32 @@
+Name     DISK-CS-GAL.tru ;
+PartNo   00 ;
+Date     02.04.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 2 = CSxDISK;
+PIN 4 = bA2;
+PIN 3 = bA3;
+PIN 5 = bRD;
+PIN 6 = bWR;
+
+/* outputs */
+PIN 19 = CSxFDC;
+PIN 18 = CSxPPIDE;
+PIN 17 = SPIxRD;
+PIN 16 = SPIxWR;
+PIN 15 = CSxSPIxLED;
+PIN 14 = CSxPPIDExLED;
+
+/* combinatorial logic */
+CSxFDC = bA3 # CSxDISK;
+CSxPPIDE = bA2 # !bA3 # CSxDISK;
+CSxPPIDExLED = bA2 # !bA3 # CSxDISK;
+CSxSPIxLED = !bA2 # !bA3 # CSxDISK;
+SPIxRD = !bA2 # !bA3 # CSxDISK # bRD;
+SPIxWR = !bA2 # !bA3 # CSxDISK # bWR;

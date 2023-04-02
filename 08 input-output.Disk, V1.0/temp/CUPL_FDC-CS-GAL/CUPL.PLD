@@ -1,0 +1,40 @@
+Name     FDC-CS-GAL.tru ;
+PartNo   00 ;
+Date     01.04.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 4 = CSxFDC;
+PIN 3 = PULSE;
+PIN 5 = bA0;
+PIN 6 = bA1;
+PIN 7 = bA2;
+PIN 8 = bRD;
+PIN 2 = bRESET;
+PIN 9 = bWR;
+
+/* outputs */
+PIN 23 = FDCxRESET;
+PIN 22 = FDCxTC;
+PIN 21 = MSRxDATA;
+PIN 20 = LDCR;
+PIN 18 = LDOR;
+PIN 19 = FDCxDACK;
+PIN 17 = CSxFDCxLED;
+
+/* combinatorial logic */
+CSxFDCxLED = CSxFDC;
+FDCxDACK = (!bA0 & bRD) # !bA1 # !bA2 # CSxFDC;
+FDCxRESET = (bA0 & bA1 & !bA2 & !CSxFDC) # !bRESET;
+FDCxTC = (!bA0 & bA1 & !bA2 & !CSxFDC) # (bA0 & bA1 & bA2 & !CSxFDC) # !PULSE;
+LDCR = !bA0 # bA1 # !bA2 # CSxFDC;
+LDOR = bA0 # !bA1 # !bA2 # CSxFDC # bWR;
+MSRxDATA = bA1 # bA2 # CSxFDC;
