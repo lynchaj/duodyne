@@ -1,6 +1,6 @@
 Name     CPU-DATA-DIR-GAL.tru ;
 PartNo   00 ;
-Date     22.03.2023 ;
+Date     03.04.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -33,6 +33,6 @@ PIN 19 = IM2xIEO;
 DATAxDIR = (IOxSEL & bIORQ) # (IOxSEL & bM1) # (IOxSEL & !DMAxIEI1) # (!DMAxIEI1 & bRD) # (bIORQ & bRD) 
      # (bM1 & bRD);
 FPxLATCHxRD = FPxLATCH # bRD;
-FPxLATCHxWR = FPxLATCH # bWR;
+FPxLATCHxWR = !FPxLATCH & !bWR;
 IM2xEN = !DMAxIEO2 # IM2xINT # bIORQ # bM1;
 IM2xIEO = !DMAxIEO2 # IM2xINT;

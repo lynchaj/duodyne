@@ -1,6 +1,6 @@
 Name     FDC-DMA-GAL.tru ;
 PartNo   00 ;
-Date     02.04.2023 ;
+Date     03.04.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -22,13 +22,15 @@ PIN 9 = bWR;
 PIN 19 = FDCxRESET;
 PIN 18 = FDCxTC;
 PIN 17 = MSRxDATA;
-PIN 16 = LDCR;
-PIN 14 = LDOR;
-PIN 15 = FDCxDACK;
-PIN 13 = CSxFDCxLED;
+PIN 15 = LDCR;
+PIN 13 = LDOR;
+PIN 14 = FDCxDACK;
+PIN 12 = CSxFDCxLED;
+PIN 16 = CSxTTS;
 
 /* combinatorial logic */
 CSxFDCxLED = CSxFDC;
+CSxTTS = bA0 # bA1 # !bA2 # CSxFDC;
 FDCxDACK = (!bA0 & bRD) # !bA1 # !bA2 # CSxFDC;
 FDCxRESET = (bA0 & bA1 & !bA2 & !CSxFDC) # !bRESET;
 FDCxTC = (!bA0 & bA1 & !bA2 & !CSxFDC) # (bA0 & bA1 & bA2 & !CSxFDC) # !PULSE;
