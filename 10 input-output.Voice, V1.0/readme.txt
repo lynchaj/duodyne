@@ -1,1 +1,1 @@
-This board provides a blank template for making input-output boards.  GAL information is notional and should be replaced with project specifics using Digital
+The input-output.Voice board is a specialized audio board for speech.  It contains a CTS256A-AL2 and SP0256A-AL2 text to speech (TTS) chipset, a DAC and ADC for audio frequencies, and left and right channel sound synthesis (SN76489N) chips.  There is a mixer combining all four sources of audio to output to either onboard speakers and/or headphone jack.  Also includes a microphone jack for ADC recording voice audio.
