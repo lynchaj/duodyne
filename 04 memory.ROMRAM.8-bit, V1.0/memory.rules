@@ -1,0 +1,145 @@
+
+(rules PCB memory
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 35812)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.5)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.7)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    "Net-(D5-Pad2)" "Net-(K1-Pad2)" "Net-(K5-Pad2)" "Net-(D3-Pad2)" "Net-(D3-Pad1)" "Net-(D8-Pad2)" "Net-(D8-Pad1)" "Net-(D10-Pad2)"
+    "Net-(D10-Pad1)" "Net-(D11-Pad2)" "Net-(D11-Pad1)" "Net-(JP3-Pad10)" "Net-(JP3-Pad8)" "Net-(JP3-Pad6)" "Net-(JP3-Pad4)" "Net-(JP3-Pad2)"
+    "Net-(Q1-Pad3)" "Net-(Q1-Pad2)" "Net-(R10-Pad2)" "Net-(U27-Pad3)" "Net-(U27-Pad2)" ~{CEO0} "~{CS_RAM0}" ~{CEO1}
+    "~{CS_RAM1}" "unconnected-(J5-Pad1)" bA14 bA15 ~{bWR} /bus/CRUCLK ~{M1} ~{MREQ}
+    ~{IORQ} ~{WR} ~{RD} A0 A1 A2 A3 A4
+    A5 A6 A7 A8 A9 A10 A11 A12
+    A13 A14 A15 D0 D1 D2 D3 D4
+    D5 D6 D7 /RTC/SPEAKER bD2 bD1 bD0 bA13
+    bA0 bA8 bA1 bA9 bA2 bA11 bA3 ~{bRD}
+    bA4 bA10 bA5 bA6 bD7 bA7 bD6 bA12
+    bD5 bD4 bD3 ~{bIORQ} ~{bM1} ~{bRESET} "~{BUS_EN}" "~{CS_RTC}"
+    "~{CS_ROM0}" ~{bMREQ} "/RTC/RTC_DAT_IN" "/RTC/RTC_CLK_IN" "/RTC/RTC_WR_EN" /RTC/USERLED1 "/RTC/RTC_RST_IN" /RTC/USERLED0
+    "~{RTC_WR}" "~{RTC_RD}" "/RTC/RTC_DQ" ZERO ONE "Net-(J2-Pad2)" "Net-(J3-Pad2)" "Net-(J4-Pad2)"
+    "Net-(J11-Pad2)" "Net-(J12-Pad2)" "Net-(J13-Pad2)" "Net-(J14-Pad2)" "Net-(J15-Pad2)" "Net-(J16-Pad2)" "Net-(J17-Pad2)" "Net-(J18-Pad2)"
+    "Net-(J19-Pad2)" ~{BOOT} "~{CS_ROM1}" "Net-(J20-Pad2)" "Net-(J21-Pad2)" "Net-(J22-Pad2)" "Net-(J23-Pad2)" "Net-(J24-Pad2)"
+    "Net-(J25-Pad2)" "Net-(J26-Pad2)" "Net-(J27-Pad2)" "Net-(J28-Pad2)" "Net-(J29-Pad2)" "Net-(J30-Pad2)" "Net-(J31-Pad2)" "Net-(JP3-Pad16)"
+    "Net-(JP3-Pad14)" "Net-(JP3-Pad12)" A16 A17 A18 A19 A20 A21
+    bA17 bA16 bA18 "~{IO_EN}" bA20 bA21 bA19 "~{CS_ROM2}"
+    "~{CS_ROM3}" "~{CS_RAM2}" "~{CS_RAM3}" "~{MEM_EN}" "~{CS_MEM}" ~{CEO2} ~{CEO3} "Net-(K2-Pad2)"
+    "Net-(K3-Pad2)" ~{IEO} ~{IEI} ~{BAO} ~{BAI} /RTC/USERBUTN "unconnected-(J5-Pad2)" "unconnected-(J5-Pad3)"
+    "unconnected-(J5-Pad4)" "unconnected-(J5-Pad5)" "unconnected-(J5-Pad6)" "unconnected-(J5-Pad7)" "unconnected-(J5-Pad8)" "unconnected-(J5-Pad9)" "unconnected-(J5-Pad10)" "unconnected-(J5-Pad11)"
+    "unconnected-(J5-Pad12)" "unconnected-(J5-Pad13)" "unconnected-(J5-Pad14)" "unconnected-(J6-Pad1)" "unconnected-(J6-Pad2)" "unconnected-(J6-Pad3)" "unconnected-(J6-Pad4)" "unconnected-(J6-Pad5)"
+    "unconnected-(J6-Pad6)" "unconnected-(J6-Pad7)" "unconnected-(J6-Pad8)" "unconnected-(J6-Pad9)" "unconnected-(J6-Pad10)" "unconnected-(J6-Pad11)" "unconnected-(J6-Pad12)" "unconnected-(J6-Pad13)"
+    "unconnected-(J6-Pad14)" "unconnected-(J7-Pad1)" "unconnected-(J7-Pad2)" "unconnected-(J7-Pad3)" "unconnected-(J7-Pad4)" "unconnected-(J7-Pad5)" "unconnected-(J7-Pad6)" "unconnected-(J7-Pad7)"
+    "unconnected-(J7-Pad8)" "unconnected-(J7-Pad9)" "unconnected-(J7-Pad10)" "unconnected-(J7-Pad11)" "unconnected-(J7-Pad12)" "unconnected-(J7-Pad13)" "unconnected-(J7-Pad14)" "unconnected-(J7-Pad15)"
+    "unconnected-(J7-Pad16)" "unconnected-(J8-Pad1)" "unconnected-(J8-Pad2)" "unconnected-(J8-Pad3)" "unconnected-(J8-Pad4)" "unconnected-(J8-Pad5)" "unconnected-(J8-Pad6)" "unconnected-(J8-Pad7)"
+    "unconnected-(J8-Pad8)" "unconnected-(J8-Pad9)" "unconnected-(J8-Pad10)" "unconnected-(J8-Pad11)" "unconnected-(J8-Pad12)" "unconnected-(J8-Pad13)" "unconnected-(J8-Pad14)" "unconnected-(J8-Pad15)"
+    "unconnected-(J8-Pad16)" "unconnected-(J9-Pad1)" "unconnected-(J9-Pad2)" "unconnected-(J9-Pad3)" "unconnected-(J9-Pad4)" "unconnected-(J9-Pad5)" "unconnected-(J9-Pad6)" "unconnected-(J9-Pad7)"
+    "unconnected-(J9-Pad8)" "unconnected-(J9-Pad9)" "unconnected-(J9-Pad10)" "unconnected-(J9-Pad11)" "unconnected-(J9-Pad12)" "unconnected-(J9-Pad13)" "unconnected-(J9-Pad14)" "unconnected-(J9-Pad15)"
+    "unconnected-(J9-Pad16)" "unconnected-(J9-Pad17)" "unconnected-(J9-Pad18)" "unconnected-(J9-Pad19)" "unconnected-(J9-Pad20)" "unconnected-(J10-Pad1)" "unconnected-(J10-Pad2)" "unconnected-(J10-Pad3)"
+    "unconnected-(J10-Pad4)" "unconnected-(J10-Pad5)" "unconnected-(J10-Pad6)" "unconnected-(J10-Pad7)" "unconnected-(J10-Pad8)" "unconnected-(J10-Pad9)" "unconnected-(J10-Pad10)" "unconnected-(J10-Pad11)"
+    "unconnected-(J10-Pad12)" "unconnected-(J10-Pad13)" "unconnected-(J10-Pad14)" "unconnected-(J10-Pad15)" "unconnected-(J10-Pad16)" "unconnected-(J10-Pad17)" "unconnected-(J10-Pad18)" "unconnected-(J10-Pad19)"
+    "unconnected-(J10-Pad20)" "Net-(JP9-Pad1)" /bus/E /bus/ST /bus/PHI /bus/~{INT2} /bus/~{INT1} /bus/~{BUSACK}
+    "~{RES_IN}" /bus/CLK /bus/CRUOUT /bus/~{INT0} /bus/CRUIN /bus/~{NMI} "~{RES_OUT}" /bus/USER8
+    /bus/~{BUSRQ} /bus/USER7 /bus/~{WAIT} /bus/USER6 /bus/~{HALT} /bus/USER5 /bus/~{RFSH} /bus/USER4
+    /bus/~{EIRQ7} /bus/USER3 /bus/~{EIRQ6} /bus/USER2 /bus/~{EIRQ5} /bus/USER1 /bus/~{EIRQ4} /bus/USER0
+    /bus/~{EIRQ3} /bus/~{EIRQ2} /bus/~{EIRQ1} /bus/~{EIRQ0} "/bus/I2C_RX" "/bus/I2C_TX" /bus/A31 /bus/A30
+    /bus/A29 /bus/A28 /bus/A27 /bus/A26 /bus/A25 /bus/A24 /bus/A23 /bus/A22
+    /bus/IC3 /bus/~{TEND1} /bus/IC2 /bus/~{DREQ1} /bus/IC1 /bus/~{TEND0} /bus/IC0 /bus/~{DREQ0}
+    /bus/AUXCLK1 /bus/AUXCLK0 /bus/D15 /bus/D31 /bus/D14 /bus/D30 /bus/D13 /bus/D29
+    /bus/D12 /bus/D28 /bus/D11 /bus/D27 /bus/D10 /bus/D26 /bus/D9 /bus/D25
+    /bus/D8 /bus/D24 /bus/D23 /bus/D22 /bus/D21 /bus/D20 /bus/D19 /bus/D18
+    /bus/D17 /bus/D16 /bus/~{BUSERR} /bus/UDS /bus/~{VPA} /bus/LDS /bus/~{VMA} /bus/S2
+    /bus/~{BHE} /bus/S1 /bus/IPL2 /bus/S0 /bus/IPL1 /bus/AUXCLK3 /bus/IPL0 /bus/AUXCLK2
+    "unconnected-(U8-Pad3)" "unconnected-(U8-Pad5)" "unconnected-(U8-Pad15)" "unconnected-(U8-Pad17)" "unconnected-(U9-Pad1)" "unconnected-(U9-Pad2)" "unconnected-(U9-Pad3)" "unconnected-(U9-Pad4)"
+    "unconnected-(U9-Pad5)" "unconnected-(U9-Pad6)" "unconnected-(U9-Pad7)" "unconnected-(U9-Pad8)" "unconnected-(U9-Pad9)" "unconnected-(U9-Pad10)" "unconnected-(U9-Pad11)" "unconnected-(U9-Pad13)"
+    "unconnected-(U9-Pad14)" "unconnected-(U9-Pad15)" "unconnected-(U9-Pad16)" "unconnected-(U9-Pad17)" "unconnected-(U9-Pad18)" "unconnected-(U9-Pad19)" "unconnected-(U9-Pad20)" "unconnected-(U9-Pad21)"
+    "unconnected-(U9-Pad22)" "unconnected-(U9-Pad23)" "unconnected-(U16-Pad3)" "unconnected-(U16-Pad4)" "unconnected-(U16-Pad5)" "unconnected-(U16-Pad6)" "unconnected-(U16-Pad8)" "unconnected-(U16-Pad9)"
+    "unconnected-(U16-Pad12)" "unconnected-(U16-Pad13)" "unconnected-(U17-Pad4)" "unconnected-(U17-Pad6)" "unconnected-(U17-Pad14)" "unconnected-(U17-Pad16)" "unconnected-(U28-Pad1)" "unconnected-(U28-Pad2)"
+    "unconnected-(U28-Pad5)" "unconnected-(U28-Pad6)" "unconnected-(U28-Pad8)" "unconnected-(U28-Pad9)" "unconnected-(U28-Pad10)" "unconnected-(U28-Pad11)" "unconnected-(U29-Pad1)" "unconnected-(U29-Pad10)"
+    "unconnected-(U29-Pad11)" "unconnected-(U29-Pad13)" "unconnected-(U29-Pad14)" "unconnected-(U29-Pad15)" "unconnected-(U29-Pad16)" "unconnected-(U29-Pad17)" "unconnected-(U29-Pad18)" "Net-(J1-Pad2)"
+    "Net-(R1-Pad1)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC /battery/V2032 "VCC_SRAM0" VBAT2 VBAT1 "VCC_SRAM1" /RTC/VBAT
+    "-12V" +12V "VCC_SRAM2" "VCC_SRAM3"
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
