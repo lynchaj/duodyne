@@ -1,6 +1,6 @@
 Name     DMA-CS-GAL.tru ;
 PartNo   00 ;
-Date     23.03.2023 ;
+Date     23.04.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -32,13 +32,13 @@ PIN 19 = BUSxEN;
 PIN 18 = DATAxXFER;
 PIN 17 = IOxSEL;
 PIN 16 = CSxMAP;
-PIN 15 = CSxEXP;
+PIN 15 = CSxUART;
 
 /* combinatorial logic */
 BUSxEN = !CPUxBUSACK;
 CExDMAxRDY = !CPUxA0 # !CPUxA1 # DMAxADDR;
-CSxEXP = !CPUxA3 # CSxIO;
 CSxMAP = CPUxA3 # CSxIO;
+CSxUART = !CPUxA3 # CSxIO;
 DATAxXFER = BUSRQ # CPUxBUSACK # (DMAxINTxPULSE1 & DMAxINTxPULSE2);
 DMAxCS1 = (CPUxA0 & BUSRQ) # (CPUxA1 & BUSRQ) # (!BUSRQ & CPUxWAIT) # (BUSRQ & DMAxADDR) # CPUxBUSACK;
 DMAxCS2 = (!CPUxA0 & BUSRQ) # (CPUxA1 & BUSRQ) # (!BUSRQ & CPUxWAIT) # (BUSRQ & DMAxADDR) # CPUxBUSACK;
