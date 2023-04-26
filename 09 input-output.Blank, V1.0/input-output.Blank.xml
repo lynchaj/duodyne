@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>C:\Users\Andrew\Desktop\System CD Updates\data\duodyne\GitHub\09 input-output.Blank, V1.0\input-output.Blank.kicad_sch</source>
-    <date>4/2/2023 3:09:46 PM</date>
+    <date>4/26/2023 1:39:46 PM</date>
     <tool>Eeschema (6.0.11)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -168,6 +168,24 @@
     </sheet>
   </design>
   <components>
+    <comp ref="H3">
+      <value>MountingHole</value>
+      <footprint>MountingHole:MountingHole_2.1mm</footprint>
+      <libsource lib="Mechanical" part="MountingHole" description="Mounting Hole without connection"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="input-output.Blank.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>945fe4ac-0bd1-4afe-8b49-11d3866c3e65</tstamps>
+    </comp>
+    <comp ref="H4">
+      <value>MountingHole</value>
+      <footprint>MountingHole:MountingHole_2.1mm</footprint>
+      <libsource lib="Mechanical" part="MountingHole" description="Mounting Hole without connection"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="input-output.Blank.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e91e0f21-4c03-4a19-a412-3dc40cc026af</tstamps>
+    </comp>
     <comp ref="J1">
       <value>DIL14</value>
       <footprint>Package_DIP:DIP-14_W7.62mm</footprint>
@@ -221,6 +239,15 @@
       <property name="Sheetfile" value="input-output.Blank.kicad_sch"/>
       <sheetpath names="/" tstamps="/"/>
       <tstamps>00000000-0000-0000-0000-0000682d249f</tstamps>
+    </comp>
+    <comp ref="U12">
+      <value>GAL16V8</value>
+      <footprint>Package_DIP:DIP-20_W7.62mm</footprint>
+      <libsource lib="Logic_Programmable" part="GAL16V8" description="Programmable Logic Array, DIP-20/SOIC-20/PLCC-20"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="input-output.Blank.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>bf03fa4c-68b6-4091-94aa-256a9e749dcd</tstamps>
     </comp>
     <comp ref="P1">
       <value>CONN_02X25</value>
@@ -654,15 +681,6 @@
       <property name="Sheetfile" value="GAL.kicad_sch"/>
       <sheetpath names="/GAL/" tstamps="/00000000-0000-0000-0000-00006409a2cc/"/>
       <tstamps>a3172629-8ddd-4be5-9241-37985e8aebd3</tstamps>
-    </comp>
-    <comp ref="U12">
-      <value>GAL16V8</value>
-      <footprint>Package_DIP:DIP-20_W7.62mm</footprint>
-      <libsource lib="Logic_Programmable" part="GAL16V8" description="Programmable Logic Array, DIP-20/SOIC-20/PLCC-20"/>
-      <property name="Sheetname" value="GAL"/>
-      <property name="Sheetfile" value="GAL.kicad_sch"/>
-      <sheetpath names="/GAL/" tstamps="/00000000-0000-0000-0000-00006409a2cc/"/>
-      <tstamps>00000000-0000-0000-0000-00006416080c</tstamps>
     </comp>
     <comp ref="J9">
       <value>RESET SEL</value>
@@ -1144,6 +1162,18 @@
         <pin num="20" name="VCC" type="power_in"/>
       </pins>
     </libpart>
+    <libpart lib="Mechanical" part="MountingHole">
+      <description>Mounting Hole without connection</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>MountingHole*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">H</field>
+        <field name="Value">MountingHole</field>
+        <field name="Datasheet">~</field>
+      </fields>
+    </libpart>
     <libpart lib="Mechanical" part="MountingHole_Pad">
       <description>Mounting Hole with connection</description>
       <docs>~</docs>
@@ -1382,10 +1412,10 @@
     <net code="60" name="/bus/E">
       <node ref="P1" pin="4" pinfunction="Pin_4" pintype="passive+no_connect"/>
     </net>
-    <net code="61" name="/bus/I2C_RX">
+    <net code="61" name="/bus/I2C_SCL">
       <node ref="P1" pin="47" pinfunction="Pin_47" pintype="passive+no_connect"/>
     </net>
-    <net code="62" name="/bus/I2C_TX">
+    <net code="62" name="/bus/I2C_SDA">
       <node ref="P1" pin="48" pinfunction="Pin_48" pintype="passive+no_connect"/>
     </net>
     <net code="63" name="/bus/IC0">
