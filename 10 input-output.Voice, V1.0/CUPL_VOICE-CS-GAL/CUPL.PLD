@@ -1,6 +1,6 @@
 Name     VOICE-CS-GAL.tru ;
 PartNo   00 ;
-Date     06.04.2023 ;
+Date     26.04.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -23,11 +23,13 @@ PIN 19 = CSxTTS1;
 PIN 16 = CSxSN1;
 PIN 15 = CSxSN2;
 PIN 14 = CSxTTS;
-PIN 13 = A15;
+PIN 12 = A15;
+PIN 13 = CSxADCxWR;
 
 /* combinatorial logic */
 A15 = !A15xTTS;
 CSxADC = bA0 # !bA1 # bA2 # BRDxSEL;
+CSxADCxWR = bA0 # !bA1 # bA2 # BRDxSEL # bWR;
 CSxDACxWR = !bA0 # !bA1 # bA2 # BRDxSEL # bWR;
 CSxSN1 = bA0 # !bA1 # !bA2 # BRDxSEL;
 CSxSN2 = !bA0 # !bA1 # !bA2 # BRDxSEL;
