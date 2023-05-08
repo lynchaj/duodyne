@@ -1,0 +1,26 @@
+Name     GDC-MISC-GAL.tru ;
+PartNo   00 ;
+Date     07.05.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 4 = 2xWCLK;
+PIN 3 = ALE2;
+PIN 2 = DBINxGDC;
+PIN 5 = HSYNC;
+PIN 6 = VSYNC;
+
+/* outputs */
+PIN 18 = READxVRAM;
+PIN 19 = DBIN;
+PIN 17 = HVSYNC;
+
+/* combinatorial logic */
+DBIN = DBINxGDC;
+HVSYNC = HSYNC & VSYNC;
+READxVRAM = (2xWCLK & DBINxGDC) # (ALE2 & DBINxGDC);

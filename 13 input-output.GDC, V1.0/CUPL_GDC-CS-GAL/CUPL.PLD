@@ -1,0 +1,48 @@
+Name     GDC-CS-GAL.tru ;
+PartNo   00 ;
+Date     07.05.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 9 = 2xWCLK;
+PIN 8 = ALE2;
+PIN 4 = CSxBRD;
+PIN 7 = DBINxGDC;
+PIN 10 = HSYNC;
+PIN 11 = VSYNC;
+PIN 5 = bA2;
+PIN 6 = bA3;
+PIN 2 = bRD;
+PIN 3 = bWR;
+
+/* outputs */
+PIN 23 = CSxGDCxRD;
+PIN 22 = CSxGDCxWR;
+PIN 21 = CSxLATCH;
+PIN 20 = CSxRAMDACxWR;
+PIN 19 = CSxRAMDACxRD;
+PIN 18 = CSxRAMDAC;
+PIN 17 = CSxGDC;
+PIN 15 = READxVRAM;
+PIN 16 = DBIN;
+PIN 14 = HVSYNC;
+
+/* combinatorial logic */
+CSxGDC = bA2 # bA3 # CSxBRD;
+CSxGDCxRD = bA2 # bA3 # CSxBRD # bRD;
+CSxGDCxWR = bA2 # bA3 # CSxBRD # bWR;
+CSxLATCH = !bA2 # bA3 # CSxBRD;
+CSxRAMDAC = !bA3 # CSxBRD;
+CSxRAMDACxRD = !bA3 # CSxBRD # bRD;
+CSxRAMDACxWR = !bA3 # CSxBRD # bWR;
+DBIN = DBINxGDC;
+HVSYNC = HSYNC & VSYNC;
+READxVRAM = (2xWCLK & DBINxGDC) # (ALE2 & DBINxGDC);
