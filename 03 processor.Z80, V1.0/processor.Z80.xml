@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>C:\Users\Andrew\Desktop\System CD Updates\data\duodyne\GitHub\03 processor.Z80, V1.0\processor.Z80.kicad_sch</source>
-    <date>4/25/2023 6:01:05 PM</date>
+    <date>5/17/2023 12:17:00 PM</date>
     <tool>Eeschema (6.0.11)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -206,7 +206,7 @@
   <components>
     <comp ref="H3">
       <value>MountingHole</value>
-      <footprint>MountingHole:MountingHole_2.1mm</footprint>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad</footprint>
       <libsource lib="Mechanical" part="MountingHole" description="Mounting Hole without connection"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="processor.Z80.kicad_sch"/>
@@ -215,7 +215,7 @@
     </comp>
     <comp ref="H4">
       <value>MountingHole</value>
-      <footprint>MountingHole:MountingHole_2.1mm</footprint>
+      <footprint>MountingHole:MountingHole_2.2mm_M2_DIN965_Pad</footprint>
       <libsource lib="Mechanical" part="MountingHole" description="Mounting Hole without connection"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="processor.Z80.kicad_sch"/>
@@ -1031,6 +1031,24 @@
       <property name="Sheetfile" value="buffers.kicad_sch"/>
       <sheetpath names="/buffers/" tstamps="/00000000-0000-0000-0000-00006439f52f/"/>
       <tstamps>00000000-0000-0000-0000-0000645681d6</tstamps>
+    </comp>
+    <comp ref="R8">
+      <value>4700</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="buffers"/>
+      <property name="Sheetfile" value="buffers.kicad_sch"/>
+      <sheetpath names="/buffers/" tstamps="/00000000-0000-0000-0000-00006439f52f/"/>
+      <tstamps>cda254be-631c-4242-9349-f9417b8010a6</tstamps>
+    </comp>
+    <comp ref="R9">
+      <value>4700</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="buffers"/>
+      <property name="Sheetfile" value="buffers.kicad_sch"/>
+      <sheetpath names="/buffers/" tstamps="/00000000-0000-0000-0000-00006439f52f/"/>
+      <tstamps>6f513c68-48d7-452f-9123-7e76e699201b</tstamps>
     </comp>
     <comp ref="R10">
       <value>1800</value>
@@ -3967,6 +3985,8 @@
       <node ref="R5" pin="2" pintype="passive"/>
       <node ref="R6" pin="2" pintype="passive"/>
       <node ref="R7" pin="1" pintype="passive"/>
+      <node ref="R8" pin="1" pintype="passive"/>
+      <node ref="R9" pin="1" pintype="passive"/>
       <node ref="RN1" pin="1" pinfunction="common" pintype="passive"/>
       <node ref="RN2" pin="1" pinfunction="common" pintype="passive"/>
       <node ref="RN3" pin="1" pinfunction="common" pintype="passive"/>
@@ -4989,10 +5009,12 @@
     </net>
     <net code="487" name="~{DREQ0}">
       <node ref="P2" pin="46" pinfunction="Pin_46" pintype="passive"/>
+      <node ref="R8" pin="2" pintype="passive"/>
       <node ref="U37" pin="2" pinfunction="I1" pintype="input"/>
     </net>
     <net code="488" name="~{DREQ1}">
       <node ref="P2" pin="42" pinfunction="Pin_42" pintype="passive"/>
+      <node ref="R9" pin="2" pintype="passive"/>
       <node ref="U37" pin="4" pinfunction="I3" pintype="input"/>
     </net>
     <net code="489" name="~{EIRQ0}">

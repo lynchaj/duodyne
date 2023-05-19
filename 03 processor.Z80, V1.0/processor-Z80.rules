@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 25160)
+    (start_pass_no 46464)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -29,7 +29,6 @@
     (width 250.0)
     (clear 200.0)
     (clear 125.0 (type smd_to_turn_gap))
-    (clear 50.0 (type smd-smd))
   )
   (padstack "Via[0-1]_800:400_um"
     (shape
@@ -44,13 +43,13 @@
     "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-G_PLCC" "Via[0-1]_800:400_um" "G_PLCC"
+    "Via[0-1]_800:400_um-G_PLCC" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" default
   )
   (via_rule
     default "Via[0-1]_800:400_um"
@@ -141,8 +140,8 @@
     )
   )
   (class "kicad_default"
-    (clearance_class "kicad_default")
-    (via_rule "kicad_default")
+    (clearance_class default)
+    (via_rule kicad_default)
     (rule
       (width 250.0)
     )
@@ -152,8 +151,8 @@
   )
   (class "G_PLCC"
     "/DMA/GND-DMA1" "/DMA/GND-DMA2"
-    (clearance_class "G_PLCC")
-    (via_rule "G_PLCC")
+    (clearance_class default)
+    (via_rule G_PLCC)
     (rule
       (width 700.0)
     )
@@ -163,7 +162,7 @@
   )
   (class Power
     GND VCC "-12V" +12V
-    (clearance_class Power)
+    (clearance_class default)
     (via_rule Power)
     (rule
       (width 1000.0)
