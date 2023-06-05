@@ -1,0 +1,43 @@
+Name     VDCENET-CS-GAL.tru ;
+PartNo   00 ;
+Date     29.05.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 10 = CSYNOUT;
+PIN 5 = CSxENET;
+PIN 4 = CSxVDC1;
+PIN 6 = ENETxINT0;
+PIN 8 = HSYNOUT;
+PIN 9 = VSYNOUT;
+PIN 3 = bRD;
+PIN 7 = bRESET1;
+PIN 2 = bWR;
+
+/* outputs */
+PIN 23 = CSxVDC;
+PIN 21 = BUSxEN;
+PIN 20 = ENETxINT01;
+PIN 22 = RD;
+PIN 19 = bRESET;
+PIN 18 = HSYNOUT1;
+PIN 17 = VSYNOUT1;
+PIN 16 = CSYNOUT1;
+
+/* combinatorial logic */
+BUSxEN = CSxENET & CSxVDC1;
+CSYNOUT1 = !CSYNOUT;
+CSxVDC = !bRD # !bWR;
+ENETxINT01 = !ENETxINT0;
+HSYNOUT1 = !HSYNOUT;
+RD = bRD;
+VSYNOUT1 = !VSYNOUT;
+bRESET = !bRESET1;
