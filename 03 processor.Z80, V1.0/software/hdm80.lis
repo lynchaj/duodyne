@@ -1,0 +1,388 @@
+hdm80.asm:
+     1                          ;
+     2                          ; Hardware Debug Monitor for 8080/8085/Z80 processor family
+     3                          ;
+     4                          ; This simple monitor requires NO RAM of any sort. You can use it to
+     5                          ; poke around the system as long as the CPU, a ROM and the UART are
+     6                          ; working. (Hint: if the UART is not working, you can use the polling
+     7                          ; by HDM86 to track down its accessing and debug it).
+     8                          ;
+     9                          ; This monitor provides basic read/modify memory, as well as
+    10                          ; Loop Read/Write functions (useful when hardware debugging).
+    11                          ;
+    12                          ; Commands (must be UPPER-CASE):
+    13                          ;  Mxxxx      - Display memory at specified address
+    14                          ;		Displays one line, enter SPACE for another, RETURN to stop
+    15                          ;  Exxxx      - Edit memory at specified address
+    16                          ;		Prompts with location, enter two digit HEX value, then
+    17                          ;               SPACE to proceed to next or RETURN to stop
+    18                          ;  Gxxxx      - Go (Begin Execution) at specified address
+    19                          ;  Rxxxx      - Perform Loop-Read at specified address (RESET to stop)
+    20                          ;  Wxxxx dd   - Perform Loop-Write dd -> specified address (RESET to stop)
+    21                          ;
+    22                          ; Build with DDS XASM tools:
+    23                          ;	MACRO HDM80.MAC >HDM80.ASM
+    24                          ;	ASM85 HDM80 -t
+    25                          ;
+    26                          ; Dave Dunfield - March 28, 2005
+    27                          ;
+    28                                  ORG     $0000
+    29                          ;	ORG	$F000
+    30                          ;
+    31                          ; Macro to read a character into A
+    32                          ; Modify this macro to perform character input on your hardware.
+    33                          ; No registers other than A may be used.
+    34                          ;
+    35                          ;
+    36                          ; Macro to write character in L
+    37                          ; Modify this macro to perform character output on your hardware
+    38                          ; No registers other than A & L may be used
+    39                          ;
+    40                          ;
+    41                          ; Macro to perform a SUBROUTINE call using one level stack in SP
+    42                          ; Even though HL is destroyed by RET, the use of SP instead of HL
+    43                          ; as the return address holding register allows HL to be used as
+    44                          ; temporary storage within the subroutine.
+    45                          ;
+    46                          ;
+    47                          ; Macro to perform a RETURN to address in SP
+    48                          ; Note: Destroys HL
+    49                          ;
+    50                          ;
+    51                          ; Initialize hardware
+    52                          ;
+    53                          ;UART0           = $58         ; DATA IN/OUT
+    54                          ;UART1           = $59         ; INTERRUPT ENABLE
+    55                          ;UART2           = $5A         ; INTERRUPT IDENTIFICATION/FIFO CONTROL
+    56                          ;UART3           = $5B         ; LINE CONTROL
+    57                          ;UART4           = $5C         ; MODEM CONTROL
+    58                          ;UART5           = $5D         ; LINE STATUS
+    59                          ;UART6           = $5E         ; MODEM STATUS
+    60                          ;UART7           = $5F         ; SCRATCH REG.
+    61                          ;
+    62                          ; MEMORY PAGE CONFIGURATION
+    63                          ;
+    64                                  BANK00  =   $50
+    65                                  BANK40  =   $51
+    66                                  BANK80  =   $52
+    67                                  BANKC0  =   $53
+    68                                  BANK_ENABLE=$54
+    69                          
+    70                          
+    71   000000 3ef0                    MVI     A,$F0
+    72   000002 0ef0                    MVI     C,$F0
+    73                          test:
+    74   000004 0d                      DCR     C
+    75   000005 c20400                  Jnz    test
+    76   000008 3d                      DCR     A
+    77   000009 c20400                  Jnz    test
+    78                          
+    79                          
+    80                          
+    81                          HINIT:
+    82   00000c 3e80                    MVI     A,$80
+    83   00000e d35b                    OUT     $5B             ; SET DLAB FLAG
+    84   000010 3e0c                    MVI     A,12            ; = 1,843,200 / ( 16 x 9600 )
+    85   000012 d358                    OUT     $58             ; Set BAUD rate til 9600
+    86   000014 3e00                    MVI     A,$00
+    87   000016 d359                    OUT     $59             ; Set BAUD rate til 9600
+    88   000018 3e03                    MVI     A,$03
+    89   00001a d35b                    OUT     $5B             ; Set 8 bit data, 1 stopbit
+    90                          
+    91   00001c 3e48                    MVI     A,'H'
+    92   00001e d358                    OUT     $58
+    93                          
+    94                          
+    95                          
+    96                          ;
+    97                          ;   SETUP MEMORY PAGES
+    98                          ;   ROM = 0000-3FFF ROM BANK0
+    99                          ;   RAM = 4000-FFFF RAM BANKS 0,1,2 OR PAGES 20,21,22
+   100                          ;
+   101   000020 3e00                    LD      A,00H           ;
+   102   000022 d350                    OUT     (BANK00),A
+   103   000024 3e80                    LD      A,80H           ;
+   104   000026 d351                    OUT     (BANK40),A
+   105   000028 3e81                    LD      A,81H           ;
+   106   00002a d352                    OUT     (BANK80),A
+   107   00002c 3e82                    LD      A,82H           ;
+   108   00002e d353                    OUT     (BANKC0),A
+   109                          ;   ENABLE PAGER
+   110   000030 3e01                    LD      A,01H           ;
+   111   000032 d354                    OUT     (BANK_ENABLE),A
+   112                          
+   113                          
+   114   000034 3e49                    MVI     A,'I'
+   115   000036 d358                    OUT     $58
+   116                          
+   117                          ;
+   118                          ; Main loop - issue prompt & wait for command
+   119                          ;
+   120                          TOP:
+   121   000038 313e00                  LXI     SP,$+6          ; SP = return address
+   122   00003b c35601                  JMP     LFCR            ; Branch to subroutine
+   123   00003e 2e3e                    MVI     L,'>'           ; Prompt
+   124                          putc2:
+   125   000040 db5d                    IN      $5D             ; Read status
+   126   000042 e620                    ANI     %00100000       ; TX ready?
+   127   000044 ca4000                  JZ      putc2           ; Wait for it
+   128   000047 7d                      MOV     A,L             ; Get data
+   129   000048 d358                    OUT     $58
+   130                          getc3:
+   131   00004a db5d                    IN      $5D             ; Read status
+   132   00004c e601                    ANI     %00000001       ; RX ready?
+   133   00004e ca4a00                  JZ      getc3           ; No, wait
+   134   000051 db58                    IN      $58             ; Read data
+   135   000053 d358                    OUT     $58
+   136                          ;
+   137                          ; Memory dump command
+   138                          ;
+   139   000055 fe4d                    CPI     'M'             ; Memory
+   140   000057 c29900                  JNZ     EDIT            ; No, try next
+   141   00005a 316000                  LXI     SP,$+6          ; SP = return address
+   142   00005d c3bb01                  JMP     GETH            ; Branch to subroutine
+   143   000060 57                      MOV     D,A             ; Set high
+   144   000061 316700                  LXI     SP,$+6          ; SP = return address
+   145   000064 c3bb01                  JMP     GETH            ; Branch to subroutine
+   146   000067 5f                      MOV     E,A             ; Set low
+   147                          MD1:
+   148   000068 316e00                  LXI     SP,$+6          ; SP = return address
+   149   00006b c35601                  JMP     LFCR            ; Branch to subroutine
+   150   00006e 7a                      MOV     A,D             ; Get high address
+   151   00006f 317500                  LXI     SP,$+6          ; SP = return address
+   152   000072 c39001                  JMP     PUTH            ; Branch to subroutine
+   153   000075 7b                      MOV     A,E             ; Get low address
+   154   000076 317c00                  LXI     SP,$+6          ; SP = return address
+   155   000079 c39001                  JMP     PUTH            ; Branch to subroutine
+   156   00007c 0e10                    MVI     C,16            ; Display 16 bytes
+   157                          MD2:
+   158   00007e 318400                  LXI     SP,$+6          ; SP = return address
+   159   000081 c38b01                  JMP     SPACE           ; Branch to subroutine
+   160   000084 1a                      LDAX    D               ; Get data from memory
+   161   000085 13                      INX     D               ; Advance to next
+   162   000086 318c00                  LXI     SP,$+6          ; SP = return address
+   163   000089 c39001                  JMP     PUTH            ; Branch to subroutine
+   164   00008c 0d                      DCR     C               ; Reduce count
+   165   00008d c27e00                  JNZ     MD2             ; Display them all
+   166   000090 319600                  LXI     SP,$+6          ; SP = return address
+   167   000093 c37301                  JMP     PAUSE           ; Branch to subroutine
+   168   000096 c36800                  JMP     MD1             ; And proceed
+   169                          ; Substitute command
+   170                          EDIT:
+   171   000099 fe45                    CPI     'E'             ; Edit
+   172   00009b c2ea00                  JNZ     go              ; No, try next
+   173   00009e 31a400                  LXI     SP,$+6          ; SP = return address
+   174   0000a1 c3bb01                  JMP     GETH            ; Branch to subroutine
+   175   0000a4 57                      MOV     D,A             ; Set high address
+   176   0000a5 31ab00                  LXI     SP,$+6          ; SP = return address
+   177   0000a8 c3bb01                  JMP     GETH            ; Branch to subroutine
+   178   0000ab 5f                      MOV     E,A             ; Set low address
+   179                          edi1:
+   180   0000ac 31b200                  LXI     SP,$+6          ; SP = return address
+   181   0000af c35601                  JMP     LFCR            ; Branch to subroutine
+   182   0000b2 7a                      MOV     A,D             ; Get high address
+   183   0000b3 31b900                  LXI     SP,$+6          ; SP = return address
+   184   0000b6 c39001                  JMP     PUTH            ; Branch to subroutine
+   185   0000b9 7b                      MOV     A,E             ; Get low address
+   186   0000ba 31c000                  LXI     SP,$+6          ; SP = return address
+   187   0000bd c39001                  JMP     PUTH            ; Branch to subroutine
+   188   0000c0 31c600                  LXI     SP,$+6          ; SP = return address
+   189   0000c3 c38b01                  JMP     SPACE           ; Branch to subroutine
+   190   0000c6 1a                      LDAX    D               ; Get data
+   191   0000c7 31cd00                  LXI     SP,$+6          ; SP = return address
+   192   0000ca c39001                  JMP     PUTH            ; Branch to subroutine
+   193   0000cd 2e3d                    MVI     L,'='           ; Prompt
+   194                          putc19:
+   195   0000cf db5d                    IN      $5D             ; Read status
+   196   0000d1 e620                    ANI     %00100000       ; TX ready?
+   197   0000d3 cacf00                  JZ      putc19          ; Wait for it
+   198   0000d6 7d                      MOV     A,L             ; Get data
+   199   0000d7 d358                    OUT     $58
+   200   0000d9 31df00                  LXI     SP,$+6          ; SP = return address
+   201   0000dc c3bb01                  JMP     GETH            ; Branch to subroutine
+   202   0000df 12                      STAX    D               ; Store it
+   203   0000e0 13                      INX     D               ; Next
+   204   0000e1 31e700                  LXI     SP,$+6          ; SP = return address
+   205   0000e4 c37301                  JMP     PAUSE           ; Branch to subroutine
+   206   0000e7 c3ac00                  JMP     edi1            ; And get next
+   207                          ; Go (execute)
+   208                          go:
+   209   0000ea fe47                    CPI     'G'             ; Go?
+   210   0000ec c2ff00                  JNZ     lread           ; No, try next
+   211   0000ef 31f500                  LXI     SP,$+6          ; SP = return address
+   212   0000f2 c3bb01                  JMP     GETH            ; Branch to subroutine
+   213   0000f5 57                      MOV     D,A             ; Set high address
+   214   0000f6 31fc00                  LXI     SP,$+6          ; SP = return address
+   215   0000f9 c3bb01                  JMP     GETH            ; Branch to subroutine
+   216   0000fc 5f                      MOV     E,A             ; Set low address
+   217   0000fd eb                      XCHG                    ; HL = address
+   218   0000fe e9                      PCHL                    ; PC = address
+   219                          ; Loop read
+   220                          lread:
+   221   0000ff fe52                    CPI     'R'             ; Read (loop)?
+   222   000101 c21c01                  JNZ     lwrite          ; No, try next
+   223   000104 310a01                  LXI     SP,$+6          ; SP = return address
+   224   000107 c3bb01                  JMP     GETH            ; Branch to subroutine
+   225   00010a 57                      MOV     D,A             ; Set high address
+   226   00010b 311101                  LXI     SP,$+6          ; SP = return address
+   227   00010e c3bb01                  JMP     GETH            ; Branch to subroutine
+   228   000111 5f                      MOV     E,A             ; Set low address
+   229   000112 311801                  LXI     SP,$+6          ; SP = return address
+   230   000115 c35601                  JMP     LFCR            ; Branch to subroutine
+   231                          lr1:
+   232   000118 1a                      LDAX    D               ; Read the data
+   233   000119 c31801                  JMP     lr1             ; And continue (forever)
+   234                          ; Loop write
+   235                          lwrite:
+   236   00011c fe57                    CPI     'W'             ; Write (loop)?
+   237   00011e c24701                  JNZ     error           ; No, try next
+   238   000121 312701                  LXI     SP,$+6          ; SP = return address
+   239   000124 c3bb01                  JMP     GETH            ; Branch to subroutine
+   240   000127 57                      MOV     D,A             ; Set high address
+   241   000128 312e01                  LXI     SP,$+6          ; SP = return address
+   242   00012b c3bb01                  JMP     GETH            ; Branch to subroutine
+   243   00012e 5f                      MOV     E,A             ; Set low address
+   244   00012f 313501                  LXI     SP,$+6          ; SP = return address
+   245   000132 c38b01                  JMP     SPACE           ; Branch to subroutine
+   246   000135 313b01                  LXI     SP,$+6          ; SP = return address
+   247   000138 c3bb01                  JMP     GETH            ; Branch to subroutine
+   248   00013b 47                      MOV     B,A             ; Save
+   249   00013c 314201                  LXI     SP,$+6          ; SP = return address
+   250   00013f c35601                  JMP     LFCR            ; Branch to subroutine
+   251   000142 78                      MOV     A,B             ; Restore data
+   252                          lw1:
+   253   000143 12                      STAX    D               ; Write
+   254   000144 c34301                  JMP     lw1             ; And continue (forever)
+   255                          ;
+   256                          ; Error has occured - issue indicator and wait next command
+   257                          ;
+   258                          error:
+   259                          ERROR:
+   260   000147 2e3f                    MVI     L,'?'           ; Error indicator
+   261                          putc32:
+   262   000149 db5d                    IN      $5D             ; Read status
+   263   00014b e620                    ANI     %00100000       ; TX ready?
+   264   00014d ca4901                  JZ      putc32          ; Wait for it
+   265   000150 7d                      MOV     A,L             ; Get data
+   266   000151 d358                    OUT     $58
+   267   000153 c33800                  JMP     TOP             ; New command
+   268                          ;
+   269                          ; Output LFCR
+   270                          ;
+   271                          LFCR:
+   272   000156 2e0a                    MVI     L,$0A           ; Line-feed
+   273                          putc33:
+   274   000158 db5d                    IN      $5D             ; Read status
+   275   00015a e620                    ANI     %00100000       ; TX ready?
+   276   00015c ca5801                  JZ      putc33          ; Wait for it
+   277   00015f 7d                      MOV     A,L             ; Get data
+   278   000160 d358                    OUT     $58
+   279   000162 2e0d                    MVI     L,$0D           ; Carriage-return
+   280                          XOUT:           EQU $           ; LABLE ADDRESS
+   281                          putc34:
+   282   000164 db5d                    IN      $5D             ; Read status
+   283   000166 e620                    ANI     %00100000       ; TX ready?
+   284   000168 ca6401                  JZ      putc34          ; Wait for it
+   285   00016b 7d                      MOV     A,L             ; Get data
+   286   00016c d358                    OUT     $58
+   287                          XRET:
+   288   00016e 210000                  LXI     H,0             ; Get zero
+   289   000171 39                      DAD     SP              ; Get address from SP
+   290   000172 e9                      PCHL                    ; PC = return address
+   291                          ;
+   292                          ; Wait for key SPACE=proceed, RETURN=end command
+   293                          ;
+   294                          PAUSE:          EQU $           ; LABLE ADDRESS
+   295                          getc36:
+   296   000173 db5d                    IN      $5D             ; Read status
+   297   000175 e601                    ANI     %00000001       ; RX ready?
+   298   000177 ca7301                  JZ      getc36          ; No, wait
+   299   00017a db58                    IN      $58             ; Read data
+   300   00017c d358                    OUT     $58
+   301   00017e fe0d                    CPI     $0D             ; End?
+   302   000180 ca3800                  JZ      TOP             ; Yes - exit
+   303   000183 fe20                    CPI     ' '             ; Continue?
+   304   000185 c27301                  JNZ     PAUSE           ; Wait for it
+   305   000188 c36e01                  JMP     XRET
+   306                          ;
+   307                          ; Output a space
+   308                          ;
+   309                          SPACE:
+   310   00018b 2e20                    MVI     L,' '           ; Get space
+   311   00018d c36401                  JMP     XOUT            ; Output & return
+   312                          ;
+   313                          ; Output A in HEX
+   314                          ;
+   315                          PUTH:
+   316   000190 67                      MOV     H,A             ; Save for later
+   317   000191 0f                      RRC                     ; Shift
+   318   000192 0f                      RRC                     ; High
+   319   000193 0f                      RRC                     ; Into
+   320   000194 0f                      RRC                     ; Low
+   321   000195 e60f                    ANI     %00001111       ; Save only LOW
+   322   000197 fe0a                    CPI     10              ; In range?
+   323   000199 da9e01                  JC      puth1           ; Yes, no adjust
+   324   00019c c607                    ADI     7               ; Adjust for alpha
+   325                          puth1:
+   326   00019e c630                    ADI     '0'             ; Convert to ASCII
+   327   0001a0 6f                      MOV     L,A             ; Set output
+   328                          putc37:
+   329   0001a1 db5d                    IN      $5D             ; Read status
+   330   0001a3 e620                    ANI     %00100000       ; TX ready?
+   331   0001a5 caa101                  JZ      putc37          ; Wait for it
+   332   0001a8 7d                      MOV     A,L             ; Get data
+   333   0001a9 d358                    OUT     $58
+   334   0001ab 7c                      MOV     A,H             ; Get data
+   335   0001ac e60f                    ANI     %00001111       ; Save only LOW
+   336   0001ae fe0a                    CPI     10              ; In range?
+   337   0001b0 dab501                  JC      puth2           ; Yes, no adjust
+   338   0001b3 c607                    ADI     7               ; Adjust for alpha
+   339                          puth2:
+   340   0001b5 c630                    ADI     '0'             ; Convert to ASCII
+   341   0001b7 6f                      MOV     L,A             ; Set output
+   342   0001b8 c36401                  JMP     XOUT            ; Output & return
+   343                          ;
+   344                          ; Get HEX character in A
+   345                          ;
+   346                          GETH:           EQU $           ; LABLE ADDRESS
+   347                          getc38:
+   348   0001bb db5d                    IN      $5D             ; Read status
+   349   0001bd e601                    ANI     %00000001       ; RX ready?
+   350   0001bf cabb01                  JZ      getc38          ; No, wait
+   351   0001c2 db58                    IN      $58             ; Read data
+   352   0001c4 d358                    OUT     $58
+   353   0001c6 d630                    SUI     '0'             ; Convert
+   354   0001c8 da4701                  JC      ERROR           ;
+   355   0001cb fe0a                    CPI     10              ; In range?
+   356   0001cd dadc01                  JC      geth1           ; It's ok
+   357   0001d0 d607                    SUI     7               ; Additional convert
+   358   0001d2 fe0a                    CPI     10              ; In range?
+   359   0001d4 da4701                  JC      error           ; No - error
+   360   0001d7 fe10                    CPI     16              ; In range?
+   361   0001d9 d24701                  JNC     error           ; No error
+   362                          geth1:
+   363   0001dc 07                      RLC                     ; Shift over
+   364   0001dd 07                      RLC                     ; Shift over
+   365   0001de 07                      RLC                     ; Shift over
+   366   0001df 07                      RLC                     ; Shift over
+   367   0001e0 e6f0                    ANI     %11110000       ; Keep only top
+   368   0001e2 6f                      MOV     L,A             ; Save for later
+   369                          getc39:
+   370   0001e3 db5d                    IN      $5D             ; Read status
+   371   0001e5 e601                    ANI     %00000001       ; RX ready?
+   372   0001e7 cae301                  JZ      getc39          ; No, wait
+   373   0001ea db58                    IN      $58             ; Read data
+   374   0001ec d358                    OUT     $58
+   375   0001ee d630                    SUI     '0'             ; Convert
+   376   0001f0 da4701                  JC      ERROR           ;
+   377   0001f3 fe0a                    CPI     10              ; In range?
+   378   0001f5 da0402                  JC      geth2           ; It's ok
+   379   0001f8 d607                    SUI     7               ; Additional convert
+   380   0001fa fe0a                    CPI     10              ; In range?
+   381   0001fc da4701                  JC      error           ; No - error
+   382   0001ff fe10                    CPI     16              ; In range?
+   383   000201 d24701                  JNC     error           ; No error
+   384                          geth2:
+   385   000204 b5                      ORA     L               ; Include high nibble
+   386   000205 c36e01                  JMP     XRET
+   387                          
