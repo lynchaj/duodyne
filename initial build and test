@@ -1,17 +1,26 @@
 duodyne initial build and test findings
 
 4-slot backplane power LED much too bright
+4-slot backplane power connectors too close to processor slot
+
 ROMRAM memory configuration jumpers flipped on PCB
-Z80 processor convert 74HCT244 symbols to 74LS244
-Z80 processor RUN and HALT labels reversed
-Z80 processor change D0-D3 to D4-D7 on U22 74LS670
-Z80 processor R8 & R9 missing value labels
-4-slot backplane power connectors to close to slot
-Z80 processor U6 reversed on back silkscreen
-Z80 processor replace reset circuit with DS1233 (EconoReset)
-Z80 processor update CPU-MAPPER GAL for I2C read and write fixes
-All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
 ROMRAM order the I2C jumper blocks the same as the I2C sockets -- would be even better if they could be made proximate
-Z80 processor requires updated U25 CPU-MAPPER GAL for I2C to function *and* U25 pins 13 and 14 connected
-ROMRAM add byoass capacitors to the 24LC512 I2C memories
+ROMRAM add bypass capacitors to the 24LC512 I2C memories
 ROMRAM replace labels on J32-J35 with better descriptions
+ROMRAM label DS1210s to match SRAMs
+
+Z80 processor LEDs way too bright
+Z80 processor replace reset circuit with DS1233 (EconoReset) (fixed 1.1)
+Z80 processor remove spare debugging sockets, GAL, & portal holes (fixed 1.1)
+Z80 processor convert 74HCT244 symbols to 74LS244 (fixed 1.1)
+Z80 processor RUN and HALT labels reversed (fixed 1.1)
+Z80 processor change D0-D3 to D4-D7 on U22 74LS670 (fixed 1.1)
+Z80 processor R8 & R9 missing value labels (fixed 1.1)
+Z80 processor U6 reversed on back silkscreen (fixed 1.1)
+Z80 processor update CPU-MAPPER GAL for I2C read and write fixes (fixed 1.1)
+Z80 processor requires updated U25 CPU-MAPPER GAL for I2C to function *and* U25 pins 13 and 14 connected (fixed 1.1)
+Z80 processor DMA D5 and D6 swapped in KiCAD symbol library (fixed 1.1)
+Z80 processor J3 and J4 should be labelled 1-8 not 0-7 (fixed 1.1)
+Z80 processor DMA CS GAL22V10 needs inverter on ~CPU-BUSACK for DMA-CS1 and DMA-CS2 (fixed 1.1)
+
+All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
