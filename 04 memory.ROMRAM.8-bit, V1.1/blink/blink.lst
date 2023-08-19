@@ -1,0 +1,39 @@
+0001   0000             ;
+0002   0000             ; Duodyne basic operation test.
+0003   0000             ; Produces alternating blinking lights on ROMRAM card user LEDs
+0004   0000             ; and runs forever.
+0005   0000             ;
+0006   0000             ; Build with TASM using command line like:
+0007   0000             ;   tasm -t80 -g3 -fFF blink.asm blink.rom blink.lst
+0008   0000             ;
+0009   0000             	.org	$0000
+0010   0000             ;
+0011   0000 F3          	di
+0012   0001             ;
+0013   0001 1E 01       	ld	e,$01		; starting value for rtc latch
+0014   0003             ;
+0015   0003             loop:
+0016   0003             	; program the rtc latch
+0017   0003 7B          	ld	a,e		; get latch value
+0018   0004 D3 94       	out	($94),a		; write to rtc port
+0019   0006             ;
+0020   0006             	; wait a while
+0021   0006 01 00 00    	ld	bc,0
+0022   0009             wait1:
+0023   0009 0B          	dec	bc
+0024   000A 78          	ld	a,b
+0025   000B B1          	or	c
+0026   000C 20 FB       	jr	nz,wait1
+0027   000E             ;
+0028   000E             	; flip latch bits
+0029   000E 7B          	ld	a,e		; cur latch value to A
+0030   000F EE 03       	xor	$03		; invert bits
+0031   0011 5F          	ld	e,a		; save back in E
+0032   0012             ;
+0033   0012             	; loop a very long time...
+0034   0012 18 EF       	jr	loop
+0035   0014             ;
+0036   0014 76          	halt
+0037   0015             ;
+0038   0015             	.end
+0039   0015             	tasm: Number of errors = 0
