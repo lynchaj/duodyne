@@ -7,8 +7,8 @@ esptest.com: esptest.asm
 	@rm esptest.bin
 	@rm esptest.o
 
-testesp.com: testesp.c
-	zcc +cpm testesp.c -create-app -o testesp
+testesp.com: testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c
+	zcc +cpm testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c -create-app -o testesp --list
 
 pretty:
 	cp *.asm ./backup
