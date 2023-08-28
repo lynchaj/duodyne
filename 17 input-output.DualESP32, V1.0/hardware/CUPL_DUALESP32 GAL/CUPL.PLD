@@ -1,0 +1,30 @@
+Name     DUALESP32 GAL.tru ;
+PartNo   00 ;
+Date     28.08.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 2 = CSxESP;
+PIN 5 = bA0;
+PIN 6 = bA1;
+PIN 3 = bRD;
+PIN 4 = bWR;
+
+/* outputs */
+PIN 19 = PRExESP0xRD;
+PIN 18 = PRExESP1xRD;
+PIN 17 = PRExESP0xWR;
+PIN 16 = PRExESP1xWR;
+PIN 15 = ESPxSTAT;
+
+/* combinatorial logic */
+ESPxSTAT = !bA1 # CSxESP # bRD;
+PRExESP0xRD = bA0 # bA1 # CSxESP # bRD;
+PRExESP0xWR = bA0 # bA1 # CSxESP # bWR;
+PRExESP1xRD = !bA0 # bA1 # CSxESP # bRD;
+PRExESP1xWR = !bA0 # bA1 # CSxESP # bWR;
