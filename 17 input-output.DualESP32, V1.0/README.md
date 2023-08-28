@@ -40,11 +40,11 @@ Qty|Reference(s)|Value|Notes
 3|R12, R14, R16|400ohm| Used for VGA voltage divider, precise value not required 
 3|R13, R15, R17|800ohm| Used for VGA voltage divider, precise value not required 
 2|R18, R19|0ohm
-1|RN1|1Kohm, networked, 7 pin, 6 resistor
+1|RN1|1Kohm, networked, 9 pin, 8 resistor
 1|RN2|10Kohm, networked, 9 pin, 8 resistor
 1|U1|74LS04
 3|U2, U4, U5|74LS32
-1|U3|74LS07
+2|U3, U17|74LS07
 2|U6, U8|74HC595
 2|U7, U9|74HC165
 3|U10, U13, U15|74LS244
@@ -1356,6 +1356,7 @@ Returns: 8 bytes
 
 ### TO DO
 * Improve formatting of README file
-* re-organize testesp.c
+* Complete espconf program
 * add better status messages to testesp.c
+* add API for getting the MAC address
 

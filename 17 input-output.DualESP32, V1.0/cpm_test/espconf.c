@@ -23,26 +23,41 @@ menu_page1()
     printf("\e[2J\e[0m\e[H");
     printcentered("Nhyodyne ESP32 IO board test");
     puts(" ");
-    printmenu('1',"Output single char to VGA",'H',"Set Resolution");
 
-    printmenu('2',"Output 100 single chars to VGA",'I',"Load Font");
-    printmenu('3',"Output string to VGA",'J',"Copy Rectangle");
-    printmenu('4',"Get Keystroke",'K',"Draw Bitmap");
-    printmenu('5',"Get Key Buffer Length",'L',"Draw Char");
-    printmenu('6',"Set Cursor visibility",'M',"Draw Ellipse");
-    printmenu(NULL,NULL,'N',"Draw Glyph");
-    printmenu('7',"Set serial baud rate",'O',"Draw Line");
-    printmenu('8',"Set serial mode",'P',"Draw Rectangle");
-    printmenu('9',"Serial TX single char",'Q',"Fill Ellipse");
-    printmenu('A',"Serial TX string",'R',"Fill Rectangle");
-    printmenu('B',"Serial RX",'S',"Get Pixel");
-    printmenu('C',"Serial Buffer Length",'T',"Invert Rectangle");
-    printmenu(NULL,NULL,'U',"Draw Line To");
-    printmenu('D',"Play String",'V',"Move Cursor To");
-    printmenu('E',"Play Sound",'W',"Scroll");
-    printmenu('F',"Set Volume",'X',"Set Brush Color");
-    printmenu('G',"Clear Screen",'Y',"\e[1mMenu Page TWO\e[0m");
+    printmenu('H',"Set Display Resolution",NULL,NULL);
+    printmenu('I',"Set Terminal Font",NULL,NULL);
+
+    printmenu('7',"Set serial 0 baud rate",NULL,NULL);
+    printmenu('8',"Set serial 0 mode",NULL,NULL);
+    printmenu('D',"Set Serial 1 baud rate",NULL,NULL);
+    printmenu('E',"Set Serial 1 mode",NULL,NULL);
+
+    printmenu('F',"Set Audio Master Volume",NULL,NULL);
+
     printmenu('Z',"\e[1mExit Program\e[0m",NULL,NULL);
+
+    puts(" ");
+    printmenu('1',"Set Hostname",NULL,NULL);
+    printmenu('2',"Set Incoming Port",NULL,NULL);
+    puts(" ");
+
+    printmenu('J',"Set Wifi SSID");
+    printmenu('K',"Set WiFi Password");
+    printmenu('L',"Connect To WiFi");
+    printmenu('M',"Get WiFi Status");
+    printmenu('N',"Get WiFi Signal Strength");
+    printmenu('O',"Get IP Address");
+    printmenu('P',"Get Subnet Mask");
+    printmenu('Q',"Get Gateway");
+    printmenu('R',"Get Primary DNS");
+    printmenu('S',"Get Secondary DNS");
+    printmenu('T',"Set IP Address");
+    printmenu('U',"Set Subnet Mask");
+    printmenu('V',"Set Gateway");
+    printmenu('W',"Set Primary DNS");
+    printmenu('X',"Set Secondary DNS");
+
+
 
     for(;;)
     {
@@ -170,25 +185,6 @@ menu_page2()
     printf("\e[2J\e[0m\e[H");
     printcentered("Nhyodyne ESP32 IO board test");
     puts(" ");
-    printmenu('1',"Set Line End Type",'H',"Serial 2 RX ");
-    printmenu('2',"Set Pen Color",'I',"Serial 2 Buffer Length");
-    printmenu('3',"Set Pen Width",'J',"Set Wifi SSID");
-    printmenu('4',"Set Pixel",'K',"Set WiFi Password");
-    printmenu('5',"Set Glyph Options",'L',"Connect To WiFi");
-    printmenu('6',"Set Palette Item",'M',"Get WiFi Status");
-    printmenu('7',"Set Mouse Cursor",'N',"Get WiFi Signal Strength");
-    printmenu('8',"Set Mouse Cursor Position",'O',"Get IP Address");
-    printmenu(NULL,NULL,'P',"Get Subnet Mask");
-    printmenu('9',"Remove Sprites",'Q',"Get Gateway");
-    printmenu('A',"Set Sprite Map",'R',"Get Primary DNS");
-    printmenu('B',"Set Sprite Location",'S',"Get Secondary DNS");
-    printmenu('C',"Set Sprite Visibility",'T',"Set IP Address");
-    printmenu(NULL,NULL,'U',"Set Subnet Mask");
-    printmenu('D',"Set Serial 2 baud rate",'V',"Set Gateway");
-    printmenu('E',"Set Serial 2 mode",'W',"Set Primary DNS");
-    printmenu('F',"Serial 2 TX single char",'X',"Set Secondary DNS");
-    printmenu('G',"Serial 2 TX String",'Y',"\e[1mMenu Page THREE\e[0m");
-    printmenu('Z',"\e[1mMenu Page ONE\e[0m",NULL,NULL);
 
 
     for(;;)
@@ -306,67 +302,6 @@ menu_page2()
                 return 3;
             case 'Z':
                 return 1;
-        }
-    }
-}
-
-menu_page3()
-{
-    char ch;
-
-    printf("\e[2J\e[0m\e[H");
-    printcentered("Nhyodyne ESP32 IO board test");
-    puts(" ");
-    printmenu('1',"Set Hostname",NULL,NULL);
-    printmenu('2',"Set Incoming Port",NULL,NULL);
-    puts(" ");
-    printmenu('3',"Out Byte To Connection",NULL,NULL);
-    printmenu('4',"Out String To Connection",NULL,NULL);
-    printmenu('5',"In Byte From Connection",NULL,NULL);
-    printmenu('6',"Queue Length for Connection",NULL,NULL);
-    puts(" ");
-    printmenu('7',"Place Connection 0 in byte mode (for telent clients)",NULL,NULL);
-    puts(" ");
-    printmenu('8',"Create Outgoing TCP Connection",NULL,NULL);
-    puts(" ");
-    printmenu('Z',"\e[1mMenu Page TWO\e[0m",NULL,NULL);
-
-    for(;;)
-    {
-        printf("\e[22;1HSelection->\e[1m");
-        ch = getchar();
-        printf("\e[0m");
-        ch = toupper(ch);
-
-        switch (ch)
-        {
-            case '1':
-                set_hostname_test();
-                return 3;
-            case '2':
-                set_incoming_port_test();
-                return 3;
-            case '3':
-                out_byte_to_connection_test();
-                return 3;
-            case '4':
-                out_string_to_connection_test();
-                return 3;
-            case '5':
-                in_byte_from_connection_test();
-                return 3;
-            case '6':
-                queue_length_from_connection_test();
-                return 3;
-            case '7':
-                set_byte_mode_test();
-                printmessage("Byte Mode Selected.");
-                break;
-            case '8':
-                create_tcp_connection_test();
-                return 3;
-            case 'Z':
-                return 2;
         }
     }
 }
