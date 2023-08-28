@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 8)
+    (start_pass_no 5822)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -29,7 +29,6 @@
     (width 250.0)
     (clear 200.0)
     (clear 125.0 (type smd_to_turn_gap))
-    (clear 50.0 (type smd-smd))
   )
   (padstack "Via[0-1]_800:400_um"
     (shape
@@ -59,7 +58,7 @@
     Power "Via[0-1]_800:400_um-Power"
   )
   (class default
-    "Net-(D1-Pad2)" ~{IEO} ~{IEI} ~{BAO} ~{BAI} "Net-(R2-Pad2)" /bus/E "Net-(J2-Pad2)"
+    "Net-(D1-Pad2)" ~{IEO} ~{IEI} ~{BAO} ~{BAI} "Net-(C15-Pad1)" /bus/E "Net-(C16-Pad2)"
     /bus/ST "Net-(D2-Pad1)" /bus/PHI /bus/~{MREQ} /bus/~{INT2} "Net-(D3-Pad1)" /bus/~{INT1} /bus/~{BUSACK}
     /bus/CRUCLK /bus/CLK /bus/CRUOUT /bus/~{INT0} /bus/CRUIN /bus/~{NMI} "Net-(D4-Pad2)" /bus/USER8
     /bus/~{BUSRQ} /bus/USER7 /bus/~{WAIT} /bus/USER6 /bus/~{HALT} /bus/USER5 /bus/~{RFSH} /bus/USER4
@@ -72,17 +71,17 @@
     /bus/IC2 /bus/~{DREQ1} /bus/IC1 /bus/~{TEND0} /bus/IC0 /bus/~{DREQ0} /bus/AUXCLK1 /bus/AUXCLK0
     /bus/D15 /bus/D31 /bus/D14 /bus/D30 /bus/D13 /bus/D29 /bus/D12 /bus/D28
     /bus/D11 /bus/D27 /bus/D10 /bus/D26 /bus/D9 /bus/D25 /bus/D8 /bus/D24
-    TX /bus/D23 "Net-(J5-Pad1)" /bus/D22 "Net-(J5-Pad2)" /bus/D21 "Net-(J5-Pad3)" /bus/D20
+    TX /bus/D23 "Net-(J10-Pad3)" /bus/D22 "Net-(J10-Pad4)" /bus/D21 "Net-(J10-Pad5)" /bus/D20
     "unconnected-(J5-Pad4)" /bus/D19 "unconnected-(J5-Pad9)" /bus/D18 "unconnected-(J5-Pad11)" /bus/D17 "unconnected-(J5-Pad12)" /bus/D16
     /bus/~{BUSERR} /bus/UDS /bus/~{VPA} /bus/LDS /bus/~{VMA} /bus/S2 /bus/~{BHE} /bus/S1
     /bus/IPL2 /bus/S0 /bus/IPL1 /bus/AUXCLK3 /bus/IPL0 /bus/AUXCLK2 "VGA_HSYNC" "VGA_VSYNC"
-    "unconnected-(J5-Pad15)" "~{RES_IN}" "Net-(J6-Pad2)" "~{RES_OUT}" "Net-(J7-Pad7)" "Net-(J7-Pad8)" "Net-(J7-Pad9)" "Net-(J7-Pad10)"
-    "Net-(J7-Pad11)" "Net-(J7-Pad12)" ~{RD} ~{WR} ~{IORQ} ~{M1} A7 A6
+    "unconnected-(J5-Pad15)" "~{RES_IN}" "Net-(J6-Pad2)" "~{RES_OUT}" "Net-(J7-Pad1)" "Net-(J7-Pad3)" "Net-(J7-Pad5)" "Net-(J7-Pad7)"
+    "Net-(J7-Pad9)" "Net-(J7-Pad11)" ~{RD} ~{WR} ~{IORQ} ~{M1} A7 A6
     A5 A4 A3 A2 A1 A0 D7 D6
     D5 D4 D3 D2 D1 D0 AUDIO MSEDAT
     MSECLK KBDCLK KBDDAT "VGA_R1" "VGA_R0" "VGA_G1" "VGA_G0" "VGA_B1"
-    "VGA_B0" "ESP1_IN" "~{ESP1_RD}" "~{ESP0_RD}" "~{ESP1_WR}" "~{ESP0_WR}" "ESP0_IN" "Net-(U16-Pad3)"
-    "Net-(U16-Pad5)" bA0 "Net-(U1-Pad2)" "Net-(U1-Pad4)" "unconnected-(U1-Pad5)" "unconnected-(U1-Pad6)" "unconnected-(U1-Pad8)" "unconnected-(U1-Pad9)"
+    "VGA_B0" "ESP1_IN" "~{ESP1_RD}" "~{ESP0_RD}" "~{ESP1_WR}" "~{ESP0_WR}" "ESP0_IN" "Net-(RN2-Pad2)"
+    "Net-(RN2-Pad3)" bA0 "Net-(U1-Pad2)" "Net-(U1-Pad4)" "unconnected-(U1-Pad5)" "unconnected-(U1-Pad6)" "unconnected-(U1-Pad8)" "unconnected-(U1-Pad9)"
     "unconnected-(U1-Pad10)" "unconnected-(U1-Pad11)" "Net-(U1-Pad12)" bA1 "Net-(U2-Pad2)" "~{ESP_RD}" "Net-(U2-Pad4)" "~{ESP_WR}"
     "unconnected-(U2-Pad8)" "unconnected-(U2-Pad9)" "unconnected-(U2-Pad10)" "unconnected-(U2-Pad11)" "unconnected-(U2-Pad12)" "unconnected-(U2-Pad13)" "Net-(U3-Pad1)" "Net-(U3-Pad3)"
     "Net-(U3-Pad5)" "Net-(U3-Pad9)" "Net-(U3-Pad11)" "Net-(U3-Pad13)" "~{CS_ESP}" "Net-(U4-Pad3)" ~{bRD} "Net-(U10-Pad1)"
@@ -93,7 +92,9 @@
     "unconnected-(U12-Pad5)" "unconnected-(U12-Pad8)" "unconnected-(U12-Pad9)" "unconnected-(U12-Pad10)" "unconnected-(U12-Pad11)" "unconnected-(U12-Pad12)" "unconnected-(U12-Pad13)" "unconnected-(U12-Pad18)"
     "unconnected-(U12-Pad19)" "unconnected-(U12-Pad20)" bA7 bA6 bA5 bA4 bA3 bA2
     "unconnected-(U15-Pad4)" "unconnected-(U15-Pad6)" ~{bM1} "unconnected-(U15-Pad8)" ~{bIORQ} "unconnected-(U15-Pad12)" "unconnected-(U15-Pad14)" "unconnected-(U15-Pad16)"
-    "unconnected-(U15-Pad18)" "unconnected-(J8-Pad2)" "unconnected-(J8-Pad6)" "unconnected-(J9-Pad2)" "unconnected-(J9-Pad6)"
+    "~{ESP_RESET}" "unconnected-(J8-Pad2)" "unconnected-(J8-Pad6)" "unconnected-(J9-Pad2)" "unconnected-(J9-Pad6)" "unconnected-(RN1-Pad9)" ~{RESET} "unconnected-(U17-Pad3)"
+    "unconnected-(U17-Pad4)" "unconnected-(U17-Pad5)" "unconnected-(U17-Pad6)" "unconnected-(U17-Pad8)" "unconnected-(U17-Pad9)" "unconnected-(U17-Pad10)" "unconnected-(U17-Pad11)" "unconnected-(U17-Pad12)"
+    "unconnected-(U17-Pad13)"
     (clearance_class default)
     (via_rule default)
     (rule

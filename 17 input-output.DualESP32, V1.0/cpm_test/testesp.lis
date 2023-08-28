@@ -1,4 +1,4 @@
-/tmp/tmpXXt0M8gm.asm:
+/tmp/tmpXXHLRvUt.asm:
      1                          MODULE cpm_crt0_asm
      2                          LINE 0, "/usr/local/share/z88dk//lib/target/cpm/classic/cpm_crt0.asm"
 /usr/local/share/z88dk//lib/target/cpm/classic/cpm_crt0.asm:
@@ -26,16 +26,16 @@
     21                          
     22                              defc    crt0 = 1
     23                              INCLUDE "zcc_opt.def"
-/tmp/tmpzccXXHDjKUX/zcc_opt.def:
+/tmp/tmpzccXXfuxExq/zcc_opt.def:
      1                          
      2                          IF !DEFINED_CRT_printf_format
      3                          	defc	DEFINED_CRT_printf_format = 1
-     4                          	defc CRT_printf_format = 0x00000407
+     4                          	defc CRT_printf_format = 0x00000004
      5                          ELSE
      6                          	UNDEFINE temp_printf_format
      7                          	defc temp_printf_format = CRT_printf_format
      8                          	UNDEFINE CRT_printf_format
-     9                          	defc CRT_printf_format = temp_printf_format | 0x00000407
+     9                          	defc CRT_printf_format = temp_printf_format | 0x00000004
     10                          ENDIF
     11                          
     12                          
@@ -108,6 +108,38 @@
     79                          ENDIF
     80                          
     81                          
+    82                          IF !DEFINED_CRT_printf_format
+    83                          	defc	DEFINED_CRT_printf_format = 1
+    84                          	defc CRT_printf_format = 0x00000002
+    85                          ELSE
+    86                          	UNDEFINE temp_printf_format
+    87                          	defc temp_printf_format = CRT_printf_format
+    88                          	UNDEFINE CRT_printf_format
+    89                          	defc CRT_printf_format = temp_printf_format | 0x00000002
+    90                          ENDIF
+    91                          
+    92                          
+    93                          IF !NEED_printf
+    94                          	DEFINE	NEED_printf
+    95                          ENDIF
+    96                          
+    97                          
+    98                          IF !DEFINED_CRT_printf_format
+    99                          	defc	DEFINED_CRT_printf_format = 1
+   100                          	defc CRT_printf_format = 0x00000401
+   101                          ELSE
+   102                          	UNDEFINE temp_printf_format
+   103                          	defc temp_printf_format = CRT_printf_format
+   104                          	UNDEFINE CRT_printf_format
+   105                          	defc CRT_printf_format = temp_printf_format | 0x00000401
+   106                          ENDIF
+   107                          
+   108                          
+   109                          IF !NEED_printf
+   110                          	DEFINE	NEED_printf
+   111                          ENDIF
+   112                          
+   113                          
 /usr/local/share/z88dk//lib/target/cpm/classic/cpm_crt0.asm:
     24                          
     25                          

@@ -1,5 +1,5 @@
 
-all:  	esptest.com testesp.com
+all:  	esptest.com testesp.com espconf.com
 
 esptest.com: esptest.asm
 	z80asm -b -l -m esptest.asm  2> esptest.err
@@ -7,8 +7,12 @@ esptest.com: esptest.asm
 	@rm esptest.bin
 	@rm esptest.o
 
-testesp.com: testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c
-	zcc +cpm testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c -create-app -o testesp --list
+testesp.com: testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c
+	zcc +cpm testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c -create-app -o testesp --list
+
+espconf.com: espconf.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c
+	zcc +cpm espconf.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c -create-app -o testesp --list
+
 
 pretty:
 	cp *.asm ./backup
