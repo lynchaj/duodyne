@@ -329,6 +329,8 @@ menu_page3()
     puts(" ");
     printmenu('8',"Create Outgoing TCP Connection",NULL,NULL);
     puts(" ");
+     printmenu('9',"Get MAC Address",NULL,NULL);
+    puts(" ");
     printmenu('Z',"\e[1mMenu Page TWO\e[0m",NULL,NULL);
 
     for(;;)
@@ -365,6 +367,9 @@ menu_page3()
             case '8':
                 create_tcp_connection_test();
                 return 3;
+            case '9':
+                get_mac_address_test();
+                break;
             case 'Z':
                 return 2;
         }
