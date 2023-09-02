@@ -443,6 +443,6 @@ create_tcp_connection_test()
     esp1_outbyte(23);        // send opcode '23'
     esp1_outbyte(connection);
     esp1_outint(port);
-    while (*c != '\0') esp1_outbyte(*++c);
+    while (*c != '\0') esp1_outbyte(*c++);
     esp1_outbyte(0);
 }
