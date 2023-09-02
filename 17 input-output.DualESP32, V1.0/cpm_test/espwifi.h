@@ -22,3 +22,4 @@ extern void in_byte_from_connection_test();
 extern void queue_length_from_connection_test();
 extern void set_byte_mode_test();
 extern void create_tcp_connection_test();
+extern void get_mac_address_test();

@@ -11,7 +11,7 @@ testesp.com: testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c
 	zcc +cpm testesp.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c -create-app -o testesp --list
 
 espconf.com: espconf.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c
-	zcc +cpm espconf.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c -create-app -o testesp --list
+	zcc +cpm espconf.c espui.c esplowlevel.c espconsole.c espserial.c espsound.c espgraphics.c espwifi.c -create-app -o espconf --list
 
 
 pretty:
@@ -39,3 +39,4 @@ cleandust:
 	@rm -f *.out
 	@rm -f *.map
 	@rm -f *.lst
+	@rm -f *.lis

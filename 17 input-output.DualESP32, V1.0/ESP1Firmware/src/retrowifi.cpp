@@ -308,3 +308,16 @@ void retroWifi::listenForIncomingConnection()
         client[0] = server.available();
     }
 }
+
+void retroWifi::getMacAddress()
+{
+    uint8_t MAC_Address[6];
+    WiFi.macAddress(MAC_Address);
+    queueByte(MAC_Address[0]);
+    queueByte(MAC_Address[1]);
+    queueByte(MAC_Address[2]);
+    queueByte(MAC_Address[3]);
+    queueByte(MAC_Address[4]);
+    queueByte(MAC_Address[5]);
+    queueByte(MAC_Address[6]);
+}
