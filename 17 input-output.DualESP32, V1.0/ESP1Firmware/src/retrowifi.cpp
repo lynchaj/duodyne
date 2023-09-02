@@ -243,7 +243,6 @@ bool retroWifi::createOutgoingConnection(uint8_t b)
     {
         OutgoingConnectionParameter *p;
         p = (OutgoingConnectionParameter *)buffer;
-
         if (b == 0)
         {
             if (p->connectionNumber > 0)
@@ -319,5 +318,4 @@ void retroWifi::getMacAddress()
     queueByte(MAC_Address[3]);
     queueByte(MAC_Address[4]);
     queueByte(MAC_Address[5]);
-    queueByte(MAC_Address[6]);
 }
