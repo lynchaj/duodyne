@@ -72,6 +72,21 @@ get_ip_address_test()
     printf("\e[23;20H\e[1m %d.%d.%d.%d",o1,o2,o3,o4);
     printf("\e[0m");
 }
+
+get_mac_address_test()
+{
+    int o1,o2,o3,o4,o5,o6;
+    esp1_outbyte(30);    // send opcode '30'
+    o1=esp1_inbytewait();   // get byte 1
+    o2=esp1_inbytewait();   // get byte 2
+    o3=esp1_inbytewait();   // get byte 3
+    o4=esp1_inbytewait();   // get byte 4
+    o5=esp1_inbytewait();   // get byte 5
+    o6=esp1_inbytewait();   // get byte 6
+    printmessage("MAC Address=");
+    printf("\e[23;20H\e[1m %02x:%02x:%02x:%02x:%02x:%02x",o1,o2,o3,o4,o5,o6);
+    printf("\e[0m");
+}
 get_subnet_mask_test()
 {
     int o1,o2,o3,o4;
@@ -428,6 +443,6 @@ create_tcp_connection_test()
     esp1_outbyte(23);        // send opcode '23'
     esp1_outbyte(connection);
     esp1_outint(port);
-    while (*c != '\0') esp1_outbyte(*++c);
+    while (*c != '\0') esp1_outbyte(*c++);
     esp1_outbyte(0);
 }
