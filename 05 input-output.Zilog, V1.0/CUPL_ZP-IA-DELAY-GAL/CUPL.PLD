@@ -1,6 +1,6 @@
 Name     ZP-IA-DELAY-GAL.tru ;
 PartNo   00 ;
-Date     11.03.2023 ;
+Date     01.09.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -22,6 +22,6 @@ PIN 16 = bCLK1;
 
 /* combinatorial logic */
 bCLK1 = !bCLK;
-bIORQ = (!DELxCNT & !bM11) # !bIORQxRAW;
+bIORQ = (!DELxCNT & !bM11) # bIORQxRAW;
 bM1 = !bM11;
-bWAIT = DELxCNT # !bIORQxRAW # bM11;
+bWAIT = DELxCNT # bIORQxRAW # bM11;
