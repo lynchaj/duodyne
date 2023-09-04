@@ -1,0 +1,555 @@
+TimeQuest Timing Analyzer report for Z80-processor-CPU
+Mon Sep 04 16:42:15 2023
+Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. TimeQuest Timing Analyzer Summary
+  3. Parallel Compilation
+  4. Clocks
+  5. Fmax Summary
+  6. Setup Summary
+  7. Hold Summary
+  8. Recovery Summary
+  9. Removal Summary
+ 10. Minimum Pulse Width Summary
+ 11. Setup: 'CLK'
+ 12. Hold: 'CLK'
+ 13. Minimum Pulse Width: 'CLK'
+ 14. Minimum Pulse Width: 'CPU-A1'
+ 15. Setup Times
+ 16. Hold Times
+ 17. Clock to Output Times
+ 18. Minimum Clock to Output Times
+ 19. Propagation Delay
+ 20. Minimum Propagation Delay
+ 21. Setup Transfers
+ 22. Hold Transfers
+ 23. Report TCCS
+ 24. Report RSKM
+ 25. Unconstrained Paths
+ 26. TimeQuest Timing Analyzer Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++----------------------------------------------------------------------------------------+
+; TimeQuest Timing Analyzer Summary                                                      ;
++--------------------+-------------------------------------------------------------------+
+; Quartus II Version ; Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition ;
+; Revision Name      ; Z80-processor-CPU                                                 ;
+; Device Family      ; MAX7000S                                                          ;
+; Device Name        ; EPM7064SLC84-10                                                   ;
+; Timing Models      ; Final                                                             ;
+; Delay Model        ; Slow Model                                                        ;
+; Rise/Fall Delays   ; Unavailable                                                       ;
++--------------------+-------------------------------------------------------------------+
+
+
+Parallel compilation was disabled, but you have multiple processors available. Enable parallel compilation to reduce compilation time.
++-------------------------------------+
+; Parallel Compilation                ;
++----------------------------+--------+
+; Processors                 ; Number ;
++----------------------------+--------+
+; Number detected on machine ; 4      ;
+; Maximum allowed            ; 1      ;
++----------------------------+--------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Clocks                                                                                                                                                                             ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+; Clock Name ; Type ; Period ; Frequency  ; Rise  ; Fall  ; Duty Cycle ; Divide by ; Multiply by ; Phase ; Offset ; Edge List ; Edge Shift ; Inverted ; Master ; Source ; Targets    ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+; CLK        ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { CLK }    ;
+; CPU-A1     ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { CPU-A1 } ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+
+
++-------------------------------------------------+
+; Fmax Summary                                    ;
++-----------+-----------------+------------+------+
+; Fmax      ; Restricted Fmax ; Clock Name ; Note ;
++-----------+-----------------+------------+------+
+; 100.0 MHz ; 100.0 MHz       ; CLK        ;      ;
++-----------+-----------------+------------+------+
+This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
+
+
++--------------------------------+
+; Setup Summary                  ;
++-------+--------+---------------+
+; Clock ; Slack  ; End Point TNS ;
++-------+--------+---------------+
+; CLK   ; -9.000 ; -63.000       ;
++-------+--------+---------------+
+
+
++-------------------------------+
+; Hold Summary                  ;
++-------+-------+---------------+
+; Clock ; Slack ; End Point TNS ;
++-------+-------+---------------+
+; CLK   ; 5.000 ; 0.000         ;
++-------+-------+---------------+
+
+
+--------------------
+; Recovery Summary ;
+--------------------
+No paths to report.
+
+
+-------------------
+; Removal Summary ;
+-------------------
+No paths to report.
+
+
++---------------------------------+
+; Minimum Pulse Width Summary     ;
++--------+--------+---------------+
+; Clock  ; Slack  ; End Point TNS ;
++--------+--------+---------------+
+; CLK    ; -3.500 ; -56.000       ;
+; CPU-A1 ; -3.500 ; -7.000        ;
++--------+--------+---------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Setup: 'CLK'                                                                                                                                                                                         ;
++--------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+; Slack  ; From Node                                                 ; To Node                                                   ; Launch Clock ; Latch Clock ; Relationship ; Clock Skew ; Data Delay ;
++--------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i0|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
+; -9.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i7|state ; CLK          ; CLK         ; 1.000        ; 0.000      ; 8.000      ;
++--------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+
+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Hold: 'CLK'                                                                                                                                                                                         ;
++-------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+; Slack ; From Node                                                 ; To Node                                                   ; Launch Clock ; Latch Clock ; Relationship ; Clock Skew ; Data Delay ;
++-------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i0|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
+; 5.000 ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i7|state ; CLK          ; CLK         ; 0.000        ; 0.000      ; 8.000      ;
++-------+-----------------------------------------------------------+-----------------------------------------------------------+--------------+-------------+--------------+------------+------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------+
+; Minimum Pulse Width: 'CLK'                                                                                                                 ;
++--------+--------------+----------------+------------------+-------+------------+-----------------------------------------------------------+
+; Slack  ; Actual Width ; Required Width ; Type             ; Clock ; Clock Edge ; Target                                                    ;
++--------+--------------+----------------+------------------+-------+------------+-----------------------------------------------------------+
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i0|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i0|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i1|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i2|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i3|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i4|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i6|state ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i7|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164:74164_i4|DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i7|state ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i0|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i0|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i1|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i1|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i2|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i2|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i3|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i3|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i4|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i4|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i5|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i5|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i6|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i6|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i7|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; 74164_i4|DIG_D_FF_AS_1bit_i7|state|clk                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CLK   ; Rise       ; CLK|dataout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CLK   ; Rise       ; CLK|dataout                                               ;
++--------+--------------+----------------+------------------+-------+------------+-----------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------+
+; Minimum Pulse Width: 'CPU-A1'                                                                                                ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------+
+; Slack  ; Actual Width ; Required Width ; Type             ; Clock  ; Clock Edge ; Target                                     ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------+
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CPU-A1 ; Rise       ; DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CPU-A1 ; Rise       ; DIG_D_FF_AS_1bit:DIG_D_FF_AS_1bit_i5|state ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPU-A1 ; Rise       ; CPU-A1|dataout                             ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPU-A1 ; Rise       ; CPU-A1|dataout                             ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPU-A1 ; Fall       ; DIG_D_FF_AS_1bit_i5|state|[1]              ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPU-A1 ; Fall       ; DIG_D_FF_AS_1bit_i5|state|[1]              ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPU-A1 ; Rise       ; s2~1|datain[0]                             ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPU-A1 ; Rise       ; s2~1|datain[0]                             ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPU-A1 ; Fall       ; s2~1|dataout                               ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPU-A1 ; Fall       ; s2~1|dataout                               ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------+
+
+
++-------------------------------------------------------------------------+
+; Setup Times                                                             ;
++-----------+------------+--------+--------+------------+-----------------+
+; Data Port ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-----------+------------+--------+--------+------------+-----------------+
+; CPU-D0    ; CPU-A1     ; -3.000 ; -3.000 ; Rise       ; CPU-A1          ;
++-----------+------------+--------+--------+------------+-----------------+
+
+
++-----------------------------------------------------------------------+
+; Hold Times                                                            ;
++-----------+------------+-------+-------+------------+-----------------+
+; Data Port ; Clock Port ; Rise  ; Fall  ; Clock Edge ; Clock Reference ;
++-----------+------------+-------+-------+------------+-----------------+
+; CPU-D0    ; CPU-A1     ; 8.000 ; 8.000 ; Rise       ; CPU-A1          ;
++-----------+------------+-------+-------+------------+-----------------+
+
+
++-------------------------------------------------------------------------+
+; Clock to Output Times                                                   ;
++-----------+------------+--------+--------+------------+-----------------+
+; Data Port ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-----------+------------+--------+--------+------------+-----------------+
+; 1WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 2WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 3WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 4WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 5WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 6WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 7WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 8WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; ~AxPRIME  ; CPU-A1     ; 10.000 ; 10.000 ; Rise       ; CPU-A1          ;
+; ~CSxI2C   ; CPU-A1     ; 10.000 ; 10.000 ; Rise       ; CPU-A1          ;
+; ~PAGExEN  ; CPU-A1     ; 23.000 ; 23.000 ; Rise       ; CPU-A1          ;
+; ~AxPRIME  ; CPU-A1     ; 10.000 ; 10.000 ; Fall       ; CPU-A1          ;
+; ~CSxI2C   ; CPU-A1     ; 10.000 ; 10.000 ; Fall       ; CPU-A1          ;
++-----------+------------+--------+--------+------------+-----------------+
+
+
++-------------------------------------------------------------------------+
+; Minimum Clock to Output Times                                           ;
++-----------+------------+--------+--------+------------+-----------------+
+; Data Port ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-----------+------------+--------+--------+------------+-----------------+
+; 1WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 2WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 3WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 4WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 5WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 6WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 7WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; 8WS       ; CLK        ; 5.000  ; 5.000  ; Rise       ; CLK             ;
+; ~AxPRIME  ; CPU-A1     ; 10.000 ; 10.000 ; Rise       ; CPU-A1          ;
+; ~CSxI2C   ; CPU-A1     ; 10.000 ; 10.000 ; Rise       ; CPU-A1          ;
+; ~PAGExEN  ; CPU-A1     ; 23.000 ; 23.000 ; Rise       ; CPU-A1          ;
+; ~AxPRIME  ; CPU-A1     ; 10.000 ; 10.000 ; Fall       ; CPU-A1          ;
+; ~CSxI2C   ; CPU-A1     ; 10.000 ; 10.000 ; Fall       ; CPU-A1          ;
++-----------+------------+--------+--------+------------+-----------------+
+
+
++---------------------------------------------------------------+
+; Propagation Delay                                             ;
++------------+--------------+--------+--------+--------+--------+
+; Input Port ; Output Port  ; RR     ; RF     ; FR     ; FF     ;
++------------+--------------+--------+--------+--------+--------+
+; CPU-A2     ; ~AxPRIME     ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A2     ; ~CSxI2C      ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A2     ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; CPU-A14    ; SEL-A14      ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A15    ; SEL-A15      ; 10.000 ;        ;        ; 10.000 ;
+; IOxSEL     ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; WSxIORD    ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxIOWR    ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxMEMRD   ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxMEMWR   ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; mA14       ; SEL-A14      ; 10.000 ;        ;        ; 10.000 ;
+; mA15       ; SEL-A15      ; 10.000 ;        ;        ; 10.000 ;
+; ~A         ; ~CSxI2CxWR   ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ  ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxIORQ  ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxIORQ  ; SEL-A14      ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxIORQ  ; SEL-A15      ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxIORQ  ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxM1    ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1    ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxMREQ  ; READY        ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxRD    ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRD    ; READY        ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxRD    ; ~FPxLATCHxRD ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRESET ; RESET        ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRFSH  ; READY        ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWR    ; FPxLATCHxWR  ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWR    ; ~AxPRIME     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWR    ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~AxPRIME     ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~CSxI2C      ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxIEI1  ; DATAxDIR     ; 10.000 ;        ;        ; 10.000 ;
+; ~DMAxIEO2  ; ~IM2xEN      ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxIEO2  ; ~IM2xIEO     ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ0     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ1     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; IM2xS1       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ2     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ3     ; IM2xS1       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ3     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ5     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~FPxLATCH  ; FPxLATCHxWR  ;        ; 10.000 ; 10.000 ;        ;
+; ~FPxLATCH  ; ~FPxLATCHxRD ;        ; 10.000 ; 10.000 ;        ;
+; ~INTxI2C   ; INT-I2C      ;        ; 10.000 ; 10.000 ;        ;
++------------+--------------+--------+--------+--------+--------+
+
+
++---------------------------------------------------------------+
+; Minimum Propagation Delay                                     ;
++------------+--------------+--------+--------+--------+--------+
+; Input Port ; Output Port  ; RR     ; RF     ; FR     ; FF     ;
++------------+--------------+--------+--------+--------+--------+
+; CPU-A2     ; ~AxPRIME     ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A2     ; ~CSxI2C      ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A2     ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; CPU-A14    ; SEL-A14      ; 10.000 ;        ;        ; 10.000 ;
+; CPU-A15    ; SEL-A15      ; 10.000 ;        ;        ; 10.000 ;
+; IOxSEL     ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; WSxIORD    ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxIOWR    ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxMEMRD   ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; WSxMEMWR   ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; mA14       ; SEL-A14      ; 10.000 ;        ;        ; 10.000 ;
+; mA15       ; SEL-A15      ; 10.000 ;        ;        ; 10.000 ;
+; ~A         ; ~CSxI2CxWR   ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ  ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxIORQ  ; READY        ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxIORQ  ; SEL-A14      ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxIORQ  ; SEL-A15      ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxIORQ  ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxM1    ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1    ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxMREQ  ; READY        ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxRD    ; DATAxDIR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRD    ; READY        ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxRD    ; ~FPxLATCHxRD ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRESET ; RESET        ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxRFSH  ; READY        ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWR    ; FPxLATCHxWR  ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWR    ; ~AxPRIME     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWR    ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~AxPRIME     ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~CSxI2C      ;        ; 10.000 ; 10.000 ;        ;
+; ~CSxMAP    ; ~PAGExWR     ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxIEI1  ; DATAxDIR     ; 10.000 ;        ;        ; 10.000 ;
+; ~DMAxIEO2  ; ~IM2xEN      ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxIEO2  ; ~IM2xIEO     ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ0     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ0     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ1     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ1     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; IM2xS1       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ2     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ2     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ3     ; IM2xS1       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ3     ; IM2xS2       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ3     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ4     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; IM2xS0       ;        ; 10.000 ; 10.000 ;        ;
+; ~EIRQ5     ; IM2xS1       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ5     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; IM2xS0       ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ6     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xEN      ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xIEO     ; 10.000 ;        ;        ; 10.000 ;
+; ~EIRQ7     ; ~IM2xINT     ; 10.000 ;        ;        ; 10.000 ;
+; ~FPxLATCH  ; FPxLATCHxWR  ;        ; 10.000 ; 10.000 ;        ;
+; ~FPxLATCH  ; ~FPxLATCHxRD ;        ; 10.000 ; 10.000 ;        ;
+; ~INTxI2C   ; INT-I2C      ;        ; 10.000 ; 10.000 ;        ;
++------------+--------------+--------+--------+--------+--------+
+
+
++-------------------------------------------------------------------+
+; Setup Transfers                                                   ;
++------------+----------+----------+----------+----------+----------+
+; From Clock ; To Clock ; RR Paths ; FR Paths ; RF Paths ; FF Paths ;
++------------+----------+----------+----------+----------+----------+
+; CLK        ; CLK      ; 7        ; 0        ; 0        ; 0        ;
++------------+----------+----------+----------+----------+----------+
+Entries labeled "false path" only account for clock-to-clock false paths and not path-based false paths. As a result, actual path counts may be lower than reported.
+
+
++-------------------------------------------------------------------+
+; Hold Transfers                                                    ;
++------------+----------+----------+----------+----------+----------+
+; From Clock ; To Clock ; RR Paths ; FR Paths ; RF Paths ; FF Paths ;
++------------+----------+----------+----------+----------+----------+
+; CLK        ; CLK      ; 7        ; 0        ; 0        ; 0        ;
++------------+----------+----------+----------+----------+----------+
+Entries labeled "false path" only account for clock-to-clock false paths and not path-based false paths. As a result, actual path counts may be lower than reported.
+
+
+---------------
+; Report TCCS ;
+---------------
+No dedicated SERDES Transmitter circuitry present in device or used in design
+
+
+---------------
+; Report RSKM ;
+---------------
+No dedicated SERDES Receiver circuitry present in device or used in design
+
+
++------------------------------------------------+
+; Unconstrained Paths                            ;
++---------------------------------+-------+------+
+; Property                        ; Setup ; Hold ;
++---------------------------------+-------+------+
+; Illegal Clocks                  ; 0     ; 0    ;
+; Unconstrained Clocks            ; 0     ; 0    ;
+; Unconstrained Input Ports       ; 33    ; 33   ;
+; Unconstrained Input Port Paths  ; 99    ; 99   ;
+; Unconstrained Output Ports      ; 27    ; 27   ;
+; Unconstrained Output Port Paths ; 90    ; 90   ;
++---------------------------------+-------+------+
+
+
++------------------------------------+
+; TimeQuest Timing Analyzer Messages ;
++------------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II 32-bit TimeQuest Timing Analyzer
+    Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+    Info: Processing started: Mon Sep 04 16:42:06 2023
+Info: Command: quartus_sta Z80-processor-CPU -c Z80-processor-CPU
+Info: qsta_default_script.tcl version: #1
+Warning (20028): Parallel compilation is not licensed and has been disabled
+Info (306004): Started post-fitting delay annotation
+Info (306005): Delay annotation completed successfully
+Warning (335095): TimeQuest Timing Analyzer does not support the analysis of latches as synchronous elements for the currently selected device family.
+Critical Warning (332012): Synopsys Design Constraints File file not found: 'Z80-processor-CPU.sdc'. A Synopsys Design Constraints File is required by the TimeQuest Timing Analyzer to get proper timing constraints. Without it, the Compiler will not properly optimize the design.
+Info (332142): No user constrained base clocks found in the design. Calling "derive_clocks -period 1.0"
+Info (332105): Deriving Clocks
+    Info (332105): create_clock -period 1.000 -name CLK CLK
+    Info (332105): create_clock -period 1.000 -name CPU-A1 CPU-A1
+Info: Found TIMEQUEST_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
+Critical Warning (332148): Timing requirements not met
+Info (332146): Worst-case setup slack is -9.000
+    Info (332119):     Slack End Point TNS Clock 
+    Info (332119): ========= ============= =====================
+    Info (332119):    -9.000       -63.000 CLK 
+Info (332146): Worst-case hold slack is 5.000
+    Info (332119):     Slack End Point TNS Clock 
+    Info (332119): ========= ============= =====================
+    Info (332119):     5.000         0.000 CLK 
+Info (332140): No Recovery paths to report
+Info (332140): No Removal paths to report
+Info (332146): Worst-case minimum pulse width slack is -3.500
+    Info (332119):     Slack End Point TNS Clock 
+    Info (332119): ========= ============= =====================
+    Info (332119):    -3.500       -56.000 CLK 
+    Info (332119):    -3.500        -7.000 CPU-A1 
+Info (332001): The selected device family is not supported by the report_metastability command.
+Info (332102): Design is not fully constrained for setup requirements
+Info (332102): Design is not fully constrained for hold requirements
+Info: Quartus II 32-bit TimeQuest Timing Analyzer was successful. 0 errors, 4 warnings
+    Info: Peak virtual memory: 299 megabytes
+    Info: Processing ended: Mon Sep 04 16:42:15 2023
+    Info: Elapsed time: 00:00:09
+    Info: Total CPU time (on all processors): 00:00:05
+
+
