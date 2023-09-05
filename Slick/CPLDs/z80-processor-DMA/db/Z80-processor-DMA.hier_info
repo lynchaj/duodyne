@@ -1,0 +1,250 @@
+|Z80-processor-DMA
+CPUxA0 => CPUxA0.IN1
+CPUxA1 => CPUxA1.IN1
+~CPUxWAIT => ~CPUxWAIT.IN2
+~BUSRQ => ~BUSRQ.IN1
+~CPUxBUSACK => DATAxXFER.IN1
+~CPUxBUSACK => s6.IN0
+~CPUxBUSACK => ~BUSxEN.IN1
+~DMAxINTxPULSE1 => DATAxXFER.IN0
+~DMAxINTxPULSE2 => DATAxXFER.IN1
+CPUxA3 => CPUxA3.IN1
+~DREQ0 => DMAxRDY1.IN0
+~DREQ1 => DMAxRDY2.IN0
+~CPUxWR => s10.IN0
+~CPUxRESET => ~CPUxRESET.IN1
+~DMAxBAO2 => BUSACK.IN0
+CPU-D0 => CPU-D0.IN1
+CPU-D1 => CPU-D1.IN1
+CPU-D2 => CPU-D2.IN1
+CPU-D3 => CPU-D3.IN1
+~CPUxIORQ => ~CPUxIORQ.IN2
+~CPUxM1 => ~CPUxM1.IN2
+CPUxA2 => CPUxA2.IN1
+Q2 => Q2.IN1
+Q3 => Q3.IN1
+CPUxA4 => CPUxA4.IN2
+CPUxA5 => CPUxA5.IN2
+CPUxA6 => CPUxA6.IN2
+CPUxA7 => CPUxA7.IN2
+Q4 => Q4.IN1
+Q5 => Q5.IN1
+Q6 => Q6.IN1
+Q7 => Q7.IN1
+R4 => R4.IN1
+R5 => R5.IN1
+R6 => R6.IN1
+R7 => R7.IN1
+~FPxLATCH <= 74139:74139_i2.~2Y2
+~DMAxCS1 <= ~DMAxCS1_temp.DB_MAX_OUTPUT_PORT_TYPE
+~DMAxCS2 <= ~DMAxCS2_temp.DB_MAX_OUTPUT_PORT_TYPE
+~BUSxEN <= ~BUSxEN.DB_MAX_OUTPUT_PORT_TYPE
+DATAxXFER <= DATAxXFER.DB_MAX_OUTPUT_PORT_TYPE
+IOxSEL <= IOxSEL.DB_MAX_OUTPUT_PORT_TYPE
+~CSxMAP <= ~CSxMAP.DB_MAX_OUTPUT_PORT_TYPE
+~CSxUART <= ~CSxUART.DB_MAX_OUTPUT_PORT_TYPE
+DMAxRDY1 <= DMAxRDY1.DB_MAX_OUTPUT_PORT_TYPE
+DMAxRDY2 <= DMAxRDY2.DB_MAX_OUTPUT_PORT_TYPE
+~DMAxRESET1 <= ~DMAxRESET1.DB_MAX_OUTPUT_PORT_TYPE
+~DMAxRESET2 <= ~DMAxRESET2.DB_MAX_OUTPUT_PORT_TYPE
+BUSACK <= BUSACK.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|Z80-processor-DMA|74688:74688_i0
+P_0 => ~EQ.IN0
+Q_0 => ~EQ.IN1
+P_1 => ~EQ.IN0
+Q_1 => ~EQ.IN1
+P_2 => ~EQ.IN0
+Q_2 => ~EQ.IN1
+P_3 => ~EQ.IN0
+Q_3 => ~EQ.IN1
+P_4 => ~EQ.IN0
+Q_4 => ~EQ.IN1
+P_5 => ~EQ.IN0
+Q_5 => ~EQ.IN1
+P_6 => ~EQ.IN0
+Q_6 => ~EQ.IN1
+P_7 => ~EQ.IN0
+Q_7 => ~EQ.IN1
+~OE => ~EQ.IN0
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+~EQ <= ~EQ.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|Z80-processor-DMA|74688:74688_i1
+P_0 => ~EQ.IN0
+Q_0 => ~EQ.IN1
+P_1 => ~EQ.IN0
+Q_1 => ~EQ.IN1
+P_2 => ~EQ.IN0
+Q_2 => ~EQ.IN1
+P_3 => ~EQ.IN0
+Q_3 => ~EQ.IN1
+P_4 => ~EQ.IN0
+Q_4 => ~EQ.IN1
+P_5 => ~EQ.IN0
+Q_5 => ~EQ.IN1
+P_6 => ~EQ.IN0
+Q_6 => ~EQ.IN1
+P_7 => ~EQ.IN0
+Q_7 => ~EQ.IN1
+~OE => ~EQ.IN0
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+~EQ <= ~EQ.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|Z80-processor-DMA|74139:74139_i2
+1A => s0[0].IN1
+1B => s0[1].IN1
+~1G => ~1G.IN1
+2A => s1[0].IN1
+2B => s1[1].IN1
+~2G => ~2G.IN1
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+~1Y0 <= Demux2:Demux2_i0.out_0
+~1Y1 <= Demux2:Demux2_i0.out_1
+~1Y2 <= Demux2:Demux2_i0.out_2
+~1Y3 <= Demux2:Demux2_i0.out_3
+~2Y0 <= Demux2:Demux2_i1.out_0
+~2Y1 <= Demux2:Demux2_i1.out_1
+~2Y2 <= Demux2:Demux2_i1.out_2
+~2Y3 <= Demux2:Demux2_i1.out_3
+
+
+|Z80-processor-DMA|74139:74139_i2|Demux2:Demux2_i0
+out_0 <= out_0.DB_MAX_OUTPUT_PORT_TYPE
+out_1 <= out_1.DB_MAX_OUTPUT_PORT_TYPE
+out_2 <= out_2.DB_MAX_OUTPUT_PORT_TYPE
+out_3 <= out_3.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Equal0.IN3
+sel[0] => Equal1.IN3
+sel[0] => Equal2.IN3
+sel[0] => Equal3.IN3
+sel[1] => Equal0.IN2
+sel[1] => Equal1.IN2
+sel[1] => Equal2.IN2
+sel[1] => Equal3.IN2
+in => out_0.DATAB
+in => out_1.DATAB
+in => out_2.DATAB
+in => out_3.DATAB
+
+
+|Z80-processor-DMA|74139:74139_i2|Demux2:Demux2_i1
+out_0 <= out_0.DB_MAX_OUTPUT_PORT_TYPE
+out_1 <= out_1.DB_MAX_OUTPUT_PORT_TYPE
+out_2 <= out_2.DB_MAX_OUTPUT_PORT_TYPE
+out_3 <= out_3.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Equal0.IN3
+sel[0] => Equal1.IN3
+sel[0] => Equal2.IN3
+sel[0] => Equal3.IN3
+sel[1] => Equal0.IN2
+sel[1] => Equal1.IN2
+sel[1] => Equal2.IN2
+sel[1] => Equal3.IN2
+in => out_0.DATAB
+in => out_1.DATAB
+in => out_2.DATAB
+in => out_3.DATAB
+
+
+|Z80-processor-DMA|74157:74157_i3
+S => S.IN1
+A1 => s0[0].IN1
+A2 => s0[1].IN1
+A3 => s0[2].IN1
+A4 => s0[3].IN1
+B1 => s1[0].IN1
+B2 => s1[1].IN1
+B3 => s1[2].IN1
+B4 => s1[3].IN1
+G => G.IN1
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+Y1 <= Mux_2x1_NBits:Mux_2x1_NBits_i1.out
+Y2 <= Mux_2x1_NBits:Mux_2x1_NBits_i1.out
+Y3 <= Mux_2x1_NBits:Mux_2x1_NBits_i1.out
+Y4 <= Mux_2x1_NBits:Mux_2x1_NBits_i1.out
+
+
+|Z80-processor-DMA|74157:74157_i3|Mux_2x1_NBits:Mux_2x1_NBits_i0
+sel[0] => Decoder0.IN0
+in_0[0] => out.DATAA
+in_0[1] => out.DATAA
+in_0[2] => out.DATAA
+in_0[3] => out.DATAA
+in_1[0] => out.DATAB
+in_1[1] => out.DATAB
+in_1[2] => out.DATAB
+in_1[3] => out.DATAB
+out[0] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= out.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|Z80-processor-DMA|74157:74157_i3|Mux_2x1_NBits:Mux_2x1_NBits_i1
+sel[0] => Decoder0.IN0
+in_0[0] => out.DATAA
+in_0[1] => out.DATAA
+in_0[2] => out.DATAA
+in_0[3] => out.DATAA
+in_1[0] => out.DATAB
+in_1[1] => out.DATAB
+in_1[2] => out.DATAB
+in_1[3] => out.DATAB
+out[0] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[1] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[2] <= out.DB_MAX_OUTPUT_PORT_TYPE
+out[3] <= out.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|Z80-processor-DMA|74175:74175_i4
+CLK => CLK.IN1
+~CL => s1.IN0
+D1 => s0[0].IN1
+D2 => s0[1].IN1
+D3 => s0[2].IN1
+D4 => s0[3].IN1
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+Q1 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.Q
+Q2 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.Q
+Q3 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.Q
+Q4 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.Q
+~Q1 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.~Q
+~Q2 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.~Q
+~Q3 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.~Q
+~Q4 <= DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0.~Q
+
+
+|Z80-processor-DMA|74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0
+Set => state[0].PRESET
+Set => state[1].PRESET
+Set => state[2].PRESET
+Set => state[3].IN0
+Set => state[3].PRESET
+D[0] => state[0].DATAIN
+D[1] => state[1].DATAIN
+D[2] => state[2].DATAIN
+D[3] => state[3].DATAIN
+C => state[0].CLK
+C => state[1].CLK
+C => state[2].CLK
+C => state[3].CLK
+Clr => state[3].IN1
+Q[0] <= state[0].DB_MAX_OUTPUT_PORT_TYPE
+Q[1] <= state[1].DB_MAX_OUTPUT_PORT_TYPE
+Q[2] <= state[2].DB_MAX_OUTPUT_PORT_TYPE
+Q[3] <= state[3].DB_MAX_OUTPUT_PORT_TYPE
+~Q[0] <= ~Q.DB_MAX_OUTPUT_PORT_TYPE
+~Q[1] <= ~Q.DB_MAX_OUTPUT_PORT_TYPE
+~Q[2] <= ~Q.DB_MAX_OUTPUT_PORT_TYPE
+~Q[3] <= ~Q.DB_MAX_OUTPUT_PORT_TYPE
+
+
