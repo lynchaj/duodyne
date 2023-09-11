@@ -1,0 +1,402 @@
+|main
+IOxSEL => DATAxDIR.IN0
+notCPUxRD => notFPxLATCHxRD.IN0
+notCPUxRD => DATAxDIR.IN1
+notCPUxRD => n74153:gate2.B
+notDMAxIEI1 => DATAxDIR.IN0
+notCPUxM1 => s0.IN0
+notCPUxIORQ => s0.IN1
+notCPUxIORQ => s5.IN0
+notCPUxIORQ => n74157:gate1.S
+notDMAxIEO2 => notIM2xIEO_temp.IN0
+notFPxLATCH => notFPxLATCHxRD.IN1
+notFPxLATCH => FPxLATCHxWR.IN0
+notCPUxWR => FPxLATCHxWR.IN1
+notCPUxWR => notAxPRIME.IN0
+notCPUxWR => n74139:gate0.not1G
+CPU_A2 => n74139:gate0.n1A
+CPU_A2 => n74139:gate0.n2A
+notCSxMAP => n74139:gate0.n1B
+notCSxMAP => n74139:gate0.n2B
+CPU_A14 => n74157:gate1.A1
+mA14 => n74157:gate1.B1
+CPU_A15 => n74157:gate1.A2
+mA15 => n74157:gate1.B2
+CPU_A1 => s3.IN0
+CPU_A1 => notCSxI2C_temp.IN0
+notINTxI2C => INT_I2C.IN0
+notA => notCSxI2CxWR.DATAIN
+WSxMEMRD => n74153:gate2.n1C0
+WSxIORD => n74153:gate2.n1C1
+WSxMEMWR => n74153:gate2.n1C2
+WSxIOWR => n74153:gate2.n1C3
+notCPUxMREQ => s5.IN1
+notCPUxMREQ => n74153:gate2.A
+notCPUxRFSH => READY.IN0
+CPU_D0 => dig_d_ff_as:gate5.D
+notEIRQ7 => n74148:gate3.n0
+notEIRQ6 => n74148:gate3.n1
+notEIRQ0 => n74148:gate3.n7
+notEIRQ1 => n74148:gate3.n6
+notEIRQ2 => n74148:gate3.n5
+notEIRQ3 => n74148:gate3.n4
+notEIRQ5 => n74148:gate3.n2
+notEIRQ4 => n74148:gate3.n3
+CLK => n74164:gate4.CP
+notCPUxRESET => RESET.IN0
+notCPUxRESET => s7.IN0
+DATAxDIR <= DATAxDIR.DB_MAX_OUTPUT_PORT_TYPE
+notIM2xEN <= notIM2xEN.DB_MAX_OUTPUT_PORT_TYPE
+notFPxLATCHxRD <= notFPxLATCHxRD.DB_MAX_OUTPUT_PORT_TYPE
+FPxLATCHxWR <= FPxLATCHxWR.DB_MAX_OUTPUT_PORT_TYPE
+notIM2xIEO <= notIM2xIEO_temp.DB_MAX_OUTPUT_PORT_TYPE
+SEL_A14 <= n74157:gate1.Y1
+SEL_A15 <= n74157:gate1.Y2
+notCSxI2C <= notCSxI2C_temp.DB_MAX_OUTPUT_PORT_TYPE
+INT_I2C <= INT_I2C.DB_MAX_OUTPUT_PORT_TYPE
+notCSxI2CxWR <= notA.DB_MAX_OUTPUT_PORT_TYPE
+notAxPRIME <= notAxPRIME.DB_MAX_OUTPUT_PORT_TYPE
+READY <= READY.DB_MAX_OUTPUT_PORT_TYPE
+notPAGExEN <= notPAGExEN.DB_MAX_OUTPUT_PORT_TYPE
+notPAGExWR <= n74139:gate0.not1Y0
+IM2xS2 <= n74148:gate3.A2
+IM2xS1 <= n74148:gate3.A1
+IM2xS0 <= n74148:gate3.A0
+notIM2xINT <= n74148:gate3.GS
+n1WS <= n74164:gate4.Q0
+n2WS <= n74164:gate4.Q1
+n3WS <= n74164:gate4.Q2
+n4WS <= n74164:gate4.Q3
+n5WS <= n74164:gate4.Q4
+n6WS <= n74164:gate4.Q5
+n7WS <= n74164:gate4.Q6
+n8WS <= n74164:gate4.Q7
+RESET <= RESET.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|main|n74139:gate0
+n1A => demux_gate_2:gate0.sel[0]
+n1B => demux_gate_2:gate0.sel[1]
+not1G => demux_gate_2:gate0.p_in
+n2A => demux_gate_2:gate1.sel[0]
+n2B => demux_gate_2:gate1.sel[1]
+not2G => demux_gate_2:gate1.p_in
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+not1Y0 <= demux_gate_2:gate0.out_0
+not1Y1 <= demux_gate_2:gate0.out_1
+not1Y2 <= demux_gate_2:gate0.out_2
+not1Y3 <= demux_gate_2:gate0.out_3
+not2Y0 <= demux_gate_2:gate1.out_0
+not2Y1 <= demux_gate_2:gate1.out_1
+not2Y2 <= demux_gate_2:gate1.out_2
+not2Y3 <= demux_gate_2:gate1.out_3
+
+
+|main|n74139:gate0|DEMUX_GATE_2:gate0
+out_0 <= out_0.DB_MAX_OUTPUT_PORT_TYPE
+out_1 <= out_1.DB_MAX_OUTPUT_PORT_TYPE
+out_2 <= out_2.DB_MAX_OUTPUT_PORT_TYPE
+out_3 <= out_3.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Equal0.IN3
+sel[0] => Equal1.IN3
+sel[0] => Equal2.IN3
+sel[0] => Equal3.IN3
+sel[1] => Equal0.IN2
+sel[1] => Equal1.IN2
+sel[1] => Equal2.IN2
+sel[1] => Equal3.IN2
+p_in => out_0.DATAB
+p_in => out_1.DATAB
+p_in => out_2.DATAB
+p_in => out_3.DATAB
+
+
+|main|n74139:gate0|DEMUX_GATE_2:gate1
+out_0 <= out_0.DB_MAX_OUTPUT_PORT_TYPE
+out_1 <= out_1.DB_MAX_OUTPUT_PORT_TYPE
+out_2 <= out_2.DB_MAX_OUTPUT_PORT_TYPE
+out_3 <= out_3.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Equal0.IN3
+sel[0] => Equal1.IN3
+sel[0] => Equal2.IN3
+sel[0] => Equal3.IN3
+sel[1] => Equal0.IN2
+sel[1] => Equal1.IN2
+sel[1] => Equal2.IN2
+sel[1] => Equal3.IN2
+p_in => out_0.DATAB
+p_in => out_1.DATAB
+p_in => out_2.DATAB
+p_in => out_3.DATAB
+
+
+|main|n74157:gate1
+S => mux_gate_bus_1:gate0.sel
+A1 => mux_gate_bus_1:gate0.in_0[0]
+A2 => mux_gate_bus_1:gate0.in_0[1]
+A3 => mux_gate_bus_1:gate0.in_0[2]
+A4 => mux_gate_bus_1:gate0.in_0[3]
+B1 => mux_gate_bus_1:gate0.in_1[0]
+B2 => mux_gate_bus_1:gate0.in_1[1]
+B3 => mux_gate_bus_1:gate0.in_1[2]
+B4 => mux_gate_bus_1:gate0.in_1[3]
+G => mux_gate_bus_1:gate1.sel
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+Y1 <= mux_gate_bus_1:gate1.p_out[0]
+Y2 <= mux_gate_bus_1:gate1.p_out[1]
+Y3 <= mux_gate_bus_1:gate1.p_out[2]
+Y4 <= mux_gate_bus_1:gate1.p_out[3]
+
+
+|main|n74157:gate1|MUX_GATE_BUS_1:gate0
+p_out[0] <= Selector3.DB_MAX_OUTPUT_PORT_TYPE
+p_out[1] <= Selector2.DB_MAX_OUTPUT_PORT_TYPE
+p_out[2] <= Selector1.DB_MAX_OUTPUT_PORT_TYPE
+p_out[3] <= Selector0.DB_MAX_OUTPUT_PORT_TYPE
+sel => p_out.IN0
+sel => WideNor0.IN1
+sel => Selector0.IN3
+sel => Selector1.IN3
+sel => Selector2.IN3
+sel => Selector3.IN3
+in_0[0] => Selector3.IN4
+in_0[1] => Selector2.IN4
+in_0[2] => Selector1.IN4
+in_0[3] => Selector0.IN4
+in_1[0] => Selector3.IN5
+in_1[1] => Selector2.IN5
+in_1[2] => Selector1.IN5
+in_1[3] => Selector0.IN5
+
+
+|main|n74157:gate1|MUX_GATE_BUS_1:gate1
+p_out[0] <= Selector3.DB_MAX_OUTPUT_PORT_TYPE
+p_out[1] <= Selector2.DB_MAX_OUTPUT_PORT_TYPE
+p_out[2] <= Selector1.DB_MAX_OUTPUT_PORT_TYPE
+p_out[3] <= Selector0.DB_MAX_OUTPUT_PORT_TYPE
+sel => p_out.IN0
+sel => WideNor0.IN1
+sel => Selector0.IN3
+sel => Selector1.IN3
+sel => Selector2.IN3
+sel => Selector3.IN3
+in_0[0] => Selector3.IN4
+in_0[1] => Selector2.IN4
+in_0[2] => Selector1.IN4
+in_0[3] => Selector0.IN4
+in_1[0] => Selector3.IN5
+in_1[1] => Selector2.IN5
+in_1[2] => Selector1.IN5
+in_1[3] => Selector0.IN5
+
+
+|main|n74153:gate2
+A => mux_gate_2:gate0.sel[0]
+A => mux_gate_2:gate1.sel[0]
+B => mux_gate_2:gate0.sel[1]
+B => mux_gate_2:gate1.sel[1]
+n2G => n2Y.IN0
+n2C0 => mux_gate_2:gate0.in_0
+n2C1 => mux_gate_2:gate0.in_1
+n2C2 => mux_gate_2:gate0.in_2
+n2C3 => mux_gate_2:gate0.in_3
+n1G => n1Y.IN0
+n1C0 => mux_gate_2:gate1.in_0
+n1C1 => mux_gate_2:gate1.in_1
+n1C2 => mux_gate_2:gate1.in_2
+n1C3 => mux_gate_2:gate1.in_3
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+n2Y <= n2Y.DB_MAX_OUTPUT_PORT_TYPE
+n1Y <= n1Y.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|main|n74153:gate2|MUX_GATE_2:gate0
+p_out <= Mux0.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Mux0.IN1
+sel[1] => Mux0.IN0
+in_0 => Mux0.IN2
+in_1 => Mux0.IN3
+in_2 => Mux0.IN4
+in_3 => Mux0.IN5
+
+
+|main|n74153:gate2|MUX_GATE_2:gate1
+p_out <= Mux0.DB_MAX_OUTPUT_PORT_TYPE
+sel[0] => Mux0.IN1
+sel[1] => Mux0.IN0
+in_0 => Mux0.IN2
+in_1 => Mux0.IN3
+in_2 => Mux0.IN4
+in_3 => Mux0.IN5
+
+
+|main|n74148:gate3
+EI => A2.IN1
+EI => GS.IN1
+EI => A1.IN1
+EI => A0.IN1
+EI => E0.IN1
+n0 => GS.IN0
+n0 => E0.IN0
+n1 => GS.IN1
+n1 => A0.IN0
+n1 => E0.IN0
+n2 => GS.IN1
+n2 => s2.IN0
+n2 => A1.IN0
+n3 => GS.IN1
+n3 => A1.IN1
+n3 => A0.IN1
+n3 => A0.IN0
+n3 => E0.IN0
+n4 => A2.IN0
+n4 => GS.IN1
+n4 => s0.IN0
+n5 => A2.IN1
+n5 => GS.IN1
+n5 => s1.IN0
+n5 => A0.IN1
+n5 => A0.IN1
+n5 => A0.IN0
+n6 => A2.IN1
+n6 => GS.IN1
+n6 => s3.IN0
+n6 => A1.IN1
+n6 => A1.IN0
+n6 => A1.IN0
+n7 => A2.IN1
+n7 => GS.IN1
+n7 => A1.IN1
+n7 => A1.IN1
+n7 => A1.IN1
+n7 => A0.IN1
+n7 => A0.IN1
+n7 => A0.IN1
+n7 => A0.IN0
+n7 => E0.IN0
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+A2 <= A2.DB_MAX_OUTPUT_PORT_TYPE
+A1 <= A1.DB_MAX_OUTPUT_PORT_TYPE
+A0 <= A0.DB_MAX_OUTPUT_PORT_TYPE
+GS <= GS.DB_MAX_OUTPUT_PORT_TYPE
+E0 <= E0.DB_MAX_OUTPUT_PORT_TYPE
+
+
+|main|n74164:gate4
+CP => dig_d_ff_as:gate0.C
+CP => dig_d_ff_as:gate1.C
+CP => dig_d_ff_as:gate2.C
+CP => dig_d_ff_as:gate3.C
+CP => dig_d_ff_as:gate4.C
+CP => dig_d_ff_as:gate5.C
+CP => dig_d_ff_as:gate6.C
+CP => dig_d_ff_as:gate7.C
+DSA => s0.IN0
+DSB => s0.IN1
+notMR => s1.IN0
+VCC => ~NO_FANOUT~
+GND => ~NO_FANOUT~
+Q0 <= dig_d_ff_as:gate0.Q
+Q1 <= dig_d_ff_as:gate1.Q
+Q2 <= dig_d_ff_as:gate2.Q
+Q3 <= dig_d_ff_as:gate3.Q
+Q4 <= dig_d_ff_as:gate4.Q
+Q5 <= dig_d_ff_as:gate5.Q
+Q6 <= dig_d_ff_as:gate6.Q
+Q7 <= dig_d_ff_as:gate7.Q
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate0
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate1
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate2
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate3
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate4
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate5
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate6
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|n74164:gate4|DIG_D_FF_AS:gate7
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+
+|main|DIG_D_FF_AS:gate5
+Q <= state.DB_MAX_OUTPUT_PORT_TYPE
+notQ <= notQ.DB_MAX_OUTPUT_PORT_TYPE
+Set => state.IN0
+Set => state.PRESET
+D => state.DATAIN
+C => state.CLK
+Clr => state.IN1
+
+

@@ -1,0 +1,572 @@
+Fitter report for main
+Sat Sep 09 09:15:50 2023
+Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Fitter Summary
+  3. Fitter Settings
+  4. Parallel Compilation
+  5. Pin-Out File
+  6. Fitter Resource Usage Summary
+  7. Input Pins
+  8. Output Pins
+  9. All Package Pins
+ 10. I/O Standard
+ 11. Dedicated Inputs I/O
+ 12. Output Pin Default Load For Reported TCO
+ 13. Fitter Resource Utilization by Entity
+ 14. Control Signals
+ 15. Global & Other Fast Signals
+ 16. Non-Global High Fan-Out Signals
+ 17. Other Routing Usage Summary
+ 18. LAB External Interconnect
+ 19. LAB Macrocells
+ 20. Shareable Expander
+ 21. Logic Cell Interconnection
+ 22. Fitter Device Options
+ 23. Fitter Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-----------------------------------------------------------------------------+
+; Fitter Summary                                                              ;
++---------------------------+-------------------------------------------------+
+; Fitter Status             ; Successful - Sat Sep 09 09:15:50 2023           ;
+; Quartus II 32-bit Version ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
+; Revision Name             ; main                                            ;
+; Top-level Entity Name     ; main                                            ;
+; Family                    ; MAX7000S                                        ;
+; Device                    ; EPM7128SLC84-10                                 ;
+; Timing Models             ; Final                                           ;
+; Total macrocells          ; 28 / 128 ( 22 % )                               ;
+; Total pins                ; 65 / 68 ( 96 % )                                ;
++---------------------------+-------------------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------+
+; Fitter Settings                                                                                              ;
++----------------------------------------------------------------------------+-----------------+---------------+
+; Option                                                                     ; Setting         ; Default Value ;
++----------------------------------------------------------------------------+-----------------+---------------+
+; Device                                                                     ; EPM7128SLC84-10 ;               ;
+; Use smart compilation                                                      ; Off             ; Off           ;
+; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation ; On              ; On            ;
+; Enable compact report table                                                ; Off             ; Off           ;
+; Optimize Multi-Corner Timing                                               ; Off             ; Off           ;
+; Optimize Timing for ECOs                                                   ; Off             ; Off           ;
+; Regenerate full fit report during ECO compiles                             ; Off             ; Off           ;
+; Optimize IOC Register Placement for Timing                                 ; Normal          ; Normal        ;
+; Fitter Initial Placement Seed                                              ; 1               ; 1             ;
+; Slow Slew Rate                                                             ; Off             ; Off           ;
+; Fitter Effort                                                              ; Auto Fit        ; Auto Fit      ;
+; Force Fitter to Avoid Periphery Placement Warnings                         ; Off             ; Off           ;
++----------------------------------------------------------------------------+-----------------+---------------+
+
+
+Parallel compilation was disabled, but you have multiple processors available. Enable parallel compilation to reduce compilation time.
++-------------------------------------+
+; Parallel Compilation                ;
++----------------------------+--------+
+; Processors                 ; Number ;
++----------------------------+--------+
+; Number detected on machine ; 4      ;
+; Maximum allowed            ; 1      ;
++----------------------------+--------+
+
+
++--------------+
+; Pin-Out File ;
++--------------+
+The pin-out file can be found in C:/Users/Andrew/Desktop/System CD Updates/data/duodyne/GitHub/Slick/CPLDs/Slick-VHDL-CPU/output_files/main.pin.
+
+
++--------------------------------------------------+
+; Fitter Resource Usage Summary                    ;
++------------------------------+-------------------+
+; Resource                     ; Usage             ;
++------------------------------+-------------------+
+; Logic cells                  ; 28 / 128 ( 22 % ) ;
+; Registers                    ; 9 / 128 ( 7 % )   ;
+; Number of pterms used        ; 53                ;
+; I/O pins                     ; 65 / 68 ( 96 % )  ;
+;     -- Clock pins            ; 2 / 2 ( 100 % )   ;
+;     -- Dedicated input pins  ; 1 / 2 ( 50 % )    ;
+;                              ;                   ;
+; Global signals               ; 2                 ;
+; Shareable expanders          ; 1 / 128 ( < 1 % ) ;
+; Parallel expanders           ; 0 / 120 ( 0 % )   ;
+; Cells using turbo bit        ; 28 / 128 ( 22 % ) ;
+; Maximum fan-out              ; 13                ;
+; Highest non-global fan-out   ; 13                ;
+; Total fan-out                ; 147               ;
+; Average fan-out              ; 1.56              ;
++------------------------------+-------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------+
+; Input Pins                                                                                                                                         ;
++--------------+-------+----------+-----+-----------------------+--------------------+--------+----------------+--------------+----------------------+
+; Name         ; Pin # ; I/O Bank ; LAB ; Combinational Fan-Out ; Registered Fan-Out ; Global ; Input Register ; I/O Standard ; Location assigned by ;
++--------------+-------+----------+-----+-----------------------+--------------------+--------+----------------+--------------+----------------------+
+; CLK          ; 83    ; --       ; --  ; 8                     ; 0                  ; yes    ; no             ; TTL          ; Fitter               ;
+; CPU_A1       ; 64    ; --       ; 7   ; 3                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; CPU_A14      ; 69    ; --       ; 7   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; CPU_A15      ; 73    ; --       ; 8   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; CPU_A2       ; 34    ; --       ; 4   ; 4                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; CPU_D0       ; 75    ; --       ; 8   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; IOxSEL       ; 61    ; --       ; 6   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; WSxIORD      ; 57    ; --       ; 6   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; WSxIOWR      ; 48    ; --       ; 5   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; WSxMEMRD     ; 68    ; --       ; 7   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; WSxMEMWR     ; 76    ; --       ; 8   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; mA14         ; 50    ; --       ; 5   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; mA15         ; 54    ; --       ; 6   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notA         ; 67    ; --       ; 7   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxIORQ  ; 33    ; --       ; 4   ; 13                    ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxM1    ; 60    ; --       ; 6   ; 2                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxMREQ  ; 81    ; --       ; 8   ; 9                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxRD    ; 52    ; --       ; 5   ; 3                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxRESET ; 1     ; --       ; --  ; 2                     ; 0                  ; yes    ; no             ; TTL          ; Fitter               ;
+; notCPUxRFSH  ; 56    ; --       ; 6   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCPUxWR    ; 70    ; --       ; 7   ; 4                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notCSxMAP    ; 35    ; --       ; 4   ; 4                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notDMAxIEI1  ; 80    ; --       ; 8   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notDMAxIEO2  ; 51    ; --       ; 5   ; 2                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ0     ; 55    ; --       ; 6   ; 6                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ1     ; 2     ; --       ; --  ; 6                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ2     ; 45    ; --       ; 5   ; 6                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ3     ; 77    ; --       ; 8   ; 6                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ4     ; 49    ; --       ; 5   ; 5                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ5     ; 58    ; --       ; 6   ; 5                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ6     ; 46    ; --       ; 5   ; 4                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notEIRQ7     ; 65    ; --       ; 7   ; 3                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notFPxLATCH  ; 79    ; --       ; 8   ; 2                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
+; notINTxI2C   ; 74    ; --       ; 8   ; 1                     ; 0                  ; no     ; no             ; TTL          ; Fitter               ;
++--------------+-------+----------+-----+-----------------------+--------------------+--------+----------------+--------------+----------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Output Pins                                                                                                                                                                                        ;
++----------------+-------+----------+-----+-----------------+----------------+------------+---------------+--------------+----------------------+-------+----------------------+---------------------+
+; Name           ; Pin # ; I/O Bank ; LAB ; Output Register ; Slow Slew Rate ; Open Drain ; TRI Primitive ; I/O Standard ; Location assigned by ; Load  ; Output Enable Source ; Output Enable Group ;
++----------------+-------+----------+-----+-----------------+----------------+------------+---------------+--------------+----------------------+-------+----------------------+---------------------+
+; DATAxDIR       ; 9     ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; FPxLATCHxWR    ; 37    ; --       ; 4   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; IM2xS0         ; 5     ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; IM2xS1         ; 4     ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; IM2xS2         ; 11    ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; INT_I2C        ; 24    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; READY          ; 20    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; RESET          ; 28    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; SEL_A14        ; 29    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; SEL_A15        ; 12    ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n1WS           ; 30    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n2WS           ; 22    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n3WS           ; 21    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n4WS           ; 18    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n5WS           ; 17    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n6WS           ; 16    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n7WS           ; 15    ; --       ; 2   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; n8WS           ; 25    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notAxPRIME     ; 41    ; --       ; 4   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notCSxI2C      ; 36    ; --       ; 4   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notCSxI2CxWR   ; 31    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notFPxLATCHxRD ; 39    ; --       ; 4   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notIM2xEN      ; 6     ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notIM2xIEO     ; 8     ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notIM2xINT     ; 10    ; --       ; 1   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notPAGExEN     ; 27    ; --       ; 3   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
+; notPAGExWR     ; 40    ; --       ; 4   ; no              ; no             ; no         ; no            ; TTL          ; Fitter               ; 10 pF ; -                    ; -                   ;
++----------------+-------+----------+-----+-----------------+----------------+------------+---------------+--------------+----------------------+-------+----------------------+---------------------+
+
+
++-------------------------------------------------------------------------------------------------------+
+; All Package Pins                                                                                      ;
++----------+------------+----------+----------------+--------+--------------+---------+-----------------+
+; Location ; Pad Number ; I/O Bank ; Pin Name/Usage ; Dir.   ; I/O Standard ; Voltage ; User Assignment ;
++----------+------------+----------+----------------+--------+--------------+---------+-----------------+
+; 1        ; 0          ; --       ; notCPUxRESET   ; input  ; TTL          ;         ; N               ;
+; 2        ; 1          ; --       ; notEIRQ1       ; input  ; TTL          ;         ; N               ;
+; 3        ; 2          ; --       ; VCCINT         ; power  ;              ; 5.0V    ;                 ;
+; 4        ; 3          ; --       ; IM2xS1         ; output ; TTL          ;         ; N               ;
+; 5        ; 4          ; --       ; IM2xS0         ; output ; TTL          ;         ; N               ;
+; 6        ; 5          ; --       ; notIM2xEN      ; output ; TTL          ;         ; N               ;
+; 7        ; 6          ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 8        ; 7          ; --       ; notIM2xIEO     ; output ; TTL          ;         ; N               ;
+; 9        ; 8          ; --       ; DATAxDIR       ; output ; TTL          ;         ; N               ;
+; 10       ; 9          ; --       ; notIM2xINT     ; output ; TTL          ;         ; N               ;
+; 11       ; 10         ; --       ; IM2xS2         ; output ; TTL          ;         ; N               ;
+; 12       ; 11         ; --       ; SEL_A15        ; output ; TTL          ;         ; N               ;
+; 13       ; 12         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 14       ; 13         ; --       ; TDI            ; input  ; TTL          ;         ; N               ;
+; 15       ; 14         ; --       ; n7WS           ; output ; TTL          ;         ; N               ;
+; 16       ; 15         ; --       ; n6WS           ; output ; TTL          ;         ; N               ;
+; 17       ; 16         ; --       ; n5WS           ; output ; TTL          ;         ; N               ;
+; 18       ; 17         ; --       ; n4WS           ; output ; TTL          ;         ; N               ;
+; 19       ; 18         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 20       ; 19         ; --       ; READY          ; output ; TTL          ;         ; N               ;
+; 21       ; 20         ; --       ; n3WS           ; output ; TTL          ;         ; N               ;
+; 22       ; 21         ; --       ; n2WS           ; output ; TTL          ;         ; N               ;
+; 23       ; 22         ; --       ; TMS            ; input  ; TTL          ;         ; N               ;
+; 24       ; 23         ; --       ; INT_I2C        ; output ; TTL          ;         ; N               ;
+; 25       ; 24         ; --       ; n8WS           ; output ; TTL          ;         ; N               ;
+; 26       ; 25         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 27       ; 26         ; --       ; notPAGExEN     ; output ; TTL          ;         ; N               ;
+; 28       ; 27         ; --       ; RESET          ; output ; TTL          ;         ; N               ;
+; 29       ; 28         ; --       ; SEL_A14        ; output ; TTL          ;         ; N               ;
+; 30       ; 29         ; --       ; n1WS           ; output ; TTL          ;         ; N               ;
+; 31       ; 30         ; --       ; notCSxI2CxWR   ; output ; TTL          ;         ; N               ;
+; 32       ; 31         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 33       ; 32         ; --       ; notCPUxIORQ    ; input  ; TTL          ;         ; N               ;
+; 34       ; 33         ; --       ; CPU_A2         ; input  ; TTL          ;         ; N               ;
+; 35       ; 34         ; --       ; notCSxMAP      ; input  ; TTL          ;         ; N               ;
+; 36       ; 35         ; --       ; notCSxI2C      ; output ; TTL          ;         ; N               ;
+; 37       ; 36         ; --       ; FPxLATCHxWR    ; output ; TTL          ;         ; N               ;
+; 38       ; 37         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 39       ; 38         ; --       ; notFPxLATCHxRD ; output ; TTL          ;         ; N               ;
+; 40       ; 39         ; --       ; notPAGExWR     ; output ; TTL          ;         ; N               ;
+; 41       ; 40         ; --       ; notAxPRIME     ; output ; TTL          ;         ; N               ;
+; 42       ; 41         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 43       ; 42         ; --       ; VCCINT         ; power  ;              ; 5.0V    ;                 ;
+; 44       ; 43         ; --       ; RESERVED       ;        ;              ;         ;                 ;
+; 45       ; 44         ; --       ; notEIRQ2       ; input  ; TTL          ;         ; N               ;
+; 46       ; 45         ; --       ; notEIRQ6       ; input  ; TTL          ;         ; N               ;
+; 47       ; 46         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 48       ; 47         ; --       ; WSxIOWR        ; input  ; TTL          ;         ; N               ;
+; 49       ; 48         ; --       ; notEIRQ4       ; input  ; TTL          ;         ; N               ;
+; 50       ; 49         ; --       ; mA14           ; input  ; TTL          ;         ; N               ;
+; 51       ; 50         ; --       ; notDMAxIEO2    ; input  ; TTL          ;         ; N               ;
+; 52       ; 51         ; --       ; notCPUxRD      ; input  ; TTL          ;         ; N               ;
+; 53       ; 52         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 54       ; 53         ; --       ; mA15           ; input  ; TTL          ;         ; N               ;
+; 55       ; 54         ; --       ; notEIRQ0       ; input  ; TTL          ;         ; N               ;
+; 56       ; 55         ; --       ; notCPUxRFSH    ; input  ; TTL          ;         ; N               ;
+; 57       ; 56         ; --       ; WSxIORD        ; input  ; TTL          ;         ; N               ;
+; 58       ; 57         ; --       ; notEIRQ5       ; input  ; TTL          ;         ; N               ;
+; 59       ; 58         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 60       ; 59         ; --       ; notCPUxM1      ; input  ; TTL          ;         ; N               ;
+; 61       ; 60         ; --       ; IOxSEL         ; input  ; TTL          ;         ; N               ;
+; 62       ; 61         ; --       ; TCK            ; input  ; TTL          ;         ; N               ;
+; 63       ; 62         ; --       ; RESERVED       ;        ;              ;         ;                 ;
+; 64       ; 63         ; --       ; CPU_A1         ; input  ; TTL          ;         ; N               ;
+; 65       ; 64         ; --       ; notEIRQ7       ; input  ; TTL          ;         ; N               ;
+; 66       ; 65         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 67       ; 66         ; --       ; notA           ; input  ; TTL          ;         ; N               ;
+; 68       ; 67         ; --       ; WSxMEMRD       ; input  ; TTL          ;         ; N               ;
+; 69       ; 68         ; --       ; CPU_A14        ; input  ; TTL          ;         ; N               ;
+; 70       ; 69         ; --       ; notCPUxWR      ; input  ; TTL          ;         ; N               ;
+; 71       ; 70         ; --       ; TDO            ; output ; TTL          ;         ; N               ;
+; 72       ; 71         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 73       ; 72         ; --       ; CPU_A15        ; input  ; TTL          ;         ; N               ;
+; 74       ; 73         ; --       ; notINTxI2C     ; input  ; TTL          ;         ; N               ;
+; 75       ; 74         ; --       ; CPU_D0         ; input  ; TTL          ;         ; N               ;
+; 76       ; 75         ; --       ; WSxMEMWR       ; input  ; TTL          ;         ; N               ;
+; 77       ; 76         ; --       ; notEIRQ3       ; input  ; TTL          ;         ; N               ;
+; 78       ; 77         ; --       ; VCCIO          ; power  ;              ; 5.0V    ;                 ;
+; 79       ; 78         ; --       ; notFPxLATCH    ; input  ; TTL          ;         ; N               ;
+; 80       ; 79         ; --       ; notDMAxIEI1    ; input  ; TTL          ;         ; N               ;
+; 81       ; 80         ; --       ; notCPUxMREQ    ; input  ; TTL          ;         ; N               ;
+; 82       ; 81         ; --       ; GND            ; gnd    ;              ;         ;                 ;
+; 83       ; 82         ; --       ; CLK            ; input  ; TTL          ;         ; N               ;
+; 84       ; 83         ; --       ; GND+           ;        ;              ;         ;                 ;
++----------+------------+----------+----------------+--------+--------------+---------+-----------------+
+Note: Pin directions (input, output or bidir) are based on device operating in user mode.
+
+
++--------------------------------------------------------------------------------------------------+
+; I/O Standard                                                                                     ;
++--------------+------------+----------------------+-------------------+-------------------+-------+
+; I/O Standard ; Input Vref ; Dedicated Input Pins ; Pins in I/O Bank1 ; Pins in I/O Bank2 ; Total ;
++--------------+------------+----------------------+-------------------+-------------------+-------+
+; TTL          ; -          ; 3                    ; 0                 ; 0                 ; 3     ;
++--------------+------------+----------------------+-------------------+-------------------+-------+
+
+
++----------------------------------------------------------------------------+
+; Dedicated Inputs I/O                                                       ;
++--------------+-------+-------+-------+--------------+------------+---------+
+; Name         ; Pin # ; Type  ; VCCIO ; I/O Standard ; Input Vref ; Current ;
++--------------+-------+-------+-------+--------------+------------+---------+
+; CLK          ; 83    ; Input ; --    ; TTL          ; -          ; 0 mA    ;
+; notCPUxRESET ; 1     ; Input ; --    ; TTL          ; -          ; 0 mA    ;
+; notEIRQ1     ; 2     ; Input ; --    ; TTL          ; -          ; 0 mA    ;
++--------------+-------+-------+-------+--------------+------------+---------+
+
+
++-----------------------------------------------+
+; Output Pin Default Load For Reported TCO      ;
++--------------+-------+------------------------+
+; I/O Standard ; Load  ; Termination Resistance ;
++--------------+-------+------------------------+
+; 3.3-V LVTTL  ; 10 pF ; Not Available          ;
+; 3.3-V LVCMOS ; 10 pF ; Not Available          ;
+; TTL          ; 10 pF ; Not Available          ;
++--------------+-------+------------------------+
+Note: User assignments will override these defaults. The user specified values are listed in the Output Pins and Bidir Pins tables.
+
+
++-----------------------------------------------------------------------------------------------------------+
+; Fitter Resource Utilization by Entity                                                                     ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+; Compilation Hierarchy Node   ; Macrocells ; Pins ; Full Hierarchy Name                     ; Library Name ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+; |main                        ; 28         ; 65   ; |main                                   ; work         ;
+;    |DIG_D_FF_AS:gate5|       ; 2          ; 0    ; |main|DIG_D_FF_AS:gate5                 ; work         ;
+;    |n74139:gate0|            ; 1          ; 0    ; |main|n74139:gate0                      ; work         ;
+;       |DEMUX_GATE_2:gate0|   ; 1          ; 0    ; |main|n74139:gate0|DEMUX_GATE_2:gate0   ; work         ;
+;    |n74148:gate3|            ; 4          ; 0    ; |main|n74148:gate3                      ; work         ;
+;    |n74157:gate1|            ; 2          ; 0    ; |main|n74157:gate1                      ; work         ;
+;       |MUX_GATE_BUS_1:gate0| ; 2          ; 0    ; |main|n74157:gate1|MUX_GATE_BUS_1:gate0 ; work         ;
+;    |n74164:gate4|            ; 8          ; 0    ; |main|n74164:gate4                      ; work         ;
+;       |DIG_D_FF_AS:gate0|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate0    ; work         ;
+;       |DIG_D_FF_AS:gate1|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate1    ; work         ;
+;       |DIG_D_FF_AS:gate2|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate2    ; work         ;
+;       |DIG_D_FF_AS:gate3|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate3    ; work         ;
+;       |DIG_D_FF_AS:gate4|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate4    ; work         ;
+;       |DIG_D_FF_AS:gate5|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate5    ; work         ;
+;       |DIG_D_FF_AS:gate6|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate6    ; work         ;
+;       |DIG_D_FF_AS:gate7|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate7    ; work         ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+
+
++-----------------------------------------------------------------------------------------------------+
+; Control Signals                                                                                     ;
++--------------+----------+---------+--------------+--------+----------------------+------------------+
+; Name         ; Location ; Fan-Out ; Usage        ; Global ; Global Resource Used ; Global Line Name ;
++--------------+----------+---------+--------------+--------+----------------------+------------------+
+; CLK          ; PIN_83   ; 8       ; Clock        ; yes    ; On                   ; --               ;
+; notCPUxIORQ  ; PIN_33   ; 13      ; Async. clear ; no     ; --                   ; --               ;
+; notCPUxMREQ  ; PIN_81   ; 9       ; Async. clear ; no     ; --                   ; --               ;
+; notCPUxRESET ; PIN_1    ; 2       ; Async. clear ; yes    ; On                   ; --               ;
+; s3~1         ; SEXP49   ; 1       ; Clock        ; no     ; --                   ; --               ;
++--------------+----------+---------+--------------+--------+----------------------+------------------+
+
+
++-----------------------------------------------------------------------------+
+; Global & Other Fast Signals                                                 ;
++--------------+----------+---------+----------------------+------------------+
+; Name         ; Location ; Fan-Out ; Global Resource Used ; Global Line Name ;
++--------------+----------+---------+----------------------+------------------+
+; CLK          ; PIN_83   ; 8       ; On                   ; --               ;
+; notCPUxRESET ; PIN_1    ; 2       ; On                   ; --               ;
++--------------+----------+---------+----------------------+------------------+
+
+
++---------------------------------------------------------+
+; Non-Global High Fan-Out Signals                         ;
++-----------------------------------------------+---------+
+; Name                                          ; Fan-Out ;
++-----------------------------------------------+---------+
+; notCPUxIORQ                                   ; 13      ;
+; notCPUxMREQ                                   ; 9       ;
+; notEIRQ3                                      ; 6       ;
+; notEIRQ2                                      ; 6       ;
+; notEIRQ1                                      ; 6       ;
+; notEIRQ0                                      ; 6       ;
+; notEIRQ4                                      ; 5       ;
+; notEIRQ5                                      ; 5       ;
+; notEIRQ6                                      ; 4       ;
+; notCSxMAP                                     ; 4       ;
+; CPU_A2                                        ; 4       ;
+; notCPUxWR                                     ; 4       ;
+; notEIRQ7                                      ; 3       ;
+; CPU_A1                                        ; 3       ;
+; notCPUxRD                                     ; 3       ;
+; notFPxLATCH                                   ; 2       ;
+; notDMAxIEO2                                   ; 2       ;
+; notCPUxM1                                     ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate6|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate5|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate4|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate3|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate2|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate1|state          ; 2       ;
+; n74164:gate4|DIG_D_FF_AS:gate0|state          ; 2       ;
+; CPU_D0                                        ; 1       ;
+; notCPUxRFSH                                   ; 1       ;
+; WSxIOWR                                       ; 1       ;
+; WSxMEMWR                                      ; 1       ;
+; WSxIORD                                       ; 1       ;
+; WSxMEMRD                                      ; 1       ;
+; notA                                          ; 1       ;
+; notINTxI2C                                    ; 1       ;
+; mA15                                          ; 1       ;
+; CPU_A15                                       ; 1       ;
+; mA14                                          ; 1       ;
+; CPU_A14                                       ; 1       ;
+; notDMAxIEI1                                   ; 1       ;
+; IOxSEL                                        ; 1       ;
+; n74164:gate4|DIG_D_FF_AS:gate7|state          ; 1       ;
+; n74148:gate3|A0~10                            ; 1       ;
+; notIM2xEN~3                                   ; 1       ;
+; DIG_D_FF_AS:gate5|state~1                     ; 1       ;
+; READY~14                                      ; 1       ;
+; notIM2xIEO_temp~3                             ; 1       ;
+; DATAxDIR~5                                    ; 1       ;
+; n74148:gate3|A1~7                             ; 1       ;
+; s3~1                                          ; 1       ;
+; DIG_D_FF_AS:gate5|state                       ; 1       ;
+; n74148:gate3|GS~4                             ; 1       ;
+; notCPUxRESET~4                                ; 1       ;
+; n74148:gate3|A2~3                             ; 1       ;
+; n74157:gate1|MUX_GATE_BUS_1:gate0|Selector2~5 ; 1       ;
+; n74157:gate1|MUX_GATE_BUS_1:gate0|Selector3~5 ; 1       ;
+; n74139:gate0|DEMUX_GATE_2:gate0|out_0~1       ; 1       ;
+; notAxPRIME~1                                  ; 1       ;
+; notA~1                                        ; 1       ;
+; notINTxI2C~1                                  ; 1       ;
+; notCSxI2C_temp~2                              ; 1       ;
+; FPxLATCHxWR~1                                 ; 1       ;
+; notFPxLATCHxRD~1                              ; 1       ;
++-----------------------------------------------+---------+
+
+
++-------------------------------------------------+
+; Other Routing Usage Summary                     ;
++-----------------------------+-------------------+
+; Other Routing Resource Type ; Usage             ;
++-----------------------------+-------------------+
+; Output enables              ; 0 / 6 ( 0 % )     ;
+; PIA buffers                 ; 46 / 288 ( 16 % ) ;
+; PIAs                        ; 46 / 288 ( 16 % ) ;
++-----------------------------+-------------------+
+
+
++----------------------------------------------------------------------------+
+; LAB External Interconnect                                                  ;
++----------------------------------------------+-----------------------------+
+; LAB External Interconnects  (Average = 5.75) ; Number of LABs  (Total = 4) ;
++----------------------------------------------+-----------------------------+
+; 0                                            ; 4                           ;
+; 1                                            ; 0                           ;
+; 2                                            ; 0                           ;
+; 3                                            ; 0                           ;
+; 4                                            ; 0                           ;
+; 5                                            ; 0                           ;
+; 6                                            ; 0                           ;
+; 7                                            ; 1                           ;
+; 8                                            ; 0                           ;
+; 9                                            ; 1                           ;
+; 10                                           ; 0                           ;
+; 11                                           ; 0                           ;
+; 12                                           ; 0                           ;
+; 13                                           ; 0                           ;
+; 14                                           ; 1                           ;
+; 15                                           ; 0                           ;
+; 16                                           ; 1                           ;
++----------------------------------------------+-----------------------------+
+
+
++----------------------------------------------------------------------+
+; LAB Macrocells                                                       ;
++----------------------------------------+-----------------------------+
+; Number of Macrocells  (Average = 3.50) ; Number of LABs  (Total = 4) ;
++----------------------------------------+-----------------------------+
+; 0                                      ; 4                           ;
+; 1                                      ; 0                           ;
+; 2                                      ; 0                           ;
+; 3                                      ; 0                           ;
+; 4                                      ; 0                           ;
+; 5                                      ; 0                           ;
+; 6                                      ; 1                           ;
+; 7                                      ; 2                           ;
+; 8                                      ; 1                           ;
++----------------------------------------+-----------------------------+
+
+
++-------------------------------------------------------------------------------+
+; Shareable Expander                                                            ;
++-------------------------------------------------+-----------------------------+
+; Number of shareable expanders  (Average = 0.13) ; Number of LABs  (Total = 1) ;
++-------------------------------------------------+-----------------------------+
+; 0                                               ; 7                           ;
+; 1                                               ; 1                           ;
++-------------------------------------------------+-----------------------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Logic Cell Interconnection                                                                                                                                                          ;
++-----+------------+---------------------------------------------------------------------------------------------------------------------+--------------------------------------------+
+; LAB ; Logic Cell ; Input                                                                                                               ; Output                                     ;
++-----+------------+---------------------------------------------------------------------------------------------------------------------+--------------------------------------------+
+;  A  ; LC3        ; notCPUxIORQ, mA15, CPU_A15                                                                                          ; SEL_A15                                    ;
+;  A  ; LC5        ; notEIRQ2, notEIRQ3, notEIRQ0, notEIRQ1                                                                              ; IM2xS2                                     ;
+;  A  ; LC6        ; notEIRQ7, notEIRQ6, notEIRQ2, notEIRQ3, notEIRQ0, notEIRQ1, notEIRQ5, notEIRQ4                                      ; notIM2xINT                                 ;
+;  A  ; LC16       ; notEIRQ5, notEIRQ4, notEIRQ0, notEIRQ1, notEIRQ2, notEIRQ3                                                          ; IM2xS1                                     ;
+;  A  ; LC8        ; notDMAxIEI1, notCPUxM1, notCPUxIORQ, IOxSEL, notCPUxRD                                                              ; DATAxDIR                                   ;
+;  A  ; LC11       ; notEIRQ7, notEIRQ6, notEIRQ2, notEIRQ3, notEIRQ0, notEIRQ1, notEIRQ5, notEIRQ4, notDMAxIEO2                         ; notIM2xIEO                                 ;
+;  A  ; LC13       ; notEIRQ7, notEIRQ6, notEIRQ2, notEIRQ3, notEIRQ0, notEIRQ1, notEIRQ5, notEIRQ4, notDMAxIEO2, notCPUxM1, notCPUxIORQ ; notIM2xEN                                  ;
+;  A  ; LC14       ; notEIRQ1, notEIRQ0, notEIRQ3, notEIRQ2, notEIRQ6, notEIRQ4, notEIRQ5                                                ; IM2xS0                                     ;
+;  B  ; LC17       ; CLK, n74164:gate4|DIG_D_FF_AS:gate0|state, notCPUxIORQ, notCPUxMREQ                                                 ; n2WS, n74164:gate4|DIG_D_FF_AS:gate2|state ;
+;  B  ; LC19       ; CLK, n74164:gate4|DIG_D_FF_AS:gate1|state, notCPUxIORQ, notCPUxMREQ                                                 ; n3WS, n74164:gate4|DIG_D_FF_AS:gate3|state ;
+;  B  ; LC21       ; WSxIOWR, notCPUxIORQ, WSxMEMWR, WSxIORD, notCPUxRFSH, WSxMEMRD, notCPUxRD, notCPUxMREQ                              ; READY                                      ;
+;  B  ; LC24       ; CLK, n74164:gate4|DIG_D_FF_AS:gate2|state, notCPUxIORQ, notCPUxMREQ                                                 ; n4WS, n74164:gate4|DIG_D_FF_AS:gate4|state ;
+;  B  ; LC25       ; CLK, n74164:gate4|DIG_D_FF_AS:gate3|state, notCPUxIORQ, notCPUxMREQ                                                 ; n5WS, n74164:gate4|DIG_D_FF_AS:gate5|state ;
+;  B  ; LC27       ; CLK, n74164:gate4|DIG_D_FF_AS:gate4|state, notCPUxIORQ, notCPUxMREQ                                                 ; n6WS, n74164:gate4|DIG_D_FF_AS:gate6|state ;
+;  B  ; LC29       ; CLK, n74164:gate4|DIG_D_FF_AS:gate5|state, notCPUxIORQ, notCPUxMREQ                                                 ; n7WS, n74164:gate4|DIG_D_FF_AS:gate7|state ;
+;  C  ; LC46       ; notINTxI2C                                                                                                          ; INT_I2C                                    ;
+;  C  ; LC35       ; notA                                                                                                                ; notCSxI2CxWR                               ;
+;  C  ; LC37       ; CLK, notCPUxIORQ, notCPUxMREQ                                                                                       ; n1WS, n74164:gate4|DIG_D_FF_AS:gate1|state ;
+;  C  ; LC38       ; notCPUxIORQ, mA14, CPU_A14                                                                                          ; SEL_A14                                    ;
+;  C  ; LC40       ; notCPUxRESET                                                                                                        ; RESET                                      ;
+;  C  ; LC43       ; DIG_D_FF_AS:gate5|state                                                                                             ; notPAGExEN                                 ;
+;  C  ; LC45       ; CLK, n74164:gate4|DIG_D_FF_AS:gate6|state, notCPUxIORQ, notCPUxMREQ                                                 ; n8WS                                       ;
+;  D  ; LC53       ; notCPUxRD, notFPxLATCH                                                                                              ; notFPxLATCHxRD                             ;
+;  D  ; LC56       ; notFPxLATCH, notCPUxWR                                                                                              ; FPxLATCHxWR                                ;
+;  D  ; LC57       ; CPU_A2, notCSxMAP, CPU_A1                                                                                           ; notCSxI2C                                  ;
+;  D  ; LC49       ; CPU_A2, notCSxMAP, CPU_A1, notCPUxWR                                                                                ; notAxPRIME                                 ;
+;  D  ; LC51       ; CPU_A2, notCPUxWR, notCSxMAP                                                                                        ; notPAGExWR                                 ;
+;  D  ; LC50       ; notCPUxRESET, CPU_D0, s3~1                                                                                          ; DIG_D_FF_AS:gate5|state~1                  ;
++-----+------------+---------------------------------------------------------------------------------------------------------------------+--------------------------------------------+
+
+
++---------------------------------------------------------------+
+; Fitter Device Options                                         ;
++----------------------------------------------+----------------+
+; Option                                       ; Setting        ;
++----------------------------------------------+----------------+
+; Enable user-supplied start-up clock (CLKUSR) ; Off            ;
+; Enable device-wide reset (DEV_CLRn)          ; Off            ;
+; Enable device-wide output enable (DEV_OE)    ; Off            ;
+; Enable INIT_DONE output                      ; Off            ;
+; Configuration scheme                         ; Passive Serial ;
+; Security bit                                 ; Off            ;
+; Base pin-out file on sameframe device        ; Off            ;
++----------------------------------------------+----------------+
+
+
++-----------------+
+; Fitter Messages ;
++-----------------+
+Warning (20028): Parallel compilation is not licensed and has been disabled
+Info (119006): Selected device EPM7128SLC84-10 for design "main"
+Info: Quartus II 32-bit Fitter was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 334 megabytes
+    Info: Processing ended: Sat Sep 09 09:15:51 2023
+    Info: Elapsed time: 00:00:14
+    Info: Total CPU time (on all processors): 00:00:04
+
+
