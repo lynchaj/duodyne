@@ -543,7 +543,7 @@ module \Z80-processor-CPU  (
   assign RESET = ~ \~CPUxRESET ;
   assign s6 = ~ const1b1;
   assign s7 = ~ \~CPUxRESET ;
-  assign DATAxDIR = ((\~CPUxRD  | IOxSEL) & (s0 | ~ \~DMAxIEI1 ));
+  assign DATAxDIR = ((\~CPUxRD  | IOxSEL) & (s0 | ~ \~DMAxIEO2 ));
   assign \~IM2xIEO_temp  = (\~IM2xINT_temp  | ~ \~DMAxIEO2 );
   assign s3 = (s1 | \CPU-A1 );
   assign \~CSxI2C_temp  = (s2 | ~ \CPU-A1 );
