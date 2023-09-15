@@ -1,18 +1,18 @@
 #include <Arduino.h>
 #include "interface.h"
 #include "serial.h"
-
+#include "pins.h"
 
 
 void serialHelper::setBaud(int b)
 {
     serialBaud =b;
-    Serial.begin(serialBaud, serialMode);
+    Serial.begin(serialBaud, serialMode,RXPIN,TXPIN);
 }
 
 void serialHelper::initialize()
 {
-    Serial.begin(serialBaud, serialMode);
+    Serial.begin(serialBaud, serialMode,RXPIN,TXPIN);
 }
 
 void serialHelper::setSerialMode(uint8_t b)

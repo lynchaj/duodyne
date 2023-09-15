@@ -8,6 +8,8 @@
 #define INDATA 17
 #define BUSY 18
 #define READY 5
+#define RXPIN 3
+#define TXPIN 1
 
 
 #define MOUSEDATA  GPIO_NUM_32
