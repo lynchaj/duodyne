@@ -1,0 +1,548 @@
+TimeQuest Timing Analyzer report for Z80-processor-DMA
+Sun Sep 03 21:18:11 2023
+Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. TimeQuest Timing Analyzer Summary
+  3. Parallel Compilation
+  4. Clocks
+  5. Fmax Summary
+  6. Setup Summary
+  7. Hold Summary
+  8. Recovery Summary
+  9. Removal Summary
+ 10. Minimum Pulse Width Summary
+ 11. Minimum Pulse Width: 'CPUxA0'
+ 12. Setup Times
+ 13. Hold Times
+ 14. Clock to Output Times
+ 15. Minimum Clock to Output Times
+ 16. Propagation Delay
+ 17. Minimum Propagation Delay
+ 18. Clock Transfers
+ 19. Report TCCS
+ 20. Report RSKM
+ 21. Unconstrained Paths
+ 22. TimeQuest Timing Analyzer Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++----------------------------------------------------------------------------------------+
+; TimeQuest Timing Analyzer Summary                                                      ;
++--------------------+-------------------------------------------------------------------+
+; Quartus II Version ; Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition ;
+; Revision Name      ; Z80-processor-DMA                                                 ;
+; Device Family      ; MAX7000S                                                          ;
+; Device Name        ; EPM7064SLC84-10                                                   ;
+; Timing Models      ; Final                                                             ;
+; Delay Model        ; Slow Model                                                        ;
+; Rise/Fall Delays   ; Unavailable                                                       ;
++--------------------+-------------------------------------------------------------------+
+
+
+Parallel compilation was disabled, but you have multiple processors available. Enable parallel compilation to reduce compilation time.
++-------------------------------------+
+; Parallel Compilation                ;
++----------------------------+--------+
+; Processors                 ; Number ;
++----------------------------+--------+
+; Number detected on machine ; 4      ;
+; Maximum allowed            ; 1      ;
++----------------------------+--------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Clocks                                                                                                                                                                             ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+; Clock Name ; Type ; Period ; Frequency  ; Rise  ; Fall  ; Duty Cycle ; Divide by ; Multiply by ; Phase ; Offset ; Edge List ; Edge Shift ; Inverted ; Master ; Source ; Targets    ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+; CPUxA0     ; Base ; 1.000  ; 1000.0 MHz ; 0.000 ; 0.500 ;            ;           ;             ;       ;        ;           ;            ;          ;        ;        ; { CPUxA0 } ;
++------------+------+--------+------------+-------+-------+------------+-----------+-------------+-------+--------+-----------+------------+----------+--------+--------+------------+
+
+
+----------------
+; Fmax Summary ;
+----------------
+No paths to report.
+
+
+-----------------
+; Setup Summary ;
+-----------------
+No paths to report.
+
+
+----------------
+; Hold Summary ;
+----------------
+No paths to report.
+
+
+--------------------
+; Recovery Summary ;
+--------------------
+No paths to report.
+
+
+-------------------
+; Removal Summary ;
+-------------------
+No paths to report.
+
+
++---------------------------------+
+; Minimum Pulse Width Summary     ;
++--------+--------+---------------+
+; Clock  ; Slack  ; End Point TNS ;
++--------+--------+---------------+
+; CPUxA0 ; -3.500 ; -28.000       ;
++--------+--------+---------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------+
+; Minimum Pulse Width: 'CPUxA0'                                                                                                                  ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------------------------+
+; Slack  ; Actual Width ; Required Width ; Type             ; Clock  ; Clock Edge ; Target                                                       ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------------------------+
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[0] ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[0] ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[1] ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[1] ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[2] ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[2] ;
+; -3.500 ; 0.500        ; 4.000          ; High Pulse Width ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[3] ;
+; -3.500 ; 0.500        ; 4.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; 74175:74175_i4|DIG_D_FF_AS_Nbit:DIG_D_FF_AS_Nbit_i0|state[3] ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[0]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[0]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[1]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[1]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[2]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[2]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[3]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; 74175_i4|DIG_D_FF_AS_Nbit_i0|state[3]|[1]                    ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; CPUxA0|dataout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; CPUxA0|dataout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; s10~14|[0]                                                   ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; s10~14|[0]                                                   ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~14|pexpout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~14|pexpout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~20|pexpin                                                ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~20|pexpin                                                ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~20|pexpout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~20|pexpout                                               ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~4|datain[2]                                              ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~4|datain[2]                                              ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Rise       ; s10~4|dataout                                                ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Rise       ; s10~4|dataout                                                ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~8|dataout                                                ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~8|dataout                                                ;
+; 0.500  ; 0.500        ; 0.000          ; High Pulse Width ; CPUxA0 ; Fall       ; s10~8|pexpin                                                 ;
+; 0.500  ; 0.500        ; 0.000          ; Low Pulse Width  ; CPUxA0 ; Fall       ; s10~8|pexpin                                                 ;
++--------+--------------+----------------+------------------+--------+------------+--------------------------------------------------------------+
+
+
++---------------------------------------------------------------------------+
+; Setup Times                                                               ;
++-----------+------------+---------+---------+------------+-----------------+
+; Data Port ; Clock Port ; Rise    ; Fall    ; Clock Edge ; Clock Reference ;
++-----------+------------+---------+---------+------------+-----------------+
+; CPU-D0    ; CPUxA0     ; -12.600 ; -12.600 ; Fall       ; CPUxA0          ;
+; CPU-D1    ; CPUxA0     ; -12.600 ; -12.600 ; Fall       ; CPUxA0          ;
+; CPU-D2    ; CPUxA0     ; -12.600 ; -12.600 ; Fall       ; CPUxA0          ;
+; CPU-D3    ; CPUxA0     ; -12.600 ; -12.600 ; Fall       ; CPUxA0          ;
++-----------+------------+---------+---------+------------+-----------------+
+
+
++-------------------------------------------------------------------------+
+; Hold Times                                                              ;
++-----------+------------+--------+--------+------------+-----------------+
+; Data Port ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-----------+------------+--------+--------+------------+-----------------+
+; CPU-D0    ; CPUxA0     ; 17.600 ; 17.600 ; Fall       ; CPUxA0          ;
+; CPU-D1    ; CPUxA0     ; 17.600 ; 17.600 ; Fall       ; CPUxA0          ;
+; CPU-D2    ; CPUxA0     ; 17.600 ; 17.600 ; Fall       ; CPUxA0          ;
+; CPU-D3    ; CPUxA0     ; 17.600 ; 17.600 ; Fall       ; CPUxA0          ;
++-----------+------------+--------+--------+------------+-----------------+
+
+
++---------------------------------------------------------------------------+
+; Clock to Output Times                                                     ;
++-------------+------------+--------+--------+------------+-----------------+
+; Data Port   ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-------------+------------+--------+--------+------------+-----------------+
+; ~DMAxCS1    ; CPUxA0     ; 10.000 ; 10.000 ; Rise       ; CPUxA0          ;
+; ~DMAxCS2    ; CPUxA0     ; 19.600 ; 19.600 ; Rise       ; CPUxA0          ;
+; ~FPxLATCH   ; CPUxA0     ; 15.000 ; 15.000 ; Rise       ; CPUxA0          ;
+; DMAxRDY1    ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; DMAxRDY2    ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~DMAxCS1    ; CPUxA0     ; 10.000 ; 10.000 ; Fall       ; CPUxA0          ;
+; ~DMAxCS2    ; CPUxA0     ; 19.600 ; 19.600 ; Fall       ; CPUxA0          ;
+; ~DMAxRESET1 ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~DMAxRESET2 ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~FPxLATCH   ; CPUxA0     ; 15.000 ; 15.000 ; Fall       ; CPUxA0          ;
++-------------+------------+--------+--------+------------+-----------------+
+
+
++---------------------------------------------------------------------------+
+; Minimum Clock to Output Times                                             ;
++-------------+------------+--------+--------+------------+-----------------+
+; Data Port   ; Clock Port ; Rise   ; Fall   ; Clock Edge ; Clock Reference ;
++-------------+------------+--------+--------+------------+-----------------+
+; ~DMAxCS1    ; CPUxA0     ; 10.000 ; 10.000 ; Rise       ; CPUxA0          ;
+; ~DMAxCS2    ; CPUxA0     ; 19.600 ; 19.600 ; Rise       ; CPUxA0          ;
+; ~FPxLATCH   ; CPUxA0     ; 15.000 ; 15.000 ; Rise       ; CPUxA0          ;
+; DMAxRDY1    ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; DMAxRDY2    ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~DMAxCS1    ; CPUxA0     ; 10.000 ; 10.000 ; Fall       ; CPUxA0          ;
+; ~DMAxCS2    ; CPUxA0     ; 19.600 ; 19.600 ; Fall       ; CPUxA0          ;
+; ~DMAxRESET1 ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~DMAxRESET2 ; CPUxA0     ; 32.600 ; 32.600 ; Fall       ; CPUxA0          ;
+; ~FPxLATCH   ; CPUxA0     ; 15.000 ; 15.000 ; Fall       ; CPUxA0          ;
++-------------+------------+--------+--------+------------+-----------------+
+
+
++-------------------------------------------------------------------+
+; Propagation Delay                                                 ;
++-----------------+-------------+--------+--------+--------+--------+
+; Input Port      ; Output Port ; RR     ; RF     ; FR     ; FF     ;
++-----------------+-------------+--------+--------+--------+--------+
+; CPUxA1          ; ~BUSxEN     ; 15.000 ;        ;        ; 15.000 ;
+; CPUxA1          ; ~DMAxCS1    ;        ; 10.000 ; 10.000 ;        ;
+; CPUxA1          ; ~DMAxCS2    ;        ; 10.000 ; 10.000 ;        ;
+; CPUxA1          ; ~FPxLATCH   ;        ; 15.000 ; 15.000 ;        ;
+; CPUxA2          ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA2          ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~FPxLATCH   ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA3          ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA3          ; ~CSxMAP     ; 11.600 ;        ;        ; 11.600 ;
+; CPUxA3          ; ~CSxUART    ;        ; 11.600 ; 11.600 ;        ;
+; CPUxA3          ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~FPxLATCH   ; 11.600 ; 10.800 ; 10.800 ; 11.600 ;
+; CPUxA4          ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA6          ; IOxSEL      ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; CPUxA6          ; ~BUSxEN     ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~CSxMAP     ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~CSxUART    ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~DMAxCS1    ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; CPUxA6          ; ~DMAxCS2    ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; CPUxA6          ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~BUSxEN     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~CSxMAP     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~CSxUART    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~DMAxCS1    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~DMAxCS2    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q2              ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q2              ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~FPxLATCH   ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q3              ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q3              ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~FPxLATCH   ; 10.800 ; 11.600 ; 11.600 ; 10.800 ;
+; Q4              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q4              ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q5              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q5              ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q6              ; IOxSEL      ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; Q6              ; ~BUSxEN     ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; Q6              ; ~DMAxCS1    ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; Q6              ; ~DMAxCS2    ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; Q6              ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q7              ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~BUSxEN     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q7              ; ~DMAxCS1    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~DMAxCS2    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; R4              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; R4              ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R4              ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R5              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; R5              ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R5              ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R6              ; IOxSEL      ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; R6              ; ~CSxMAP     ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; R6              ; ~CSxUART    ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; R7              ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; R7              ; ~CSxMAP     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; R7              ; ~CSxUART    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~BUSRQ          ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~BUSRQ          ; ~BUSxEN     ; 11.600 ; 10.000 ; 10.000 ; 11.600 ;
+; ~BUSRQ          ; ~DMAxCS1    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~BUSRQ          ; ~DMAxCS2    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxBUSACK     ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxBUSACK     ; ~BUSxEN     ; 11.600 ;        ;        ; 11.600 ;
+; ~CPUxBUSACK     ; ~DMAxCS1    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxBUSACK     ; ~DMAxCS2    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; IOxSEL      ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxIORQ       ; ~BUSxEN     ; 15.000 ;        ;        ; 15.000 ;
+; ~CPUxIORQ       ; ~CSxMAP     ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; ~CSxUART    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; ~DMAxCS1    ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxIORQ       ; ~DMAxCS2    ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxIORQ       ; ~FPxLATCH   ; 15.000 ;        ;        ; 15.000 ;
+; ~CPUxM1         ; IOxSEL      ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxM1         ; ~BUSxEN     ;        ; 15.000 ; 15.000 ;        ;
+; ~CPUxM1         ; ~CSxMAP     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1         ; ~CSxUART    ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1         ; ~DMAxCS1    ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxM1         ; ~DMAxCS2    ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxM1         ; ~FPxLATCH   ;        ; 15.000 ; 15.000 ;        ;
+; ~CPUxRESET      ; ~DMAxRESET1 ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxRESET      ; ~DMAxRESET2 ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWAIT       ; ~BUSxEN     ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWAIT       ; ~DMAxCS1    ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWAIT       ; ~DMAxCS2    ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxBAO2       ; BUSACK      ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxINTxPULSE1 ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~DMAxINTxPULSE2 ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~DREQ0          ; DMAxRDY1    ; 10.000 ;        ;        ; 10.000 ;
+; ~DREQ1          ; DMAxRDY2    ; 10.000 ;        ;        ; 10.000 ;
++-----------------+-------------+--------+--------+--------+--------+
+
+
++-------------------------------------------------------------------+
+; Minimum Propagation Delay                                         ;
++-----------------+-------------+--------+--------+--------+--------+
+; Input Port      ; Output Port ; RR     ; RF     ; FR     ; FF     ;
++-----------------+-------------+--------+--------+--------+--------+
+; CPUxA1          ; ~BUSxEN     ; 15.000 ;        ;        ; 15.000 ;
+; CPUxA1          ; ~DMAxCS1    ;        ; 10.000 ; 10.000 ;        ;
+; CPUxA1          ; ~DMAxCS2    ;        ; 10.000 ; 10.000 ;        ;
+; CPUxA1          ; ~FPxLATCH   ;        ; 15.000 ; 15.000 ;        ;
+; CPUxA2          ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA2          ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA2          ; ~FPxLATCH   ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA3          ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; CPUxA3          ; ~CSxMAP     ; 11.600 ;        ;        ; 11.600 ;
+; CPUxA3          ; ~CSxUART    ;        ; 11.600 ; 11.600 ;        ;
+; CPUxA3          ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; CPUxA3          ; ~FPxLATCH   ; 11.600 ; 10.800 ; 10.800 ; 11.600 ;
+; CPUxA4          ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA4          ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA4          ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA5          ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; CPUxA5          ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; CPUxA6          ; IOxSEL      ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; CPUxA6          ; ~BUSxEN     ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~CSxMAP     ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~CSxUART    ; 10.800 ; 10.000 ; 10.000 ; 10.800 ;
+; CPUxA6          ; ~DMAxCS1    ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; CPUxA6          ; ~DMAxCS2    ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; CPUxA6          ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~BUSxEN     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~CSxMAP     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~CSxUART    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; CPUxA7          ; ~DMAxCS1    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~DMAxCS2    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; CPUxA7          ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q2              ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q2              ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q2              ; ~FPxLATCH   ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q3              ; IOxSEL      ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~BUSxEN     ; 11.600 ; 11.600 ; 11.600 ; 11.600 ;
+; Q3              ; ~DMAxCS1    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~DMAxCS2    ; 19.600 ; 19.600 ; 19.600 ; 19.600 ;
+; Q3              ; ~FPxLATCH   ; 10.800 ; 11.600 ; 11.600 ; 10.800 ;
+; Q4              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q4              ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q4              ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q5              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~BUSxEN     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q5              ; ~DMAxCS1    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~DMAxCS2    ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; Q5              ; ~FPxLATCH   ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; Q6              ; IOxSEL      ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; Q6              ; ~BUSxEN     ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; Q6              ; ~DMAxCS1    ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; Q6              ; ~DMAxCS2    ; 18.800 ; 18.000 ; 18.000 ; 18.800 ;
+; Q6              ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q7              ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~BUSxEN     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; Q7              ; ~DMAxCS1    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~DMAxCS2    ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; Q7              ; ~FPxLATCH   ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; R4              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; R4              ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R4              ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R5              ; IOxSEL      ; 18.800 ; 18.800 ; 18.800 ; 18.800 ;
+; R5              ; ~CSxMAP     ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R5              ; ~CSxUART    ; 10.800 ; 10.800 ; 10.800 ; 10.800 ;
+; R6              ; IOxSEL      ; 18.000 ; 18.800 ; 18.800 ; 18.000 ;
+; R6              ; ~CSxMAP     ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; R6              ; ~CSxUART    ; 10.000 ; 10.800 ; 10.800 ; 10.000 ;
+; R7              ; IOxSEL      ; 18.000 ; 18.000 ; 18.000 ; 18.000 ;
+; R7              ; ~CSxMAP     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; R7              ; ~CSxUART    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~BUSRQ          ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~BUSRQ          ; ~BUSxEN     ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~BUSRQ          ; ~DMAxCS1    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~BUSRQ          ; ~DMAxCS2    ; 10.000 ; 10.000 ; 10.000 ; 10.000 ;
+; ~CPUxBUSACK     ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxBUSACK     ; ~BUSxEN     ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxBUSACK     ; ~DMAxCS1    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxBUSACK     ; ~DMAxCS2    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; IOxSEL      ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxIORQ       ; ~BUSxEN     ; 15.000 ;        ;        ; 15.000 ;
+; ~CPUxIORQ       ; ~CSxMAP     ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; ~CSxUART    ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxIORQ       ; ~DMAxCS1    ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxIORQ       ; ~DMAxCS2    ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxIORQ       ; ~FPxLATCH   ; 15.000 ;        ;        ; 15.000 ;
+; ~CPUxM1         ; IOxSEL      ;        ; 18.000 ; 18.000 ;        ;
+; ~CPUxM1         ; ~BUSxEN     ;        ; 15.000 ; 15.000 ;        ;
+; ~CPUxM1         ; ~CSxMAP     ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1         ; ~CSxUART    ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxM1         ; ~DMAxCS1    ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxM1         ; ~DMAxCS2    ; 18.000 ;        ;        ; 18.000 ;
+; ~CPUxM1         ; ~FPxLATCH   ;        ; 15.000 ; 15.000 ;        ;
+; ~CPUxRESET      ; ~DMAxRESET1 ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxRESET      ; ~DMAxRESET2 ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWAIT       ; ~BUSxEN     ; 10.000 ;        ;        ; 10.000 ;
+; ~CPUxWAIT       ; ~DMAxCS1    ;        ; 10.000 ; 10.000 ;        ;
+; ~CPUxWAIT       ; ~DMAxCS2    ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxBAO2       ; BUSACK      ;        ; 10.000 ; 10.000 ;        ;
+; ~DMAxINTxPULSE1 ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~DMAxINTxPULSE2 ; DATAxXFER   ; 10.000 ;        ;        ; 10.000 ;
+; ~DREQ0          ; DMAxRDY1    ; 10.000 ;        ;        ; 10.000 ;
+; ~DREQ1          ; DMAxRDY2    ; 10.000 ;        ;        ; 10.000 ;
++-----------------+-------------+--------+--------+--------+--------+
+
+
+-------------------
+; Clock Transfers ;
+-------------------
+Nothing to report.
+
+
+---------------
+; Report TCCS ;
+---------------
+No dedicated SERDES Transmitter circuitry present in device or used in design
+
+
+---------------
+; Report RSKM ;
+---------------
+No dedicated SERDES Receiver circuitry present in device or used in design
+
+
++------------------------------------------------+
+; Unconstrained Paths                            ;
++---------------------------------+-------+------+
+; Property                        ; Setup ; Hold ;
++---------------------------------+-------+------+
+; Illegal Clocks                  ; 0     ; 0    ;
+; Unconstrained Clocks            ; 0     ; 0    ;
+; Unconstrained Input Ports       ; 33    ; 33   ;
+; Unconstrained Input Port Paths  ; 129   ; 129  ;
+; Unconstrained Output Ports      ; 13    ; 13   ;
+; Unconstrained Output Port Paths ; 125   ; 125  ;
++---------------------------------+-------+------+
+
+
++------------------------------------+
+; TimeQuest Timing Analyzer Messages ;
++------------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II 32-bit TimeQuest Timing Analyzer
+    Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+    Info: Processing started: Sun Sep 03 21:18:02 2023
+Info: Command: quartus_sta Z80-processor-DMA -c Z80-processor-DMA
+Info: qsta_default_script.tcl version: #1
+Warning (20028): Parallel compilation is not licensed and has been disabled
+Info (306004): Started post-fitting delay annotation
+Info (306005): Delay annotation completed successfully
+Warning (335095): TimeQuest Timing Analyzer does not support the analysis of latches as synchronous elements for the currently selected device family.
+Critical Warning (332012): Synopsys Design Constraints File file not found: 'Z80-processor-DMA.sdc'. A Synopsys Design Constraints File is required by the TimeQuest Timing Analyzer to get proper timing constraints. Without it, the Compiler will not properly optimize the design.
+Info (332142): No user constrained base clocks found in the design. Calling "derive_clocks -period 1.0"
+Info (332105): Deriving Clocks
+    Info (332105): create_clock -period 1.000 -name CPUxA0 CPUxA0
+Info: Found TIMEQUEST_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
+Info (332140): No fmax paths to report
+Info (332140): No Setup paths to report
+Info (332140): No Hold paths to report
+Info (332140): No Recovery paths to report
+Info (332140): No Removal paths to report
+Critical Warning (332148): Timing requirements not met
+Info (332146): Worst-case minimum pulse width slack is -3.500
+    Info (332119):     Slack End Point TNS Clock 
+    Info (332119): ========= ============= =====================
+    Info (332119):    -3.500       -28.000 CPUxA0 
+Info (332001): The selected device family is not supported by the report_metastability command.
+Info (332102): Design is not fully constrained for setup requirements
+Info (332102): Design is not fully constrained for hold requirements
+Info: Quartus II 32-bit TimeQuest Timing Analyzer was successful. 0 errors, 4 warnings
+    Info: Peak virtual memory: 299 megabytes
+    Info: Processing ended: Sun Sep 03 21:18:11 2023
+    Info: Elapsed time: 00:00:09
+    Info: Total CPU time (on all processors): 00:00:05
+
+
