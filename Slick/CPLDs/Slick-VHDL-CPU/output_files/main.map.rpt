@@ -1,0 +1,461 @@
+Analysis & Synthesis report for main
+Sat Sep 09 09:15:31 2023
+Quartus II 32-bit Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Parallel Compilation
+  5. Analysis & Synthesis Source Files Read
+  6. Analysis & Synthesis Resource Usage Summary
+  7. Analysis & Synthesis Resource Utilization by Entity
+  8. Parameter Settings for User Entity Instance: n74139:gate0|DEMUX_GATE_2:gate0
+  9. Parameter Settings for User Entity Instance: n74139:gate0|DEMUX_GATE_2:gate1
+ 10. Parameter Settings for User Entity Instance: n74157:gate1|MUX_GATE_BUS_1:gate0
+ 11. Parameter Settings for User Entity Instance: n74157:gate1|MUX_GATE_BUS_1:gate1
+ 12. Port Connectivity Checks: "DIG_D_FF_AS:gate5"
+ 13. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate7"
+ 14. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate6"
+ 15. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate5"
+ 16. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate4"
+ 17. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate3"
+ 18. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate2"
+ 19. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate1"
+ 20. Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate0"
+ 21. Port Connectivity Checks: "n74164:gate4"
+ 22. Port Connectivity Checks: "n74148:gate3"
+ 23. Port Connectivity Checks: "n74153:gate2"
+ 24. Port Connectivity Checks: "n74157:gate1|MUX_GATE_BUS_1:gate1"
+ 25. Port Connectivity Checks: "n74157:gate1"
+ 26. Port Connectivity Checks: "n74139:gate0"
+ 27. Analysis & Synthesis Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2013 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++-------------------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                                  ;
++-----------------------------+-------------------------------------------------+
+; Analysis & Synthesis Status ; Successful - Sat Sep 09 09:15:31 2023           ;
+; Quartus II 32-bit Version   ; 13.0.1 Build 232 06/12/2013 SP 1 SJ Web Edition ;
+; Revision Name               ; main                                            ;
+; Top-level Entity Name       ; main                                            ;
+; Family                      ; MAX7000S                                        ;
+; Total macrocells            ; 28                                              ;
+; Total pins                  ; 61                                              ;
++-----------------------------+-------------------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                                ;
++----------------------------------------------------------------------------+-----------------+---------------+
+; Option                                                                     ; Setting         ; Default Value ;
++----------------------------------------------------------------------------+-----------------+---------------+
+; Device                                                                     ; EPM7128SLC84-10 ;               ;
+; Top-level entity name                                                      ; main            ; main          ;
+; Family name                                                                ; MAX7000S        ; Cyclone IV GX ;
+; Use smart compilation                                                      ; Off             ; Off           ;
+; Enable parallel Assembler and TimeQuest Timing Analyzer during compilation ; On              ; On            ;
+; Enable compact report table                                                ; Off             ; Off           ;
+; Create Debugging Nodes for IP Cores                                        ; Off             ; Off           ;
+; Preserve fewer node names                                                  ; On              ; On            ;
+; Disable OpenCore Plus hardware evaluation                                  ; Off             ; Off           ;
+; Verilog Version                                                            ; Verilog_2001    ; Verilog_2001  ;
+; VHDL Version                                                               ; VHDL_1993       ; VHDL_1993     ;
+; State Machine Processing                                                   ; Auto            ; Auto          ;
+; Safe State Machine                                                         ; Off             ; Off           ;
+; Extract Verilog State Machines                                             ; On              ; On            ;
+; Extract VHDL State Machines                                                ; On              ; On            ;
+; Ignore Verilog initial constructs                                          ; Off             ; Off           ;
+; Iteration limit for constant Verilog loops                                 ; 5000            ; 5000          ;
+; Iteration limit for non-constant Verilog loops                             ; 250             ; 250           ;
+; Add Pass-Through Logic to Inferred RAMs                                    ; On              ; On            ;
+; Infer RAMs from Raw Logic                                                  ; On              ; On            ;
+; Parallel Synthesis                                                         ; On              ; On            ;
+; NOT Gate Push-Back                                                         ; On              ; On            ;
+; Power-Up Don't Care                                                        ; On              ; On            ;
+; Remove Duplicate Registers                                                 ; On              ; On            ;
+; Ignore CARRY Buffers                                                       ; Off             ; Off           ;
+; Ignore CASCADE Buffers                                                     ; Off             ; Off           ;
+; Ignore GLOBAL Buffers                                                      ; Off             ; Off           ;
+; Ignore ROW GLOBAL Buffers                                                  ; Off             ; Off           ;
+; Ignore LCELL Buffers                                                       ; Auto            ; Auto          ;
+; Ignore SOFT Buffers                                                        ; Off             ; Off           ;
+; Limit AHDL Integers to 32 Bits                                             ; Off             ; Off           ;
+; Optimization Technique                                                     ; Speed           ; Speed         ;
+; Allow XOR Gate Usage                                                       ; On              ; On            ;
+; Auto Logic Cell Insertion                                                  ; On              ; On            ;
+; Parallel Expander Chain Length                                             ; 4               ; 4             ;
+; Auto Parallel Expanders                                                    ; On              ; On            ;
+; Auto Open-Drain Pins                                                       ; On              ; On            ;
+; Auto Resource Sharing                                                      ; Off             ; Off           ;
+; Maximum Fan-in Per Macrocell                                               ; 100             ; 100           ;
+; Use LogicLock Constraints during Resource Balancing                        ; On              ; On            ;
+; Ignore translate_off and synthesis_off directives                          ; Off             ; Off           ;
+; Report Parameter Settings                                                  ; On              ; On            ;
+; Report Source Assignments                                                  ; On              ; On            ;
+; Report Connectivity Checks                                                 ; On              ; On            ;
+; HDL message level                                                          ; Level2          ; Level2        ;
+; Suppress Register Optimization Related Messages                            ; Off             ; Off           ;
+; Number of Removed Registers Reported in Synthesis Report                   ; 5000            ; 5000          ;
+; Number of Swept Nodes Reported in Synthesis Report                         ; 5000            ; 5000          ;
+; Number of Inverted Registers Reported in Synthesis Report                  ; 100             ; 100           ;
+; Block Design Naming                                                        ; Auto            ; Auto          ;
+; Synthesis Effort                                                           ; Auto            ; Auto          ;
+; Shift Register Replacement - Allow Asynchronous Clear Signal               ; On              ; On            ;
+; Pre-Mapping Resynthesis Optimization                                       ; Off             ; Off           ;
+; Analysis & Synthesis Message Level                                         ; Medium          ; Medium        ;
+; Disable Register Merging Across Hierarchies                                ; Auto            ; Auto          ;
+; Synthesis Seed                                                             ; 1               ; 1             ;
++----------------------------------------------------------------------------+-----------------+---------------+
+
+
+Parallel compilation was disabled, but you have multiple processors available. Enable parallel compilation to reduce compilation time.
++-------------------------------------+
+; Parallel Compilation                ;
++----------------------------+--------+
+; Processors                 ; Number ;
++----------------------------+--------+
+; Number detected on machine ; 4      ;
+; Maximum allowed            ; 1      ;
++----------------------------+--------+
+
+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                                                        ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------+---------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type       ; File Name with Absolute Path                                                                                 ; Library ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------+---------+
+; Slick-VHDL-CPU.vhdl              ; yes             ; User VHDL File  ; C:/Users/Andrew/Desktop/System CD Updates/data/duodyne/GitHub/Slick/CPLDs/Slick-VHDL-CPU/Slick-VHDL-CPU.vhdl ;         ;
++----------------------------------+-----------------+-----------------+--------------------------------------------------------------------------------------------------------------+---------+
+
+
++---------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary ;
++----------------------+----------------------+
+; Resource             ; Usage                ;
++----------------------+----------------------+
+; Logic cells          ; 28                   ;
+; Total registers      ; 9                    ;
+; I/O pins             ; 61                   ;
+; Shareable expanders  ; 1                    ;
+; Maximum fan-out node ; notCPUxIORQ          ;
+; Maximum fan-out      ; 13                   ;
+; Total fan-out        ; 147                  ;
+; Average fan-out      ; 1.63                 ;
++----------------------+----------------------+
+
+
++-----------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                       ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+; Compilation Hierarchy Node   ; Macrocells ; Pins ; Full Hierarchy Name                     ; Library Name ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+; |main                        ; 28         ; 61   ; |main                                   ; work         ;
+;    |DIG_D_FF_AS:gate5|       ; 2          ; 0    ; |main|DIG_D_FF_AS:gate5                 ; work         ;
+;    |n74139:gate0|            ; 1          ; 0    ; |main|n74139:gate0                      ; work         ;
+;       |DEMUX_GATE_2:gate0|   ; 1          ; 0    ; |main|n74139:gate0|DEMUX_GATE_2:gate0   ; work         ;
+;    |n74148:gate3|            ; 4          ; 0    ; |main|n74148:gate3                      ; work         ;
+;    |n74157:gate1|            ; 2          ; 0    ; |main|n74157:gate1                      ; work         ;
+;       |MUX_GATE_BUS_1:gate0| ; 2          ; 0    ; |main|n74157:gate1|MUX_GATE_BUS_1:gate0 ; work         ;
+;    |n74164:gate4|            ; 8          ; 0    ; |main|n74164:gate4                      ; work         ;
+;       |DIG_D_FF_AS:gate0|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate0    ; work         ;
+;       |DIG_D_FF_AS:gate1|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate1    ; work         ;
+;       |DIG_D_FF_AS:gate2|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate2    ; work         ;
+;       |DIG_D_FF_AS:gate3|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate3    ; work         ;
+;       |DIG_D_FF_AS:gate4|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate4    ; work         ;
+;       |DIG_D_FF_AS:gate5|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate5    ; work         ;
+;       |DIG_D_FF_AS:gate6|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate6    ; work         ;
+;       |DIG_D_FF_AS:gate7|    ; 1          ; 0    ; |main|n74164:gate4|DIG_D_FF_AS:gate7    ; work         ;
++------------------------------+------------+------+-----------------------------------------+--------------+
+
+
++------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: n74139:gate0|DEMUX_GATE_2:gate0 ;
++----------------+-------+-----------------------------------------------------+
+; Parameter Name ; Value ; Type                                                ;
++----------------+-------+-----------------------------------------------------+
+; default        ; 1     ; Signed Integer                                      ;
++----------------+-------+-----------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: n74139:gate0|DEMUX_GATE_2:gate1 ;
++----------------+-------+-----------------------------------------------------+
+; Parameter Name ; Value ; Type                                                ;
++----------------+-------+-----------------------------------------------------+
+; default        ; 1     ; Signed Integer                                      ;
++----------------+-------+-----------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++--------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: n74157:gate1|MUX_GATE_BUS_1:gate0 ;
++----------------+-------+-------------------------------------------------------+
+; Parameter Name ; Value ; Type                                                  ;
++----------------+-------+-------------------------------------------------------+
+; bits           ; 4     ; Signed Integer                                        ;
++----------------+-------+-------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++--------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: n74157:gate1|MUX_GATE_BUS_1:gate1 ;
++----------------+-------+-------------------------------------------------------+
+; Parameter Name ; Value ; Type                                                  ;
++----------------+-------+-------------------------------------------------------+
+; bits           ; 4     ; Signed Integer                                        ;
++----------------+-------+-------------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "DIG_D_FF_AS:gate5"                                                                  ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; q    ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate7"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate6"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate5"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate4"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate3"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate2"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate1"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4|DIG_D_FF_AS:gate0"                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; notq ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; set  ; Input  ; Info     ; Stuck at GND                                                                        ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++------------------------------------------+
+; Port Connectivity Checks: "n74164:gate4" ;
++------+-------+----------+----------------+
+; Port ; Type  ; Severity ; Details        ;
++------+-------+----------+----------------+
+; dsa  ; Input ; Info     ; Stuck at VCC   ;
+; dsb  ; Input ; Info     ; Stuck at VCC   ;
+; vcc  ; Input ; Info     ; Stuck at VCC   ;
+; gnd  ; Input ; Info     ; Stuck at GND   ;
++------+-------+----------+----------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74148:gate3"                                                                       ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; ei   ; Input  ; Info     ; Stuck at GND                                                                        ;
+; vcc  ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; gnd  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; e0   ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74153:gate2"                                                                       ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; n2g  ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; n2c0 ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; n2c1 ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; n2c2 ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; n2c3 ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; n1g  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; vcc  ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; gnd  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; n2y  ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++---------------------------------------------------------------+
+; Port Connectivity Checks: "n74157:gate1|MUX_GATE_BUS_1:gate1" ;
++------+-------+----------+-------------------------------------+
+; Port ; Type  ; Severity ; Details                             ;
++------+-------+----------+-------------------------------------+
+; in_1 ; Input ; Info     ; Stuck at GND                        ;
++------+-------+----------+-------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74157:gate1"                                                                       ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; a3   ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; a4   ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; b3   ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; b4   ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; g    ; Input  ; Info     ; Stuck at GND                                                                        ;
+; vcc  ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; gnd  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; y3   ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; y4   ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "n74139:gate0"                                                                         ;
++--------+--------+----------+-------------------------------------------------------------------------------------+
+; Port   ; Type   ; Severity ; Details                                                                             ;
++--------+--------+----------+-------------------------------------------------------------------------------------+
+; not2g  ; Input  ; Info     ; Stuck at GND                                                                        ;
+; vcc    ; Input  ; Info     ; Stuck at VCC                                                                        ;
+; gnd    ; Input  ; Info     ; Stuck at GND                                                                        ;
+; not1y2 ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; not1y3 ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; not2y0 ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; not2y2 ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
+; not2y3 ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++--------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II 32-bit Analysis & Synthesis
+    Info: Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition
+    Info: Processing started: Sat Sep 09 09:15:03 2023
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off Slick-VHDL-CPU -c main
+Warning (20028): Parallel compilation is not licensed and has been disabled
+Info (12021): Found 20 design units, including 10 entities, in source file slick-vhdl-cpu.vhdl
+    Info (12022): Found design unit 1: DEMUX_GATE_2-Behavioral
+    Info (12022): Found design unit 2: n74139-Behavioral
+    Info (12022): Found design unit 3: MUX_GATE_BUS_1-Behavioral
+    Info (12022): Found design unit 4: n74157-Behavioral
+    Info (12022): Found design unit 5: MUX_GATE_2-Behavioral
+    Info (12022): Found design unit 6: n74153-Behavioral
+    Info (12022): Found design unit 7: n74148-Behavioral
+    Info (12022): Found design unit 8: DIG_D_FF_AS-Behavioral
+    Info (12022): Found design unit 9: n74164-Behavioral
+    Info (12022): Found design unit 10: main-Behavioral
+    Info (12023): Found entity 1: DEMUX_GATE_2
+    Info (12023): Found entity 2: n74139
+    Info (12023): Found entity 3: MUX_GATE_BUS_1
+    Info (12023): Found entity 4: n74157
+    Info (12023): Found entity 5: MUX_GATE_2
+    Info (12023): Found entity 6: n74153
+    Info (12023): Found entity 7: n74148
+    Info (12023): Found entity 8: DIG_D_FF_AS
+    Info (12023): Found entity 9: n74164
+    Info (12023): Found entity 10: main
+Info (12127): Elaborating entity "main" for the top level hierarchy
+Info (12128): Elaborating entity "n74139" for hierarchy "n74139:gate0"
+Info (12128): Elaborating entity "DEMUX_GATE_2" for hierarchy "n74139:gate0|DEMUX_GATE_2:gate0"
+Info (12128): Elaborating entity "n74157" for hierarchy "n74157:gate1"
+Info (12128): Elaborating entity "MUX_GATE_BUS_1" for hierarchy "n74157:gate1|MUX_GATE_BUS_1:gate0"
+Info (12128): Elaborating entity "n74153" for hierarchy "n74153:gate2"
+Info (12128): Elaborating entity "MUX_GATE_2" for hierarchy "n74153:gate2|MUX_GATE_2:gate0"
+Info (12128): Elaborating entity "n74148" for hierarchy "n74148:gate3"
+Info (12128): Elaborating entity "n74164" for hierarchy "n74164:gate4"
+Info (12128): Elaborating entity "DIG_D_FF_AS" for hierarchy "n74164:gate4|DIG_D_FF_AS:gate0"
+Info (280013): Promoted pin-driven signal(s) to global signal
+    Info (280014): Promoted clock signal driven by pin "CLK" to global clock signal
+    Info (280015): Promoted clear signal driven by pin "notCPUxRESET" to global clear signal
+Info (21057): Implemented 90 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 34 input pins
+    Info (21059): Implemented 27 output pins
+    Info (21063): Implemented 28 macrocells
+    Info (21073): Implemented 1 shareable expanders
+Info: Quartus II 32-bit Analysis & Synthesis was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 363 megabytes
+    Info: Processing ended: Sat Sep 09 09:15:31 2023
+    Info: Elapsed time: 00:00:28
+    Info: Total CPU time (on all processors): 00:00:05
+
+

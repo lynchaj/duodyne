@@ -256,19 +256,10 @@ module \74175  (
 endmodule
 
 module \Z80-processor-DMA  (
-  input CPUxA0,
-  input CPUxA1,
-  input \~CPUxWAIT ,
-  input \~BUSRQ ,
-  input \~CPUxBUSACK ,
-  input \~DMAxINTxPULSE1 ,
-  input \~DMAxINTxPULSE2 ,
-  input CPUxA3,
   input \~DREQ0 ,
   input \~DREQ1 ,
   input \~CPUxWR ,
   input \~CPUxRESET ,
-  input \~DMAxBAO2 ,
   input \CPU-D0 ,
   input \CPU-D1 ,
   input \CPU-D2 ,
@@ -290,6 +281,18 @@ module \Z80-processor-DMA  (
   input R5,
   input R6,
   input R7,
+  input CPUxA0,
+  input CPUxA1,
+  input \~CPUxWAIT ,
+  input \~CPUxBUSACK ,
+  input \~DMAxINTxPULSE1 ,
+  input \~DMAxINTxPULSE2 ,
+  input CPUxA3,
+  input \~DMAxBAO2 ,
+  output DMAxRDY1,
+  output DMAxRDY2,
+  output \~DMAxRESET1 ,
+  output \~DMAxRESET2 ,
   output \~FPxLATCH ,
   output \~DMAxCS1 ,
   output \~DMAxCS2 ,
@@ -297,12 +300,7 @@ module \Z80-processor-DMA  (
   output DATAxXFER,
   output IOxSEL,
   output \~CSxMAP ,
-  output \~CSxUART ,
-  output DMAxRDY1,
-  output DMAxRDY2,
-  output \~DMAxRESET1 ,
-  output \~DMAxRESET2 ,
-  output BUSACK
+  output \~CSxUART 
 );
   wire s0;
   wire s1;
@@ -311,17 +309,11 @@ module \Z80-processor-DMA  (
   wire s4;
   wire s5;
   wire s6;
-  wire \~DMAxCS1_temp ;
-  wire \~DMAxCS2_temp ;
   wire s7;
   wire s8;
   wire s9;
   wire s10;
-  wire s11;
-  wire s12;
-  assign DATAxXFER = ((\~CPUxBUSACK  | \~BUSRQ ) | (\~DMAxINTxPULSE1  & \~DMAxINTxPULSE2 ));
-  assign s6 = ~ \~CPUxBUSACK ;
-  assign BUSACK = ~ \~DMAxBAO2 ;
+  wire \~BUSxEN_temp ;
   \74688  \74688_i0 (
     .P_0( \~CPUxM1  ),
     .Q_0( 1'b1 ),
@@ -342,7 +334,7 @@ module \Z80-processor-DMA  (
     .\~OE ( \~CPUxIORQ  ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
-    .\~EQ ( s4 )
+    .\~EQ ( s6 )
   );
   \74688  \74688_i1 (
     .P_0( \~CPUxM1  ),
@@ -366,44 +358,45 @@ module \Z80-processor-DMA  (
     .GND( 1'b0 ),
     .\~EQ ( s7 )
   );
+  assign \~BUSxEN_temp  = ~ \~DMAxBAO2 ;
   \74139  \74139_i2 (
     .\1A ( 1'b1 ),
     .\1B ( 1'b1 ),
     .\~1G ( 1'b1 ),
     .\2A ( CPUxA0 ),
     .\2B ( CPUxA1 ),
-    .\~2G ( s4 ),
+    .\~2G ( s6 ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
-    .\~2Y0 ( s0 ),
-    .\~2Y1 ( s1 ),
+    .\~2Y0 ( s9 ),
+    .\~2Y1 ( s10 ),
     .\~2Y2 ( \~FPxLATCH  ),
-    .\~2Y3 ( s5 )
+    .\~2Y3 ( s2 )
   );
-  assign IOxSEL = ~ (s4 & s7);
+  assign IOxSEL = ~ (s6 & s7);
   assign \~CSxMAP  = (s7 | CPUxA3);
   assign \~CSxUART  = (s7 | ~ CPUxA3);
+  assign s8 = (\~BUSxEN_temp  | \~CPUxBUSACK );
+  assign s3 = (\~CPUxWR  | s2);
   \74157  \74157_i3 (
-    .S( \~BUSRQ  ),
+    .S( s8 ),
     .A1( \~CPUxWAIT  ),
     .A2( \~CPUxWAIT  ),
     .A3( 1'b0 ),
     .A4( 1'b0 ),
-    .B1( s0 ),
-    .B2( s1 ),
+    .B1( s9 ),
+    .B2( s10 ),
     .B3( 1'b0 ),
     .B4( 1'b0 ),
     .G( 1'b0 ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
-    .Y1( s2 ),
-    .Y2( s3 )
+    .Y1( \~DMAxCS1  ),
+    .Y2( \~DMAxCS2  )
   );
-  assign s10 = (\~CPUxWR  | s5);
-  assign \~DMAxCS1_temp  = (s6 | s2);
-  assign \~DMAxCS2_temp  = (s6 | s3);
+  assign DATAxXFER = (s8 | (\~DMAxINTxPULSE1  & \~DMAxINTxPULSE2 ));
   \74175  \74175_i4 (
-    .CLK( s10 ),
+    .CLK( s3 ),
     .\~CL ( \~CPUxRESET  ),
     .D1( \CPU-D0  ),
     .D2( \CPU-D1  ),
@@ -411,16 +404,14 @@ module \Z80-processor-DMA  (
     .D4( \CPU-D3  ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
-    .Q1( s8 ),
-    .Q2( s9 ),
-    .\~Q3 ( s11 ),
-    .\~Q4 ( s12 )
+    .Q1( s0 ),
+    .Q2( s1 ),
+    .\~Q3 ( s4 ),
+    .\~Q4 ( s5 )
   );
-  assign \~BUSxEN  = ~ (\~CPUxBUSACK  & (\~DMAxCS1_temp  & \~DMAxCS2_temp ));
-  assign DMAxRDY1 = (~ \~DREQ0  | s8);
-  assign DMAxRDY2 = (~ \~DREQ1  | s9);
-  assign \~DMAxRESET1  = (s11 & \~CPUxRESET );
-  assign \~DMAxRESET2  = (\~CPUxRESET  & s12);
-  assign \~DMAxCS1  = \~DMAxCS1_temp ;
-  assign \~DMAxCS2  = \~DMAxCS2_temp ;
+  assign DMAxRDY1 = (~ \~DREQ0  | s0);
+  assign DMAxRDY2 = (~ \~DREQ1  | s1);
+  assign \~DMAxRESET1  = (s4 & \~CPUxRESET );
+  assign \~DMAxRESET2  = (\~CPUxRESET  & s5);
+  assign \~BUSxEN  = \~BUSxEN_temp ;
 endmodule

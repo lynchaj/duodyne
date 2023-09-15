@@ -463,13 +463,14 @@ module \Z80-processor-CPU  (
   wire \~IM2xINT_temp ;
   wire s1;
   wire s2;
-  wire \~CSxI2C_temp ;
   wire s3;
+  wire \~CSxI2C_temp ;
   wire s4;
-  wire const1b1;
   wire s5;
+  wire const1b1;
   wire s6;
   wire s7;
+  wire s8;
   assign const1b1 = 1'b1;
   assign s0 = (\~CPUxM1  | \~CPUxIORQ );
   assign \~FPxLATCHxRD  = (\~CPUxRD  | \~FPxLATCH );
@@ -484,7 +485,8 @@ module \Z80-processor-CPU  (
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
     .\~1Y0 ( \~PAGExWR  ),
-    .\~2Y1 ( s1 )
+    .\~1Y1 ( s1 ),
+    .\~2Y1 ( s2 )
   );
   \74157  \74157_i1 (
     .S( \~CPUxIORQ  ),
@@ -518,9 +520,9 @@ module \Z80-processor-CPU  (
     .\1C3 ( WSxIOWR ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
-    .\1Y ( s3 )
+    .\1Y ( s4 )
   );
-  assign s4 = ~ (\~CPUxMREQ  & \~CPUxIORQ );
+  assign s5 = ~ (\~CPUxMREQ  & \~CPUxIORQ );
   \74148  \74148_i3 (
     .EI( 1'b0 ),
     .\0 ( \~EIRQ7  ),
@@ -539,18 +541,18 @@ module \Z80-processor-CPU  (
     .GS( \~IM2xINT_temp  )
   );
   assign RESET = ~ \~CPUxRESET ;
-  assign s5 = ~ const1b1;
-  assign s6 = ~ \~CPUxRESET ;
-  assign DATAxDIR = ((\~CPUxRD  | IOxSEL) & (s0 | ~ \~DMAxIEI1 ));
+  assign s6 = ~ const1b1;
+  assign s7 = ~ \~CPUxRESET ;
+  assign DATAxDIR = ((\~CPUxRD  | IOxSEL) & (s0 | ~ \~DMAxIEO2 ));
   assign \~IM2xIEO_temp  = (\~IM2xINT_temp  | ~ \~DMAxIEO2 );
-  assign s2 = (s1 | \CPU-A1 );
-  assign \~CSxI2C_temp  = (s1 | ~ \CPU-A1 );
-  assign READY = (~ (s4 & \~CPUxRFSH ) | s3);
+  assign s3 = (s1 | \CPU-A1 );
+  assign \~CSxI2C_temp  = (s2 | ~ \CPU-A1 );
+  assign READY = (~ (s5 & \~CPUxRFSH ) | s4);
   \74164  \74164_i4 (
     .CP( CLK ),
     .DSA( 1'b1 ),
     .DSB( 1'b1 ),
-    .\~MR ( s4 ),
+    .\~MR ( s5 ),
     .VCC( 1'b1 ),
     .GND( 1'b0 ),
     .Q0( \1WS  ),
@@ -568,13 +570,13 @@ module \Z80-processor-CPU  (
     .Default(0)
   )
   DIG_D_FF_AS_1bit_i5 (
-    .Set( s5 ),
+    .Set( s6 ),
     .D( \CPU-D0  ),
-    .C( s2 ),
-    .Clr( s6 ),
-    .\~Q ( s7 )
+    .C( s3 ),
+    .Clr( s7 ),
+    .\~Q ( s8 )
   );
-  assign \~PAGExEN  = (s7 | (~ const1b1 & ~ \~CPUxRESET ));
+  assign \~PAGExEN  = (s8 | (~ const1b1 & ~ \~CPUxRESET ));
   assign \~IM2xIEO  = \~IM2xIEO_temp ;
   assign \~CSxI2C  = \~CSxI2C_temp ;
   assign \~CSxI2CxWR  = \~A ;
