@@ -9,6 +9,8 @@
 #define BUSY 14
 #define READY 12
 #define SPARE 2
+#define RXPIN 3
+#define TXPIN 1
 
 #define RED1  GPIO_NUM_22
 #define RED0  GPIO_NUM_21
