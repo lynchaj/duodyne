@@ -1,0 +1,118 @@
+
+(rules PCB SAB80535-Dev-Board
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 2824)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.6)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.6)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    "Net-(C3-Pad1)" RESET "LCD-ADJ" "TX-LED" "Net-(D2-Pad2)" "RX-LED" "Net-(D3-Pad2)" PE.0
+    PE.1 "Net-(D6-Pad2)" PE.2 "Net-(D7-Pad2)" PE.3 "Net-(D8-Pad2)" PE.4 "Net-(D9-Pad2)"
+    PE.5 "Net-(D10-Pad2)" PE.6 "Net-(D11-Pad2)" PE.7 "Net-(D12-Pad2)" P1.0 P1.1
+    P1.2 P1.3 P1.4 P1.5 P1.6 P1.7 D7 D6
+    D5 D4 D3 D2 D1 D0 "CS-LCD-WR" A0
+    A1 A5 A2 A3 A6 A7 A4 A8
+    A12 A10 A13 A9 "~{CS-P2}" "~{CS-P3}" "~{CS-P1}" "~{CS-P0}"
+    ~{WR} A11 A14 A15 ~{OE} P4.0 P4.1 P4.2
+    P4.3 P4.4 P4.5 P4.6 P4.7 P5.0 P5.1 P5.2
+    P5.3 P5.4 P5.5 P5.6 P5.7 P6.0 P6.1 P6.2
+    P6.3 P6.4 P6.5 P6.6 P6.7 PA.0 PA.1 PA.2
+    PA.3 PA.4 PA.5 PA.6 PA.7 PB.0 PB.1 PB.2
+    PB.3 PB.4 PB.5 PB.6 PB.7 PC.0 PC.1 PC.2
+    PC.3 PC.4 PC.5 PC.6 PC.7 PD.0 PD.1 PD.2
+    PD.3 PD.4 PD.5 PD.6 PD.7 PF.0 PF.1 PF.2
+    PF.3 PF.4 PF.5 PF.6 PF.7 ~{INT0} ~{INT1} T1
+    "unconnected-(J16-Pad2)" "Net-(J16-Pad3)" "RxD-0" "TxD-0" "unconnected-(J16-Pad6)" "unconnected-(J17-Pad2)" "Net-(J17-Pad3)" "RxD-1"
+    "TxD-1" "unconnected-(J17-Pad6)" "Net-(R3-Pad2)" ~{PE} B15 B16 RxD TxD
+    "unconnected-(U13-Pad1)" ~{RD} ~{PSEN} "unconnected-(U13-Pad11)" "unconnected-(U13-Pad16)" B17 T0 "~{CS-LCD}"
+    B18 "~{CS-ROM}" ALE "Net-(D4-Pad2)" "~{CS-PPI1}" "~{CS-PPI0}" "unconnected-(U11-Pad1)" "unconnected-(U11-Pad12)"
+    "unconnected-(U11-Pad23)" "unconnected-(U11-Pad34)" "unconnected-(U12-Pad1)" "unconnected-(U12-Pad12)" "unconnected-(U12-Pad23)" "unconnected-(U12-Pad34)" /XTAL1 /XTAL2
+    ~{EA} "Net-(Q1-Pad2)" ~{RESET} "~{CS-LATCH}" C15 C16 C17 C18
+    "unconnected-(U2-Pad1)" "unconnected-(U2-Pad10)" "unconnected-(U2-Pad11)" "unconnected-(U2-Pad13)" "unconnected-(U2-Pad14)" "Net-(D5-Pad2)" "unconnected-(J24-Pad1)" "unconnected-(J25-Pad1)"
+    "unconnected-(J26-Pad1)" "unconnected-(J27-Pad1)" "unconnected-(J28-Pad1)" "unconnected-(J29-Pad1)" "unconnected-(J30-Pad1)" "unconnected-(J31-Pad1)" "unconnected-(J32-Pad1)" "unconnected-(J33-Pad1)"
+    "unconnected-(J34-Pad1)" "unconnected-(J35-Pad1)" "unconnected-(J36-Pad1)" "unconnected-(J37-Pad1)" "unconnected-(J38-Pad1)" "unconnected-(J39-Pad1)" "unconnected-(J40-Pad1)" "unconnected-(J41-Pad1)"
+    "unconnected-(J42-Pad1)" "unconnected-(J43-Pad1)" "unconnected-(J44-Pad1)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND /9VDC /VI VCC
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 700.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

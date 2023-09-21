@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<truthTable>
+  <variables>
+    <variable name="~RD"/>
+    <variable name="~PSEN"/>
+    <variable name="~WR"/>
+    <variable name="TxD"/>
+    <variable name="TO"/>
+    <variable name="RxDx1"/>
+    <variable name="RxDx0"/>
+    <variable name="~CSxLCD"/>
+  </variables>
+  <results>
+    <result>
+      <name>~OE</name>
+      <values class="BoolTableEx">
+        <e>0001</e>
+        <vars>
+          <variable name="~RD"/>
+          <variable name="~PSEN"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>1</int>
+          <int>2</int>
+          <int>3</int>
+          <int>4</int>
+          <int>5</int>
+        </bitsToRemove>
+        <bitRemoveCount>6</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>CSxLCDxWR</name>
+      <values class="BoolTableEx">
+        <e>1010101010101000</e>
+        <vars>
+          <variable name="~RD"/>
+          <variable name="~PSEN"/>
+          <variable name="~WR"/>
+          <variable name="~CSxLCD"/>
+        </vars>
+        <bitsToRemove>
+          <int>1</int>
+          <int>2</int>
+          <int>3</int>
+          <int>4</int>
+        </bitsToRemove>
+        <bitRemoveCount>4</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>TXxLED</name>
+      <values class="BoolTableEx">
+        <e>01</e>
+        <vars>
+          <variable name="TxD"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>1</int>
+          <int>2</int>
+          <int>3</int>
+          <int>5</int>
+          <int>6</int>
+          <int>7</int>
+        </bitsToRemove>
+        <bitRemoveCount>7</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>RXxLED</name>
+      <values class="BoolTableEx">
+        <e>00110101</e>
+        <vars>
+          <variable name="TO"/>
+          <variable name="RxDx1"/>
+          <variable name="RxDx0"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>4</int>
+          <int>5</int>
+          <int>6</int>
+          <int>7</int>
+        </bitsToRemove>
+        <bitRemoveCount>5</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>TxDx0</name>
+      <values class="BoolTableEx">
+        <e>0111</e>
+        <vars>
+          <variable name="TxD"/>
+          <variable name="TO"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>1</int>
+          <int>2</int>
+          <int>5</int>
+          <int>6</int>
+          <int>7</int>
+        </bitsToRemove>
+        <bitRemoveCount>6</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>TxDx1</name>
+      <values class="BoolTableEx">
+        <e>1011</e>
+        <vars>
+          <variable name="TxD"/>
+          <variable name="TO"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>1</int>
+          <int>2</int>
+          <int>5</int>
+          <int>6</int>
+          <int>7</int>
+        </bitsToRemove>
+        <bitRemoveCount>6</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+    <result>
+      <name>RxD</name>
+      <values class="BoolTableEx">
+        <e>00110101</e>
+        <vars>
+          <variable name="TO"/>
+          <variable name="RxDx1"/>
+          <variable name="RxDx0"/>
+        </vars>
+        <bitsToRemove>
+          <int>0</int>
+          <int>4</int>
+          <int>5</int>
+          <int>6</int>
+          <int>7</int>
+        </bitsToRemove>
+        <bitRemoveCount>5</bitRemoveCount>
+        <size>256</size>
+      </values>
+    </result>
+  </results>
+</truthTable>
