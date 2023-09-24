@@ -1,17 +1,22 @@
 Name     SAB80535-RX-TX.tru ;
 PartNo   00 ;
-Date     22.09.2023 ;
+Date     24.09.2023 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
 Assembly None ;
 Location unknown ;
-Device   g16v8a ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
 
 /* inputs */
 PIN 5 = CSxLCD;
+PIN 10 = CSxLCDxWRxPRIME;
 PIN 3 = PSEN;
 PIN 2 = RD;
+PIN 11 = RESET;
 PIN 9 = RxDx0;
 PIN 8 = RxDx1;
 PIN 7 = TO;
@@ -19,19 +24,23 @@ PIN 6 = TxD;
 PIN 4 = WR;
 
 /* outputs */
-PIN 19 = OE;
-PIN 18 = CSxLCDxWR;
-PIN 17 = TXxLED;
-PIN 12 = RXxLED;
-PIN 15 = TxDx0;
-PIN 14 = TxDx1;
-PIN 13 = RxD;
+PIN 23 = OE;
+PIN 22 = CSxLCDxWR;
+PIN 21 = TXxLED;
+PIN 17 = RXxLED;
+PIN 19 = TxDx0;
+PIN 20 = TxDx1;
+PIN 18 = RxD;
+PIN 16 = E;
+PIN 15 = RESET1;
 
 /* combinatorial logic */
 CSxLCDxWR = (!CSxLCD & !RD) # (!CSxLCD & !PSEN) # (!CSxLCD & !WR);
+E = CSxLCDxWRxPRIME;
 OE = PSEN & RD;
+RESET1 = !RESET;
 RXxLED = (RxDx0 & TO) # (RxDx1 & !TO);
 RxD = (RxDx0 & TO) # (RxDx1 & !TO);
 TXxLED = TxD;
-TxDx0 = TO # TxD;
-TxDx1 = !TO # TxD;
+TxDx0 = !TO # TxD;
+TxDx1 = TO # TxD;
