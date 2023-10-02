@@ -1,0 +1,49 @@
+Name     GAL-U9 ;
+PartNo   00 ;
+Date     10/16/2023 ;
+Revision 01 ;
+Designer Dan Werner ;
+Company  a ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN [2..11] = [a10..19] ; /* Upper 9 address*/
+PIN   1   = !a21        ; /*                */
+PIN   13  = a22         ; /*                                */
+PIN   14  = a20         ; /*                                */
+PIN   23  = a23         ; /*                                */
+PIN   21  = a8          ; /*                                */
+PIN   22  = a9          ; /*                                */
+
+PIN   20  = h_in        ; /*                                */
+
+
+/* *************** OUTPUT PINS *********************/
+PIN   15  = cs_rom     ; /*                                 */
+PIN   16  = cs_bus     ; /*                                 */
+PIN   17  = io         ; /*                                 */
+PIN   19  = h_out      ; /*                                 */
+
+
+
+/* ****  MEMORY MAP ******
+
+000000..00DEFF  EXTERNAL ADDRESS
+00DF00..00DFFF	I/O AREA (BOARD AND EXTERNAL)
+00E000..00FFFF	8K ONBOARD ROM
+010000..FFFFFF	EXTERNAL ADDRESS
+
+************************ */
+
+
+not_high	= a23  # a22  # a21 #  a20 #  a19 #  a18 #  a17 #  a16 ;
+DF 		    = !a15 # !a14 # a13 # !a12 # !a11 # !a10 # !a9  # !a8 ;
+E0 		    = !a15 # !a14 # !a13 ;
+
+
+h_out  =	not_high  ;
+io	    =	h_in # DF ;
+cs_rom	=	h_in # E0 ;
+cs_bus	=	!cs_rom 			;
