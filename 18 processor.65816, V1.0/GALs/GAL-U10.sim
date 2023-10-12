@@ -1,0 +1,49 @@
+%SIGNAL
+PIN   7 =  bus 
+PIN  17 = !busak 
+PIN  14 =  data_dir 
+PIN   6 =  io 
+PIN  18 =  iorq 
+PIN  13 = !m1 
+PIN   5 = !ml 
+PIN  19 =  mreq 
+PIN   9 =  onboardio 
+PIN   1 =  phi 
+PIN  16 = !rd 
+PIN   2 =  rw 
+PIN   3 =  vda 
+PIN   8 = !vp 
+PIN   4 =  vpa 
+PIN  15 = !wr 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+busak =>
+    0 
+
+data_dir =>
+    bus
+  # !onboardio
+  # !rw
+
+iorq =>
+    io
+  # !phi
+
+m1 =>
+    vda & vpa
+
+mreq =>
+    bus
+  # !phi
+
+rd =>
+    phi & rw
+
+wr =>
+    phi & !rw
+
+%END
