@@ -1,0 +1,44 @@
+Name     SAB80535-CS.tru ;
+PartNo   00 ;
+Date     24.09.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 9 = A10;
+PIN 2 = A11;
+PIN 3 = A12;
+PIN 4 = A13;
+PIN 5 = A14;
+PIN 6 = A15;
+PIN 7 = A8;
+PIN 8 = A9;
+
+/* outputs */
+PIN 23 = CSxRAM;
+PIN 22 = CSxPPI0;
+PIN 21 = CSxPPI1;
+PIN 20 = CSxP0;
+PIN 19 = CSxP1;
+PIN 18 = CSxP2;
+PIN 17 = CSxP3;
+PIN 16 = CSxLCD;
+PIN 15 = CSxLATCH;
+
+/* combinatorial logic */
+CSxLATCH = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A8 # !A9;
+CSxLCD = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A8 # !A9;
+CSxP0 = A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A8 # !A9;
+CSxP1 = A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A8 # !A9;
+CSxP2 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A8 # A9;
+CSxP3 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A8 # A9;
+CSxPPI0 = A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A8 # A9;
+CSxPPI1 = A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A8 # A9;
+CSxRAM = (A11 & A12 & A13 & A14) # !A15;
