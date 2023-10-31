@@ -34,9 +34,9 @@ Z80 processor add jumper U36-13 to RN6-8 (fixed 1.1)
 
 Zilog IO U2 and U4 are really 74LS244s even though the front silkscreen says 74LS241s (fixed 1.1)
 Zilog IO Update U1 GAL to ZP-DATA-DIR-V2 configuration (fixed 1.1)
-Zilog IO Disconnect D6 from D5 on 1PIO and 2PIO
-Zilog IO Mark default jumper locations on PCB front silkscreen
-Zilog IO Consolidate multi small jumpers into a larger jumper group
+Zilog IO Disconnect D6 from D5 on 1PIO and 2PIO (fixed 1.1)
+Zilog IO Mark default jumper locations on PCB front silkscreen (fixed 1.1)
+Zilog IO Consolidate multi small jumpers into a larger jumper group (fixed 1.1)
 
 Multi IO Replace 1K ohm isolated resistor networks DIP-14 with same in DIP-16 due to obsolescence
 Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds)

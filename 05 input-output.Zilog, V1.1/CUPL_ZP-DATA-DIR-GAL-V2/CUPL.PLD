@@ -1,0 +1,44 @@
+Name     ZP-DATA-DIR-GAL-V2.tru ;
+PartNo   00 ;
+Date     15.10.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 11 = BASECLK;
+PIN 4 = CS1;
+PIN 13 = CS2;
+PIN 5 = IEO;
+PIN 9 = bA2;
+PIN 10 = bA3;
+PIN 7 = bIEI;
+PIN 8 = bIORQ;
+PIN 6 = bM1;
+PIN 3 = bRD;
+PIN 2 = bRESET;
+
+/* outputs */
+PIN 22 = DATADIR;
+PIN 21 = CSxCTC1;
+PIN 20 = CSxSIO1;
+PIN 19 = CSxPIO1;
+PIN 18 = CSxPIO2;
+PIN 23 = PM1;
+PIN 17 = CLKxZILOG;
+
+/* combinatorial logic */
+CLKxZILOG = BASECLK;
+CSxCTC1 = bA2 # bA3 # CS1 # bIORQ;
+CSxPIO1 = bA2 # !bA3 # CS1 # bIORQ;
+CSxPIO2 = !bA2 # !bA3 # CS1 # bIORQ;
+CSxSIO1 = !bA2 # bA3 # CS1 # bIORQ;
+DATADIR = (CS1 & CS2 & IEO) # (CS1 & CS2 & bM1) # (CS1 & CS2 & !bIEI) # (IEO & bRD) # (!bIEI & bRD) 
+     # bIORQ # (bM1 & bRD);
+PM1 = bM1 & bRESET;

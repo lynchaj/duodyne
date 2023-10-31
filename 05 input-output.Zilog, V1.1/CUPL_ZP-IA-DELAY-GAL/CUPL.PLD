@@ -1,0 +1,27 @@
+Name     ZP-IA-DELAY-GAL.tru ;
+PartNo   00 ;
+Date     01.09.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 3 = DELxCNT;
+PIN 5 = bCLK;
+PIN 2 = bIORQxRAW;
+PIN 4 = bM11;
+
+/* outputs */
+PIN 19 = bIORQ;
+PIN 18 = bWAIT;
+PIN 17 = bM1;
+PIN 16 = bCLK1;
+
+/* combinatorial logic */
+bCLK1 = !bCLK;
+bIORQ = (!DELxCNT & !bM11) # bIORQxRAW;
+bM1 = !bM11;
+bWAIT = DELxCNT # bIORQxRAW # bM11;
