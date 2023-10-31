@@ -1,0 +1,48 @@
+Name     GAL-U8 ;
+PartNo   00 ;
+Date     10/29/2023 ;
+Revision 01 ;
+Designer Dan Werner ;
+Company  a ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+
+/* inputs */
+PIN 1 = MEMEN;
+PIN 2 = WE;
+PIN 3 = DBIN;
+PIN 4 = ISFE;
+PIN 5 = RA15;
+PIN 6 = CPUA7;
+PIN 7 = CPUA6;
+PIN 8 = ROMEN;
+PIN 9 = CRUCLK;
+PIN 10 = USER;
+PIN 11 = PROTECT;
+
+
+/* outputs */
+PIN 23 = ONBOARD_ROM;
+PIN 22 = OFFBOARD_MEM;
+PIN 21 = CFSEL;
+PIN 20 = MAPSEL;
+PIN 19 = PWE;
+PIN 18 = 9902SEL;
+PIN 17 = WAIT;
+PIN 16 = FLAGSEL;
+PIN 15 = CPU_IORQ;
+PIN 14 = CPU_MREQ;
+
+/* combinatorial logic */
+ONBOARD_ROM = MEMEN # ROMEN # RA15;
+OFFBOARD_MEM = MEMEN # !ROMEN & !RA15 & WE # !ISFE & RA15;
+CFSEL = MEMEN # ISFE # !RA15 # CPUA7 # CPUA6 # USER;
+MAPSEL = MEMEN # ISFE # !RA15 # CPUA7 # !CPUA6 # USER;
+PWE = WE # PROTECT & USER;
+9902SEL = !MEMEN # ISFE # RA15 # CPUA7 # CPUA6 # USER;
+WAIT = !ONBOARD_ROM # !CFSEL;
+FLAGSEL = CRUCLK # ISFE # RA15 # CPUA7 # !CPUA6;
+CPU_IORQ = MEMEN # ISFE # !RA15 # !CPUA7 # CPUA6 # USER;
+CPU_MREQ = !CPU_IORQ # OFFBOARD_MEM;

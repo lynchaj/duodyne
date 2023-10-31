@@ -1,0 +1,148 @@
+
+(rules PCB processor-tms9995
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 35424)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.5)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.7)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.0)
+    (clear 125.0 (type smd_to_turn_gap))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-G_PLCC" "Via[0-1]_800:400_um" "G_PLCC"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    "G_PLCC" "Via[0-1]_800:400_um-G_PLCC"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    "Net-(D2-Pad1)" "Net-(D5-Pad2)" "Net-(C40-Pad2)" "Net-(D1-Pad2)" "Net-(D2-Pad2)" ~{WAIT} ~{INT0} ~{TEND1}
+    ~{TEND0} ~{DREQ1} ~{DREQ0} "Net-(D3-Pad1)" "Net-(D3-Pad2)" ~{HALT} ~{BUSRQ} /bus/CRUCLK
+    ~{NMI} CLK ~{BUSACK} ~{M1} ~{MREQ} ~{IORQ} ~{WR} ~{RD}
+    A0 A1 A2 A3 A4 A5 A6 A7
+    A8 A9 A10 A11 A12 A13 A14 A15
+    D0 D1 D2 D3 D4 D5 D6 D7
+    "Net-(D5-Pad1)" "Net-(C41-Pad2)" ~{ACTIVE} "Net-(D6-Pad2)" ZERO CRUIN ~{INT4} IAQ
+    ~{DBIN} ~{WE} ~{MEMEN} "~{CPU-IORQ}" "~{CPU-RESET}" "CPU-A1" "CPU-A0" "~{CPU-WAIT}"
+    "~{CPU-M1}" "~{CPU-MREQ}" "DATA-DIR" "~{TMS9995_RST}" RA15 RA14 RA13 RA12
+    bCLK /bus/~{RFSH} /bus/~{EIRQ7} /bus/~{EIRQ6} ~{MAPSEL} ~{PWE} PROTECT "CPU-A3"
+    "CPU-A4" "CPU-A2" "CPU-A5" "CPU-A6" "CPU-A7" /bus/~{EIRQ5} "CPU-A11" "CPU-A12"
+    "CPU-A10" "CPU-A13" "CPU-A9" "CPU-A14" "CPU-A8" "CPU-A15" "~{CPU-INT}" "~{CPU-HALT}"
+    "CPU-D1" "CPU-D7" "CPU-D6" "CPU-D3" "CPU-D0" "CPU-D2" "CPU-D5" "CPU-D4"
+    9995EN ~{9995EN} ~{9995ACTIVE} A16 A17 A18 A19 A20
+    A21 /bus/~{EIRQ4} /bus/~{EIRQ3} "Net-(J4-Pad1)" /bus/~{EIRQ2} /bus/~{EIRQ1} "unconnected-(J5-Pad2)" /bus/~{EIRQ0}
+    A23 A22 "Net-(J5-Pad3)" "unconnected-(U6-Pad7)" "CPU-A16" "CPU-A17" 10KA "CPU-A18"
+    "CPU-A19" "CPU-A20" /bus/E /bus/ST /bus/PHI /bus/~{INT2} /bus/~{INT1} "~{RES_IN}"
+    /bus/CRUOUT /bus/CRUIN "~{RES_OUT}" /bus/USER8 /bus/USER7 /bus/USER6 /bus/USER5 /bus/USER4
+    /bus/USER3 /bus/USER2 /bus/USER1 /bus/USER0 "~{ONBOARD_ROM}" "unconnected-(J5-Pad6)" /bus/A31 /bus/A30
+    /bus/A29 /bus/A28 /bus/A27 /bus/A26 /bus/A25 /bus/A24 "~{OFFBOARD_MEM}" /bus/IC3
+    /bus/IC2 /bus/IC1 /bus/IC0 /bus/AUXCLK1 /bus/AUXCLK0 /bus/D15 /bus/D31 /bus/D14
+    /bus/D30 /bus/D13 /bus/D29 /bus/D12 /bus/D28 /bus/D11 /bus/D27 /bus/D10
+    /bus/D26 /bus/D9 /bus/D25 /bus/D8 /bus/D24 /bus/D23 /bus/D22 /bus/D21
+    /bus/D20 /bus/D19 /bus/D18 /bus/D17 /bus/D16 /bus/~{BUSERR} /bus/UDS /bus/~{VPA}
+    /bus/LDS /bus/~{VMA} /bus/S2 /bus/~{BHE} /bus/S1 /bus/IPL2 /bus/S0 /bus/IPL1
+    /bus/AUXCLK3 /bus/IPL0 /bus/AUXCLK2 USEROUT1 USEROUT2 USEROUT3 USEROUT4 "CPU-A21"
+    "CPU-A22" "unconnected-(U2-Pad5)" "unconnected-(U2-Pad6)" "unconnected-(U2-Pad9)" USEROUT5 "Net-(JP1-Pad1)" "Net-(JP1-Pad3)" "unconnected-(U13-Pad2)"
+    "Net-(J1-Pad10)" "Net-(JP1-Pad5)" "unconnected-(U13-Pad6)" "Net-(JP1-Pad7)" "Net-(JP3-Pad1)" RX TX "~{EXT_RES}"
+    "Net-(JP4-Pad1)" "/IO/VCC_IDE" "Net-(P1-Pad44)" "Net-(P1-Pad40)" "/bus/I2C_SCL" "Net-(J1-Pad12)" "Net-(J1-Pad14)" "Net-(J1-Pad16)"
+    "Net-(U21-Pad5)" "/bus/I2C_SDA" "Net-(P4-Pad1)" "unconnected-(P4-Pad4)" "unconnected-(P4-Pad6)" "unconnected-(P4-Pad8)" "unconnected-(P4-Pad10)" "unconnected-(P4-Pad12)"
+    "unconnected-(P4-Pad14)" "unconnected-(P4-Pad16)" "unconnected-(P4-Pad18)" "unconnected-(P4-Pad21)" "unconnected-(P4-Pad27)" "unconnected-(P4-Pad28)" "unconnected-(P4-Pad29)" "unconnected-(P4-Pad31)"
+    "unconnected-(P4-Pad32)" "unconnected-(P4-Pad34)" ~{CFSEL} "Net-(P4-Pad38)" "Net-(R2-Pad1)" "Net-(R9-Pad2)" 99TOGGLE "CPU-A23"
+    "unconnected-(RN4-Pad6)" "unconnected-(U1-Pad3)" "unconnected-(U1-Pad4)" "unconnected-(U1-Pad8)" "unconnected-(U1-Pad9)" "unconnected-(RN4-Pad7)" "unconnected-(RN4-Pad8)" "Net-(U1-Pad12)"
+    "Net-(U1-Pad13)" "unconnected-(RN4-Pad9)" "Net-(U1-Pad2)" "unconnected-(U2-Pad8)" "Net-(U2-Pad11)" "Net-(U1-Pad10)" "Net-(J1-Pad2)" "Net-(J1-Pad4)"
+    "Net-(J1-Pad6)" "Net-(J1-Pad8)" "Net-(U3-Pad21)" "Net-(U3-Pad23)" "Net-(U23-Pad6)" MAPEN "Net-(U4-Pad8)" "Net-(U21-Pad15)"
+    ~{CRUCLK} "Net-(U5-Pad2)" "unconnected-(U5-Pad6)" "unconnected-(U5-Pad8)" "Net-(U5-Pad12)" "unconnected-(U6-Pad6)" WAIT "Net-(U15-Pad7)"
+    "Net-(U7-Pad2)" "Net-(U7-Pad12)" ~{ISFE} ~{ROMEN} USER ~{FLAGSEL} ~{9902SEL} "unconnected-(U13-Pad14)"
+    "unconnected-(U14-Pad3)" "unconnected-(U14-Pad5)" "unconnected-(U14-Pad7)" "unconnected-(U14-Pad13)" "unconnected-(U14-Pad14)" "unconnected-(U14-Pad15)" "unconnected-(U14-Pad17)" "unconnected-(U15-Pad9)"
+    "unconnected-(U15-Pad10)" "unconnected-(U15-Pad11)" "unconnected-(U15-Pad12)" "unconnected-(U15-Pad14)" "unconnected-(U16-Pad4)" "unconnected-(U16-Pad5)" "unconnected-(U16-Pad6)" "unconnected-(U16-Pad8)"
+    "unconnected-(U16-Pad9)" "unconnected-(U16-Pad10)" "unconnected-(U16-Pad11)" "unconnected-(U16-Pad12)" "unconnected-(U16-Pad13)" "unconnected-(U18-Pad1)" "unconnected-(U21-Pad7)" "unconnected-(U23-Pad14)"
+    "unconnected-(U23-Pad19)" "unconnected-(U23-Pad22)" "unconnected-(U23-Pad23)" "unconnected-(U23-Pad28)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "G_PLCC"
+    (clearance_class "G_PLCC")
+    (via_rule "G_PLCC")
+    (rule
+      (width 700.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC "-12V" +12V
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
