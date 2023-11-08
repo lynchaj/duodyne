@@ -38,9 +38,10 @@ Zilog IO Disconnect D6 from D5 on 1PIO and 2PIO (fixed 1.1)
 Zilog IO Mark default jumper locations on PCB front silkscreen (fixed 1.1)
 Zilog IO Consolidate multi small jumpers into a larger jumper group (fixed 1.1)
 
-Multi IO Replace 1K ohm isolated resistor networks DIP-14 with same in DIP-16 due to obsolescence
-Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds)
-Multi IO add 3-pin jumper to select "reserved 2" on either 2x5 IDC PS/2 keyboard & mouse connector either pin 2 or 10
+Multi IO Replace 1K ohm isolated resistor networks DIP-14 with regular resistors due to obsolescence (fixed 1.1)
+Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds) (fixed 1.1)
+Multi IO add 3-pin jumper to select "reserved 2" on either 2x5 IDC PS/2 keyboard & mouse connector either pin 2 or 10 (fixed 1.1)
+Multi IO add CH376S-EVT board as alternate to CH376S and associated parts install (fixed 1.1)
 
 EPM7128S dev board Replace 470 ohm isolated resistor networks DIP-14 with same in DIP-16 due to obsolescence
 
