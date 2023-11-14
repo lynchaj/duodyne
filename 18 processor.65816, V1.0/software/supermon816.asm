@@ -1243,7 +1243,8 @@ monbrk:
         SLONGA
         LDAW    hwstack         ;top of hardware stack
         TCS                     ;set SPR
-        CLI                     ;reenable IRQs
+;        CLI                     ;reenable IRQs
+        SEI                     ;Disable Interrupts
         SHORTA
         LDA     #$00            ;set DBR
         PHA

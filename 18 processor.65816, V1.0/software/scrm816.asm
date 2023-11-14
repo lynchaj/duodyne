@@ -65,6 +65,7 @@ INBUFFER        = $0200         ;
 ;
 ;_______________________________________________________________
 COLD_START:
+        SEI                     ;  Disable Interrupts
         CLD                     ;  VERIFY DECIMAL MODE IS OFF
 
         LDA     #$80            ;
