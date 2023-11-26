@@ -46,3 +46,8 @@ Multi IO add CH376S-EVT board as alternate to CH376S and associated parts instal
 EPM7128S dev board Replace 470 ohm isolated resistor networks DIP-14 with same in DIP-16 due to obsolescence
 
 All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
+
+SAB80535 Cut VCC trace between U10-pin32 and C12-pin1 so VBB is connected to GND via C12 not VCC
+SAB80535 Rotate U5 180 degrees and U11 & U12 90 degrees so labels are consistent with board
+SAB80535 Replace R6 with 1000 ohm resistor because LED is way too bright
+SAB80535 Label J2 (9VDC screw terminal) connections 9VDC & GND

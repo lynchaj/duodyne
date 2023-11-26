@@ -1,0 +1,904 @@
+// Copyright (C) 1991-2013 Altera Corporation
+// Your use of Altera Corporation's design tools, logic functions 
+// and other software and tools, and its AMPP partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Altera Program License 
+// Subscription Agreement, Altera MegaCore Function License 
+// Agreement, or other applicable license agreement, including, 
+// without limitation, that your use is for the sole purpose of 
+// programming logic devices manufactured by Altera and sold by 
+// Altera or its authorized distributors.  Please refer to the 
+// applicable agreement for further details.
+
+// *****************************************************************************
+// This file contains a Verilog test bench with test vectors .The test vectors  
+// are exported from a vector file in the Quartus Waveform Editor and apply to  
+// the top level entity of the current Quartus project .The user can use this   
+// testbench to simulate his design using a third-party simulation tool .       
+// *****************************************************************************
+// Generated on "03/23/2014 17:29:14"
+                                                                        
+// Verilog Self-Checking Test Bench (with test vectors) for design :    First
+// 
+// Simulation tool : 3rd Party
+// 
+
+`timescale 1 ps/ 1 ps
+module First_vlg_sample_tst(
+	A0,
+	A1,
+	A2,
+	A3,
+	A4,
+	A5,
+	A6,
+	A7,
+	Clock,
+	LED_Drive1,
+	LED_Drive2,
+	Not_IORQ,
+	Not_M1,
+	Not_WD,
+	pin_name1,
+	pin_name2,
+	pin_name3,
+	pin_name4,
+	sampler_tx
+);
+input  A0;
+input  A1;
+input  A2;
+input  A3;
+input  A4;
+input  A5;
+input  A6;
+input  A7;
+input  Clock;
+input  LED_Drive1;
+input  LED_Drive2;
+input  Not_IORQ;
+input  Not_M1;
+input  Not_WD;
+input  pin_name1;
+input  pin_name2;
+input  pin_name3;
+input  pin_name4;
+output sampler_tx;
+
+reg sample;
+time current_time;
+always @(A0 or A1 or A2 or A3 or A4 or A5 or A6 or A7 or Clock or LED_Drive1 or LED_Drive2 or Not_IORQ or Not_M1 or Not_WD or pin_name1 or pin_name2 or pin_name3 or pin_name4)
+                                                                                
+begin                                                 
+ if ($realtime > 0)                                   
+ begin                                                
+	if ($realtime == 0 || $realtime != current_time)  
+	begin									          
+		if (sample === 1'bx)                          
+			sample = 0;                               
+		else                                          
+			sample = ~sample;                         
+	end										          
+	current_time = $realtime;					      
+ end                                                  
+end                                                   
+
+assign sampler_tx = sample;
+endmodule
+
+module First_vlg_check_tst (
+	CK,
+	CKDiv2,
+	CKDiv4,
+	CKDiv8,
+	CKDiv16,
+	Div10,
+	Div100,
+	Div1000,
+	Div10000,
+	Div100000,
+	Div1000000,
+	LED_1,
+	LED_1a,
+	LED_2,
+	LED_2b,
+	Not_OUT0,
+	Not_PE8T11,
+	Seg_a,
+	Seg_b,
+	Seg_c,
+	Seg_d,
+	Seg_e,
+	Seg_f,
+	Seg_g,
+	sampler_rx
+);
+input  CK;
+input  CKDiv2;
+input  CKDiv4;
+input  CKDiv8;
+input  CKDiv16;
+input  Div10;
+input  Div100;
+input  Div1000;
+input  Div10000;
+input  Div100000;
+input  Div1000000;
+input  LED_1;
+input  LED_1a;
+input  LED_2;
+input  LED_2b;
+input  Not_OUT0;
+input  Not_PE8T11;
+input  Seg_a;
+input  Seg_b;
+input  Seg_c;
+input  Seg_d;
+input  Seg_e;
+input  Seg_f;
+input  Seg_g;
+input sampler_rx;
+
+reg  CK_expected;
+reg  CKDiv2_expected;
+reg  CKDiv4_expected;
+reg  CKDiv8_expected;
+reg  CKDiv16_expected;
+reg  Div10_expected;
+reg  Div100_expected;
+reg  Div1000_expected;
+reg  Div10000_expected;
+reg  Div100000_expected;
+reg  Div1000000_expected;
+reg  LED_1_expected;
+reg  LED_1a_expected;
+reg  LED_2_expected;
+reg  LED_2b_expected;
+reg  Not_OUT0_expected;
+reg  Not_PE8T11_expected;
+reg  Seg_a_expected;
+reg  Seg_b_expected;
+reg  Seg_c_expected;
+reg  Seg_d_expected;
+reg  Seg_e_expected;
+reg  Seg_f_expected;
+reg  Seg_g_expected;
+
+reg  CK_prev;
+reg  CKDiv2_prev;
+reg  CKDiv4_prev;
+reg  CKDiv8_prev;
+reg  CKDiv16_prev;
+reg  Div10_prev;
+reg  Div100_prev;
+reg  Div1000_prev;
+reg  Div10000_prev;
+reg  Div100000_prev;
+reg  Div1000000_prev;
+reg  LED_1_prev;
+reg  LED_1a_prev;
+reg  LED_2_prev;
+reg  LED_2b_prev;
+reg  Not_OUT0_prev;
+reg  Not_PE8T11_prev;
+reg  Seg_a_prev;
+reg  Seg_b_prev;
+reg  Seg_c_prev;
+reg  Seg_d_prev;
+reg  Seg_e_prev;
+reg  Seg_f_prev;
+reg  Seg_g_prev;
+
+reg  LED_1_expected_prev;
+reg  LED_1a_expected_prev;
+reg  LED_2_expected_prev;
+reg  LED_2b_expected_prev;
+reg  Seg_a_expected_prev;
+reg  Seg_b_expected_prev;
+reg  Seg_c_expected_prev;
+reg  Seg_d_expected_prev;
+reg  Seg_e_expected_prev;
+reg  Seg_f_expected_prev;
+reg  Seg_g_expected_prev;
+
+reg  last_LED_1_exp;
+reg  last_LED_1a_exp;
+reg  last_LED_2_exp;
+reg  last_LED_2b_exp;
+reg  last_Seg_a_exp;
+reg  last_Seg_b_exp;
+reg  last_Seg_c_exp;
+reg  last_Seg_d_exp;
+reg  last_Seg_e_exp;
+reg  last_Seg_f_exp;
+reg  last_Seg_g_exp;
+
+reg trigger;
+
+integer i;
+integer nummismatches;
+
+reg [1:24] on_first_change ;
+
+
+initial
+begin
+trigger = 0;
+i = 0;
+nummismatches = 0;
+on_first_change = 24'b1;
+end
+
+// update real /o prevs
+
+always @(trigger)
+begin
+	CK_prev = CK;
+	CKDiv2_prev = CKDiv2;
+	CKDiv4_prev = CKDiv4;
+	CKDiv8_prev = CKDiv8;
+	CKDiv16_prev = CKDiv16;
+	Div10_prev = Div10;
+	Div100_prev = Div100;
+	Div1000_prev = Div1000;
+	Div10000_prev = Div10000;
+	Div100000_prev = Div100000;
+	Div1000000_prev = Div1000000;
+	LED_1_prev = LED_1;
+	LED_1a_prev = LED_1a;
+	LED_2_prev = LED_2;
+	LED_2b_prev = LED_2b;
+	Not_OUT0_prev = Not_OUT0;
+	Not_PE8T11_prev = Not_PE8T11;
+	Seg_a_prev = Seg_a;
+	Seg_b_prev = Seg_b;
+	Seg_c_prev = Seg_c;
+	Seg_d_prev = Seg_d;
+	Seg_e_prev = Seg_e;
+	Seg_f_prev = Seg_f;
+	Seg_g_prev = Seg_g;
+end
+
+// update expected /o prevs
+
+always @(trigger)
+begin
+	LED_1_expected_prev = LED_1_expected;
+	LED_1a_expected_prev = LED_1a_expected;
+	LED_2_expected_prev = LED_2_expected;
+	LED_2b_expected_prev = LED_2b_expected;
+	Seg_a_expected_prev = Seg_a_expected;
+	Seg_b_expected_prev = Seg_b_expected;
+	Seg_c_expected_prev = Seg_c_expected;
+	Seg_d_expected_prev = Seg_d_expected;
+	Seg_e_expected_prev = Seg_e_expected;
+	Seg_f_expected_prev = Seg_f_expected;
+	Seg_g_expected_prev = Seg_g_expected;
+end
+
+
+
+// expected Seg_a
+initial
+begin
+	Seg_a_expected = 1'bX;
+end 
+
+// expected Seg_b
+initial
+begin
+	Seg_b_expected = 1'bX;
+end 
+
+// expected Seg_c
+initial
+begin
+	Seg_c_expected = 1'bX;
+end 
+
+// expected Seg_d
+initial
+begin
+	Seg_d_expected = 1'bX;
+end 
+
+// expected Seg_e
+initial
+begin
+	Seg_e_expected = 1'bX;
+end 
+
+// expected Seg_f
+initial
+begin
+	Seg_f_expected = 1'bX;
+end 
+
+// expected Seg_g
+initial
+begin
+	Seg_g_expected = 1'bX;
+end 
+
+// expected LED_1
+initial
+begin
+	LED_1_expected = 1'bX;
+end 
+
+// expected LED_1a
+initial
+begin
+	LED_1a_expected = 1'bX;
+end 
+
+// expected LED_2
+initial
+begin
+	LED_2_expected = 1'bX;
+end 
+
+// expected LED_2b
+initial
+begin
+	LED_2b_expected = 1'bX;
+end 
+// generate trigger
+always @(CK_expected or CK or CKDiv2_expected or CKDiv2 or CKDiv4_expected or CKDiv4 or CKDiv8_expected or CKDiv8 or CKDiv16_expected or CKDiv16 or Div10_expected or Div10 or Div100_expected or Div100 or Div1000_expected or Div1000 or Div10000_expected or Div10000 or Div100000_expected or Div100000 or Div1000000_expected or Div1000000 or LED_1_expected or LED_1 or LED_1a_expected or LED_1a or LED_2_expected or LED_2 or LED_2b_expected or LED_2b or Not_OUT0_expected or Not_OUT0 or Not_PE8T11_expected or Not_PE8T11 or Seg_a_expected or Seg_a or Seg_b_expected or Seg_b or Seg_c_expected or Seg_c or Seg_d_expected or Seg_d or Seg_e_expected or Seg_e or Seg_f_expected or Seg_f or Seg_g_expected or Seg_g)
+begin
+	trigger <= ~trigger;
+end
+
+always @(posedge sampler_rx or negedge sampler_rx)
+begin
+`ifdef debug_tbench
+	$display("Scanning pattern %d @time = %t",i,$realtime );
+	i = i + 1;
+	$display("| expected CK = %b | expected CKDiv2 = %b | expected CKDiv4 = %b | expected CKDiv8 = %b | expected CKDiv16 = %b | expected Div10 = %b | expected Div100 = %b | expected Div1000 = %b | expected Div10000 = %b | expected Div100000 = %b | expected Div1000000 = %b | expected LED_1 = %b | expected LED_1a = %b | expected LED_2 = %b | expected LED_2b = %b | expected Not_OUT0 = %b | expected Not_PE8T11 = %b | expected Seg_a = %b | expected Seg_b = %b | expected Seg_c = %b | expected Seg_d = %b | expected Seg_e = %b | expected Seg_f = %b | expected Seg_g = %b | ",CK_expected_prev,CKDiv2_expected_prev,CKDiv4_expected_prev,CKDiv8_expected_prev,CKDiv16_expected_prev,Div10_expected_prev,Div100_expected_prev,Div1000_expected_prev,Div10000_expected_prev,Div100000_expected_prev,Div1000000_expected_prev,LED_1_expected_prev,LED_1a_expected_prev,LED_2_expected_prev,LED_2b_expected_prev,Not_OUT0_expected_prev,Not_PE8T11_expected_prev,Seg_a_expected_prev,Seg_b_expected_prev,Seg_c_expected_prev,Seg_d_expected_prev,Seg_e_expected_prev,Seg_f_expected_prev,Seg_g_expected_prev);
+	$display("| real CK = %b | real CKDiv2 = %b | real CKDiv4 = %b | real CKDiv8 = %b | real CKDiv16 = %b | real Div10 = %b | real Div100 = %b | real Div1000 = %b | real Div10000 = %b | real Div100000 = %b | real Div1000000 = %b | real LED_1 = %b | real LED_1a = %b | real LED_2 = %b | real LED_2b = %b | real Not_OUT0 = %b | real Not_PE8T11 = %b | real Seg_a = %b | real Seg_b = %b | real Seg_c = %b | real Seg_d = %b | real Seg_e = %b | real Seg_f = %b | real Seg_g = %b | ",CK_prev,CKDiv2_prev,CKDiv4_prev,CKDiv8_prev,CKDiv16_prev,Div10_prev,Div100_prev,Div1000_prev,Div10000_prev,Div100000_prev,Div1000000_prev,LED_1_prev,LED_1a_prev,LED_2_prev,LED_2b_prev,Not_OUT0_prev,Not_PE8T11_prev,Seg_a_prev,Seg_b_prev,Seg_c_prev,Seg_d_prev,Seg_e_prev,Seg_f_prev,Seg_g_prev);
+`endif
+	if (
+		( LED_1_expected_prev !== 1'bx ) && ( LED_1_prev !== LED_1_expected_prev )
+		&& ((LED_1_expected_prev !== last_LED_1_exp) ||
+			on_first_change[12])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port LED_1 :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", LED_1_expected_prev);
+		$display ("     Real value = %b", LED_1_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[12] = 1'b0;
+		last_LED_1_exp = LED_1_expected_prev;
+	end
+	if (
+		( LED_1a_expected_prev !== 1'bx ) && ( LED_1a_prev !== LED_1a_expected_prev )
+		&& ((LED_1a_expected_prev !== last_LED_1a_exp) ||
+			on_first_change[13])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port LED_1a :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", LED_1a_expected_prev);
+		$display ("     Real value = %b", LED_1a_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[13] = 1'b0;
+		last_LED_1a_exp = LED_1a_expected_prev;
+	end
+	if (
+		( LED_2_expected_prev !== 1'bx ) && ( LED_2_prev !== LED_2_expected_prev )
+		&& ((LED_2_expected_prev !== last_LED_2_exp) ||
+			on_first_change[14])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port LED_2 :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", LED_2_expected_prev);
+		$display ("     Real value = %b", LED_2_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[14] = 1'b0;
+		last_LED_2_exp = LED_2_expected_prev;
+	end
+	if (
+		( LED_2b_expected_prev !== 1'bx ) && ( LED_2b_prev !== LED_2b_expected_prev )
+		&& ((LED_2b_expected_prev !== last_LED_2b_exp) ||
+			on_first_change[15])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port LED_2b :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", LED_2b_expected_prev);
+		$display ("     Real value = %b", LED_2b_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[15] = 1'b0;
+		last_LED_2b_exp = LED_2b_expected_prev;
+	end
+	if (
+		( Seg_a_expected_prev !== 1'bx ) && ( Seg_a_prev !== Seg_a_expected_prev )
+		&& ((Seg_a_expected_prev !== last_Seg_a_exp) ||
+			on_first_change[18])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_a :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_a_expected_prev);
+		$display ("     Real value = %b", Seg_a_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[18] = 1'b0;
+		last_Seg_a_exp = Seg_a_expected_prev;
+	end
+	if (
+		( Seg_b_expected_prev !== 1'bx ) && ( Seg_b_prev !== Seg_b_expected_prev )
+		&& ((Seg_b_expected_prev !== last_Seg_b_exp) ||
+			on_first_change[19])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_b :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_b_expected_prev);
+		$display ("     Real value = %b", Seg_b_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[19] = 1'b0;
+		last_Seg_b_exp = Seg_b_expected_prev;
+	end
+	if (
+		( Seg_c_expected_prev !== 1'bx ) && ( Seg_c_prev !== Seg_c_expected_prev )
+		&& ((Seg_c_expected_prev !== last_Seg_c_exp) ||
+			on_first_change[20])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_c :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_c_expected_prev);
+		$display ("     Real value = %b", Seg_c_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[20] = 1'b0;
+		last_Seg_c_exp = Seg_c_expected_prev;
+	end
+	if (
+		( Seg_d_expected_prev !== 1'bx ) && ( Seg_d_prev !== Seg_d_expected_prev )
+		&& ((Seg_d_expected_prev !== last_Seg_d_exp) ||
+			on_first_change[21])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_d :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_d_expected_prev);
+		$display ("     Real value = %b", Seg_d_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[21] = 1'b0;
+		last_Seg_d_exp = Seg_d_expected_prev;
+	end
+	if (
+		( Seg_e_expected_prev !== 1'bx ) && ( Seg_e_prev !== Seg_e_expected_prev )
+		&& ((Seg_e_expected_prev !== last_Seg_e_exp) ||
+			on_first_change[22])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_e :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_e_expected_prev);
+		$display ("     Real value = %b", Seg_e_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[22] = 1'b0;
+		last_Seg_e_exp = Seg_e_expected_prev;
+	end
+	if (
+		( Seg_f_expected_prev !== 1'bx ) && ( Seg_f_prev !== Seg_f_expected_prev )
+		&& ((Seg_f_expected_prev !== last_Seg_f_exp) ||
+			on_first_change[23])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_f :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_f_expected_prev);
+		$display ("     Real value = %b", Seg_f_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[23] = 1'b0;
+		last_Seg_f_exp = Seg_f_expected_prev;
+	end
+	if (
+		( Seg_g_expected_prev !== 1'bx ) && ( Seg_g_prev !== Seg_g_expected_prev )
+		&& ((Seg_g_expected_prev !== last_Seg_g_exp) ||
+			on_first_change[24])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port Seg_g :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", Seg_g_expected_prev);
+		$display ("     Real value = %b", Seg_g_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[24] = 1'b0;
+		last_Seg_g_exp = Seg_g_expected_prev;
+	end
+
+	trigger <= ~trigger;
+end
+initial 
+
+begin 
+$timeformat(-12,3," ps",6);
+#100000000;
+if (nummismatches > 0)
+	$display ("%d mismatched vectors : Simulation failed !",nummismatches);
+else
+	$display ("Simulation passed !");
+$finish;
+end 
+endmodule
+
+module First_vlg_vec_tst();
+// constants                                           
+// general purpose registers
+reg A0;
+reg A1;
+reg A2;
+reg A3;
+reg A4;
+reg A5;
+reg A6;
+reg A7;
+reg Clock;
+reg LED_Drive1;
+reg LED_Drive2;
+reg Not_IORQ;
+reg Not_M1;
+reg Not_WD;
+reg pin_name1;
+reg pin_name2;
+reg pin_name3;
+reg pin_name4;
+// wires                                               
+wire CK;
+wire CKDiv2;
+wire CKDiv4;
+wire CKDiv8;
+wire CKDiv16;
+wire Div10;
+wire Div100;
+wire Div1000;
+wire Div10000;
+wire Div100000;
+wire Div1000000;
+wire LED_1;
+wire LED_1a;
+wire LED_2;
+wire LED_2b;
+wire Not_OUT0;
+wire Not_PE8T11;
+wire Seg_a;
+wire Seg_b;
+wire Seg_c;
+wire Seg_d;
+wire Seg_e;
+wire Seg_f;
+wire Seg_g;
+
+wire sampler;                             
+
+// assign statements (if any)                          
+First i1 (
+// port map - connection between master ports and signals/registers   
+	.A0(A0),
+	.A1(A1),
+	.A2(A2),
+	.A3(A3),
+	.A4(A4),
+	.A5(A5),
+	.A6(A6),
+	.A7(A7),
+	.CK(CK),
+	.CKDiv2(CKDiv2),
+	.CKDiv4(CKDiv4),
+	.CKDiv8(CKDiv8),
+	.CKDiv16(CKDiv16),
+	.Clock(Clock),
+	.Div10(Div10),
+	.Div100(Div100),
+	.Div1000(Div1000),
+	.Div10000(Div10000),
+	.Div100000(Div100000),
+	.Div1000000(Div1000000),
+	.LED_1(LED_1),
+	.LED_1a(LED_1a),
+	.LED_2(LED_2),
+	.LED_2b(LED_2b),
+	.LED_Drive1(LED_Drive1),
+	.LED_Drive2(LED_Drive2),
+	.Not_IORQ(Not_IORQ),
+	.Not_M1(Not_M1),
+	.Not_OUT0(Not_OUT0),
+	.Not_PE8T11(Not_PE8T11),
+	.Not_WD(Not_WD),
+	.pin_name1(pin_name1),
+	.pin_name2(pin_name2),
+	.pin_name3(pin_name3),
+	.pin_name4(pin_name4),
+	.Seg_a(Seg_a),
+	.Seg_b(Seg_b),
+	.Seg_c(Seg_c),
+	.Seg_d(Seg_d),
+	.Seg_e(Seg_e),
+	.Seg_f(Seg_f),
+	.Seg_g(Seg_g)
+);
+
+// pin_name4
+initial
+begin
+	pin_name4 = 1'b1;
+	pin_name4 = #4000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #2000000 1'b1;
+	pin_name4 = #5000000 1'b0;
+	pin_name4 = #3000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #4000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #2000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #6000000 1'b0;
+	pin_name4 = #3000000 1'b1;
+	pin_name4 = #2000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #2000000 1'b1;
+	pin_name4 = #7000000 1'b0;
+	pin_name4 = #2000000 1'b1;
+	pin_name4 = #3000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #3000000 1'b0;
+	pin_name4 = #2000000 1'b1;
+	pin_name4 = #2000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #3000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #4000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #3000000 1'b0;
+	pin_name4 = #4000000 1'b1;
+	pin_name4 = #1000000 1'b0;
+	pin_name4 = #1000000 1'b1;
+	pin_name4 = #2000000 1'b0;
+end 
+
+// pin_name3
+initial
+begin
+	pin_name3 = 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #3000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #4000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #4000000 1'b1;
+	pin_name3 = #3000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #3000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #4000000 1'b0;
+	pin_name3 = #3000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #4000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #3000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #2000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #7000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #3000000 1'b0;
+	pin_name3 = #2000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #1000000 1'b1;
+	pin_name3 = #1000000 1'b0;
+	pin_name3 = #3000000 1'b1;
+end 
+
+// pin_name2
+initial
+begin
+	pin_name2 = 1'b0;
+	pin_name2 = #3000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #3000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #5000000 1'b1;
+	pin_name2 = #8000000 1'b0;
+	pin_name2 = #3000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #6000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #4000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #6000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+	pin_name2 = #5000000 1'b0;
+	pin_name2 = #3000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #2000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #1000000 1'b1;
+	pin_name2 = #1000000 1'b0;
+	pin_name2 = #2000000 1'b1;
+end 
+
+// pin_name1
+initial
+begin
+	pin_name1 = 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #4000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #4000000 1'b1;
+	pin_name1 = #4000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #3000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #6000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #3000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #6000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #3000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #2000000 1'b0;
+	pin_name1 = #3000000 1'b1;
+	pin_name1 = #5000000 1'b0;
+	pin_name1 = #2000000 1'b1;
+	pin_name1 = #4000000 1'b0;
+	pin_name1 = #1000000 1'b1;
+	pin_name1 = #1000000 1'b0;
+end 
+
+// LED_Drive1
+initial
+begin
+	LED_Drive1 = 1'b1;
+end 
+
+// LED_Drive2
+initial
+begin
+	LED_Drive2 = 1'b0;
+end 
+
+First_vlg_sample_tst tb_sample (
+	.A0(A0),
+	.A1(A1),
+	.A2(A2),
+	.A3(A3),
+	.A4(A4),
+	.A5(A5),
+	.A6(A6),
+	.A7(A7),
+	.Clock(Clock),
+	.LED_Drive1(LED_Drive1),
+	.LED_Drive2(LED_Drive2),
+	.Not_IORQ(Not_IORQ),
+	.Not_M1(Not_M1),
+	.Not_WD(Not_WD),
+	.pin_name1(pin_name1),
+	.pin_name2(pin_name2),
+	.pin_name3(pin_name3),
+	.pin_name4(pin_name4),
+	.sampler_tx(sampler)
+);
+
+First_vlg_check_tst tb_out(
+	.CK(CK),
+	.CKDiv2(CKDiv2),
+	.CKDiv4(CKDiv4),
+	.CKDiv8(CKDiv8),
+	.CKDiv16(CKDiv16),
+	.Div10(Div10),
+	.Div100(Div100),
+	.Div1000(Div1000),
+	.Div10000(Div10000),
+	.Div100000(Div100000),
+	.Div1000000(Div1000000),
+	.LED_1(LED_1),
+	.LED_1a(LED_1a),
+	.LED_2(LED_2),
+	.LED_2b(LED_2b),
+	.Not_OUT0(Not_OUT0),
+	.Not_PE8T11(Not_PE8T11),
+	.Seg_a(Seg_a),
+	.Seg_b(Seg_b),
+	.Seg_c(Seg_c),
+	.Seg_d(Seg_d),
+	.Seg_e(Seg_e),
+	.Seg_f(Seg_f),
+	.Seg_g(Seg_g),
+	.sampler_rx(sampler)
+);
+endmodule
+
