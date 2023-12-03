@@ -47,8 +47,12 @@ EPM7128S dev board Replace 470 ohm isolated resistor networks DIP-14 with same i
 
 SAB80535 Cut VCC trace between U10-pin32 and C12-pin1 so VBB is connected to GND via C12 not VCC
 SAB80535 Rotate U5 180 degrees and U11 & U12 90 degrees so labels are consistent with board
-SAB80535 Replace R6 with 1000 ohm resistor because LED is way too bright
+SAB80535 Replace R6 with 10K ohm resistor because LED is way too bright
 SAB80535 Label J2 (9VDC screw terminal) connections 9VDC & GND
+SAB80535 Add jumper select for pin 37 (VCC for SAB80C535 and 0.1uF to GND for SAB80535)
+SAB80535 Replace SIL-6 TTL serial connectors with right angle 2x6 IDC and flip orientation
+SAB80535 Replace 22.1184 MHz crystal with 11.0592 MHz crystal
+SAB80535 Change LM7805 voltage regulator from vertical to horizontal
 
 SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed)
 
