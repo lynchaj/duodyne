@@ -336,7 +336,7 @@
     (uuid e5d5053b-3e6c-44c3-9291-72645c817935)
   )
 
-  (text "=~{MEMEN}+~{ROMEN}+RA15\n=~{MEMEN}+!~{ROMEN}*!RA15*~{WE}+!~{ISFE}*RA15\n=~{MEMEN}+~{ISFE}+!RA15+CPU-A7+CPU-A6+USER\n=~{MEMEN}+~{ISFE}+!RA15+CPU-A7+!CPU-A6+USER\n=~{WE}+PROTECT*USER\n=!~{MEMEN}+~{ISFE}+RA15+CPU-A7+CPU-A6+USER\n=!~{ROMSEL}+!~{CFSEL}\n=~{CRUCLK}+~{ISFE}+RA15+CPU-A7+!CPU-A6\n=~{MEMEN}+~{ISFE}+!RA15+!CPU-A7+CPU-A6+USER\n=!~{CPU-IORQ}+~{OFFBOARD_MEM}"
+  (text "=~{MEMEN}+~{ROMEN}+RA15\n=~{MEMEN}+(!~{ROMEN}*!RA15*~{WE}) + (!ISFE * RA15)\n=~{MEMEN}+~{ISFE}+!RA15+CPU-A7+CPU-A6+USER\n=~{MEMEN}+~{ISFE}+!RA15+CPU-A7+!CPU-A6+USER\n=~{WE}+(PROTECT*USER)\n=!~{MEMEN}+~{ISFE}+RA15+CPU-A7+CPU-A6+USER\n=!~{ROMSEL}+!~{CFSEL}\n=~{CRUCLK}+~{ISFE}+RA15+CPU-A7+!CPU-A6\n=~{MEMEN}+~{ISFE}+!CFSEL+!MAPSEL+!9902SEL+USER+!RA15\n=(!ISFE * RA15)+~{OFFBOARD_MEM}"
     (at 185.801 99.441 0)
     (effects (font (size 1.6 1.6)) (justify left bottom))
     (uuid 27355835-9e34-4347-8291-cf75a257a2e0)
@@ -345,7 +345,7 @@
     (effects (font (size 2 2) (thickness 0.4) bold italic) (justify left bottom))
     (uuid 2c29dfa5-603f-457f-9748-b72e814162a2)
   )
-  (text "The memory map is shown in the table below.\n\nMemory Address	Mapped To\n>0000 - >7FFF	ROM when enabled, otherwise RAM\n>8000 - >EFFF	RAM\n>F000 - >F0FB	TMS 9995 internal RAM\n>F0FC - >FDFF	RAM\n>FE00 - >FE3F	CF card ATA registers (FIX INCOMPLETE DECODING WITH NEXT REVISION)\n>FE40 - >FE7F	Memory mapper registers 0-15 (>FE40 - >FE4F, repeats at >FE50 etc. . .  FIX INCOMPLETE DECODING WITH NEXT REVISION)\n>FE80 - >FEBF	Offboard IO (ports $80-$BF)\n>FEC0 - >FFF9	RAM\n>FFFA - >FFFF	TMS 9995 internal RAM\n\n\nCRU Address	Mapped To\n>0000 - >003F	TMS 9902 registers\n>0040 - >007F	Control signal latch (further details here)\n 	(Plus processor internal CRU bits)\n"
+  (text "The memory map is shown in the table below.\n\nMemory Address	Mapped To\n>0000 - >7FFF	ROM when enabled, otherwise RAM\n>8000 - >EFFF	RAM\n>F000 - >F0FB	TMS 9995 internal RAM\n>F0FC - >FDFF	RAM\n>FE00 - >FE3F	CF card ATA registers (FIX INCOMPLETE DECODING WITH NEXT REVISION)\n>FE40 - >FE7F	Memory mapper registers 0-15 (>FE40 - >FE4F, repeats at >FE50 etc. . .  FIX INCOMPLETE DECODING WITH NEXT REVISION)\n>FE80 - >FEBF	Offboard IO (ports $80-$FF)\n>FFF0 - >FFF9	RAM\n>FFFA - >FFFF	TMS 9995 internal RAM\n\n\nCRU Address	Mapped To\n>0000 - >003F	TMS 9902 registers\n>0040 - >007F	Control signal latch (further details here)\n 	(Plus processor internal CRU bits)\n"
     (at 187.706 139.573 0)
     (effects (font (size 1.016 1.016)) (justify left bottom))
     (uuid 51c092f4-9c80-4cb8-af92-22dcb062dc38)
