@@ -9,6 +9,7 @@ The main EEPROM image provides a boot menu which enables the user to select betw
 ## Memory Map
 The memory map is shown in the table below.
 
+```
 Memory Address	Mapped To
 >0000 - >7FFF	ROM when enabled, otherwise RAM
 >8000 - >EFFF	RAM
@@ -24,7 +25,7 @@ CRU Address	Mapped To
 >0000 - >003F	TMS 9902 registers
 >0040 - >007F	Control signal latch (further details here)
  	(Plus processor internal CRU bits)
-
+```
 [for more information see Stuart's site](https://www.stuartconner.me.uk/mini_cortex/mini_cortex.htm)
 
 ## Creating CF card Image for MDEX and Unix
@@ -35,7 +36,7 @@ It can be problematic formatting a new card using Windows 10 as it does not alwa
 [for more information see Stuart's site](https://www.stuartconner.me.uk/mini_cortex/mini_cortex.htm)
 
 ## Jumper Settings
-
+```
 JP1- CPU Signal Pullups - Jumpers should be installed if this is the only CPU card in the system, otherwise leave unjumpered
 JP2 - Reset Selection - 1&2 closed for External bus Reset in 2&3 closed for CPU to assert reset to the bus
 JP4 - Jumper to enable on board LED for IDE or connect external LED for IDE Activity
@@ -48,21 +49,21 @@ J7 - External User flag bits (CRU 0046-004C)
 J2 - 1&2 for Stand Alone Operation, 2&3 for secondary CPU
 J3 - 1&2 for Stand Alone Operation, 2&3 for secondary CPU
 J8 - 2&3 for Stand Alone Operation, 1&2 for secondary CPU
-
+```
 ## Powering up
 The serial port on the TMS9995 board is configured for 9600 Baud, 7 data bits, even parity, one stop bit, no flow control.
 
 The EVMBUG monitor and Cortex BASIC software applications, and the boot loaders for MDEX and Unix, are stored on a single 32K byte EEPROM. The required application is selected from a boot menu. To display the boot menu, connect the board to a configured serial port on a PC, apply power then press any key.
 
 You should then see:
-
+```
 TMS 9995 BREADBOARD SYSTEM
 BY STUART CONNER
 PRESS 1 FOR EVMBUG MONITOR
 PRESS 2 FOR CORTEX BASIC
 PRESS 3 FOR MDEX
 PRESS 4 FOR UNIX
-
+```
 To select a software application from the menu, press the corresponding numeric key.
 
 ## Useful Links
@@ -85,7 +86,7 @@ The first test image tests just the processor (TMS9995_test_1_eprom_image), the 
 
 If the first test passes, repeat with the second test image (TMS9995_test_2_eprom_image), which also tests the RAM and the RAM chip select logic. With the second test, a series of pulses should be seen on pin 20 of the EPROM every 6 seconds or so.
 
-The third test image has two versions.   The first version configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E ("~").  This version tests most of the system including ROM and RAM.   The second version is a ROM only version. It also configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E ("~"), but does not use any external RAM.
+The third test image has two versions.   The first version configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E .  This version tests most of the system including ROM and RAM.   The second version is a ROM only version. It also configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E , but does not use any external RAM.
 
 ## BOM
 Qty|Reference(s)|Value
