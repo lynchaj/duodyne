@@ -25,6 +25,8 @@ CRU Address	Mapped To
 >0000 - >003F	TMS 9902 registers
 >0040 - >007F	Control signal latch (further details here)
  	(Plus processor internal CRU bits)
+    
+(Note that in TI Speak ">" means Hexidecimal, so for the rest of us >FFFA is the same as $FFFA or 0xFFFA or FFFAH)
 ```
 [for more information see Stuart's site](https://www.stuartconner.me.uk/mini_cortex/mini_cortex.htm)
 
