@@ -73,10 +73,14 @@ MDEX documentation is available on the site http://www.powertrancortex.com/docum
 
 The first version of Unix ported was LSX Unix (https://www.mailcom.com/lsx/), which was designed to run with 40K byte RAM and two 256K byte floppies. LSX Unix was adapted from Unix V6 by Dr. Heinz Lycklama (https://www.60bits.net/msu/mycomp/terak/termubel.htm). This port has been further ported to the TI 990 minicomputer by Dave Pitts, who has also made improvements to the code build system.
 
+
+
 [EVMBUG documentation](https://www.stuartconner.me.uk/tibug_evmbug/tibug_evmbug.htm#evmbug)
 
 
 ## Bugs/To Do
+* Add Xmodem to Unix
+* Add Vi to Unix
 * CF card ATA registers have INCOMPLETE DECODING 
 * Memory mapper have INCOMPLETE DECODING
 * Add Serial port drivers for off board Duodyne hardware
