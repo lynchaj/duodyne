@@ -1,0 +1,233 @@
+                   ; Assembly language example code for accessing a LCD using t
+                   ; 8051 development board: http://www.pjrc.com/tech/8051/boar
+                   
+                   
+                   ; The location in memory where this example program is built
+                   ; page for details: http://www.pjrc.com/tech/8051/board4/mem
+                   ;.equ    locat, 0x2000           ;Location for this program
+0000:              .equ    locat, 0x8000           ;Location for this program
+                   
+                   ; Constants to define the display size.  These are needed by
+                   ; routine to turn X-Y coordinates into addresses within the 
+                   ; buffer.  These settings work with the 16x2 display availab
+                   ; PJRC.COM, at: http://www.pjrc.com/store/dev_display_16x2.h
+0000:              .equ     lcd_horiz_size, 16
+0000:              .equ     lcd_vert_size, 2
+0000:              .equ     lcd_bytes_per_line, (128 / lcd_vert_size)
+                   
+                   ; Misc constants to define commands give to the display.
+0000:              .equ     lcd_clear_cmd, 0x01             ;clears display
+0000:              .equ     lcd_home_cmd, 0x02              ;put cursor at home
+0000:              .equ     lcd_on_cmd, 0x0C                ;turn on display (c
+0000:              .equ     lcd_shift_cmd, 0x10
+0000:              .equ     lcd_config_cmd, 0x38            ;config 8 bit, 2 li
+                   
+                   ; Memory mapped locations to accessing the LCD.
+0000:              .equ     lcd_command_wr, 0xFE00
+0000:              .equ     lcd_status_rd, 0xFE01
+0000:              .equ     lcd_data_wr, 0xFE02
+0000:              .equ     lcd_data_rd, 0xFE03
+                   
+                   ; Routines within PAULMON2 for interacting with the serial p
+0000:              .equ     cout, 0x0030
+0000:              .equ     cin, 0x0032
+0000:              .equ     phex, 0x0034
+0000:              .equ     phex16, 0x0036
+0000:              .equ     pstr, 0x0038
+0000:              .equ     newline, 0x0048
+                   
+                   
+                   ; Program header, so this program will show up in PAULMON2's
+8000:              .org    locat
+8000: A5 E5 E0 A5 
+                   .db     0xA5,0xE5,0xE0,0xA5     ;signiture bytes
+8004: 23 FF 00 00 
+                   .db     35,255,0,0              ;id (35=prog)
+8008: 00 00 00 00 
+                   .db     0,0,0,0                 ;prompt code vector
+800C: 00 00 00 00 
+                   .db     0,0,0,0                 ;reserved
+8010: 00 00 00 00 
+                   .db     0,0,0,0                 ;reserved
+8014: 00 00 00 00 
+                   .db     0,0,0,0                 ;reserved
+8018: 00 00 00 00 
+                   .db     0,0,0,0                 ;user defined
+801C: FF FF FF FF 
+                   .db     255,255,255,255         ;length and checksum (255=un
+8020: 4C 43 44 20 
+      54 65 73 74 
+      00           .db     "LCD Test",0            ;max 31 characters, plus the
+8040:              .org    locat+64                ;executable code begins here
+                   
+                   
+                   ; Finally, the main program.  This simple program prints a c
+                   ; welcome messages and then enters a loop where everything t
+                   ; user types is displayed on the LCD.  A pair of registers t
+                   ; the cursor position and the code repositions the cursor wh
+                   ; reaches the right side or bottom edge of the display, so t
+                   ; the user's characters will keep displaying somewhere on th
+                   
+                   begin:
+8040: 90 80 76              mov     dptr, #mesg_start       ;print a message fo
+8043: 12 00 38              lcall   pstr
+8046: 31 01                 acall   lcd_init
+8048: 31 1D                 acall   lcd_clear               ;setup the LCD
+804A: 31 27                 acall   lcd_home
+804C: 7C 00                 mov     r4, #0                  ;r4/r5 will remembe
+804E: 7D 01                 mov     r5, #1
+8050: 90 80 B0              mov     dptr, #mesg_start_lcd
+8053: 11 D2                 acall   lcd_pstr                ;print a message on
+8055: 80 17                 sjmp    reposition_cursor       ;start the cursor o
+                   main_loop:
+8057: 12 00 32              lcall   cin                     ;get a user keystro
+805A: B4 1B 03              cjne    a, #27, main2
+805D: 02 00 00              ljmp    0                       ;quit if they press
+8060: 11 BF        main2:   acall   lcd_cout
+8062: 0C                    inc     r4                      ;keep up with curso
+8063: BC 10 F1              cjne    r4, #lcd_horiz_size, main_loop
+8066: 7C 00                 mov     r4, #0                  ;if right edge, ret
+8068: 0D                    inc     r5
+8069: BD 02 02              cjne    r5, #lcd_vert_size, reposition_cursor
+806C: 7D 00                 mov     r5, #0                  ;if bottom edge, re
+                   reposition_cursor:
+806E: EC                    mov     a, r4
+806F: FA                    mov     r2, a
+8070: ED                    mov     a, r5
+8071: FB                    mov     r3, a
+8072: 11 E4                 acall   lcd_set_xy              ;set the cursor bac
+8074: 80 E1                 sjmp    main_loop
+                   
+                   
+                   
+                   mesg_start:
+8076: 54 79 70 65 
+      20 74 65 78 
+      74 20 74 6F 
+      20 73 68 6F 
+      77 20 6F 6E 
+      20 74 68 65 
+      20 64 69 73 
+      70 6C 61 79 
+      0D 0A                 .db     "Type text to show on the display",13,10
+8098: 61 6E 64 20 
+      70 72 65 73 
+      73 20 45 53 
+      43 20 74 6F 
+      20 71 75 69 
+      74 0D 0A 00 
+                            .db     "and press ESC to quit",13,10,0
+                   
+                   mesg_start_lcd:
+80B0: 54 79 70 65 
+      20 53 6F 6D 
+      65 74 68 69 
+      6E 67 00              .db     "Type Something",0
+                   
+                   
+                   ;-----------------------------------------------------------
+                   ;         General purpose routines for accessing the LCD
+                   ;-----------------------------------------------------------
+                   
+                   
+                   
+                   ; Print a single character in Acc to the display.
+                   
+                   lcd_cout:
+80BF: C0 82                 push    dpl
+80C1: C0 83                 push    dph
+80C3: C0 E0                 push    acc
+80C5: 11 DC                 acall   lcd_busy
+80C7: 90 FE 02              mov     dptr, #lcd_data_wr
+80CA: D0 E0                 pop     acc
+80CC: F0                    movx    @dptr, a
+80CD: D0 83                 pop     dph
+80CF: D0 82                 pop     dpl
+80D1: 22                    ret
+                   
+                   
+                   ; Print a string @DPTR to the display.
+                   
+                   lcd_pstr:
+80D2: E4                    clr     a
+80D3: 93                    movc    a, @a+dptr
+80D4: A3                    inc     dptr
+80D5: 60 04                 jz      lcd_pstr_end
+80D7: 11 BF                 acall   lcd_cout
+80D9: 80 F7                 sjmp    lcd_pstr
+                   lcd_pstr_end:
+80DB: 22                    ret
+                   
+                   
+                   ; Wait for the display to be ready for a command or data.
+                   
+                   lcd_busy:
+80DC: 90 FE 01              mov     dptr, #lcd_status_rd
+                   lcd_busy_wait:
+80DF: E0                    movx    a, @dptr
+80E0: 20 E7 FC              jb      acc.7, lcd_busy_wait
+80E3: 22                    ret
+                   
+                   
+                   ; Set the display's cursor position.
+                   ; R2 = X position (0 to 15), R3 = Y position (0 to 1)
+                   
+                   lcd_set_xy:
+                            ;check X is within display size
+80E4: EA                    mov     a, r2
+80E5: 24 F0                 add     a, #256 - lcd_horiz_size
+80E7: 50 02                 jnc     lcd_set_xok
+80E9: 7A 0F                 mov     r2, #lcd_horiz_size - 1
+                   lcd_set_xok:
+                            ;check Y is within display size
+80EB: EB                    mov     a, r3
+80EC: 24 FE                 add     a, #256 - lcd_vert_size
+80EE: 50 02                 jnc     lcd_set_yok
+80F0: 7B 01                 mov     r3, #lcd_vert_size - 1
+                   lcd_set_yok:
+80F2: 11 DC                 acall   lcd_busy
+                            ;compute address within data display ram in LCD con
+80F4: EB                    mov     a, r3
+80F5: 75 F0 40              mov     b, #lcd_bytes_per_line
+80F8: A4                    mul     ab
+80F9: 2A                    add     a, r2
+80FA: 44 80                 orl     a, #0x80        ;msb set for set DD RAM add
+80FC: 90 FE 00              mov     dptr, #lcd_command_wr
+80FF: F0                    movx    @dptr, a
+8100: 22                    ret
+                   
+                   
+                   ; Initialize the display for use.
+                   
+                   lcd_init:
+8101: 12 80 DC              lcall   lcd_busy
+8104: 90 FE 00              mov     dptr, #lcd_command_wr
+8107: 74 38                 mov     a, #lcd_config_cmd
+8109: F0                    movx    @dptr, a
+810A: 12 80 DC              lcall   lcd_busy
+810D: 90 FE 00              mov     dptr, #lcd_command_wr
+8110: 74 0C                 mov     a, #lcd_on_cmd
+8112: F0                    movx    @dptr, a
+8113: 12 80 DC              lcall   lcd_busy
+8116: 90 FE 00              mov     dptr, #lcd_command_wr
+8119: 74 10                 mov     a, #lcd_shift_cmd
+811B: F0                    movx    @dptr, a
+811C: 22                    ret
+                   
+                   ; Clear the screen.
+                   
+                   lcd_clear:
+811D: 12 80 DC              lcall   lcd_busy
+8120: 90 FE 00              mov     dptr, #lcd_command_wr
+8123: 74 01                 mov     a, #lcd_clear_cmd
+8125: F0                    movx    @dptr, a
+8126: 22                    ret
+                   
+                   ; Return the cursor to the home position.
+                   
+                   lcd_home:
+8127: 12 80 DC              lcall   lcd_busy
+812A: 90 FE 00              mov     dptr, #lcd_command_wr
+812D: 74 02                 mov     a, #lcd_home_cmd
+812F: F0                    movx    @dptr, a
+8130: 22                    ret

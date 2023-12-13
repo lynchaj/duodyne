@@ -1,0 +1,4134 @@
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 1
+
+
+
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.3
+       =====================================================
+
+
+
+	Source File:	tb51.asm
+	Object File:	tb51.hex
+	List File:	tb51.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:					$MOD52
+					 ^
+			  @@@@@ illegal control statement @@@@@
+
+    2:					$NODEBUG
+    3:		N      0078		$PAGEWIDTH	(120)
+    4:		N      0042		$PAGELENGTH	(66)
+    5:					$TITLE          (Tiny-Basic51 - Modified for Metalink ASM51)
+    6:
+    7:
+    8:				LIT_    MACRO   K
+    9:					CALL	LIT
+   10:					DB	K
+   11:					ENDM
+   12:
+   13:				TSTV_   MACRO   LBL
+   14:				        CALL    TSTV
+   15:				        JNC     LBL
+   16:				        ENDM
+   17:
+   18:				TSTN_   MACRO   LBL
+   19:				        CALL    TSTN
+   20:				        JNC     LBL
+   21:				        ENDM
+   22:
+   23:				TSTL_   MACRO   LBL
+   24:				        CALL    TSTN
+   25:				        JNC     LBL
+   26:				        ENDM
+   27:
+   28:				TSTS_   MACRO   LBL
+   29:				        CALL    TSTS
+   30:				        JC      LBL
+   31:				        ENDM
+   32:
+   33:				IFDONE_ MACRO   LBL
+   34:				        CALL    IFDONE
+   35:				        JNC     LBL
+   36:				        ENDM
+   37:
+   38:				LINIT_  MACRO
+   39:				        CALL   L_INIT
+   40:				        JC      ERRENT
+   41:				        ENDM
+   42:
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 2
+
+
+
+ Line  I  Addr  Code            Source
+
+   43:				COND_   MACRO   LBL
+   44:				        CALL   COND
+   45:				        JNC    LBL
+   46:				        ENDM
+   47:
+   48:				NEXT_LOOP_       MACRO   LBL
+   49:				        CALL   LOOP
+   50:				        JC     LBL
+   51:				        ENDM
+   52:
+   53:				IJMP_   MACRO   LBL
+   54:				        JMP     LBL
+   55:				        ENDM
+   56:
+   57:				HOP_    MACRO   LBL
+   58:				        SJMP    LBL
+   59:				        ENDM
+   60:
+   61:				ICALL_  MACRO   LBL
+   62:				        CALL    LBL
+   63:				        ENDM
+   64:
+   65:				MLCALL_ MACRO
+   66:				        CALL    MLCALL
+   67:				        ANL     PSW,#11100111B
+   68:				        ENDM
+   69:
+   70:
+   71:				;$ERRORPRINT TITLE(MCS-51(TM) TINY BASIC INTERPRETER 8/26/80)
+   72:				;
+   73:				;	TINY BASIC INTERPRETER PROGRAM  (CREATED 3/10/80   JHW)
+   74:				;	==============================
+   75:				;
+   76:				;	INSITE ORDER NO. BF10
+   77:				;
+   78:		N      0023	VERS    EQU     23H
+   79:				;
+   80:				; Known Update History:
+   81:				; Modified from 2.1 to 2.2 by lss 4 jan 1983 to fix errors in the divide routine; and th
+				e random number generator.
+   82:				; Updated: Jim Lum/CompTech Systems, Inc. 04/25/92  V2.3  Converted to Metalink ASM51
+   83:				;
+   84:				;
+   85:				;	STATUS:
+   86:				;	======
+   87:				;
+   88:				;
+   89:				;	NEW FEATURES/GIMMICKS TO BE CONSIDERED:
+   90:				;
+   91:				;	On power-up, system should adapt itself to whatever RAM it can
+   92:				;	find off-chip.
+   93:				;	Should allow for and/or identify multiple baud rates for serial link.
+   94:				;	Should allow other physical devices (software serial I/O, etc.).
+   95:				;
+   96:				;	Amount of RAM consumed by BASIC variables should be user-alterable.
+   97:				;	16-bit variable array handling should be provided when external RAM
+   98:				;	is available.
+   99:				;	Program buffering in internal RAM and/or line buffering in external RAM
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 3
+
+
+
+ Line  I  Addr  Code            Source
+
+  100:				;	(when available/not available) might be nice.
+  101:				;
+  102:				;	INNUM could be changed to allow line editing and expression input.
+  103:				;
+  104:				;	Interrupt handlers should be provided for, and supported by strapping
+  105:				;	options so that CRT is not required.
+  106:				;
+  107:				;	Symbolically-accessable 8-bit pseudo CPU-registers, ports,
+  108:				;	etc. desired to support ML debug.
+  109:				;	During CALL, pseudo-registers should be loaded/saved.
+  110:				;
+  111:				;	Capability to load and dump programs to MDS or twin system desired.
+  112:				;	Download command desired compatible with ISIS hex file format.
+  113:				;	Line buffering should ignore initial line-feed to be compatible
+  114:				;	with down-load or cross-load, and terminate on <cntrl-Z>.
+  115:				;
+  116:				;	Expression evaluation algorithm should be changed to use less stack
+  117:				;	and allow more precedence levels.
+  118:				;	Since EXPR recursive, hardware stack can overflow (not checked).
+  119:				;
+  120:				;	NEXT command should verify that a valid loop record is on the AES
+  121:				;	as opposed to GOSUB return address, and vice-versa.
+  122:				;	STEP values other than +1 should be considered.
+  123:				;
+  124:				;	Error reporting could re-type line and indicate error point.
+  125:				;	Error numbers (if retained) should make some sense.
+  126:				;	Might be indices for error message strings.
+  127:				;
+  128:				;	TRACE mode could aid BASIC debug by typing each source line # executed.
+  129:				;
+  130:				;	RND number seed should be easily alterable for games, etc.
+  131:				;
+  132:				;$EJECT
+  133:				;
+  134:				;	AESTHETIC IMPROVEMENTS DESIRED:
+  135:				;
+  136:				;	Disallow 0 and >7FFFH line numbers.
+  137:				;
+  138:				;	Source modules could be re-grouped to be more readable
+  139:				;	and re-ordered to minimize use of LJMPs and LCALLs.
+  140:				;	Linkage jumps might be created in second 2K page to provide efficient
+  141:				;	access to first 2K.
+  142:				;
+  143:				;	PRN could insert zeros before leading Hex digits.
+  144:				;
+  145:				;	IDIV uses variable storage inefficiently (TMP0-TMP4).
+  146:				;	Should be modified to make use of actual stack variables.
+  147:				;
+  148:				;	TST could use optimized algorithm for single character token tests.
+  149:				;	String tests should skip over unsearched strings more efficiently.
+  150:				;
+  151:				;	Program buffer searching could be speeded by giving line length
+  152:				;	before text string and computing branch over undesired lines.
+  153:				;
+  154:				;	Math and AES operations might be optimized by dedicating R1 as AESP
+  155:				;	to be loaded and saved only on entering/leaving execution mode.
+  156:				;
+  157:				;	Input radix should be determined by 'H' suffix presence.
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 4
+
+
+
+ Line  I  Addr  Code            Source
+
+  158:				;	Otherwise labels (GOTO destinations) should always be decimal.
+  159:				;
+  160:				;	Space between GO and TO might be forgiven.
+  161:				;
+  162:				;	Certain commands might be disallowed in each operating mode:
+  163:				;	No LIST in execution, no INPUT in interactive, for instance.
+  164:				;	Some commands (FOR, GOTO, RETURN, etc.) must be last command in line.
+  165:				;
+  166:				;	GETLN could be made somewhat more abstract, so that L_INIT and READ_C
+  167:				;	return characters from edited line buffer in interactive mode and
+  168:				;	code buffer in execution mode.  Dual execution loops in main IL program
+  169:				;	can then be combined.  (Line insertion should default when no keyword
+  170:				;	tokens would be detected during parsing.)
+  171:				;
+  172:				;	Get rid of LIST and FNDLBL kludge which falsely sets RUNFLG to fool
+  173:				;	READ_C subroutine.
+  174:				;
+  175:				;	Sequential string testing (command parsing, operator recognition, etc.)
+  176:				;	could be made table-driven, eliminating repeated "CALL TST"s.
+  177:				;
+  178:				;	All data structures need to be better defined in listing.
+  179:				;	It would be a wise exercize to gather each
+  180:				;	data-structure definition/declaration/accessing-routine set
+  181:				;	into isolated functional modules (like objects),
+  182:				;	with communication only via global variables.
+  183:
+  184:				;
+  185:				;$EJECT
+  186:				;
+  187:				;	GLOBAL VARIABLE AND DATA STRUCTURE DECLARATIONS:
+  188:				;	====== ======== === ==== ========= ============
+  189:				;
+  190:				;	Intended System Configuration Constants:
+  191:				;
+  192:		N      2034	EXTRAM		EQU	2034H		;External program buffer begins after 26 vars.
+  193:		N      3000	RAMLIM		EQU	3000H		;Allowance made for 4K RAM buffer.
+  194:		N      9080	EXTROM		EQU	9080H		;Start of external ROM space.
+  195:		N      0008	TABSIZ		EQU	8			;Formatted column spacing.
+  196:		N      0024	AESLEN		EQU	36			;AES Length.
+  197:				;
+  198:				;	Working Register Definitions.
+  199:				;
+  200:		R	 R0	PNTR_L		EQU	R0			;Program buffer pointer.
+  201:		R	 R1	DEST_L		EQU	R1			;Destination pointer for line insertion.
+  202:		R	 R2	PNTR_H		EQU	R2			;High-order pointer byte (temp. cursor)
+  203:		R	 R3	DEST_H		EQU	R3
+  204:		R	 R4	CHAR		EQU	R4			;BASIC source string character being par
+				sed.
+  205:		R	 R5	LP_CNT		EQU	R5
+  206:		R	 R6	TOS_L		EQU	R6
+  207:		R	 R7	TOS_H		EQU	R7			;Variable popped from stack for math rou
+				tines.
+  208:				;
+  209:					DSEG
+  210:
+  211:		N	 20		ORG 20H
+  212:	    20	N	 01	MODE:		DS	1		;Operating mode bits.
+  213:		B	 00	EXTVAR		BIT	MODE.0		;Set when BASIC variables in external RAM.
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 5
+
+
+
+ Line  I  Addr  Code            Source
+
+  214:		B	 01	ROMMOD		BIT	MODE.1		;Set when BASIC programs executed from ROM.
+  215:		B	 02	EXTMOD		BIT	MODE.2		;Set when BASIC programs fetched externally.
+  216:		B	 03	RUNMOD		BIT	MODE.3		;Set when stored BASIC program is running.
+  217:		B	 04	HEXMOD		BIT	MODE.4		;Set when operations should use HEX radix.
+  218:				;
+  219:	    21	N	 01	FLAGS:		DS	1		;Interroutine communication flags.
+  220:		B	 08	ZERSUP		BIT	FLAGS.0		;If set, suppress printing leading zeroes.
+  221:		B	 09	CHAR_FLG  	BIT	FLAGS.1		;Set when CHAR has not been processed.
+  222:		B	 0A	SGN_FLG		BIT	FLAGS.2		;Keeps track of operand(s) sign during math.
+  223:		B	 0B	SEQ_FLG		BIT	FLAGS.3		;
+  224:		B	 0C	MOD_FLG		BIT	FLAGS.4		;Set if divide routine should return MOD value.
+  225:		B	 0D	H_FLG		BIT	FLAGS.5		;Used to sense allow 'H' suffix in HEX mode.
+  226:				;
+  227:		N	 30		ORG	30H
+  228:				;
+  229:				;	Temporary variables used by IDIV routine.
+  230:				;
+  231:	    30	N	 01	TMP0:		DS	1
+  232:	    31	N	 01	TMP1:		DS	1
+  233:	    32	N	 01	TMP2:		DS	1
+  234:	    33	N	 01	TMP3:		DS	1
+  235:	    34	N	 01	TMP4:		DS	1
+  236:				;
+  237:				;	Random number key.
+  238:				;
+  239:	    35	N	 01	SEED_L:		DS	1
+  240:	    36	N	 01	SEED_H:		DS	1
+  241:				;
+  242:				;
+  243:	    37	N	 01	STRLEN:		DS	1			;Length of text string in L_BUF.
+  244:				;
+  245:				;US_VAR		User Variable (A,B,...) Array:
+  246:				;
+  247:		N      000C	NO_VAR		EQU	12			;Allow 12 internal variables A - L.
+  248:	    38	N	 18	US_VAR:		DS	2*NO_VAR	;Allocate variable storage space.
+  249:				;
+  250:
+  251:				;AES	Arithmetic Expression Stack.
+  252:				;
+  253:	    50	N	 01	AESP:		DS	1			;AES Stack Pointer
+  254:	    51	N	 24	AES:		DS	AESLEN		;Buffer allocation.
+  255:				;
+  256:				;
+  257:				;	Line Buffer Variables:
+  258:	    75	N	 01	L_CURS:		DS	1			;Cursor for line buffer.
+  259:				;
+  260:	    76	N	 01	TABCNT:		DS	1			;Column formatting count.
+  261:				;
+  262:				;CURSOR	Source line cursor.
+  263:	    77	N	 01	CURS_L:		DS	1
+  264:	    78	N	 01	CURS_H:		DS	1
+  265:	    79	N	 01	C_SAVE:		DS	1			;CHAR saved during SAVE_PNTR.
+  266:				;
+  267:	    7A	N	 01	LABL_L:		DS	1			;BASIC program source line counter.
+  268:	    7B	N	 01	LABL_H:		DS	1			;  "       "       "     high byte.
+  269:				;
+  270:		N      007F	SP_BASE	EQU	7FH				;Initialization value for hardware SP.
+  271:				;
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 6
+
+
+
+ Line  I  Addr  Code            Source
+
+  272:		N      000D	CR			EQU	0DH			;ASCII CODE FOR <CARRIAGE RETURN
+				>.
+  273:		N      000A	LF			EQU	0AH			;  "    "    "  <LINE FEED>.
+  274:		N      0007	BEL			EQU	07H			;  "    "    "  <BELL>.
+  275:				;
+  276:				;$EJECT
+  277:				;$SAVE NOGEN
+  278:				;
+  279:					CSEG
+  280:		N      8000		ORG	8000H
+  281:	  8000	02 80 03		JMP	S_INIT		;Jump to system initialization routine.
+  282:				;
+  283:				;	Interrupt routine expansion hooks:
+  284:				;	REMOVED
+  285:
+  286:				;	CONSOLE I/O ROUTINES AND DRIVERS:
+  287:				;	======= === ======== === =======
+  288:				;
+  289:	  8003			S_INIT:
+  290:	  8003	E4			CLR		A
+  291:	  8004	F5 D0			MOV		PSW,A
+  292:	  8006	F5 36			MOV		SEED_H,A
+  293:	  8008	F5 35			MOV		SEED_L,A
+  294:	  800A	75 81 7F		MOV		SP,#SP_BASE			;Re-initialize hardware stack.
+  295:	  800D	12 86 E8		CALL	RAM_INIT			;Clear-out variable RAM.
+  296:	  8010			SP_INI:
+  297:				;	JNB		RXD, RUNROM
+  298:				;	CLR		TR1
+  299:				;	MOV		SCON, #01011010B	;TI set indicates transmitter ready.
+  300:				;	MOV		TMOD, #00100001B	;Timer 1 is set to auto-reload timer mod
+				e.
+  301:				;	MOV		TH1, #0				;Assume fastest rate.
+  302:				;	MOV		R0, #144
+  303:				;	JB		RXD, $
+  304:	  8010			BAUDID:
+  305:				;	DJNZ	R0,$
+  306:				;	DEC		TH1
+  307:				;	MOV		R0, #94
+  308:				;	JNB		RXD, BAUDID
+  309:				;	JB		RXD, $		;Hang-up here until space char. over.
+  310:				;	JNB		RXD, $
+  311:				;	SETB	TR1
+  312:	  8010	12 80 BF		CALL	STROUT
+  313:	  8013	0D 4D 43 53		DB      CR,'MCS-51 TINY BASIC/Metalink-Compatible Source V'
+	  8017	2D 35 31 20
+	  801B	54 49 4E 59
+	  801F	20 42 41 53
+	  8023	49 43 2F 4D
+	  8027	65 74 61 6C
+	  802B	69 6E 6B 2D
+	  802F	43 6F 6D 70
+	  8033	61 74 69 62
+	  8037	6C 65 20 53
+	  803B	6F 75 72 63
+	  803F	65 20 56
+  314:	  8042	32 2E 33 8D		DB      ('0'+VERS/10H),'.',('0'+(VERS AND 0FH)),(CR OR 80H)
+  315:	  8046	02 88 2F		JMP		START
+  316:				;
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 7
+
+
+
+ Line  I  Addr  Code            Source
+
+  317:	  8049			RUNROM:
+  318:	  8049	D2 02			SETB	EXTMOD
+  319:	  804B	D2 01			SETB	ROMMOD
+  320:	  804D	02 88 50		JMP		XEC
+  321:				;
+  322:				;=======
+  323:				;
+  324:	  8050			C_IN:
+  325:				;	Console character input routine.
+  326:				;	Waits for next input from console device and returns with character
+  327:				;	code in accumulator.
+  328:				;	If character is <CNTRL-C> process syntax error.
+  329:				;	Adjust lower-case alphabetics to upper case.
+  330:				;
+  331:	  8050			DD005:
+  332:	  8050	30 98 FD		JNB     RI,$            ;Wait until character received.
+  333:	  8053	E5 99			MOV     A,SBUF          ;Read input character.
+  334:	  8055	C2 98			CLR		RI				;Clear reception flag.
+  335:	  8057	54 7F			ANL		A,#7FH			;Mask off data bits.
+  336:	  8059	B4 03 03		CJNE	A,#03H,C_IN_2	;Test for CNTRL-C code.
+  337:	  805C	02 80 E8		JMP		SYN_ER			;Abort if detected.
+  338:				;
+  339:	  805F			C_IN_2:
+  340:	  805F	B4 61 00		CJNE	A,#'a',$+3		;Check for lower-case alphabetics.
+  341:	  8062	40 07			JC		C_IN_1
+  342:	  8064	B4 7B 00		CJNE	A,#'z'+1,$+3
+  343:	  8067	50 02			JNC		C_IN_1
+  344:	  8069	54 DF			ANL		A,#11011111B	;Force upper-case code.
+  345:	  806B			C_IN_1:
+  346:	  806B	22			RET						;Return to calling routine.
+  347:				;
+  348:				;=======
+  349:				;
+  350:				;
+  351:	  806C			NLINE:
+  352:				;	Transmit <CR><LF> sequence to console device.
+  353:				;
+  354:	  806C	74 0D			MOV	A,#CR
+  355:	  806E			C_OUT:
+  356:				;	Console character output routine.
+  357:				;	Outputs character received in accumulator to console output device.
+  358:				;
+  359:	  806E			DD006:
+  360:	  806E	30 99 FD		JNB     TI,$            ;Wait until transmission completed.
+  361:	  8071			DD007:
+  362:	  8071	C2 99			CLR     TI              ;Clear interrupt flag.
+  363:	  8073	F5 99			MOV		SBUF,A			;Write out character.
+  364:	  8075	B4 0D 0A		CJNE	A,#CR,COUT_2
+  365:	  8078			DD008:
+  366:	  8078	30 99 FD		JNB     TI,$
+  367:	  807B			DD009:
+  368:	  807B	C2 99			CLR     TI
+  369:	  807D	75 99 0A		MOV		SBUF,#LF		;Output linefeed.
+  370:	  8080	80 04			SJMP	COUT_3
+  371:				;
+  372:	  8082	C3		COUT_2:	CLR	C
+  373:	  8083	D5 76 04		DJNZ	TABCNT,COUT_1	;Monitor output field position.
+  374:	  8086	75 76 08	COUT_3:	MOV	TABCNT,#TABSIZ	;Reload field counter.
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 8
+
+
+
+ Line  I  Addr  Code            Source
+
+  375:	  8089	D3			SETB	C
+  376:	  808A	22		COUT_1:	RET
+  377:				;
+  378:				;=======
+  379:				;
+  380:				;
+  381:	  808B			CNTRL:
+  382:	  808B	30 98 0A		JNB		RI,CNTRET		;Poll whether character has been typed.
+  383:	  808E	11 50			CALL	C_IN
+  384:	  8090	B4 13 05		CJNE	A,#13H,CNTRET	;Check if char. is <CNTRL-S>.
+  385:	  8093			CNTR_2:
+  386:	  8093	11 50			CALL	C_IN			;If so, hang up...
+  387:	  8095	B4 11 FB		CJNE	A,#11H,CNTR_2	;    ...until <CNTRL-Q> received.
+  388:	  8098			CNTRET:
+  389:	  8098	22			RET
+  390:				;
+  391:				;=======
+  392:				;
+  393:				;
+  394:	  8099			SPC:
+  395:				;	Transmit one or more space characters to console to move console
+  396:				;	cursor to start of next field.
+  397:				;
+  398:	  8099	74 20			MOV		A,#' '			;Load ASCII code for space character.
+  399:	  809B	11 6E			CALL	C_OUT
+  400:	  809D	50 FA			JNC		SPC				;Repeat until at TAB boundary.
+  401:	  809F	22			RET
+  402:				;
+  403:				;===============
+  404:				;
+  405:				;NIBOUT
+  406:				;	If low-order nibble in Acc. is non-zero or ZERSUP flag is cleared,
+  407:				;	output the corresponding ASCII value and clear ZERSUP flag.
+  408:				;	Otherwise return without affecting output or ZERSUP.
+  409:				;
+  410:	  80A0	54 0F		NIBOUT:	ANL	A,#0FH		;Mask out low-order bits.
+  411:	  80A2	70 03			JNZ	NIBO_2		;Output ASCII code for Acc contents.
+  412:	  80A4	20 08 07		JB	ZERSUP,NIBO_3
+  413:	  80A7	C2 08		NIBO_2:	CLR	ZERSUP		;Mark that non-zero character encountered.
+  414:	  80A9	24 03			ADD	A,#(ASCTBL-(NIBO_1+1))	;Offset to start of table.
+  415:	  80AB	83		NIBO_1:	MOVC	A,@A+PC		;Look up corresponding code.
+  416:	  80AC	11 6E			CALL	C_OUT		;Output character.
+  417:	  80AE	22		NIBO_3:	RET
+  418:				;
+  419:	  80AF	30 31 32 33	ASCTBL:	DB	'0123456789ABCDEF'
+	  80B3	34 35 36 37
+	  80B7	38 39 41 42
+	  80BB	43 44 45 46
+  420:				;
+  421:				;=======
+  422:				;
+  423:				;STROUT
+  424:				;	Copy in-line character string to console output device.
+  425:				;
+  426:	  80BF	D0 83		STROUT:	POP	DPH		;Access in-line string.
+  427:	  80C1	D0 82			POP	DPL
+  428:	  80C3	E4		STRO_1:	CLR	A
+  429:	  80C4	93			MOVC	A,@A+DPTR	;Read next byte.
+
+ASEM-51 V1.3                              Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 9
+
+
+
+ Line  I  Addr  Code            Source
+
+  430:	  80C5	A3			INC	DPTR		;Bump pointer.
+  431:	  80C6	10 E7 04		JBC	ACC.7,STRO_2	;Escape after last character.
+  432:	  80C9	11 6E			CALL	C_OUT		;Output character.
+  433:	  80CB	80 F6			SJMP	STRO_1		;Loop until done.
+  434:				;
+  435:	  80CD	11 6E		STRO_2:	CALL	C_OUT		;Output character.
+  436:	  80CF	E4			CLR	A
+  437:	  80D0	73			JMP	@A+DPTR		;Return to program.
+  438:				;
+  439:				;=======
+  440:				;$EJECT
+  441:	  80D1			ERROUT:
+  442:				;	Error handling routine common entry point.
+  443:				;	(Could retype bad line, etc.)
+  444:				;
+  445:	  80D1	02 88 32		JMP	ERRENT		;Return to executive.
+  446:				;
+  447:				;=======
+  448:				;
+  449:				;EXP_ER	Expression evaluation error.
+  450:	  80D4	11 BF		EXP_ER:	CALL	STROUT		;Output error message.
+  451:	  80D6	48 4F 57 3F	        DB      'HOW?',(CR OR 80H)
+	  80DA	8D
+  452:	  80DB	80 F4			JMP	ERROUT		;Return to executive.
+  453:				;
+  454:				;=======
+  455:				;
+  456:				;AES_ER	Arithmetic expression stack error handling routine.
+  457:	  80DD	11 BF		AES_ER:	CALL	STROUT		;Output error message.
+  458:	  80DF	53 4F 52 52	        DB      'SORRY!',(CR OR 80H)
+	  80E3	59 21 8D
+  459:	  80E6	80 E9			JMP	ERROUT		;Return to executive.
+  460:				;
+  461:				;
+  462:				;=======
+  463:				;
+  464:				;SYN_ER	Syntax error handling routine.
+  465:	  80E8	11 BF		SYN_ER:	CALL	STROUT		;Output error message.
+  466:	  80EA	0D 57 48 41	        DB      CR,'WHAT?',(CR OR 80H)
+	  80EE	54 3F 8D
+  467:	  80F1	80 DE			JMP	ERROUT		;Process error.
+  468:				;
+  469:				;=======
+  470:				;$EJECT
+  471:
+  472:				;
+  473:				;	ARITHMETIC SUBROUTINE PACKAGE  (8/12/80)
+  474:				;
+  475:				;=======
+  476:				;
+  477:	  80F3			POP_TOS:
+  478:				;	Verify that stack holds at least one (16-bit) entry.
+  479:				;	(Call AES_ER otherwise.)
+  480:				;	Pop TOS into registers TOS_H and TOS_L,
+  481:				;	update AESP,
+  482:				;	and return with R1 pointing to low-order byte of previous NOS.
+  483:				;	Do not affect accumulator contents.
+  484:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 10
+
+
+
+ Line  I  Addr  Code            Source
+
+  485:	  80F3	A9 50			MOV	R1,AESP
+  486:	  80F5	B9 52 00		CJNE	R1,#AES+1,$+3	;Compare pointer with min. legal level.
+  487:	  80F8	40 21			JC	STK_ER
+  488:	  80FA	FE			MOV	TOS_L,A
+  489:	  80FB	E7			MOV	A,@R1
+  490:	  80FC	FF			MOV	TOS_H,A
+  491:	  80FD	19			DEC	R1
+  492:	  80FE	E7			MOV	A,@R1
+  493:	  80FF	CE			XCH	A,TOS_L		;Store byte and reload ACC.
+  494:	  8100	19			DEC	R1
+  495:	  8101	89 50			MOV	AESP,R1
+  496:	  8103	19			DEC	R1
+  497:	  8104	22			RET
+  498:				;
+  499:				;=======
+  500:				;
+  501:	  8105			POP_ACC:
+  502:				;	Pop TOS into accumulator and update AESP.
+  503:				;
+  504:	  8105	A9 50			MOV	R1,AESP
+  505:	  8107	E7			MOV	A,@R1
+  506:	  8108	15 50			DEC	AESP
+  507:	  810A	22			RET
+  508:				;
+  509:				;=======
+  510:				;
+  511:	  810B			PUSH_TOS:
+  512:				;	Verify that the AES is not full,
+  513:				;	push registers TOS_H and TOS_L onto AES,
+  514:				;	and update AESP.
+  515:				;
+  516:	  810B	A9 50			MOV	R1,AESP
+  517:	  810D	B9 73 00		CJNE	R1,#AES+AESLEN-2,$+3	;Compare pointer with max. legal level.
+  518:	  8110	50 09			JNC	STK_ER
+  519:	  8112	09			INC	R1
+  520:	  8113	EE			MOV	A,TOS_L		;Push low-order byte.
+  521:	  8114	F7			MOV	@R1,A
+  522:	  8115	09			INC	R1
+  523:	  8116	EF			MOV	A,TOS_H		;Push high-order byte.
+  524:	  8117	F7			MOV	@R1,A
+  525:	  8118	89 50			MOV	AESP,R1
+  526:	  811A	22			RET
+  527:				;
+  528:	  811B	11 DD		STK_ER:	CALL	AES_ER
+  529:	  811D	0F			DB	0FH
+  530:				;
+  531:				;=======
+  532:				;
+  533:				;
+  534:	  811E			DUPL:
+  535:				;	Verify that the AES is not full,
+  536:				;	then duplicate the top element and update AESP.
+  537:				;
+  538:	  811E	A9 50			MOV	R1,AESP
+  539:	  8120	B9 73 00		CJNE	R1,#AES+AESLEN-2,$+3	;Compare pointer with max. legal level.
+  540:	  8123	50 F6			JNC	STK_ER
+  541:	  8125	19			DEC	R1
+  542:	  8126	E7			MOV	A,@R1
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 11
+
+
+
+ Line  I  Addr  Code            Source
+
+  543:	  8127	09			INC	R1
+  544:	  8128	87 F0			MOV	B,@R1
+  545:	  812A	09			INC	R1
+  546:	  812B	F7			MOV	@R1,A			;Push low-order byte.
+  547:	  812C	09			INC	R1
+  548:	  812D	A7 F0			MOV	@R1,B
+  549:	  812F	89 50			MOV	AESP,R1
+  550:	  8131	22			RET
+  551:				;
+  552:				;=======
+  553:				;
+  554:				;LIT	(K)
+  555:				;	Report error if arithmetic expression stack is full.
+  556:				;	Otherwise push the one-byte constant K onto AES.
+  557:				;	Return with carry=1, since LIT marks a successful match.
+  558:				;
+  559:	  8132	D0 83		LIT:	POP	DPH		;Get parameter address.
+  560:	  8134	D0 82			POP	DPL
+  561:	  8136	E4			CLR	A
+  562:	  8137	93			MOVC	A,@A+DPTR	;Read literal value.
+  563:	  8138	05 50			INC	AESP		;Reserve storage on top of AES.
+  564:	  813A	A9 50			MOV	R1,AESP		;Point to free entry on stack.
+  565:	  813C	B9 75 02		CJNE	R1,#AES+AESLEN,LIT_1
+  566:	  813F	80 9C			JMP	AES_ER
+  567:				;
+  568:	  8141	F7		LIT_1:	MOV	@R1,A		;Store literal.
+  569:	  8142	74 01			MOV	A,#1		;Branch over constant on return.
+  570:	  8144	D3			SETB	C
+  571:	  8145	73			JMP	@A+DPTR		;Return to IL program.
+  572:				;
+  573:				;=======
+  574:				;$EJECT
+  575:				;
+  576:				;	BASIC VARIABLE ACCESSING OPERATIONS  (8/20/80)
+  577:				;	===== ======== ========= ==========
+  578:				;
+  579:				;
+  580:				;	Direct address mode emulation tables:
+  581:				;
+  582:	  8146	80		SFRTBL:	DB	80H
+  583:	  8147	90			DB	90H
+  584:	  8148	A0			DB	0A0H
+  585:	  8149	B0			DB	0B0H
+  586:	  814A	88			DB	88H
+  587:	  814B	98			DB	98H
+  588:	  814C	A8			DB	0A8H
+  589:	  814D	B8			DB	0B8H
+  590:	  814E	89			DB	89H
+  591:	  814F	8A			DB	8AH
+  592:	  8150	8B			DB	8BH
+  593:	  8151	8C			DB	8CH
+  594:	  8152	8D			DB	8DH
+  595:	  8153	99			DB	99H
+  596:		N      000E	NO_SFR	EQU	$-SFRTBL
+  597:				;
+  598:				;===
+  599:				;
+  600:	  8154	8E 80		STRTBL:	MOV	80H,TOS_L
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 12
+
+
+
+ Line  I  Addr  Code            Source
+
+  601:	  8156	22			RET
+  602:	  8157	8E 90			MOV	90H,TOS_L
+  603:	  8159	22			RET
+  604:	  815A	8E A0			MOV	0A0H,TOS_L
+  605:	  815C	22			RET
+  606:	  815D	8E B0			MOV	0B0H,TOS_L
+  607:	  815F	22			RET
+  608:	  8160	8E 88			MOV	88H,TOS_L
+  609:	  8162	22			RET
+  610:	  8163	8E 98			MOV	98H,TOS_L
+  611:	  8165	22			RET
+  612:	  8166	8E A8			MOV	0A8H,TOS_L
+  613:	  8168	22			RET
+  614:	  8169	8E B8			MOV	0B8H,TOS_L
+  615:	  816B	22			RET
+  616:	  816C	8E 89			MOV	89H,TOS_L
+  617:	  816E	22			RET
+  618:	  816F	8E 8A			MOV	8AH,TOS_L
+  619:	  8171	22			RET
+  620:	  8172	8E 8B			MOV	8BH,TOS_L
+  621:	  8174	22			RET
+  622:	  8175	8E 8C			MOV	8CH,TOS_L
+  623:	  8177	22			RET
+  624:	  8178	8E 8D			MOV	8DH,TOS_L
+  625:	  817A	22			RET
+  626:	  817B	8E 99			MOV	99H,TOS_L
+  627:	  817D	22			RET
+  628:				;
+  629:				;===
+  630:				;
+  631:	  817E	E5 80		INDTBL:	MOV	A,80H
+  632:	  8180	22			RET
+  633:	  8181	E5 90			MOV	A,90H
+  634:	  8183	22			RET
+  635:	  8184	E5 A0			MOV	A,0A0H
+  636:	  8186	22			RET
+  637:	  8187	E5 B0			MOV	A,0B0H
+  638:	  8189	22			RET
+  639:	  818A	E5 88			MOV	A,88H
+  640:	  818C	22			RET
+  641:	  818D	E5 98			MOV	A,98H
+  642:	  818F	22			RET
+  643:	  8190	E5 A8			MOV	A,0A8H
+  644:	  8192	22			RET
+  645:	  8193	E5 B8			MOV	A,0B8H
+  646:	  8195	22			RET
+  647:	  8196	E5 89			MOV	A,89H
+  648:	  8198	22			RET
+  649:	  8199	E5 8A			MOV	A,8AH
+  650:	  819B	22			RET
+  651:	  819C	E5 8B			MOV	A,8BH
+  652:	  819E	22			RET
+  653:	  819F	E5 8C			MOV	A,8CH
+  654:	  81A1	22			RET
+  655:	  81A2	E5 8D			MOV	A,8DH
+  656:	  81A4	22			RET
+  657:	  81A5	E5 99			MOV	A,99H
+  658:	  81A7	22			RET
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 13
+
+
+
+ Line  I  Addr  Code            Source
+
+  659:				;
+  660:				;$EJECT
+  661:	  81A8			SFR_ID:
+  662:				;	Identify which SFR is indicated by the contents of R1.
+  663:				;	Return with acc holding (Index of said register)*3.
+  664:				;	Call error routine if register number not found.
+  665:				;
+  666:	  81A8	90 81 46		MOV	DPTR,#SFRTBL
+  667:	  81AB	E4			CLR	A
+  668:	  81AC	FD			MOV	LP_CNT,A
+  669:	  81AD	ED		SFID_1:	MOV	A,LP_CNT
+  670:	  81AE	93			MOVC	A,@A+DPTR
+  671:	  81AF	69			XRL	A,R1
+  672:	  81B0	70 04			JNZ	SFID_2
+  673:	  81B2	ED			MOV	A,LP_CNT
+  674:	  81B3	23			RL	A
+  675:	  81B4	2D			ADD	A,LP_CNT
+  676:	  81B5	22			RET
+  677:				;
+  678:	  81B6	0D		SFID_2:	INC	LP_CNT
+  679:	  81B7	ED			MOV	A,LP_CNT
+  680:	  81B8	B4 0E F2		CJNE	A,#NO_SFR,SFID_1
+  681:	  81BB	01 D4		ADR_ER:	JMP	EXP_ER
+  682:				;
+  683:				;=======
+  684:				;
+  685:	  81BD			STRDIR:
+  686:				;	Store data byte in ACC into direct on-chip RAM address held in R1.
+  687:				;
+  688:	  81BD	FE			MOV	TOS_L,A
+  689:	  81BE	E9			MOV	A,R1
+  690:	  81BF	20 E7 03		JB	ACC.7,STRSFR	;Direct addresses above 7FH are SFRs.
+  691:	  81C2	EE			MOV	A,TOS_L
+  692:	  81C3	F7			MOV	@R1,A		;Store low-order byte in RAM.
+  693:	  81C4	22			RET
+  694:				;
+  695:	  81C5	31 A8		STRSFR:	CALL	SFR_ID
+  696:	  81C7	90 81 54		MOV	DPTR,#STRTBL
+  697:	  81CA	73			JMP	@A+DPTR		;Jump into store sequence.
+  698:				;
+  699:				;=======
+  700:				;
+  701:	  81CB			FETDIR:
+  702:				;	Fetch on-chip directly addressed byte indicated by R1 into Acc.
+  703:				;	and return.
+  704:				;
+  705:	  81CB	E9			MOV	A,R1
+  706:	  81CC	20 E7 02		JB	ACC.7,FETSFR
+  707:	  81CF	E7			MOV	A,@R1
+  708:	  81D0	22			RET
+  709:				;
+  710:	  81D1	31 A8		FETSFR:	CALL	SFR_ID
+  711:	  81D3	90 81 7E		MOV	DPTR,#INDTBL
+  712:	  81D6	73			JMP	@A+DPTR
+  713:				;
+  714:				;=======
+  715:				;
+  716:	  81D7			SPLIT_DBA:
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 14
+
+
+
+ Line  I  Addr  Code            Source
+
+  717:				;	Called with TOS_L containing a direct on-chip bit address.
+  718:				;	Return the direct &byte& address of encompassing
+  719:				;	register in R1, and load B with a mask containing a single 1
+  720:				;	corresponding to the bit's position in a field of zeroes.
+  721:				;
+  722:	  81D7	EE			MOV	A,TOS_L
+  723:	  81D8	54 F8			ANL	A,#11111000B
+  724:	  81DA	20 E7 04		JB	ACC.7,SPLSFR
+  725:	  81DD	23			RL	A
+  726:	  81DE	C4			SWAP	A
+  727:	  81DF	24 20			ADD	A,#20H		;Address of bit-address space.
+  728:	  81E1	F9		SPLSFR:	MOV	R1,A
+  729:	  81E2	EE			MOV	A,TOS_L
+  730:	  81E3	54 07			ANL	A,#07H		;Mask off bit-displacement field.
+  731:	  81E5	24 03			ADD	A,#MSKTBL-MSK_PC
+  732:	  81E7	83			MOVC	A,@A+PC		;Read mask byte.
+  733:	  81E8			MSK_PC:
+  734:	  81E8	F5 F0			MOV	B,A
+  735:	  81EA	22			RET
+  736:				;
+  737:	  81EB	01		MSKTBL:	DB	00000001B
+  738:	  81EC	02			DB	00000010B
+  739:	  81ED	04			DB	00000100B
+  740:	  81EE	08			DB	00001000B
+  741:	  81EF	10			DB	00010000B
+  742:	  81F0	20			DB	00100000B
+  743:	  81F1	40			DB	01000000B
+  744:	  81F2	80			DB	10000000B
+  745:				;
+  746:				;=======
+  747:				;
+  748:				;
+  749:	  81F3			SEQ_STORE:
+  750:				;	Same as STORE, below, except that index is retained
+  751:				;	rather than being popped.
+  752:	  81F3	D2 0B			SETB	SEQ_FLG
+  753:	  81F5	80 02			SJMP	STOR_0
+  754:				;
+  755:				;
+  756:	  81F7			STORE:
+  757:				;	When STORE is called, AES contains
+  758:				;	(TOS:)	2 byte VALUE to be stored,
+  759:				;		2 byte INDEX of destination variable,
+  760:				;		1 byte TYPE code for variable space.
+  761:				;			(0=BASIC variable,
+  762:				;			 1=DBYTE,
+  763:				;			 2=RBIT,
+  764:				;			 3=XBYTE,
+  765:				;			 4=CBYTE.)
+  766:				;	Store (VAR_1) into appropriate variable memory at location of (INDEX).
+  767:				;
+  768:	  81F7	C2 0B			CLR	SEQ_FLG
+  769:	  81F9	11 F3		STOR_0:	CALL	POP_TOS
+  770:	  81FB	8E 30			MOV	TMP0,TOS_L
+  771:	  81FD	8F 31			MOV	TMP1,TOS_H
+  772:	  81FF	11 F3			CALL	POP_TOS
+  773:	  8201	31 05			CALL	POP_ACC		;Load TYPE code.
+  774:	  8203	30 0B 06		JNB	SEQ_FLG,STOR_1	;Jump forward if simple store.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 15
+
+
+
+ Line  I  Addr  Code            Source
+
+  775:	  8206	05 50			INC	AESP
+  776:	  8208	05 50			INC	AESP
+  777:	  820A	05 50			INC	AESP
+  778:	  820C	90 82 11	STOR_1:	MOV	DPTR,#STRJTB
+  779:	  820F	93			MOVC	A,@A+DPTR
+  780:	  8210	73			JMP	@A+DPTR
+  781:				;
+  782:	  8211	05		STRJTB:	DB	STRVAR-STRJTB
+  783:	  8212	23			DB	STRDBY-STRJTB
+  784:	  8213	29			DB	STRRBI-STRJTB
+  785:	  8214	3E			DB	STRXBY-STRJTB
+  786:	  8215	3E			DB	STRCBY-STRJTB
+  787:				;
+  788:				;=======
+  789:				;
+  790:				;	All of the following routines are called with
+  791:				;	TOS_L holding the low-order address of the destination,
+  792:				;	TOS_H holding the high-order address (if necessary),
+  793:				;	and <TMP1><TMP0> holding the 8- or 16-bit data to be stored.
+  794:				;
+  795:	  8216	EE		STRVAR:	MOV	A,TOS_L
+  796:	  8217	23			RL	A		;Multiply by two for 2 byte variables.
+  797:	  8218	20 00 0D		JB	EXTVAR,STREXT	;Branch if vars in external RAM.
+  798:	  821B	24 38			ADD	A,#US_VAR	;Offset for variable array.
+  799:	  821D	F9			MOV	R1,A
+  800:	  821E	24 B1			ADD	A,#-(US_VAR+2*NO_VAR-1)	;Compare with maximum legal address.
+  801:	  8220	40 99			JC	ADR_ER
+  802:	  8222	A7 30			MOV	@R1,TMP0
+  803:	  8224	09			INC	R1
+  804:	  8225	A7 31			MOV	@R1,TMP1
+  805:	  8227	22			RET
+  806:				;
+  807:	  8228	F9		STREXT:	MOV	R1,A
+  808:	  8229	75 A0 20	DD001:  MOV     P2,#HIGH(EXTRAM)
+  809:	  822C	E5 30		        MOV     A,TMP0
+  810:	  822E	F3			MOVX	@R1,A
+  811:	  822F	09			INC	R1		;Bump pointers.
+  812:	  8230	E5 31			MOV	A,TMP1		;Move high-order byte into variable array.
+  813:	  8232	F3			MOVX	@R1,A
+  814:	  8233	22			RET
+  815:				;
+  816:				;===
+  817:				;
+  818:	  8234	EE		STRDBY:	MOV	A,TOS_L		;Load acc. with low-order dest. addr.
+  819:	  8235	F9			MOV	R1,A
+  820:	  8236	E5 30			MOV	A,TMP0
+  821:	  8238	80 83			JMP	STRDIR
+  822:				;
+  823:				;===
+  824:				;
+  825:	  823A	31 D7		STRRBI:	CALL	SPLIT_DBA
+  826:	  823C	31 CB			CALL	FETDIR
+  827:	  823E	FE			MOV	TOS_L,A
+  828:	  823F	E5 30			MOV	A,TMP0
+  829:	  8241	20 E0 06		JB	ACC.0,SETRBI
+  830:				;
+  831:				;	Clear RBIT.
+  832:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 16
+
+
+
+ Line  I  Addr  Code            Source
+
+  833:	  8244	E5 F0			MOV	A,B
+  834:	  8246	F4			CPL	A
+  835:	  8247	5E			ANL	A,TOS_L
+  836:	  8248	21 BD			JMP	STRDIR
+  837:				;
+  838:	  824A	E5 F0		SETRBI:	MOV	A,B
+  839:	  824C	4E			ORL	A,TOS_L
+  840:	  824D	21 BD			JMP	STRDIR
+  841:				;
+  842:				;===
+  843:				;
+  844:	  824F			STRXBY:
+  845:	  824F	8F A0		STRCBY:	MOV	P2,TOS_H
+  846:	  8251	EE			MOV	A,TOS_L
+  847:	  8252	F9			MOV	R1,A
+  848:	  8253	E5 30			MOV	A,TMP0
+  849:	  8255	F3			MOVX	@R1,A
+  850:	  8256	22			RET
+  851:				;
+  852:				;===============
+  853:				;
+  854:				;
+  855:	  8257			SEQ_FETCH:
+  856:				;	Same as FETCH, below, except that index is retained
+  857:				;	rather than being popped.
+  858:	  8257	D2 0B			SETB	SEQ_FLG
+  859:	  8259	80 02			SJMP	FET_0
+  860:				;
+  861:				;
+  862:	  825B			FETCH:
+  863:				;	When FETCH is called, AES contains
+  864:				;	(TOS:)	2 byte INDEX of source variable,
+  865:				;		1 byte TYPE code for variable space.
+  866:				;			(0=BASIC variable,
+  867:				;			 1=DBYTE,
+  868:				;			 2=RBIT,
+  869:				;			 3=XBYTE,
+  870:				;			 4=CBYTE.)
+  871:				;	Read 8- or 16-bit variable from the appropriate variable
+  872:				;	memory at location of (INDEX) and return on AES.
+  873:				;
+  874:	  825B	C2 0B			CLR	SEQ_FLG
+  875:	  825D	11 F3		FET_0:	CALL	POP_TOS
+  876:	  825F	31 05			CALL	POP_ACC
+  877:	  8261	30 0B 06		JNB	SEQ_FLG,FET_1	;Jump forward if simple store.
+  878:	  8264	05 50			INC	AESP
+  879:	  8266	05 50			INC	AESP
+  880:	  8268	05 50			INC	AESP
+  881:	  826A	90 82 6F	FET_1:	MOV	DPTR,#FETJTB
+  882:	  826D	93			MOVC	A,@A+DPTR
+  883:	  826E	73			JMP	@A+DPTR
+  884:				;
+  885:	  826F	05		FETJTB:	DB	FETVAR-FETJTB
+  886:	  8270	25			DB	FETDBY-FETJTB
+  887:	  8271	2B			DB	FETRBI-FETJTB
+  888:	  8272	37			DB	FETXBY-FETJTB
+  889:	  8273	3E			DB	FETCBY-FETJTB
+  890:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 17
+
+
+
+ Line  I  Addr  Code            Source
+
+  891:				;=======
+  892:				;
+  893:				;	All of the following routines are called with
+  894:				;	TOS_L holding the low-order index of the desired variable,
+  895:				;	and TOS_H holding the high-order index (if necessary).
+  896:				;
+  897:	  8274	EE		FETVAR:	MOV	A,TOS_L
+  898:	  8275	23			RL	A		;Correct for double-byte entries.
+  899:	  8276	20 00 0E		JB	EXTVAR,FETEXT
+  900:	  8279	24 38			ADD	A,#US_VAR	;Offset for variable array.
+  901:	  827B	F9			MOV	R1,A		;Index to variable storage array.
+  902:	  827C	24 B1			ADD	A,#-(US_VAR+2*NO_VAR-1)
+  903:	  827E	40 12			JC	FETERR
+  904:	  8280	E7			MOV	A,@R1		;Load low-order byte of variable.
+  905:	  8281	FE			MOV	TOS_L,A		;And store on AES.
+  906:	  8282	09			INC	R1		;Bump pointer.
+  907:	  8283	E7			MOV	A,@R1		;Transfer high-order byte of variable.
+  908:	  8284	FF			MOV	TOS_H,A
+  909:	  8285	21 0B			JMP	PUSH_TOS
+  910:				;
+  911:				;===
+  912:				;
+  913:	  8287	F9		FETEXT:	MOV	R1,A		;Index to variable storage array.
+  914:	  8288	75 A0 20	DD002:  MOV     P2,#HIGH(EXTRAM)
+  915:	  828B	E3		        MOVX    A,@R1           ;Load low-order byte of variable.
+  916:	  828C	FE			MOV	TOS_L,A		;And store on AES.
+  917:	  828D	09			INC	R1		;Bump pointers.
+  918:	  828E	E3			MOVX	A,@R1		;Transfer high-order byte of variable.
+  919:	  828F	FF			MOV	TOS_H,A
+  920:	  8290	21 0B			JMP	PUSH_TOS
+  921:				;
+  922:	  8292	21 BB		FETERR:	JMP	ADR_ER
+  923:				;
+  924:				;===
+  925:				;
+  926:	  8294	EE		FETDBY:	MOV	A,TOS_L
+  927:	  8295	F9			MOV	R1,A
+  928:	  8296	31 CB			CALL	FETDIR
+  929:	  8298	80 19			SJMP	FETBDN		;Byte fetch done.
+  930:				;
+  931:				;===
+  932:				;
+  933:	  829A	31 D7		FETRBI:	CALL	SPLIT_DBA
+  934:	  829C	31 CB			CALL	FETDIR
+  935:	  829E	55 F0			ANL	A,B
+  936:	  82A0	24 FF			ADD	A,#0FFH
+  937:	  82A2	E4			CLR	A
+  938:	  82A3	33			RLC	A
+  939:	  82A4	80 0D			SJMP	FETBDN
+  940:				;
+  941:				;===
+  942:				;
+  943:	  82A6	8F A0		FETXBY:	MOV	P2,TOS_H
+  944:	  82A8	EE			MOV	A,TOS_L
+  945:	  82A9	F9			MOV	R1,A
+  946:	  82AA	E3			MOVX	A,@R1
+  947:	  82AB	80 06			SJMP	FETBDN
+  948:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 18
+
+
+
+ Line  I  Addr  Code            Source
+
+  949:				;===
+  950:				;
+  951:	  82AD	8F 83		FETCBY:	MOV	DPH,TOS_H
+  952:	  82AF	8E 82			MOV	DPL,TOS_L
+  953:	  82B1	E4			CLR	A
+  954:	  82B2	93			MOVC	A,@A+DPTR
+  955:	  82B3	7F 00		FETBDN:	MOV	TOS_H,#00H	;FETCH sequence for Bytes Done.
+  956:	  82B5	FE			MOV	TOS_L,A		;FETCH sequence for words done.
+  957:	  82B6	21 0B			JMP	PUSH_TOS
+  958:				;
+  959:				;=======
+  960:				;$EJECT
+  961:				;
+  962:				;CREATE
+  963:				;	Test the contents of Acc.
+  964:				;	If CHAR holds the ASCII code for a legitimate decimal digit,
+  965:				;	create a two-byte entry in <TOS_H><TOS_L> holding low-order ACC nibble
+  966:				;	and return with CY set.
+  967:				;	Otherwise, return with CY cleared.
+  968:				;
+  969:	  82B8	24 D0		CREATE:	ADD	A,#-'0'		;Correct for ASCII digit offset.
+  970:	  82BA	B4 0A 00		CJNE	A,#10,$+3	;Compare to maximum legal digit.
+  971:	  82BD	50 05			JNC	CREA_1		;Abort if first char is not decimal digit.
+  972:	  82BF	FE			MOV	TOS_L,A		;Save initial digit read.
+  973:	  82C0	7F 00			MOV	TOS_H,#0	;Clear high-order bits.
+  974:	  82C2	C2 0D			CLR	H_FLG
+  975:	  82C4	22		CREA_1:	RET
+  976:				;
+  977:				;===============
+  978:				;
+  979:				;APPEND
+  980:				;	Test ASCII code in Acc.
+  981:				;	If it is a legal digit in the current radix,
+  982:				;	modify <TOS_H><TOS_L> to include this digit and return with CY set.
+  983:				;	Otherwise leave AES and CHAR unchanged and return with CY cleared.
+  984:				;	Operating mode determined by HEXMOD flag (1=Hex).
+  985:				;
+  986:	  82C5	20 0D 3E	APPEND:	JB	H_FLG,APND_2	;Nothing allowed after trailing 'H' received.
+  987:	  82C8	24 D0			ADD	A,#-'0'		;Correct for ASCII offset.
+  988:	  82CA	B4 0A 00		CJNE	A,#10,$+3	;Verify whether legal digit.
+  989:	  82CD	40 13			JC	APND_1		;Insert decimal digit as is.
+  990:	  82CF	30 04 34		JNB	HEXMOD,APND_2	;If in decimal mode, character isn't legal.
+  991:	  82D2	24 EF			ADD	A,#'0'-'A'	;Acc now equals 0 if 'A' received.
+  992:	  82D4	B4 06 00		CJNE	A,#6,$+3
+  993:	  82D7	40 07			JC	APND_4		;Process Hex digit.
+  994:				;
+  995:				;	Char was not hexidecimal digit, but if it was the first 'H', that's OK.
+  996:				;
+  997:	  82D9	B4 07 2A		CJNE	A,#'H'-'A',APND_2	;Compare original input with 'H'.
+  998:	  82DC	D2 0D			SETB	H_FLG		;Mark that 'H' was detected but don't process.
+  999:	  82DE	D3			SETB	C
+ 1000:	  82DF	22			RET
+ 1001:				;
+ 1002:	  82E0	24 0A		APND_4:	ADD	A,#10		;Value of lowest hex digit.
+ 1003:	  82E2	CE		APND_1:	XCH	A,TOS_L		;Save nibble to be appended.
+ 1004:	  82E3	75 F0 0A		MOV	B,#10		;(Assuming radix=decimal.)
+ 1005:	  82E6	30 04 03		JNB	HEXMOD,XRAD_1	;Skip ahead if assumption correct.
+ 1006:	  82E9	75 F0 10		MOV	B,#16		;If mode is actually hex.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 19
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1007:	  82EC	C0 F0		XRAD_1:	PUSH	B		;Save for re-use.
+ 1008:	  82EE	A4			MUL	AB		;Multiply by radix.
+ 1009:	  82EF	2E			ADD	A,TOS_L		;Append new digit.
+ 1010:	  82F0	FE			MOV	TOS_L,A		;Save low-order shifted value.
+ 1011:	  82F1	E4			CLR	A
+ 1012:	  82F2	35 F0			ADDC	A,B		;Incremented high-order product if carry.
+ 1013:	  82F4	CF			XCH	A,TOS_H
+ 1014:	  82F5	D0 F0			POP	B
+ 1015:	  82F7	A4			MUL	AB
+ 1016:	  82F8	2F			ADD	A,TOS_H
+ 1017:	  82F9	FF			MOV	TOS_H,A
+ 1018:	  82FA	72 E7			ORL	C,ACC.7		;Detect if most significant bit set.
+ 1019:	  82FC	E5 F0			MOV	A,B
+ 1020:	  82FE	34 FF			ADDC	A,#0FFH		;Simulate "ORL	C,NZ" instruction.
+ 1021:	  8300	B0 04			ANL	C,/HEXMOD	;Overflow only relevent in decimal mode.
+ 1022:	  8302	40 04			JC	APN_ER		;Error if bit 7 overflow occurred.
+ 1023:	  8304	D3			SETB	C		;CHAR processed as legal character.
+ 1024:	  8305	22			RET
+ 1025:				;
+ 1026:	  8306	C3		APND_2:	CLR	C
+ 1027:	  8307	22			RET
+ 1028:				;
+ 1029:				;
+ 1030:	  8308	11 D4		APN_ER:	CALL	EXP_ER		;Indicate illegal entry.
+ 1031:	  830A	02			DB	2
+ 1032:				;
+ 1033:				;$EJECT
+ 1034:				;
+ 1035:	  830B			OV_TST:
+ 1036:				;	If OV is set and operation is BCD mode then call EXP_ER routine.
+ 1037:				;
+ 1038:	  830B	A2 D2			MOV	C,OV
+ 1039:	  830D	B0 04			ANL	C,/HEXMOD
+ 1040:	  830F	40 01			JC	EXP_OV
+ 1041:	  8311	22			RET
+ 1042:				;
+ 1043:	  8312	11 D4		EXP_OV:	CALL	EXP_ER
+ 1044:	  8314	06			DB	6
+ 1045:				;
+ 1046:				;=======
+ 1047:				;
+ 1048:	  8315	E7		ADD_16:	MOV	A,@R1		;Add low-order bytes.
+ 1049:	  8316	2E			ADD	A,TOS_L
+ 1050:	  8317	F7			MOV	@R1,A		;Save sum.
+ 1051:	  8318	09			INC	R1
+ 1052:	  8319	E7			MOV	A,@R1		;Add high-order bytes.
+ 1053:	  831A	3F			ADDC	A,TOS_H
+ 1054:	  831B	F7			MOV	@R1,A		;Save sum.
+ 1055:	  831C	22			RET
+ 1056:				;
+ 1057:				;=======
+ 1058:				;
+ 1059:				;
+ 1060:	  831D			IADD:
+ 1061:				;	Pop VAR from AES (two bytes).
+ 1062:				;	TOS <= TOS + VAR
+ 1063:				;
+ 1064:	  831D	11 F3			CALL	POP_TOS
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 20
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1065:	  831F	71 15			CALL	ADD_16
+ 1066:	  8321	80 E8			JMP	OV_TST
+ 1067:				;
+ 1068:				;===============
+ 1069:				;
+ 1070:				;ISUB
+ 1071:				;	Pop VAR from AES (two bytes).
+ 1072:				;	TOS <= TOS - VAR
+ 1073:				;
+ 1074:				;
+ 1075:	  8323	11 F3		ISUB:	ACALL	POP_TOS
+ 1076:	  8325	C3			CLR	C		;Set up for subtraction with borrow.
+ 1077:	  8326	E7			MOV	A,@R1		;Subtract low-order bytes.
+ 1078:	  8327	9E			SUBB	A,TOS_L
+ 1079:	  8328	F7			MOV	@R1,A		;Save difference.
+ 1080:	  8329	09			INC	R1		;Bump pointers.
+ 1081:	  832A	E7			MOV	A,@R1		;Subtract high-order bytes.
+ 1082:	  832B	9F			SUBB	A,TOS_H
+ 1083:	  832C	F7			MOV	@R1,A		;Save difference.
+ 1084:	  832D	80 DC			JMP	OV_TST
+ 1085:				;
+ 1086:				;=======
+ 1087:				;
+ 1088:				;
+ 1089:	  832F			IAND:
+ 1090:				;	Pop VAR from AES (two bytes).
+ 1091:				;	TOS <= TOS AND VAR
+ 1092:				;
+ 1093:	  832F	11 F3			CALL	POP_TOS
+ 1094:	  8331	E7			MOV	A,@R1		;AND low-order bytes.
+ 1095:	  8332	5E			ANL	A,TOS_L
+ 1096:	  8333	F7			MOV	@R1,A		;Save result.
+ 1097:	  8334	09			INC	R1
+ 1098:	  8335	E7			MOV	A,@R1		;AND high-order bytes.
+ 1099:	  8336	5F			ANL	A,TOS_H
+ 1100:	  8337	F7			MOV	@R1,A		;Save result.
+ 1101:	  8338	22			RET
+ 1102:				;
+ 1103:				;=======
+ 1104:				;
+ 1105:				;
+ 1106:	  8339			IOR:
+ 1107:				;	Pop VAR from AES (two bytes).
+ 1108:				;	TOS <= TOS OR VAR
+ 1109:				;
+ 1110:	  8339	11 F3			CALL	POP_TOS
+ 1111:	  833B	E7			MOV	A,@R1		;OR low-order bytes.
+ 1112:	  833C	4E			ORL	A,TOS_L
+ 1113:	  833D	F7			MOV	@R1,A		;Save result.
+ 1114:	  833E	09			INC	R1
+ 1115:	  833F	E7			MOV	A,@R1		;OR high-order bytes.
+ 1116:	  8340	4F			ORL	A,TOS_H
+ 1117:	  8341	F7			MOV	@R1,A		;Save result.
+ 1118:	  8342	22			RET
+ 1119:				;
+ 1120:				;=======
+ 1121:				;
+ 1122:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 21
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1123:	  8343			IXOR:
+ 1124:				;	Pop VAR from AES (two bytes).
+ 1125:				;	TOS <= TOS XOR VAR
+ 1126:				;
+ 1127:	  8343	11 F3			CALL	POP_TOS
+ 1128:	  8345	E7			MOV	A,@R1		;XOR low-order bytes.
+ 1129:	  8346	6E			XRL	A,TOS_L
+ 1130:	  8347	F7			MOV	@R1,A		;Save result.
+ 1131:	  8348	09			INC	R1
+ 1132:	  8349	E7			MOV	A,@R1		;XOR high-order bytes.
+ 1133:	  834A	6F			XRL	A,TOS_H
+ 1134:	  834B	F7			MOV	@R1,A		;Save result.
+ 1135:	  834C	22			RET
+ 1136:				;
+ 1137:				;===============
+ 1138:				;
+ 1139:				;
+ 1140:	  834D			NEG:
+ 1141:				;	TOS <= -TOS
+ 1142:				;
+ 1143:	  834D	C3			CLR	C
+ 1144:	  834E	B2 0A			CPL	SGN_FLG
+ 1145:	  8350	A9 50		NEG_0:	MOV	R1,AESP		;Compute variable address.
+ 1146:	  8352	19			DEC	R1		;Index for low-order byte of VAR_1.
+ 1147:	  8353	E4			CLR	A		;Subtract VAR_1 from 0000H.
+ 1148:	  8354	97			SUBB	A,@R1
+ 1149:	  8355	F7			MOV	@R1,A		;Save difference.
+ 1150:	  8356	09			INC	R1		;Bump pointer.
+ 1151:	  8357	E4			CLR	A
+ 1152:	  8358	97			SUBB	A,@R1		;Subtract high-order byte.
+ 1153:	  8359	F7			MOV	@R1,A		;Save difference.
+ 1154:	  835A	80 AF			JMP	OV_TST
+ 1155:				;
+ 1156:				;=======
+ 1157:				;
+ 1158:				;
+ 1159:	  835C			ICPL:
+ 1160:				;	TOS <= /TOS  (ones complement)
+ 1161:	  835C	D3			SETB	C
+ 1162:	  835D	80 F1			SJMP	NEG_0
+ 1163:				;
+ 1164:				;===============
+ 1165:				;
+ 1166:				;
+ 1167:	  835F			IABS:
+ 1168:				;	If in decimal mode and TOS < 0
+ 1169:				;	then complement SGN_FLG and negate TOS.
+ 1170:				;
+ 1171:	  835F	A9 50			MOV	R1,AESP
+ 1172:	  8361	E7			MOV	A,@R1
+ 1173:	  8362	A2 E7			MOV	C,ACC.7
+ 1174:	  8364	B0 04			ANL	C,/HEXMOD
+ 1175:	  8366	40 E5			JC	NEG
+ 1176:	  8368	22			RET
+ 1177:				;
+ 1178:				;=======
+ 1179:				;
+ 1180:	  8369			NEG_IF_NEG:
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 22
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1181:				;	If SGN_FLG is set then negate TOS and complement SGN_FLG,
+ 1182:				;	else return with TOS unchanged.
+ 1183:	  8369	20 0A E1		JB	SGN_FLG,NEG
+ 1184:	  836C	22			RET
+ 1185:				;
+ 1186:				;=======
+ 1187:				;
+ 1188:				;
+ 1189:	  836D			IINC:
+ 1190:				;	TOS <= TOS+1
+ 1191:				;
+ 1192:	  836D	A9 50			MOV	R1,AESP		;Compute variable address.
+ 1193:	  836F	19			DEC	R1		;Index for low-order byte of VAR_1.
+ 1194:	  8370	07			INC	@R1
+ 1195:	  8371	B7 00 02		CJNE	@R1,#00,IINC_1
+ 1196:	  8374	09			INC	R1		;Bump pointer.
+ 1197:	  8375	07			INC	@R1
+ 1198:	  8376	22		IINC_1:	RET
+ 1199:				;
+ 1200:				;=======
+ 1201:				;
+ 1202:	  8377			MUL_16:
+ 1203:				;	Multiply unsigned 16-bit quantity in <TOS_H><TOS_L> by entry
+ 1204:				;	on top of stack, and return with product on stack.
+ 1205:				;	If product exceeds 16-bits, set OV flag.
+ 1206:				;
+ 1207:	  8377	C2 D5			CLR	F0		;Initialize overflow flag.
+ 1208:	  8379	A9 50			MOV	R1,AESP		;Point to MSB of NOS.
+ 1209:	  837B	E7			MOV	A,@R1
+ 1210:	  837C	60 05			JZ	IMUL_1		;High-order byte of either param. must be 0.
+ 1211:	  837E	EF			MOV	A,TOS_H
+ 1212:	  837F	60 02			JZ	IMUL_1
+ 1213:	  8381	D2 D5			SETB	F0		;Mark that both parameters exceed 255.
+ 1214:	  8383	19		IMUL_1:	DEC	R1		;Index low-order NOS.
+ 1215:	  8384	E7			MOV	A,@R1
+ 1216:	  8385	8F F0			MOV	B,TOS_H
+ 1217:	  8387	A4			MUL	AB		;Low-order product.
+ 1218:	  8388	30 D2 02		JNB	OV,IMUL_2
+ 1219:	  838B	D2 D5			SETB	F0
+ 1220:	  838D	09		IMUL_2:	INC	R1
+ 1221:	  838E	C7			XCH	A,@R1		;Save low-order prod. and load high-order NOS.
+ 1222:	  838F	8E F0			MOV	B,TOS_L
+ 1223:	  8391	A4			MUL	AB
+ 1224:	  8392	30 D2 02		JNB	OV,IMUL_3	;Mark if overflow.
+ 1225:	  8395	D2 D5			SETB	F0
+ 1226:	  8397	27		IMUL_3:	ADD	A,@R1
+ 1227:	  8398	F7			MOV	@R1,A		;Save high-order sum.
+ 1228:	  8399	72 D5			ORL	C,F0
+ 1229:	  839B	92 D5			MOV	F0,C
+ 1230:	  839D	19			DEC	R1		;Address low-order NOS.
+ 1231:	  839E	E7			MOV	A,@R1
+ 1232:	  839F	8E F0			MOV	B,TOS_L
+ 1233:	  83A1	A4			MUL	AB
+ 1234:	  83A2	F7			MOV	@R1,A
+ 1235:	  83A3	E5 F0			MOV	A,B
+ 1236:	  83A5	09			INC	R1
+ 1237:	  83A6	27			ADD	A,@R1
+ 1238:	  83A7	F7			MOV	@R1,A		;Save high-order product.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 23
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1239:	  83A8	72 D5			ORL	C,F0		;Check if carry or sign-bit set.
+ 1240:	  83AA	72 E7			ORL	C,ACC.7		;Check if sign-bit set.
+ 1241:	  83AC	92 D2			MOV	OV,C
+ 1242:	  83AE	22			RET
+ 1243:				;
+ 1244:				;=======
+ 1245:				;
+ 1246:				;
+ 1247:	  83AF			IMUL:
+ 1248:				;	Pop VAR from AES (two bytes).
+ 1249:				;	TOS <= TOS * VAR
+ 1250:				;
+ 1251:	  83AF	C2 0A			CLR	SGN_FLG		;Initialize sign monitor flag.
+ 1252:	  83B1	71 5F			CALL	IABS		;Take absolute value of TOS.
+ 1253:	  83B3	11 F3			CALL	POP_TOS		;Pop top entry.
+ 1254:	  83B5	71 5F			CALL	IABS		;Take absolute value of NOS.
+ 1255:	  83B7	71 77			CALL	MUL_16
+ 1256:	  83B9	71 0B			CALL	OV_TST		;Check if OV relevent.
+ 1257:	  83BB	71 69			CALL	NEG_IF_NEG
+ 1258:	  83BD	22			RET
+ 1259:				;
+ 1260:				;===============
+ 1261:				;
+ 1262:				;
+ 1263:	  83BE	D2 0C		IMOD:	SETB	MOD_FLG		;Indicate modulo entry point.
+ 1264:	  83C0	80 02			SJMP	IDIV_0
+ 1265:				;
+ 1266:				;=======
+ 1267:				;
+ 1268:				;
+ 1269:	  83C2			IDIV:
+ 1270:				;	Pop VAR from AES (two bytes).
+ 1271:				;	TOS <= TOS / VAR
+ 1272:				;	If divide-by-zero attempted report error.
+ 1273:				;
+ 1274:	  83C2	C2 0C			CLR	MOD_FLG		;Indicate division entry point.
+ 1275:	  83C4	D2 0A		IDIV_0:	SETB	SGN_FLG		;Initialize sign monitor flag.
+ 1276:	  83C6	71 5F			CALL	IABS
+ 1277:	  83C8	71 4D			CALL	NEG
+ 1278:	  83CA	11 F3			CALL	POP_TOS
+ 1279:				;???
+ 1280:				; The next line of code added by lss 21-dec-1982
+ 1281:				;???
+ 1282:	  83CC	EE			mov	a,tos_l
+ 1283:	  83CD	4F			ORL	A,TOS_H
+ 1284:	  83CE	60 4D			JZ	DIV_NG
+ 1285:	  83D0	A2 0A			MOV	C,SGN_FLG
+ 1286:	  83D2	B0 0C			ANL	C,/MOD_FLG	;Clear SGN_FLG if MOD funtion being done.
+ 1287:	  83D4	92 0A			MOV	SGN_FLG,C
+ 1288:	  83D6	71 5F			CALL	IABS
+ 1289:	  83D8	F5 31			MOV	TMP1,A
+ 1290:	  83DA	19			DEC	R1
+ 1291:	  83DB	E7			MOV	A,@R1
+ 1292:	  83DC	F5 30			MOV	TMP0,A
+ 1293:	  83DE	E4			CLR	A
+ 1294:	  83DF	F5 33			MOV	TMP3,A
+ 1295:	  83E1	F5 32			MOV	TMP2,A
+ 1296:	  83E3	7D 11			MOV	LP_CNT,#17
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 24
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1297:	  83E5	C3			CLR	C
+ 1298:	  83E6	80 17			SJMP	DIV_RP
+ 1299:				;
+ 1300:	  83E8	E5 32		DIV_LP:	MOV	A,TMP2
+ 1301:	  83EA	33			RLC	A
+ 1302:	  83EB	F5 32			MOV	TMP2,A
+ 1303:	  83ED	C5 33			XCH	A,TMP3
+ 1304:	  83EF	33			RLC	A
+ 1305:	  83F0	C5 33			XCH	A,TMP3
+ 1306:	  83F2	2E			ADD	A,TOS_L
+ 1307:	  83F3	F5 34			MOV	TMP4,A
+ 1308:	  83F5	E5 33			MOV	A,TMP3
+ 1309:	  83F7	3F			ADDC	A,TOS_H
+ 1310:	  83F8	50 05			JNC	DIV_RP
+ 1311:	  83FA	85 34 32		MOV	TMP2,TMP4
+ 1312:	  83FD	F5 33			MOV	TMP3,A
+ 1313:	  83FF	E5 30		DIV_RP:	MOV	A,TMP0
+ 1314:	  8401	33			RLC	A
+ 1315:	  8402	F5 30			MOV	TMP0,A
+ 1316:	  8404	E5 31			MOV	A,TMP1
+ 1317:	  8406	33			RLC	A
+ 1318:	  8407	F5 31			MOV	TMP1,A
+ 1319:	  8409	DD DD			DJNZ	LP_CNT,DIV_LP
+ 1320:	  840B	20 0C 07		JB	MOD_FLG,DIV_1
+ 1321:	  840E	A7 30			MOV	@R1,TMP0
+ 1322:	  8410	09			INC	R1
+ 1323:	  8411	A7 31			MOV	@R1,TMP1
+ 1324:	  8413	80 05			SJMP	DIV_2
+ 1325:				;
+ 1326:	  8415	A7 32		DIV_1:	MOV	@R1,TMP2
+ 1327:	  8417	09			INC	R1
+ 1328:	  8418	A7 33			MOV	@R1,TMP3
+ 1329:	  841A	71 69		DIV_2:	CALL	NEG_IF_NEG
+ 1330:	  841C	22			RET
+ 1331:				;
+ 1332:	  841D	61 12		DIV_NG:	AJMP	EXP_OV		;Report expression overflow.
+ 1333:				;
+ 1334:				;===============
+ 1335:				;
+ 1336:				;$EJECT
+ 1337:				;
+ 1338:				;
+ 1339:	  841F			RND:
+ 1340:				;	Generate a new 16-bit random number from RND_KEY,
+ 1341:				;	and push onto the AES.
+ 1342:	  841F	AE 35			MOV	TOS_L,SEED_L
+ 1343:	  8421	AF 36			MOV	TOS_H,SEED_H
+ 1344:	  8423	31 0B			CALL	PUSH_TOS
+ 1345:	  8425	7E 55		        MOV     TOS_L,#LOW(25173)
+ 1346:	  8427	7F 62		        MOV     TOS_H,#HIGH(25173)
+ 1347:	  8429	71 77			CALL	MUL_16
+ 1348:	  842B	7E 19		        MOV     TOS_L,#LOW(13849)
+ 1349:	  842D	7F 36		        MOV     TOS_H,#HIGH(13849)
+ 1350:	  842F	A9 50			MOV	R1,AESP
+ 1351:	  8431	19			DEC	R1
+ 1352:	  8432	71 15			CALL	ADD_16
+ 1353:	  8434	11 F3			CALL	POP_TOS
+ 1354:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 25
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1355:				;???
+ 1356:				; The code from here to label no_problem added by lss 21 dec 1982
+ 1357:				; to cure a extraneous overflow if seed=8000h.
+ 1358:				;???
+ 1359:				;
+ 1360:	  8436	BE 00 07		cjne	tos_l,#0,no_problem
+ 1361:	  8439	BF 80 04		cjne	tos_h,#80h,no_problem
+ 1362:	  843C			big_problem:				   ; tos=8000h will generate an overflow
+ 1363:	  843C	7E 2A			mov	tos_l,#low(12586)          ; when control gets to iabs.
+ 1364:	  843E	7F 31			mov	tos_h,#high(12586)         ; Load the precalculated seed.
+ 1365:	  8440			no_problem:
+ 1366:	  8440	8E 35			MOV	SEED_L,TOS_L
+ 1367:	  8442	8F 36			MOV	SEED_H,TOS_H
+ 1368:	  8444	31 0B			CALL	PUSH_TOS
+ 1369:	  8446	22			RET
+ 1370:				;
+ 1371:				;===============
+ 1372:				;
+ 1373:				;
+ 1374:	  8447			CMPR:
+ 1375:				;	When CMPR is called, AES contains:
+ 1376:				;	(TOS:)	VAR_2 (two bytes),
+ 1377:				;		C_CODE (one byte),
+ 1378:				;		VAR_1 (two bytes).
+ 1379:				;	Pop all 5 bytes from stack and test relation between VAR_1 and VAR_2.
+ 1380:				;	    If C_CODE=010 then test whether (VAR_1) =  (VAR_2)
+ 1381:				;	    If C_CODE=100 then test whether (VAR_1) <  (VAR_2)
+ 1382:				;	    If C_CODE=110 then test whether (VAR_1) <= (VAR_2)
+ 1383:				;	    If C_CODE=101 then test whether (VAR_1) <> (VAR_2)
+ 1384:				;	    If C_CODE=001 then test whether (VAR_1) >  (VAR_2)
+ 1385:				;	    If C_CODE=011 then test whether (VAR_1) >= (VAR_2)
+ 1386:				;	If true then return 0001H on AES;
+ 1387:				;	otherwise return 0000H.
+ 1388:				;
+ 1389:	  8447	11 F3			CALL	POP_TOS
+ 1390:	  8449	31 05			CALL	POP_ACC
+ 1391:	  844B	F5 F0			MOV	B,A
+ 1392:	  844D	A9 50			MOV	R1,AESP
+ 1393:	  844F	19			DEC	R1
+ 1394:	  8450	C3			CLR	C		;...in preparation for string subtract.
+ 1395:	  8451	E7			MOV	A,@R1		;Compare low-order parameter bytes.
+ 1396:	  8452	9E			SUBB	A,TOS_L
+ 1397:	  8453	09			INC	R1		;Bump pointer.
+ 1398:	  8454	C7			XCH	A,@R1		;Save difference.
+ 1399:	  8455	20 04 06		JB	HEXMOD,CMPR_4
+ 1400:	  8458	64 80			XRL	A,#80H		;Offset variable by 80H for unsigned compare.
+ 1401:	  845A	CF			XCH	A,TOS_H
+ 1402:	  845B	64 80			XRL	A,#80H
+ 1403:	  845D	CF			XCH	A,TOS_H
+ 1404:	  845E	9F		CMPR_4:	SUBB	A,TOS_H
+ 1405:	  845F	47			ORL	A,@R1		;Add any non-zero high-order bits to acc.
+ 1406:	  8460	70 04			JNZ	CMPR_1		;Jump ahead VAR_1 <> VAR_2.
+ 1407:				;
+ 1408:				;	VAR_1 = VAR_2:
+ 1409:				;
+ 1410:	  8462	A2 F1			MOV	C,B.1		;Load VAR_1 = VAR_2 test flag.
+ 1411:	  8464	80 08			SJMP	PUSH_C
+ 1412:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 26
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1413:	  8466	40 04		CMPR_1:	JC	CMPR_2		;Jump ahead if VAR_1 < VAR_2.
+ 1414:				;
+ 1415:				;	VAR_1 > VAR_2:
+ 1416:				;
+ 1417:	  8468	A2 F0			MOV	C,B.0		;Load VAR_1 > VAR_2 test flag.
+ 1418:	  846A	80 02			SJMP	PUSH_C
+ 1419:				;
+ 1420:				;	VAR_1 < VAR_2:
+ 1421:				;
+ 1422:	  846C	A2 F2		CMPR_2:	MOV	C,B.2		;Load VAR_1 < VAR_2 test flag.
+ 1423:	  846E	E4		PUSH_C:	CLR	A
+ 1424:	  846F	F7			MOV	@R1,A
+ 1425:	  8470	33			RLC	A
+ 1426:	  8471	19			DEC	R1
+ 1427:	  8472	F7			MOV	@R1,A
+ 1428:	  8473	22			RET
+ 1429:				;
+ 1430:				;$EJECT
+ 1431:
+ 1432:				;	BASIC SOURCE PROGRAM LINE ACCESSING ROUTINES:
+ 1433:				;	===== ====== ======= ==== ======= ==========
+ 1434:				;
+ 1435:				;	The general methodology of the various parsing routines is as follows:
+ 1436:				;	The POINTER (PNTR_L, PNTR_H) is used to indicate the next BASIC
+ 1437:				;	source character or string to be parsed
+ 1438:				;	by routines TST, TSTV, TSTN, TSTL, and TSTS.
+ 1439:				;	GET_C reads the indicated character from the appropriate
+ 1440:				;	program buffer space into acc. and returns.
+ 1441:				;	READ_CHAR reads the character into CHAR as well as acc. and
+ 1442:				;	increments the 16-bit pointer.
+ 1443:				;	When done, each routine calls D_BLANK to remove any trailing spaces,
+ 1444:				;	and leaves READ_CHAR ready to fetch the next non-blank character.
+ 1445:				;
+ 1446:				;=======
+ 1447:				;
+ 1448:				;REWIND
+ 1449:				;	Reset Cursor to start of current program buffer space.
+ 1450:				;
+ 1451:	  8474	C2 09		REWIND:	CLR	CHAR_FLG
+ 1452:	  8476	20 01 05		JB	ROMMOD,REWROM
+ 1453:	  8479	7A 20		        MOV     PNTR_H,#HIGH(EXTRAM)
+ 1454:	  847B	78 34		        MOV     PNTR_L,#LOW(EXTRAM)
+ 1455:	  847D	22			RET
+ 1456:				;
+ 1457:	  847E	20 02 05	REWROM:	JB	EXTMOD,RWXROM
+ 1458:	  8481	7A 8B		        MOV     PNTR_H,#HIGH(INTROM)
+ 1459:	  8483	78 F0		        MOV     PNTR_L,#LOW(INTROM)
+ 1460:	  8485	22			RET
+ 1461:				;
+ 1462:	  8486	7A 90		RWXROM: MOV     PNTR_H,#HIGH(EXTROM)
+ 1463:	  8488	78 80		        MOV     PNTR_L,#LOW(EXTROM)
+ 1464:	  848A	22			RET
+ 1465:				;
+ 1466:				;=======
+ 1467:				;
+ 1468:	  848B			SAVE_PNTR:
+ 1469:				;	Save PNTR variables in cursor.
+ 1470:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 27
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1471:	  848B	88 77			MOV	CURS_L,PNTR_L
+ 1472:	  848D	8A 78			MOV	CURS_H,PNTR_H
+ 1473:	  848F	8C 79			MOV	C_SAVE,CHAR
+ 1474:	  8491	22			RET
+ 1475:				;
+ 1476:				;=======
+ 1477:				;
+ 1478:	  8492			LOAD_PNTR:
+ 1479:				;	Reload pointer with value saved earlier by SAVE_PNTR.
+ 1480:				;
+ 1481:	  8492	AA 78			MOV	PNTR_H,CURS_H
+ 1482:	  8494	A8 77			MOV	PNTR_L,CURS_L
+ 1483:	  8496	AC 79			MOV	CHAR,C_SAVE
+ 1484:	  8498	22			RET
+ 1485:				;
+ 1486:				;=======
+ 1487:				;
+ 1488:	  8499			GET_C:
+ 1489:				;	Read character from logical buffer space into A and return.
+ 1490:				;
+ 1491:	  8499	20 03 02		JB	RUNMOD,GET_BUF
+ 1492:	  849C	E6			MOV	A,@PNTR_L
+ 1493:	  849D	22			RET
+ 1494:				;
+ 1495:	  849E			GET_BUF:
+ 1496:				;	Read character from active program buffer space into A and return.
+ 1497:	  849E	20 01 04		JB	ROMMOD,GETROM
+ 1498:	  84A1	8A A0		DD003:  MOV     P2,PNTR_H               ;Select variable storage page.
+ 1499:	  84A3	E2		        MOVX    A,@PNTR_L               ;Read from external address space.
+ 1500:	  84A4	22			RET
+ 1501:				;
+ 1502:	  84A5	E8		GETROM:	MOV	A,PNTR_L
+ 1503:	  84A6	C5 82			XCH	A,DPL
+ 1504:	  84A8	CA			XCH	A,PNTR_H
+ 1505:	  84A9	C5 83			XCH	A,DPH
+ 1506:	  84AB	F8			MOV	PNTR_L,A
+ 1507:	  84AC	E4			CLR	A
+ 1508:	  84AD	93			MOVC	A,@A+DPTR
+ 1509:	  84AE	C8			XCH	A,PNTR_L		;Save char. and load old DPH.
+ 1510:	  84AF	C5 83			XCH	A,DPH
+ 1511:	  84B1	CA			XCH	A,PNTR_H
+ 1512:	  84B2	C5 82			XCH	A,DPL
+ 1513:	  84B4	C8			XCH	A,PNTR_L		;Store DPL and reload byte read.
+ 1514:	  84B5	22			RET
+ 1515:				;
+ 1516:				;=======
+ 1517:				;
+ 1518:	  84B6			READ_CHAR:
+ 1519:				;	READ_CHAR first tests the state of CHAR_FLG.
+ 1520:				;	If it is still cleared, the character most recently read from the line
+ 1521:				;	buffer or program buffer has been processed, so read the next
+ 1522:				;	character, bump the buffer pointer, and return with the character
+ 1523:				;	in both Acc. and CHAR and the CHAR_FLG cleared.
+ 1524:				;	If CHAR_FLG has been set by the parsing routines,
+ 1525:				;	then CHAR still holds a previously read character which has
+ 1526:				;	not yet been processed.  Read this character into Acc. and return
+ 1527:				;	with CHAR_FLG again cleared.
+ 1528:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 28
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1529:	  84B6	10 09 09		JBC	CHAR_FLG,REREAD
+ 1530:	  84B9	91 99			CALL	GET_C
+ 1531:	  84BB	FC			MOV	CHAR,A
+ 1532:	  84BC	08			INC	PNTR_L
+ 1533:	  84BD	B8 00 01		CJNE	PNTR_L,#00,RDCHDN
+ 1534:	  84C0	0A			INC	PNTR_H
+ 1535:	  84C1	22		RDCHDN:	RET
+ 1536:				;
+ 1537:	  84C2	EC		REREAD:	MOV	A,CHAR
+ 1538:	  84C3	22			RET
+ 1539:				;
+ 1540:				;=======
+ 1541:				;
+ 1542:	  84C4			PUT_BUF:
+ 1543:				;	Put the contents of the acc. into program buffer space
+ 1544:				;	currently active at the address held in <DEST_H><DEST_L>.
+ 1545:				;
+ 1546:	  84C4	20 01 04		JB	ROMMOD,PUTROM
+ 1547:	  84C7	8B A0		DD004:  MOV     P2,DEST_H
+ 1548:	  84C9	F3		        MOVX    @DEST_L,A
+ 1549:	  84CA	22			RET
+ 1550:				;
+ 1551:	  84CB	01 D4		PUTROM:	JMP	EXP_ER
+ 1552:				;
+ 1553:				;=======
+ 1554:				;
+ 1555:	  84CD			WRITE_CHAR:
+ 1556:				;	Converse of READ_CHAR.
+ 1557:				;	Write contents of acc. into appropriate memory space (@DEST),
+ 1558:				;	increment DEST, and return.
+ 1559:				;
+ 1560:	  84CD	91 C4			CALL	PUT_BUF
+ 1561:	  84CF	09			INC	DEST_L
+ 1562:	  84D0	B9 00 01		CJNE	DEST_L,#00H,WRCH_1
+ 1563:	  84D3	0B			INC	DEST_H
+ 1564:	  84D4	22		WRCH_1:	RET
+ 1565:				;
+ 1566:				;=======
+ 1567:				;
+ 1568:	  84D5			D_BLNK:
+ 1569:				;	Remove leading blanks from BASIC source line, update cursor,
+ 1570:				;	load first non-blank character into CHAR,
+ 1571:				;	and leave pointer loaded with its address.
+ 1572:				;	(This routine is jumped to by parsing routines when successful,
+ 1573:				;	so set C before returning to original routines.)
+ 1574:				;
+ 1575:	  84D5	91 B6			CALL	READ_CHAR
+ 1576:	  84D7	64 20			XRL	A,#' '		;Verify that it is non-blank.
+ 1577:	  84D9	60 FA			JZ	D_BLNK		;Loop until non-blank leading character.
+ 1578:	  84DB	D2 09			SETB	CHAR_FLG
+ 1579:	  84DD	D3			SETB	C
+ 1580:	  84DE	22			RET			;Return to scanning code.
+ 1581:				;
+ 1582:				;=======
+ 1583:				;
+ 1584:				;SKPLIN
+ 1585:				;	Skip Cursor over entire BASIC source line, leaving
+ 1586:				;	cursor pointing to character after terminating <CR>.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 29
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1587:				;SKPTXT
+ 1588:				;	Skip remainder of line in progress, assuming line number
+ 1589:				;	has already been passed over.
+ 1590:				;	(Note that either byte of binary line number could be
+ 1591:				;	mis-interpreted as a CR.)
+ 1592:				;
+ 1593:				;
+ 1594:	  84DF	91 B6		SKPLIN:	CALL	READ_CHAR
+ 1595:	  84E1	91 B6			CALL	READ_CHAR
+ 1596:	  84E3	91 B6		SKPTXT:	CALL	READ_CHAR
+ 1597:	  84E5	B4 0D FB		CJNE	A,#CR,SKPTXT	;Verify that it is non-<CR>.
+ 1598:	  84E8	22			RET			;Return to scanning code.
+ 1599:				;
+ 1600:				;=======
+ 1601:				;$EJECT
+ 1602:				;
+ 1603:				;	Token recognition and processing routines.
+ 1604:				;
+ 1605:				;
+ 1606:	  84E9			TST:
+ 1607:				;	If "TEMPLATE" matches the BASIC character string read by
+ 1608:				;	READ_CHAR then move pointer over string and any trailing blanks
+ 1609:				;	and continue with the following IL instruction.
+ 1610:				;	Otherwise leave pointer unchanged and branch to IL instruction at LBL.
+ 1611:				;
+ 1612:	  84E9	D0 83			POP	DPH		;Get in-line parameter base address from stack.
+ 1613:	  84EB	D0 82			POP	DPL
+ 1614:	  84ED	91 B6			CALL	READ_CHAR
+ 1615:	  84EF	91 8B			CALL	SAVE_PNTR
+ 1616:	  84F1	E4		TST_1:	CLR	A
+ 1617:	  84F2	93			MOVC	A,@A+DPTR	;Read next character from template string.
+ 1618:	  84F3	A2 E7			MOV	C,ACC.7		;Save terminator bit.
+ 1619:	  84F5	54 7F			ANL	A,#7FH		;Mask off terminator.
+ 1620:	  84F7	6C			XRL	A,CHAR		;Compare with template.
+ 1621:	  84F8	70 12			JNZ	T_BAD		;Abort if first characters miscompare.
+ 1622:	  84FA	A3			INC	DPTR		;Pass over template character just checked.
+ 1623:	  84FB	40 0B			JC	T_GOOD		;Done if template character bit 7 set.
+ 1624:	  84FD	91 B6			CALL	READ_CHAR	;Fetch next character for test.
+ 1625:	  84FF	BC 2E EF		CJNE	CHAR,#'.',TST_1	;Done if input string abbreviated at this point
+ 1626:	  8502	E4		TST_2:	CLR	A		;Fetch template characters until end of string
+ 1627:	  8503	93			MOVC	A,@A+DPTR
+ 1628:	  8504	A3			INC	DPTR
+ 1629:	  8505	30 E7 FA		JNB	ACC.7,TST_2	;Loop until last character detected.
+ 1630:	  8508	91 D5		T_GOOD:	CALL	D_BLNK
+ 1631:	  850A	E4			CLR	A
+ 1632:	  850B	73			JMP	@A+DPTR		;Return to next IL instruction
+ 1633:				;
+ 1634:				;	Strings do not match.  Leave cursor at start of string.
+ 1635:				;
+ 1636:	  850C	E4		T_BAD:	CLR	A
+ 1637:	  850D	93			MOVC	A,@A+DPTR	;Search for final template character.
+ 1638:	  850E	A3			INC	DPTR
+ 1639:	  850F	30 E7 FA		JNB	ACC.7,T_BAD	;Loop until terminator found.
+ 1640:	  8512	91 92			CALL	LOAD_PNTR
+ 1641:	  8514	D2 09			SETB	CHAR_FLG
+ 1642:	  8516	C3			CLR	C		;Mark string not found.
+ 1643:	  8517	E4			CLR	A
+ 1644:	  8518	73			JMP	@A+DPTR		;Return to mismatch branch instruction.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 30
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1645:				;
+ 1646:				;===============
+ 1647:				;
+ 1648:				;TSTV	(LBL)
+ 1649:				;
+ 1650:				;
+ 1651:	  8519			TSTV:
+ 1652:				;	Test if first non-blank string is a legal variable symbol.
+ 1653:				;	If so, move cursor over string and any trailing blanks,
+ 1654:				;	compute variable index value,
+ 1655:				;	push onto arithmetic expression stack,
+ 1656:				;	and continue with following IL instruction.
+ 1657:				;	Otherwise branch to IL instruction at LBL with cursor unaffected.
+ 1658:				;
+ 1659:	  8519	91 B6			CALL	READ_CHAR
+ 1660:	  851B	24 BF			ADD	A,#-'A'		;Subtract offset for base variable.
+ 1661:	  851D	FE			MOV	TOS_L,A		;Save index in case needed later.
+ 1662:	  851E	24 E6			ADD	A,#-26
+ 1663:	  8520	50 04			JNC	ALPHAB		;First character is alphabetic if C=0.
+ 1664:	  8522	D2 09			SETB	CHAR_FLG
+ 1665:	  8524	C3			CLR	C
+ 1666:	  8525	22			RET
+ 1667:				;
+ 1668:	  8526	91 8B		ALPHAB:	CALL	SAVE_PNTR	;In case variable name not found.
+ 1669:	  8528	91 B6			CALL	READ_CHAR	;Verify that next character is not alphabetic.
+ 1670:	  852A	24 BF			ADD	A,#-'A'		;Alphabetic characters now <= 25.
+ 1671:	  852C	24 E6			ADD	A,#-26		;Non-alphabetics cause overflow.
+ 1672:	  852E	50 03			JNC	NOTVAR		;Alphabetic character means illegal var. name.
+ 1673:	  8530	BC 2E 40		CJNE	CHAR,#'.',TSTV_1	;Period indicates abbreviated keyword.
+ 1674:	  8533	91 92		NOTVAR:	CALL	LOAD_PNTR
+ 1675:	  8535	D2 09			SETB	CHAR_FLG
+ 1676:				;*        %TST    (TSTRBI,DBYTE)  ;Test if direct byte token.
+ 1677:	  8537	91 E9		        call   tst
+ 1678:	  8539	44 42 59 54	        db      'DBYT',('E' OR 80H)
+	  853D	C5
+ 1679:	  853E	50 05		        jnc     tstrbi
+ 1680:				        LIT_    1
+ 1681+ 1  8540	31 32			CALL	LIT
+ 1682+ 1  8542	01			DB	1
+ 1683:	  8543	80 27			SJMP	INDEX
+ 1684:				;
+ 1685:				;*TSTRBI: %TST    (TSTXBY,RBIT)
+ 1686:	  8545	91 E9		tstrbi: call   tst
+ 1687:	  8547	52 42 49 D4	        db      'RBI',('T' OR 80H)
+ 1688:	  854B	50 05		        jnc     tstxby
+ 1689:				        LIT_    2
+ 1690+ 1  854D	31 32			CALL	LIT
+ 1691+ 1  854F	02			DB	2
+ 1692:	  8550	80 1A			SJMP	INDEX
+ 1693:				;
+ 1694:				;*TSTXBY: %TST    (TSTCBY,XBYTE)  ;Test if expansion RAM byte token.
+ 1695:	  8552	91 E9		tstxby: call   tst
+ 1696:	  8554	58 42 59 54	        db      'XBYT',('E' OR 80H)
+	  8558	C5
+ 1697:	  8559	50 05		        jnc     tstcby
+ 1698:				        LIT_    3
+ 1699+ 1  855B	31 32			CALL	LIT
+ 1700+ 1  855D	03			DB	3
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 31
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1701:	  855E	80 0C			SJMP	INDEX
+ 1702:				;
+ 1703:				;*TSTCBY: %TST    (NOTSYM,CBYTE)  ;Test if program memory byte token.
+ 1704:	  8560	91 E9		tstcby: call   tst
+ 1705:	  8562	43 42 59 54	        db      'CBYT',('E' OR 80H)
+	  8566	C5
+ 1706:	  8567	50 08		        jnc     notsym
+ 1707:				        LIT_    4
+ 1708+ 1  8569	31 32			CALL	LIT
+ 1709+ 1  856B	04			DB	4
+ 1710:	  856C	12 8B 5E	INDEX:	CALL	VAR
+ 1711:	  856F	D3			SETB	C
+ 1712:	  8570	22			RET
+ 1713:				;
+ 1714:	  8571	C3		NOTSYM:	CLR	C		;Indicate that condition tested wasn't true.
+ 1715:	  8572	22			RET
+ 1716:				;
+ 1717:				;	BASIC Variable name is legitimate (A-Z).
+ 1718:				;
+ 1719:	  8573			TSTV_1:	LIT_	0
+ 1720+ 1  8573	31 32			CALL	LIT
+ 1721+ 1  8575	00			DB	0
+ 1722:	  8576	7F 00			MOV	TOS_H,#0
+ 1723:	  8578	31 0B			CALL	PUSH_TOS
+ 1724:	  857A	D2 09			SETB	CHAR_FLG
+ 1725:	  857C	81 D5			JMP	D_BLNK		;Remove leading blanks from source line.
+ 1726:				;
+ 1727:				;===============
+ 1728:				;
+ 1729:				;TSTN	(LBL)
+ 1730:				;	Test if indicated string is an unsigned number.
+ 1731:				;	If so, move cursor over string and trailing blanks,
+ 1732:				;	compute number's binary value,
+ 1733:				;	push onto arithmetic expression stack, and continue with
+ 1734:				;	following IL instruction.
+ 1735:				;	Otherwise restore cursor and branch to IL instruction at LBL.
+ 1736:				;
+ 1737:				;
+ 1738:	  857E	91 B6		TSTN:	CALL	READ_CHAR
+ 1739:	  8580	51 B8			CALL	CREATE		;Create entry on AES if legit. digit.
+ 1740:	  8582	40 03			JC	TSTN_1		;Abort if CHAR is not decimal digit.
+ 1741:	  8584	D2 09			SETB	CHAR_FLG
+ 1742:	  8586	22			RET
+ 1743:				;
+ 1744:	  8587	91 B6		TSTN_1:	CALL	READ_CHAR	;Move over matched character.
+ 1745:	  8589	51 C5			CALL	APPEND		;Append new digit to entry on TOS.
+ 1746:	  858B	40 FA			JC	TSTN_1		;Continue processing while legal characters.
+ 1747:	  858D	31 0B			CALL	PUSH_TOS
+ 1748:	  858F	D2 09			SETB	CHAR_FLG
+ 1749:	  8591	81 D5			JMP	D_BLNK		;Remove leading blank characters.
+ 1750:				;
+ 1751:				;===============
+ 1752:				;
+ 1753:				;TSTL	(LBL)
+ 1754:				;	Test if first non-blank string is a BASIC source line number.
+ 1755:				;	If so, move cursor over string and following blanks,
+ 1756:				;	compute number's binary value,
+ 1757:				;	push onto arithmetic expression stack,
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 32
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1758:				;	and continue with next IL instruction.
+ 1759:				;	If invalid source line number report syntax error.
+ 1760:				;	If line number not present restore cursor
+ 1761:				;	and branch to IL instruction at LBL.
+ 1762:				;
+ 1763:				;
+ 1764:				;===============
+ 1765:				;
+ 1766:				;TSTS	(LBL)
+ 1767:				;	Test if first character is a quote.
+ 1768:				;	If so, print characters from the BASIC source program to the console
+ 1769:				;	until a (closing) quote is encountered,
+ 1770:				;	pass over any trailing blanks,
+ 1771:				;	leave source cursor pointing to first non-blank character,
+ 1772:				;	and branch to IL instruction at location (LBL).
+ 1773:				;	(Report syntax error if <CR> encountered before quote.)
+ 1774:				;	If first character is not a quote, return to next
+ 1775:				;	sequential IL instruction with cursor unchanged.
+ 1776:				;
+ 1777:				;
+ 1778:	  8593	91 B6		TSTS:	CALL	READ_CHAR
+ 1779:	  8595	F5 30			MOV	TMP0,A
+ 1780:	  8597	64 22			XRL	A,#'"'
+ 1781:	  8599	60 08			JZ	TSTS_1
+ 1782:	  859B	64 05			XRL	A,#'''' XOR '"'
+ 1783:	  859D	60 04			JZ	TSTS_1
+ 1784:	  859F	C3			CLR	C
+ 1785:	  85A0	D2 09			SETB	CHAR_FLG
+ 1786:	  85A2	22			RET
+ 1787:				;
+ 1788:	  85A3	91 B6		TSTS_1:	CALL	READ_CHAR	;Read next string character.
+ 1789:	  85A5	B5 30 02		CJNE	A,TMP0,TSTS_2
+ 1790:	  85A8	81 D5			JMP	D_BLNK
+ 1791:				;
+ 1792:	  85AA	11 6E		TSTS_2:	CALL	C_OUT		;Call output routine.
+ 1793:	  85AC	B4 0D F4		CJNE	A,#CR,TSTS_1	;<CR> before closing quote is illegal.
+ 1794:	  85AF	01 E8			JMP	SYN_ER		;Transmit error message.
+ 1795:				;
+ 1796:				;===============
+ 1797:				;
+ 1798:				;DONE
+ 1799:				;	Delete leading blanks from the BASIC source line.
+ 1800:				;	Return with the cursor positioned over the first non-blank
+ 1801:				;	character, which must be a colon or <CR> in the source line.
+ 1802:				;	If any other characters are encountered report a syntax error.
+ 1803:				;
+ 1804:				;
+ 1805:				;
+ 1806:	  85B1	91 B6		DONE:	CALL	READ_CHAR
+ 1807:	  85B3	BC 3A 03		CJNE	CHAR,#':',DONE_1	;Colon indicates resume interpretation.
+ 1808:	  85B6	22			RET			;Return to IL.
+ 1809:				;
+ 1810:	  85B7	91 B6		LNDONE:	CALL	READ_CHAR
+ 1811:	  85B9	BC 0D 01	DONE_1:	CJNE	CHAR,#CR,DONE_2	;Any non-colon, non-CR characters are illegal.
+ 1812:	  85BC	22			RET
+ 1813:				;
+ 1814:	  85BD	D2 09		DONE_2:	SETB	CHAR_FLG
+ 1815:	  85BF	01 E8			JMP	SYN_ER		;Process syntax error if so.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 33
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1816:				;
+ 1817:				;=======
+ 1818:				;
+ 1819:				;IFDONE	(LBL)
+ 1820:				;	If the first non-blank character is a colon or <CR> in the source line
+ 1821:				;	then branch to the IL instruction specified by (LBL).
+ 1822:				;	If any other characters are encountered
+ 1823:				;	then continue with next IL instruction.
+ 1824:				;
+ 1825:				;
+ 1826:	  85C1	91 B6		IFDONE:	CALL	READ_CHAR
+ 1827:	  85C3	BC 3A 01		CJNE	CHAR,#':',IFDN_1	;Colon indicates resume interpretation.
+ 1828:	  85C6	22			RET			;Return to IL.
+ 1829:				;
+ 1830:	  85C7	BC 0D 01	IFDN_1:	CJNE	CHAR,#CR,IFDN_2	;Any non-colon, non-CR characters are illegal.
+ 1831:	  85CA	22			RET
+ 1832:				;
+ 1833:	  85CB	D2 09		IFDN_2:	SETB	CHAR_FLG
+ 1834:	  85CD	D3			SETB	C
+ 1835:	  85CE	22			RET
+ 1836:				;
+ 1837:				;=======
+ 1838:
+ 1839:				;$EJECT
+ 1840:	  85CF			READ_LABEL:
+ 1841:				;	Read next two characters from program buffer into <LABL_H><LABL_L>.
+ 1842:				;	Return with carry set if bit 15 of LABL is set (indicating EOF).
+ 1843:				;
+ 1844:	  85CF	91 B6			CALL	READ_CHAR
+ 1845:	  85D1	F5 7B			MOV	LABL_H,A
+ 1846:	  85D3	91 B6			CALL	READ_CHAR
+ 1847:	  85D5	F5 7A			MOV	LABL_L,A
+ 1848:	  85D7	E5 7B			MOV	A,LABL_H
+ 1849:	  85D9	A2 E7			MOV	C,ACC.7
+ 1850:	  85DB	22			RET
+ 1851:				;
+ 1852:				;=======
+ 1853:				;
+ 1854:				;
+ 1855:	  85DC			L_INIT:
+ 1856:				;	Initialize for execution of new BASIC source line.
+ 1857:				;	If none present, or if not in sequential execution mode,
+ 1858:				;	then return to line collection operation.
+ 1859:				;
+ 1860:	  85DC	30 03 02		JNB	RUNMOD,LINI_1	;Determine operating mode.
+ 1861:	  85DF	80 EE			JMP	READ_LABEL
+ 1862:				;
+ 1863:	  85E1	D3		LINI_1:	SETB	C
+ 1864:	  85E2	22			RET
+ 1865:				;
+ 1866:				;=======
+ 1867:				;
+ 1868:				;
+ 1869:				;
+ 1870:	  85E3			NL_NXT:
+ 1871:				;	Output a <CR><LF> and continue with NXT routine.
+ 1872:				;
+ 1873:	  85E3	11 6C			CALL	NLINE
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 34
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1874:				;
+ 1875:	  85E5			NXT:
+ 1876:				;	A colon or carriage return has been previously READ_CHARed.
+ 1877:				;	If CHAR holds a colon,
+ 1878:				;	continue interpretation of source line in current mode
+ 1879:				;	from IL program instruction "TOKEN".
+ 1880:				;	Otherwise CHAR is a <CR>, and line has been completed.
+ 1881:				;	Resume execution from IL instruction "STMT".
+ 1882:				;
+ 1883:	  85E5	BC 3A 05		CJNE	CHAR,#':',NXT_1	;Skip ahead unless colon detected.
+ 1884:	  85E8	91 D5			CALL	D_BLNK
+ 1885:	  85EA	02 88 58		JMP	TOKEN		;Continue with interpretation.
+ 1886:				;
+ 1887:	  85ED	02 88 53	NXT_1:	JMP	STMT
+ 1888:				;
+ 1889:				;=======
+ 1890:				;
+ 1891:				;$EJECT
+ 1892:				;
+ 1893:				;
+ 1894:	  85F0			GETLN:
+ 1895:				;	Input a line from console input device and put in line buffer
+ 1896:				;	in internal RAM.
+ 1897:				;
+ 1898:	  85F0	E5 50			MOV	A,AESP
+ 1899:	  85F2	24 04			ADD	A,#4
+ 1900:	  85F4	F5 30			MOV	TMP0,A
+ 1901:	  85F6	A8 30		GETL_0:	MOV	R0,TMP0		;Point to beginning of line buffer.
+ 1902:	  85F8	11 BF			CALL	STROUT
+ 1903:	  85FA	BE		        DB      ('>' OR 80H)
+ 1904:	  85FB	11 50		GETL_1:	CALL	C_IN		;Get next character from console.
+ 1905:	  85FD	B4 12 12		CJNE	A,#12H,GETL_5	;Re-type line on <CNTRL-R>.
+ 1906:	  8600	11 BF			CALL	STROUT
+ 1907:	  8602	8D		        DB      (CR OR 80H)     ;Newline.
+ 1908:	  8603	88 77			MOV	CURS_L,R0	;Save old value of cursor.
+ 1909:	  8605	A8 30			MOV	R0,TMP0		;Start at beginning of line buffer.
+ 1910:	  8607	E8		GETL_6:	MOV	A,R0		;Check if re-write done.
+ 1911:	  8608	65 77			XRL	A,CURS_L
+ 1912:	  860A	60 EF			JZ	GETL_1		;Continue with line input.
+ 1913:	  860C	E6			MOV	A,@R0		;Load character to re-write.
+ 1914:	  860D	11 6E			CALL	C_OUT
+ 1915:	  860F	08			INC	R0
+ 1916:	  8610	80 F5			SJMP	GETL_6		;Continue until done.
+ 1917:				;
+ 1918:	  8612	B4 18 06	GETL_5:	CJNE	A,#18H,GETL_7	;Cancel whole line on <CNTRL-X>.
+ 1919:	  8615	11 BF			CALL	STROUT
+ 1920:	  8617	23 8D		        DB      '#',(CR OR 80H) ;Advance to next line.
+ 1921:	  8619	80 DB			SJMP	GETL_0
+ 1922:				;
+ 1923:	  861B	B4 7F 11	GETL_7:	CJNE	A,#7FH,GETL_3
+ 1924:	  861E	E8			MOV	A,R0
+ 1925:	  861F	B5 30 05		CJNE	A,TMP0,GETL_4	;Delete previous character (if any).
+ 1926:	  8622	11 BF			CALL	STROUT
+ 1927:	  8624	87		        DB      (BEL OR 80H)    ;Echo <BEL>.
+ 1928:	  8625	80 D4			SJMP	GETL_1		;Ignore rubouts at beginning of line
+ 1929:				;
+ 1930:	  8627	11 BF		GETL_4:	CALL	STROUT
+ 1931:	  8629	08 20 88		DB	08H,' ',88H	;BKSP,SPC,BKSP
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 35
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1932:	  862C	18			DEC	R0		;Wipeout last char.
+ 1933:	  862D	80 CC			SJMP	GETL_1
+ 1934:				;
+ 1935:	  862F	B8 74 05	GETL_3:	CJNE	R0,#AES+AESLEN-1,GETL_2	;Test if buffer full.
+ 1936:	  8632	11 BF			CALL	STROUT		;Echo <BEL>.
+ 1937:	  8634	87		        DB      (BEL OR 80H)
+ 1938:	  8635	80 C4			SJMP	GETL_1		;If so, override character received.
+ 1939:				;
+ 1940:	  8637	F6		GETL_2:	MOV	@R0,A		;Store into line buffer.
+ 1941:	  8638	11 6E			CALL	C_OUT		;Echo character.
+ 1942:	  863A	08			INC	R0		;Bump pointer.
+ 1943:	  863B	B4 0D BD		CJNE	A,#CR,GETL_1	;Repeat for next character.
+ 1944:	  863E	A8 30			MOV	PNTR_L,TMP0	;Point cursor to beginning of line buffer.
+ 1945:	  8640	C2 09			CLR	CHAR_FLG
+ 1946:	  8642	22			RET
+ 1947:				;
+ 1948:				;===============
+ 1949:				;
+ 1950:				;
+ 1951:	  8643			PRN:
+ 1952:				;	Pop top of arithmetic expression stack (AES),
+ 1953:				;	convert to decimal number,
+ 1954:				;	and print to console output device, suppressing leading zeroes.
+ 1955:				;
+ 1956:	  8643	C2 0A			CLR	SGN_FLG
+ 1957:	  8645	71 5F			CALL	IABS
+ 1958:	  8647	11 F3			CALL	POP_TOS
+ 1959:	  8649	D2 08		PRNTOS:	SETB	ZERSUP		;Set zero suppression flag.
+ 1960:	  864B	E4			CLR	A
+ 1961:	  864C	F5 30			MOV	TMP0,A
+ 1962:	  864E	7D 10			MOV	LP_CNT,#16	;Conversion precision.
+ 1963:	  8650	20 04 1D		JB	HEXMOD,PRNHEX
+ 1964:	  8653	30 0A 03		JNB	SGN_FLG,PRN_1	;Skip ahead if positive number.
+ 1965:	  8656	11 BF			CALL	STROUT		;Output minus sign if negative.
+ 1966:	  8658	AD		        DB      ('-' OR 80H)
+ 1967:	  8659	CE		PRN_1:	XCH	A,TOS_L
+ 1968:	  865A	33			RLC	A
+ 1969:	  865B	CE			XCH	A,TOS_L
+ 1970:	  865C	CF			XCH	A,TOS_H
+ 1971:	  865D	33			RLC	A
+ 1972:	  865E	CF			XCH	A,TOS_H
+ 1973:	  865F	C5 30			XCH	A,TMP0
+ 1974:	  8661	35 E0			ADDC	A,ACC
+ 1975:	  8663	D4			DA	A
+ 1976:	  8664	C5 30			XCH	A,TMP0
+ 1977:	  8666	35 E0			ADDC	A,ACC
+ 1978:	  8668	D4			DA	A
+ 1979:	  8669	DD EE			DJNZ	LP_CNT,PRN_1
+ 1980:	  866B	FF			MOV	TOS_H,A
+ 1981:	  866C	EE			MOV	A,TOS_L
+ 1982:	  866D	33			RLC	A
+ 1983:	  866E	AE 30			MOV	TOS_L,TMP0
+ 1984:	  8670	11 A0		PRNHEX:	CALL	NIBOUT
+ 1985:	  8672	EF			MOV	A,TOS_H
+ 1986:	  8673	C4			SWAP	A
+ 1987:	  8674	11 A0			CALL	NIBOUT		;Print second digit.
+ 1988:	  8676	EF			MOV	A,TOS_H
+ 1989:	  8677	11 A0			CALL	NIBOUT		;Print third digit.
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 36
+
+
+
+ Line  I  Addr  Code            Source
+
+ 1990:	  8679	30 04 02		JNB	HEXMOD,PRNH_1
+ 1991:	  867C	C2 08			CLR	ZERSUP		;Print out last two chars. (at least) in hex.
+ 1992:	  867E	EE		PRNH_1:	MOV	A,TOS_L		;Read into Acc.
+ 1993:	  867F	C4			SWAP	A		;Interchange nibbles.
+ 1994:	  8680	11 A0			CALL	NIBOUT		;Print fourth digit.
+ 1995:	  8682	C2 08			CLR	ZERSUP
+ 1996:	  8684	EE			MOV	A,TOS_L		;Reload byte.
+ 1997:	  8685	11 A0			CALL	NIBOUT		;Print last digit.
+ 1998:	  8687	30 04 03		JNB	HEXMOD,PRNRET
+ 1999:	  868A	11 BF			CALL	STROUT		;Print trailing "H".
+ 2000:	  868C	C8		        DB      ('H' OR 80H)
+ 2001:	  868D	22		PRNRET:	RET
+ 2002:				;
+ 2003:				;===============
+ 2004:				;
+ 2005:	  868E			LSTLIN:
+ 2006:				;	Check Label of Program line pointed to by Cursor.
+ 2007:				;	If legal, print line number, source line, and <CR><LF> to console,
+ 2008:				;	adjust Cursor to start of next line,
+ 2009:				;	and return with carry set.
+ 2010:				;	Else return with carry cleared.
+ 2011:				;
+ 2012:	  868E	B1 CF			CALL	READ_LABEL
+ 2013:	  8690	40 12			JC	LSTL_1
+ 2014:	  8692	AF 7B			MOV	TOS_H,LABL_H
+ 2015:	  8694	AE 7A			MOV	TOS_L,LABL_L
+ 2016:	  8696	C2 0A			CLR	SGN_FLG
+ 2017:	  8698	D1 49			CALL	PRNTOS
+ 2018:	  869A	11 BF			CALL	STROUT		;Insert space before user's source line.
+ 2019:	  869C	A0		        DB      (' ' OR 80H)
+ 2020:	  869D	91 B6		LSTL_2:	CALL	READ_CHAR
+ 2021:	  869F	11 6E			CALL	C_OUT
+ 2022:	  86A1	B4 0D F9		CJNE	A,#CR,LSTL_2
+ 2023:	  86A4	22		LSTL_1:	RET
+ 2024:				;
+ 2025:				;===============
+ 2026:				;
+ 2027:				;LST
+ 2028:				;	List the contents of the program memory area.
+ 2029:				;
+ 2030:				;
+ 2031:	  86A5	D2 03		LST:	SETB	RUNMOD
+ 2032:	  86A7	91 74			CALL	REWIND		;Point to first char of external buffer.
+ 2033:	  86A9	11 8B		LST_1:	CALL	CNTRL
+ 2034:	  86AB	40 04			JC	LSTRET
+ 2035:	  86AD	D1 8E			CALL	LSTLIN		;Print out current line if present.
+ 2036:	  86AF	50 F8			JNC	LST_1		;Repeat if successful.
+ 2037:	  86B1	C2 03		LSTRET:	CLR	RUNMOD
+ 2038:	  86B3	22			RET
+ 2039:				;
+ 2040:				;===============
+ 2041:				;
+ 2042:				;
+ 2043:	  86B4			INNUM:
+ 2044:				;	Read a numeric character string from the console input device.
+ 2045:				;	Convert to binary value and push onto arithmetic expression stack.
+ 2046:				;	Report error if illegal characters read.
+ 2047:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 37
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2048:	  86B4	C2 0A			CLR	SGN_FLG		;Assume number will be positive.
+ 2049:	  86B6	11 BF			CALL	STROUT
+ 2050:	  86B8	3A A0		        DB      ':',(' ' OR 80H);Print input prompt.
+ 2051:	  86BA	11 50		INUM_0:	CALL	C_IN
+ 2052:	  86BC	11 6E			CALL	C_OUT		;Echo input
+ 2053:	  86BE	B4 20 02		CJNE	A,#' ',INUM_3
+ 2054:	  86C1	80 F7			SJMP	INUM_0
+ 2055:				;
+ 2056:	  86C3	B4 2B 02	INUM_3:	CJNE	A,#'+',INUM_4
+ 2057:	  86C6	80 F2			SJMP	INUM_0
+ 2058:				;
+ 2059:	  86C8	B4 2D 04	INUM_4:	CJNE	A,#'-',INUM_5
+ 2060:	  86CB	B2 0A			CPL	SGN_FLG
+ 2061:	  86CD	80 EB			SJMP	INUM_0
+ 2062:				;
+ 2063:	  86CF	51 B8		INUM_5:	CALL	CREATE		;Create value on stack if legal decimal digit.
+ 2064:	  86D1	50 07			JNC	INUM_2		;Abort if first character received not legal.
+ 2065:	  86D3	11 50		INUM_1:	CALL	C_IN		;Get additional characters.
+ 2066:	  86D5	11 6E			CALL	C_OUT		;Echo input.
+ 2067:	  86D7	B4 7F 06		CJNE	A,#7FH,INUM_6	;Start over if delete char detected.
+ 2068:	  86DA	11 BF		INUM_2:	CALL	STROUT
+ 2069:	  86DC	23 8D		        DB      '#',(CR OR 80H)
+ 2070:	  86DE	80 D4			SJMP	INNUM
+ 2071:				;
+ 2072:	  86E0	51 C5		INUM_6:	CALL	APPEND		;Incorporate into stack entry.
+ 2073:	  86E2	40 EF			JC	INUM_1		;Loop while legal characters arrive.
+ 2074:	  86E4	31 0B			CALL	PUSH_TOS
+ 2075:	  86E6	61 69			JMP	NEG_IF_NEG
+ 2076:				;
+ 2077:				;===============
+ 2078:				;$EJECT
+ 2079:	  86E8			RAM_INIT:
+ 2080:	  86E8	E4			CLR	A		;Many bytes to be cleared...
+ 2081:	  86E9	F5 20			MOV	MODE,A		;Interactive mode, decimal radix.
+ 2082:	  86EB	F5 21			MOV	FLAGS,A		;Interroutine flags.
+ 2083:	  86ED	75 A0 20	DD010:  MOV     P2,#HIGH(EXTRAM);Select first External RAM page.
+ 2084:	  86F0	F8		        MOV     R0,A
+ 2085:	  86F1	74 5A			MOV	A,#5AH		;Random bit pattern.
+ 2086:	  86F3	F2			MOVX	@R0,A
+ 2087:	  86F4	E2			MOVX	A,@R0
+ 2088:	  86F5	64 5A			XRL	A,#5AH
+ 2089:	  86F7	60 0A			JZ	EXTINI
+ 2090:	  86F9	E4			CLR	A
+ 2091:	  86FA	78 38			MOV	R0,#US_VAR	;Clear variable array.
+ 2092:	  86FC	F6		INIT_1:	MOV	@R0,A
+ 2093:	  86FD	08			INC	R0
+ 2094:	  86FE	B8 50 FB		CJNE	R0,#US_VAR+2*NO_VAR,INIT_1	;Loop until all vars cleared.
+ 2095:	  8701	80 09			SJMP	INIT_3
+ 2096:				;
+ 2097:	  8703	D2 00		EXTINI:	SETB	EXTVAR
+ 2098:	  8705	E4			CLR	A
+ 2099:	  8706	F8			MOV	R0,A		;Clear variable array.
+ 2100:	  8707	F2		INIT_2:	MOVX	@R0,A
+ 2101:	  8708	08			INC	R0
+ 2102:	  8709	B8 34 FB		CJNE	R0,#2*26,INIT_2	;Loop until all vars cleared.
+ 2103:	  870C	22		INIT_3:	RET
+ 2104:				;
+ 2105:				;========
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 38
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2106:				;
+ 2107:				;INIT
+ 2108:				;	Perform global initialization:
+ 2109:				;	Clear program memory, empty all I/O buffers, reset all stack
+ 2110:				;	pointers, etc.
+ 2111:				;
+ 2112:				;
+ 2113:	  870D	D1 E8		INIT:	CALL	RAM_INIT
+ 2114:	  870F	78 34		        MOV     R0,#LOW(EXTRAM)
+ 2115:	  8711	74 FF			MOV	A,#0FFH
+ 2116:	  8713	F2			MOVX	@R0,A
+ 2117:	  8714	22			RET
+ 2118:				;
+ 2119:				;===============
+ 2120:				;
+ 2121:				;$EJECT
+ 2122:				;
+ 2123:				;	BASIC PROGRAM LINE SEQUENCE CONTROL MACROS:
+ 2124:				;	===== ======= ==== ======== ======= ======
+ 2125:				;
+ 2126:				;XINIT
+ 2127:				;	Perform initialization needed before starting sequential execution.
+ 2128:				;	Empty stacks, set BASIC line number to 1, etc.
+ 2129:				;
+ 2130:				;
+ 2131:	  8715	75 50 50	XINIT:	MOV	AESP,#AES-1	;Initialize AE Stack.
+ 2132:	  8718	91 74			CALL	REWIND
+ 2133:	  871A	D2 03			SETB	RUNMOD
+ 2134:	  871C	22			RET			;Begin execution.
+ 2135:				;
+ 2136:				;===============
+ 2137:				;
+ 2138:	  871D			FNDLBL:
+ 2139:				;	Search program buffer for line with label passed on AES (Pop AES).
+ 2140:				;	If found, return with CURSOR pointing to start of line (before label)
+ 2141:				;	and carry cleared.
+ 2142:				;	If not found return with carry set and pointer at start of first
+ 2143:				;	line with a greater label value (possible EOF).
+ 2144:				;
+ 2145:	  871D	D2 03			SETB	RUNMOD		;Kludge to make GET_C fetch from prog. buffer.
+ 2146:	  871F	91 74			CALL	REWIND
+ 2147:	  8721	11 F3			CALL	POP_TOS
+ 2148:	  8723	91 8B		FND_1:	CALL	SAVE_PNTR	;Store position of beginning of line.
+ 2149:	  8725	B1 CF			CALL	READ_LABEL
+ 2150:	  8727	40 12			JC	FNDDON
+ 2151:	  8729	EE			MOV	A,TOS_L
+ 2152:	  872A	95 7A			SUBB	A,LABL_L
+ 2153:	  872C	F5 7A			MOV	LABL_L,A	;Save non-zero bits.
+ 2154:	  872E	EF			MOV	A,TOS_H
+ 2155:	  872F	95 7B			SUBB	A,LABL_H
+ 2156:	  8731	45 7A			ORL	A,LABL_L	;Test for non-zero bits.
+ 2157:	  8733	60 06			JZ	FNDDON
+ 2158:	  8735	40 04			JC	FNDDON		;Carry=1 if a greater label value found.
+ 2159:	  8737	91 E3			CALL	SKPTXT		;Skip over remaining text portion of line.
+ 2160:	  8739	80 E8			SJMP	FND_1
+ 2161:				;
+ 2162:	  873B	81 92		FNDDON:	JMP	LOAD_PNTR
+ 2163:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 39
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2164:				;=======
+ 2165:				;
+ 2166:	  873D			KILL_L:
+ 2167:				;	Kill (delete) line from code buffer indicated by pointer.
+ 2168:				;	When called, CURSOR and POINTER hold the address of first LABEL byte of
+ 2169:				;	line to be deleted.
+ 2170:				;
+ 2171:	  873D	A9 77			MOV	DEST_L,CURS_L
+ 2172:	  873F	AB 78			MOV	DEST_H,CURS_H
+ 2173:	  8741	91 DF			CALL	SKPLIN		;Pass pointer over full text line.
+ 2174:				;
+ 2175:				;	Pointer now indicates first label byte of following line.
+ 2176:				;	Cursor and DEST still indicate first label byte of obsolete line.
+ 2177:				;
+ 2178:	  8743	91 B6		KILL_2:	CALL	READ_CHAR	;Copy down first label byte.
+ 2179:	  8745	91 CD			CALL	WRITE_CHAR	;Transfer first byte of label number.
+ 2180:	  8747	20 E7 0D		JB	ACC.7,KILL_9	;Quit when End of Code sentinel reached.
+ 2181:	  874A	91 B6			CALL	READ_CHAR	;Copy down second label byte.
+ 2182:	  874C	91 CD			CALL	WRITE_CHAR	;Store second byte of label number.
+ 2183:	  874E	91 B6		KILL_3:	CALL	READ_CHAR	;Transfer text character.
+ 2184:	  8750	91 CD			CALL	WRITE_CHAR
+ 2185:	  8752	B4 0D F9		CJNE	A,#CR,KILL_3	;Loop until full line moved.
+ 2186:	  8755	80 EC			SJMP	KILL_2		;Continue until all code moved forward.
+ 2187:				;
+ 2188:	  8757	22		KILL_9:	RET			;Full line now deleted.
+ 2189:				;
+ 2190:				;=======
+ 2191:				;
+ 2192:	  8758			OPEN_L:
+ 2193:				;	Open space for new line in code buffer starting at Cursor.
+ 2194:				;
+ 2195:	  8758	91 92			CALL	LOAD_PNTR	;Load address of point for insertion.
+ 2196:	  875A	C2 09			CLR	CHAR_FLG
+ 2197:	  875C	91 B6		OPEN_3:	CALL	READ_CHAR	;Test first label byte of following line.
+ 2198:	  875E	20 E7 09		JB	ACC.7,OPEN_4
+ 2199:	  8761	91 B6			CALL	READ_CHAR	;Pass over next LABEL byte.
+ 2200:	  8763	91 B6		OPEN_5:	CALL	READ_CHAR
+ 2201:	  8765	B4 0D FB		CJNE	A,#CR,OPEN_5
+ 2202:	  8768	80 F2			SJMP	OPEN_3
+ 2203:				;
+ 2204:				;	Pointer now indicates end-of-buffer sentinel.
+ 2205:				;
+ 2206:	  876A	E5 37		OPEN_4:	MOV	A,STRLEN	;Number of bytes needed for BASIC text.
+ 2207:	  876C	24 03			ADD	A,#3		;Space needed for for label and <CR>.
+ 2208:	  876E	28			ADD	A,R0		;Low-order byte of old pointer.
+ 2209:	  876F	F9			MOV	DEST_L,A
+ 2210:	  8770	E4			CLR	A
+ 2211:	  8771	3A			ADDC	A,PNTR_H
+ 2212:	  8772	FB			MOV	DEST_H,A
+ 2213:	  8773	B4 30 02	        CJNE    A,#HIGH(RAMLIM),OPEN_1
+ 2214:	  8776	01 DD			JMP	AES_ER
+ 2215:				;
+ 2216:				;	Transfer characters from source back to destination
+ 2217:				;	until pointer at original CURSOR value.
+ 2218:				;
+ 2219:	  8778	91 9E		OPEN_1:	CALL	GET_BUF		;Move back next character.
+ 2220:	  877A	91 C4			CALL	PUT_BUF
+ 2221:	  877C	E8			MOV	A,PNTR_L
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 40
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2222:	  877D	B5 77 05		CJNE	A,CURS_L,OPEN_2
+ 2223:	  8780	EA			MOV	A,PNTR_H
+ 2224:	  8781	B5 78 01		CJNE	A,CURS_H,OPEN_2
+ 2225:				;
+ 2226:				;	All bytes have been moved back.
+ 2227:				;
+ 2228:	  8784	22			RET
+ 2229:				;
+ 2230:	  8785			OPEN_2:
+ 2231:				;	Decrement src. and dest. pointers and repeat.
+ 2232:				;
+ 2233:	  8785	18			DEC	PNTR_L
+ 2234:	  8786	B8 FF 01		CJNE	PNTR_L,#0FFH,OPEN_6
+ 2235:	  8789	1A			DEC	PNTR_H
+ 2236:	  878A	19		OPEN_6:	DEC	DEST_L
+ 2237:	  878B	B9 FF EA		CJNE	DEST_L,#0FFH,OPEN_1
+ 2238:	  878E	1B			DEC	DEST_H
+ 2239:	  878F	80 E7			SJMP	OPEN_1		;Repeat for next character.
+ 2240:				;
+ 2241:				;=======
+ 2242:				;
+ 2243:	  8791			INSR_L:
+ 2244:				;	Insert program line label (still held in <TOS_H><TOS_L> from earlier
+ 2245:				;	call to FNDLBL)
+ 2246:				;	and character string in line buffer (pointed at by L_CURS)
+ 2247:				;	into program buffer gap created by OPEN_L routine
+ 2248:				;	(still pointed at by CURSOR).
+ 2249:				;
+ 2250:	  8791	A9 77			MOV	DEST_L,CURS_L
+ 2251:	  8793	AB 78			MOV	DEST_H,CURS_H
+ 2252:	  8795	EF			MOV	A,TOS_H
+ 2253:	  8796	91 CD			CALL	WRITE_CHAR
+ 2254:	  8798	EE			MOV	A,TOS_L
+ 2255:	  8799	91 CD			CALL	WRITE_CHAR
+ 2256:	  879B	A8 75			MOV	PNTR_L,L_CURS
+ 2257:	  879D	E6		INSL_1:	MOV	A,@PNTR_L
+ 2258:	  879E	91 CD			CALL	WRITE_CHAR
+ 2259:	  87A0	08			INC	PNTR_L
+ 2260:	  87A1	B4 0D F9		CJNE	A,#CR,INSL_1
+ 2261:	  87A4	22			RET
+ 2262:				;
+ 2263:				;=======
+ 2264:				;
+ 2265:				;
+ 2266:	  87A5			INSRT:
+ 2267:				;	Pop line number from top of arithmetic expression stack.
+ 2268:				;	Search BASIC source program for corresponding line number.
+ 2269:				;	If found, delete old line.
+ 2270:				;	Otherwise position cursor before next sequential line number.
+ 2271:				;	If line buffer is not empty then insert line number, contents of
+ 2272:				;	line buffer, and line terminator.
+ 2273:				;
+ 2274:	  87A5	18			DEC	PNTR_L		;Since previous D_BLNK passed over first char.
+ 2275:	  87A6	88 75			MOV	L_CURS,PNTR_L
+ 2276:	  87A8	F1 1D			CALL	FNDLBL
+ 2277:	  87AA	40 02			JC	INSR_1
+ 2278:	  87AC	F1 3D			CALL	KILL_L		;Delete line iff label found in buffer.
+ 2279:	  87AE	A9 75		INSR_1:	MOV	R1,L_CURS
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 41
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2280:	  87B0	19			DEC	R1
+ 2281:	  87B1	09		INSR_2:	INC	R1
+ 2282:	  87B2	E7			MOV	A,@R1
+ 2283:	  87B3	B4 0D FB		CJNE	A,#CR,INSR_2
+ 2284:	  87B6	E9			MOV	A,R1
+ 2285:	  87B7	C3			CLR	C
+ 2286:	  87B8	95 75			SUBB	A,L_CURS
+ 2287:	  87BA	F5 37			MOV	STRLEN,A
+ 2288:	  87BC	60 04			JZ	INSR_4
+ 2289:	  87BE	F1 58			CALL	OPEN_L
+ 2290:	  87C0	F1 91			CALL	INSR_L
+ 2291:	  87C2	C2 03		INSR_4:	CLR	RUNMOD
+ 2292:	  87C4	22			RET
+ 2293:				;
+ 2294:				;===============
+ 2295:				;
+ 2296:				;
+ 2297:	  87C5	11 F3		COND:	CALL	POP_TOS
+ 2298:	  87C7	EE			MOV	A,TOS_L
+ 2299:	  87C8	13			RRC	A
+ 2300:	  87C9	22			RET
+ 2301:				;
+ 2302:				;=======
+ 2303:				;
+ 2304:				;XFER
+ 2305:				;	Pop the value from the top of the arithmetic expression stack (AES).
+ 2306:				;	Position cursor at beginning of the BASIC source program line
+ 2307:				;	with that label and begin source interpretation.
+ 2308:				;	(Report error if corresponding source line not found.)
+ 2309:				;
+ 2310:				;
+ 2311:	  87CA	F1 1D		XFER:	CALL	FNDLBL
+ 2312:	  87CC	40 03			JC	XFERNG
+ 2313:	  87CE	02 88 53		JMP	STMT		;Begin execution of source line.
+ 2314:				;
+ 2315:	  87D1	01 D4		XFERNG:	JMP	EXP_ER
+ 2316:				;
+ 2317:				;===============
+ 2318:				;
+ 2319:				;
+ 2320:	  87D3			SAV:
+ 2321:				;	Push BASIC line number of current source line onto AES.
+ 2322:				;
+ 2323:	  87D3	AF 7B			MOV	TOS_H,LABL_H
+ 2324:	  87D5	AE 7A			MOV	TOS_L,LABL_L
+ 2325:	  87D7	21 0B			JMP	PUSH_TOS
+ 2326:				;
+ 2327:				;===============
+ 2328:				;
+ 2329:				;
+ 2330:	  87D9			RSTR:
+ 2331:				;	If AES is empty report a nesting error.
+ 2332:				;	Otherwise, pop AES into current BASIC souce program line number.
+ 2333:				;
+ 2334:	  87D9	F1 1D			CALL	FNDLBL
+ 2335:	  87DB	91 DF			CALL	SKPLIN		;Pass over statement initiating transfer.
+ 2336:	  87DD	02 88 53		JMP	STMT
+ 2337:				;
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 42
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2338:				;===============
+ 2339:				;
+ 2340:				;
+ 2341:	  87E0			LOOP:
+ 2342:				;	LOOP is called with the AES holding:
+ 2343:				;	(TOS:)	2 byte VALUE of variable after being incremented,
+ 2344:				;		2 byte INDEX of variable being incremented,
+ 2345:				;		1 byte TYPE of variable code,
+ 2346:				;		2 byte LABEL of line initiating FOR loop,
+ 2347:				;		2 byte LIMIT specified by FOR statement,
+ 2348:				;		2 byte INDEX of variable used by FOR loop,
+ 2349:				;		1 byte TYPE of variable code.
+ 2350:				;	If indices disagree, then generate syntax error.
+ 2351:				;	Otherwise, store incremented value in variable popping both from AES.
+ 2352:				;	If the incremented value <= LIMIT then return with carry set.
+ 2353:				;	If incr. val. > LIMIT looping is done, so return with carry not set.
+ 2354:				;
+ 2355:				;	Compare all three bytes of variable index.
+ 2356:	  87E0	E8			MOV	A,R0
+ 2357:	  87E1	C0 E0			PUSH	ACC
+ 2358:	  87E3	E5 50			MOV	A,AESP
+ 2359:	  87E5	24 FE			ADD	A,#-2
+ 2360:	  87E7	F9			MOV	R1,A
+ 2361:	  87E8	24 F9			ADD	A,#-7
+ 2362:	  87EA	F8			MOV	R0,A
+ 2363:	  87EB	7D 03			MOV	LP_CNT,#3	;Set to test three bytes.
+ 2364:	  87ED	E7		LOOP_0:	MOV	A,@R1
+ 2365:	  87EE	66			XRL	A,@R0
+ 2366:	  87EF	70 1F			JNZ	LOOP_1
+ 2367:	  87F1	18			DEC	R0
+ 2368:	  87F2	19			DEC	R1
+ 2369:	  87F3	DD F8			DJNZ	LP_CNT,LOOP_0
+ 2370:				;
+ 2371:				;	All three bytes of variable code match.
+ 2372:	  87F5	D0 E0			POP	ACC
+ 2373:	  87F7	F8			MOV	R0,A
+ 2374:	  87F8	31 F7			CALL	STORE
+ 2375:	  87FA	E5 50			MOV	A,AESP
+ 2376:	  87FC	24 FD			ADD	A,#-3
+ 2377:	  87FE	F9			MOV	R1,A
+ 2378:	  87FF	C3			CLR	C
+ 2379:	  8800	E7			MOV	A,@R1
+ 2380:	  8801	95 30			SUBB	A,TMP0
+ 2381:	  8803	09			INC	R1
+ 2382:	  8804	E7			MOV	A,@R1
+ 2383:	  8805	20 04 05		JB	HEXMOD,LOOP_2	;Branch forward if unsigned compare correct.
+ 2384:	  8808	64 80			XRL	A,#80H		;Adjust sign bits so signed compare valid.
+ 2385:	  880A	63 31 80		XRL	TMP1,#80H
+ 2386:	  880D	95 31		LOOP_2:	SUBB	A,TMP1
+ 2387:	  880F	22			RET
+ 2388:				;
+ 2389:				;	Indices don't match.
+ 2390:				;
+ 2391:	  8810	D0 E0		LOOP_1:	POP	ACC
+ 2392:	  8812	F8			MOV	R0,A
+ 2393:	  8813	02 80 E8		JMP	SYN_ER
+ 2394:				;
+ 2395:				;=======
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 43
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2396:				;
+ 2397:				;FIN
+ 2398:				;	Return to line collection routine.
+ 2399:				;
+ 2400:				;
+ 2401:	  8816	C2 03		FIN:	CLR	RUNMOD
+ 2402:	  8818	02 88 3A		JMP	CONT		;Return to line collection mode.
+ 2403:				;
+ 2404:				;===============
+ 2405:				;
+ 2406:				;$EJECT
+ 2407:				;
+ 2408:				;	IL SEQUENCE CONTROL INSTRUCTIONS:
+ 2409:				;	== ======== ======= ============
+ 2410:				;
+ 2411:				;IJMP	(LBL)
+ 2412:				;	Jump to the (potentially distant) IL instruction at location LBL.
+ 2413:				;Note:	In this implementation IL addresses are equivalent to machine
+ 2414:				;	language addresses, so IJMP performs a generic JMP.
+ 2415:				;
+ 2416:				;
+ 2417:				;===============
+ 2418:				;
+ 2419:				;HOP	(LBL)
+ 2420:				;	Perform a branch to the IL instruction at (nearby) location LBL.
+ 2421:				;Note:	In this implementation IL addresses are equivalent to machine
+ 2422:				;	language addresses, so HOP performs a simple relative SJMP.
+ 2423:				;
+ 2424:				;
+ 2425:				;===============
+ 2426:				;
+ 2427:				;ICALL	(LBL)
+ 2428:				;	Call the IL subroutine starting at instruction LBL.
+ 2429:				;	Save the location of the next IL instruction on the control stack.
+ 2430:				;Note:	In this implementation, IL addresses are identical with
+ 2431:				;	machine language addresses, and are saved on the MCS-51 hardware stack.
+ 2432:				;
+ 2433:				;
+ 2434:				;===============
+ 2435:				;
+ 2436:				;IRET
+ 2437:				;	Return from IL subroutine to location on top of control stack.
+ 2438:				;Note:	In this implementation, IL addresses are identical with machine
+ 2439:				;	language addresses, which are saved on the hardware stack.
+ 2440:				;
+ 2441:				;
+ 2442:				;===============
+ 2443:				;
+ 2444:				;MLCALL
+ 2445:				;	Call the ML subroutine starting at the address on top of AES.
+ 2446:				;
+ 2447:				;
+ 2448:	  881B	A9 50		MLCALL:	MOV	R1,AESP
+ 2449:	  881D	87 F0			MOV	B,@R1
+ 2450:	  881F	19			DEC	R1
+ 2451:	  8820	E7			MOV	A,@R1
+ 2452:	  8821	19			DEC	R1
+ 2453:	  8822	89 50			MOV	AESP,R1
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 44
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2454:	  8824	C0 E0			PUSH	ACC
+ 2455:	  8826	C0 F0			PUSH	B
+ 2456:	  8828	43 D0 18		ORL	PSW,#00011000B	;Select RB3.
+ 2457:	  882B	22			RET			;Branch to user routine.
+ 2458:				;
+ 2459:				;=======
+ 2460:				;$EJECT
+ 2461:				;$RESTORE
+ 2462:				;
+ 2463:				;	STATEMENT EXECUTOR WRITTEN IN IL (INTERPRETIVE LANGUAGE)
+ 2464:				;	OPERATIONS IMPLEMENTED BY ASM51 MPL MACRO PROCESSING LANGUAGE
+ 2465:				;			(8/11/80)
+ 2466:				;
+ 2467:	  882C	02 80 E8	CMD_NG:	JMP	SYN_ER
+ 2468:				;
+ 2469:	  882F	12 87 0D	START:  CALL    INIT
+ 2470:	  8832	C2 03		ERRENT:	CLR	RUNMOD
+ 2471:	  8834	75 81 7F		MOV	SP,#SP_BASE	;Re-initialize hardware stack.
+ 2472:	  8837	75 50 50		MOV	AESP,#AES-1	;Initialize AES pointer.
+ 2473:	  883A	12 80 BF	CONT:	CALL	STROUT
+ 2474:	  883D	4F 4B 8D	        DB      'OK',(CR OR 80H)
+ 2475:	  8840	12 85 F0	CONT_1: CALL    GETLN          ;Receive interactive command line.
+ 2476:	  8843	12 84 D5		CALL	D_BLNK
+ 2477:				        TSTL_   TOKEN
+ 2478+ 1  8846	12 85 7E	        CALL    TSTN
+ 2479+ 1  8849	50 0D		        JNC     TOKEN
+ 2480:	  884B	12 87 A5	        CALL    INSRT
+ 2481:				        HOP_    CONT_1
+ 2482+ 1  884E	80 F0		        SJMP    CONT_1
+ 2483:				;
+ 2484:				;=======
+ 2485:				;
+ 2486:	  8850	12 87 15	XEC:    CALL    XINIT          ;Initialize for sequential execution.
+ 2487:	  8853			STMT:   LINIT_          ;Initialize for line execution.
+ 2488+ 1  8853	12 85 DC	        CALL   L_INIT
+ 2489+ 1  8856	40 DA		        JC      ERRENT
+ 2490:	  8858	12 80 8B	TOKEN:	CALL	CNTRL
+ 2491:	  885B	12 84 D5		CALL	D_BLNK
+ 2492:				        TSTV_   S0            ;Parse implied LET command.
+ 2493+ 1  885E	12 85 19	        CALL    TSTV
+ 2494+ 1  8861	50 08		        JNC     S0
+ 2495:				;*        %TST    (SE4,=)
+ 2496:	  8863	12 84 E9	        call   tst
+ 2497:	  8866	BD		        db      ('=' OR 80H)
+ 2498:	  8867	50 2F		        jnc     se4
+ 2499:				        HOP_    SE3
+ 2500+ 1  8869	80 13		        SJMP    SE3
+ 2501:				;
+ 2502:				;*S0:     %TST    (S1,LET)                ;Parse explicit LET command.
+ 2503:	  886B	12 84 E9	s0:     call   tst
+ 2504:	  886E	4C 45 D4	        db      'LE',('T' OR 80H)
+ 2505:	  8871	50 31		        jnc     s1
+ 2506:				        TSTV_   CMD_NG
+ 2507+ 1  8873	12 85 19	        CALL    TSTV
+ 2508+ 1  8876	50 B4		        JNC     CMD_NG
+ 2509:				;*        %TST    (CMD_NG,=)
+ 2510:	  8878	12 84 E9	        call   tst
+ 2511:	  887B	BD		        db      ('=' OR 80H)
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 45
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2512:	  887C	50 AE		        jnc     cmd_ng
+ 2513:	  887E			SE3:    ICALL_  EXPR
+ 2514+ 1  887E	12 8A B3	        CALL    EXPR
+ 2515:				;*        %TST    (SE3A,%1,)
+ 2516:	  8881	12 84 E9	        call   tst
+ 2517:	  8884	AC		        db      (',' OR 80H)            ;to match tb51.lst
+ 2518:	  8885	50 08		        jnc     se3a
+ 2519:	  8887	12 81 F3	        CALL    SEQ_STORE
+ 2520:	  888A	12 83 6D		CALL	IINC
+ 2521:				        HOP_    SE3
+ 2522+ 1  888D	80 EF		        SJMP    SE3
+ 2523:				;
+ 2524:	  888F	12 85 B1	SE3A:   CALL    DONE
+ 2525:	  8892	12 81 F7		CALL	STORE
+ 2526:	  8895	02 85 E5	        JMP     NXT
+ 2527:				;
+ 2528:	  8898	12 85 B1	SE4:    CALL    DONE           ;Process implied PRINT command.
+ 2529:	  889B	12 82 5B		CALL	FETCH
+ 2530:	  889E	12 86 43	        CALL    PRN
+ 2531:	  88A1	02 85 E3	        JMP     NL_NXT
+ 2532:				;
+ 2533:				;=======
+ 2534:				;
+ 2535:				;*S1:     %TST    (S2,GOTO)               ;Parse GOTO command.
+ 2536:	  88A4	12 84 E9	s1:     call   tst
+ 2537:	  88A7	47 4F 54 CF	        db      'GOT',('O' OR 80H)
+ 2538:	  88AB	50 09		        jnc     s2
+ 2539:				        ICALL_  EXPR
+ 2540+ 1  88AD	12 8A B3	        CALL    EXPR
+ 2541:	  88B0	12 85 B7	        CALL    LNDONE
+ 2542:	  88B3	02 87 CA	        JMP     XFER
+ 2543:				;
+ 2544:				;=======
+ 2545:				;
+ 2546:				;*S2:     %TST    (S3,GOSUB)              ;Parse GOSUB command.
+ 2547:	  88B6	12 84 E9	s2:     call   tst
+ 2548:	  88B9	47 4F 53 55	        db      'GOSU',('B' OR 80H)
+	  88BD	C2
+ 2549:	  88BE	50 0C		        jnc     s3
+ 2550:	  88C0	12 87 D3	        CALL    SAV
+ 2551:				        ICALL_  EXPR
+ 2552+ 1  88C3	12 8A B3	        CALL    EXPR
+ 2553:	  88C6	12 85 B7	        CALL    LNDONE
+ 2554:	  88C9	02 87 CA	        JMP     XFER
+ 2555:				;
+ 2556:				;=======
+ 2557:				;
+ 2558:				;*S3:     %TST    (S8,PRINT)              ;Parse PRINT command.
+ 2559:	  88CC	12 84 E9	s3:     call   tst
+ 2560:	  88CF	50 52 49 4E	        db      'PRIN',('T' OR 80H)
+	  88D3	D4
+ 2561:	  88D4	50 44		        jnc     s8
+ 2562:				        IFDONE_ S6B
+ 2563+ 1  88D6	12 85 C1	        CALL    IFDONE
+ 2564+ 1  88D9	50 39		        JNC     S6B
+ 2565:				;*S3A:    %TST    (S3B,;)
+ 2566:	  88DB	12 84 E9	s3a:    call   tst
+ 2567:	  88DE	BB		        db      (';' OR 80H)
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 46
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2568:	  88DF	50 02		        jnc     s3b
+ 2569:				        HOP_    S3A
+ 2570+ 1  88E1	80 F8		        SJMP    S3A
+ 2571:				;
+ 2572:				;*S3B:    %TST    (S3C,%1,)
+ 2573:	  88E3	12 84 E9	s3b:    call   tst
+ 2574:	  88E6	AC		        db      (',' OR 80H)            ;to match TB51.LST
+ 2575:	  88E7	50 05		        jnc     s3c
+ 2576:	  88E9	12 80 99	        CALL    SPC
+ 2577:				        HOP_    S3A
+ 2578+ 1  88EC	80 ED		        SJMP    S3A
+ 2579:				;
+ 2580:	  88EE			S3C:    IFDONE_ S6A
+ 2581+ 1  88EE	12 85 C1	        CALL    IFDONE
+ 2582+ 1  88F1	50 24		        JNC     S6A
+ 2583:				        TSTS_   S5
+ 2584+ 1  88F3	12 85 93	        CALL    TSTS
+ 2585+ 1  88F6	40 06		        JC      S5
+ 2586:				        ICALL_  EXPR
+ 2587+ 1  88F8	12 8A B3	        CALL    EXPR
+ 2588:	  88FB	12 86 43	        CALL    PRN
+ 2589:				;*S5:     %TST    (S5A,%1,)
+ 2590:	  88FE	12 84 E9	s5:     call   tst
+ 2591:	  8901	AC		        db      (',' OR 80H)            ;to match TB51.LST
+ 2592:	  8902	50 05		        jnc     s5a
+ 2593:	  8904	12 80 99	        CALL    SPC
+ 2594:				        HOP_    S3A
+ 2595+ 1  8907	80 D2		        SJMP    S3A
+ 2596:				;
+ 2597:				;*S5A:    %TST    (S6,;)
+ 2598:	  8909	12 84 E9	s5a:    call   tst
+ 2599:	  890C	BB		        db      (';' OR 80H)
+ 2600:	  890D	50 02		        jnc     s6
+ 2601:				        HOP_    S3A
+ 2602+ 1  890F	80 CA		        SJMP    S3A
+ 2603:				;
+ 2604:	  8911	12 85 B1	S6:     CALL    DONE
+ 2605:	  8914	02 85 E3	S6B:    JMP     NL_NXT
+ 2606:				;
+ 2607:	  8917	02 85 E5	S6A:    JMP     NXT
+ 2608:				;
+ 2609:				;=======
+ 2610:				;
+ 2611:				;*S8:     %TST    (S9,IF)         ;Parse IF command.
+ 2612:	  891A	12 84 E9	s8:     call   tst
+ 2613:	  891D	49 C6		        db      'I',('F' OR 80H)
+ 2614:	  891F	50 18		        jnc     s9
+ 2615:				        ICALL_  EXPR
+ 2616+ 1  8921	12 8A B3	        CALL    EXPR
+ 2617:				;*        %TST    (S8A,THEN)
+ 2618:	  8924	12 84 E9	        call   tst
+ 2619:	  8927	54 48 45 CE	        db      'THE',('N' OR 80H)
+ 2620:	  892B	50 00		        jnc     s8a
+ 2621:	  892D			S8A:    COND_   S8B
+ 2622+ 1  892D	12 87 C5	        CALL   COND
+ 2623+ 1  8930	50 02		        JNC    S8B
+ 2624:				        IJMP_   TOKEN         ;Continue parsing command.
+ 2625+ 1  8932	01 58		        JMP     TOKEN
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 47
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2626:				;
+ 2627:	  8934	12 84 E3	S8B:    CALL    SKPTXT
+ 2628:				        IJMP_   STMT
+ 2629+ 1  8937	01 53		        JMP     STMT
+ 2630:				;
+ 2631:				;=======
+ 2632:				;
+ 2633:				;*S9:     %TST    (S12,INPUT)             ;Parse INPUT command.
+ 2634:	  8939	12 84 E9	s9:     call   tst
+ 2635:	  893C	49 4E 50 55	        db      'INPU',('T' OR 80H)
+	  8940	D4
+ 2636:	  8941	50 2C		        jnc     s12
+ 2637:	  8943			S10:    TSTS_   S10B
+ 2638+ 1  8943	12 85 93	        CALL    TSTS
+ 2639+ 1  8946	40 0B		        JC      S10B
+ 2640:				        TSTV_   S10D
+ 2641+ 1  8948	12 85 19	        CALL    TSTV
+ 2642+ 1  894B	50 19		        JNC     S10D
+ 2643:	  894D	12 86 B4	        CALL    INNUM
+ 2644:	  8950	12 81 F7		CALL	STORE
+ 2645:				;*S10B:   %TST    (S10C,;)
+ 2646:	  8953	12 84 E9	s10b:   call   tst
+ 2647:	  8956	BB		        db      (';' OR 80H)
+ 2648:	  8957	50 02		        jnc     s10c
+ 2649:				        HOP_    S10
+ 2650+ 1  8959	80 E8		        SJMP    S10
+ 2651:				;
+ 2652:				;*S10C:   %TST    (S11,%1,)
+ 2653:	  895B	12 84 E9	s10c:   call   tst
+ 2654:	  895E	AC		        db      (',' OR 80H)            ;to match TB51.LST
+ 2655:	  895F	50 08		        jnc     s11
+ 2656:	  8961	12 80 99	        CALL    SPC
+ 2657:				        HOP_    S10
+ 2658+ 1  8964	80 DD		        SJMP    S10
+ 2659:				;
+ 2660:	  8966			S10D:   IJMP_   SYN_NG
+ 2661+ 1  8966	02 8B A3	        JMP     SYN_NG
+ 2662:				;
+ 2663:	  8969	12 85 B1	S11:    CALL    DONE
+ 2664:	  896C	02 85 E3	        JMP     NL_NXT
+ 2665:				;
+ 2666:				;=======
+ 2667:				;
+ 2668:				;*S12:    %TST    (S13,RETURN)            ;Parse RETURN command.
+ 2669:	  896F	12 84 E9	s12:    call   tst
+ 2670:	  8972	52 45 54 55	        db      'RETUR',('N' OR 80H)
+	  8976	52 CE
+ 2671:	  8978	50 06		        jnc     s13
+ 2672:	  897A	12 85 B7	        CALL    LNDONE
+ 2673:	  897D	02 87 D9	        JMP     RSTR
+ 2674:				;
+ 2675:				;=======
+ 2676:				;
+ 2677:				;*S13:    %TST    (S13A,CALL)             ;Machine language CALL.
+ 2678:	  8980	12 84 E9	s13:    call   tst
+ 2679:	  8983	43 41 4C CC	        db      'CAL',('L' OR 80H)
+ 2680:	  8987	50 0E		        jnc     s13a
+ 2681:				        ICALL_  EXPR
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 48
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2682+ 1  8989	12 8A B3	        CALL    EXPR
+ 2683:	  898C	12 85 B7	        CALL    LNDONE
+ 2684:				        MLCALL_
+ 2685+ 1  898F	11 1B		        CALL    MLCALL
+ 2686+ 1  8991	53 D0 E7	        ANL     PSW,#11100111B
+ 2687:	  8994	02 85 E5	        JMP     NXT
+ 2688:				;
+ 2689:				;=======
+ 2690:				;
+ 2691:				;*S13A:   %TST    (S13B,FOR)
+ 2692:	  8997	12 84 E9	s13a:   call   tst
+ 2693:	  899A	46 4F D2	        db      'FO',('R' OR 80H)
+ 2694:	  899D	50 24		        jnc     s13b
+ 2695:				        TSTV_   FOR_ER
+ 2696+ 1  899F	12 85 19	        CALL    TSTV
+ 2697+ 1  89A2	50 50		        JNC     FOR_ER
+ 2698:				;*        %TST    (FOR_ER,=)
+ 2699:	  89A4	12 84 E9	        call   tst
+ 2700:	  89A7	BD		        db      ('=' OR 80H)
+ 2701:	  89A8	50 4A		        jnc     for_er
+ 2702:				        ICALL_  EXPR
+ 2703+ 1  89AA	12 8A B3	        CALL    EXPR
+ 2704:	  89AD	12 81 F3		CALL	SEQ_STORE
+ 2705:				;*        %TST    (FOR_ER,TO)
+ 2706:	  89B0	12 84 E9	        call   tst
+ 2707:	  89B3	54 CF		        db      'T',('O' OR 80H)
+ 2708:	  89B5	50 3D		        jnc     for_er
+ 2709:				        ICALL_  EXPR
+ 2710+ 1  89B7	12 8A B3	        CALL    EXPR
+ 2711:	  89BA	12 85 B7	        CALL    LNDONE
+ 2712:	  89BD	12 87 D3	        CALL    SAV
+ 2713:	  89C0	02 85 E5	        JMP     NXT
+ 2714:				;
+ 2715:				;=======
+ 2716:				;
+ 2717:				;*S13B:   %TST    (S13C,NEXT)
+ 2718:	  89C3	12 84 E9	s13b:   call   tst
+ 2719:	  89C6	4E 45 58 D4	        db      'NEX',('T' OR 80H)
+ 2720:	  89CA	50 2A		        jnc     s13c
+ 2721:				        TSTV_   FOR_ER
+ 2722+ 1  89CC	12 85 19	        CALL    TSTV
+ 2723+ 1  89CF	50 23		        JNC     FOR_ER
+ 2724:	  89D1	12 85 B1	        CALL    DONE
+ 2725:	  89D4	12 82 57		CALL	SEQ_FETCH
+ 2726:	  89D7	12 83 6D		CALL	IINC
+ 2727:				        NEXT_LOOP_      FORDON
+ 2728+ 1  89DA	12 87 E0	        CALL   LOOP
+ 2729+ 1  89DD	40 06		        JC     FORDON
+ 2730:	  89DF	12 81 1E		CALL	DUPL
+ 2731:	  89E2	02 87 D9	        JMP     RSTR
+ 2732:				;
+ 2733:	  89E5	12 80 F3	FORDON:	CALL	POP_TOS
+ 2734:	  89E8	12 80 F3		CALL	POP_TOS
+ 2735:	  89EB	12 80 F3		CALL	POP_TOS
+ 2736:	  89EE	12 81 05		CALL	POP_ACC
+ 2737:	  89F1	02 85 E5	        JMP     NXT
+ 2738:				;
+ 2739:				;=======
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 49
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2740:				;
+ 2741:	  89F4			FOR_ER: IJMP_   CMD_NG
+ 2742+ 1  89F4	01 2C		        JMP     CMD_NG
+ 2743:				;
+ 2744:				;=======
+ 2745:				;
+ 2746:				;*S13C:   %TST    (S14,END)               ;Parse END command.
+ 2747:	  89F6	12 84 E9	s13c:   call   tst
+ 2748:	  89F9	45 4E C4	        db      'EN',('D' OR 80H)
+ 2749:	  89FC	50 05		        jnc     s14
+ 2750:	  89FE	12 85 B7	        CALL    LNDONE
+ 2751:	  8A01	01 16		        JMP     FIN
+ 2752:				;
+ 2753:				;=======
+ 2754:				;
+ 2755:				;*S14:    %TST    (S15,LIST)              ;Parse LIST command.
+ 2756:	  8A03	12 84 E9	s14:    call   tst
+ 2757:	  8A06	4C 49 53 D4	        db      'LIS',('T' OR 80H)
+ 2758:	  8A0A	50 15		        jnc     s15
+ 2759:				        IFDONE_ S14B
+ 2760+ 1  8A0C	12 85 C1	        CALL    IFDONE
+ 2761+ 1  8A0F	50 0B		        JNC     S14B
+ 2762:				        ICALL_  EXPR
+ 2763+ 1  8A11	12 8A B3	        CALL    EXPR
+ 2764:	  8A14	12 87 1D		CALL	FNDLBL
+ 2765:	  8A17	12 86 A9		CALL	LST_1
+ 2766:				        IJMP_   CONT
+ 2767+ 1  8A1A	01 3A		        JMP     CONT
+ 2768:				;
+ 2769:	  8A1C	12 86 A5	S14B:   CALL    LST
+ 2770:				        IJMP_   CONT
+ 2771+ 1  8A1F	01 3A		        JMP     CONT
+ 2772:				;
+ 2773:				;=======
+ 2774:				;
+ 2775:				;*S15:    %TST    (S16,RUN)               ;Parse LIST command.
+ 2776:	  8A21	12 84 E9	s15:    call   tst
+ 2777:	  8A24	52 55 CE	        db      'RU',('N' OR 80H)
+ 2778:	  8A27	50 05		        jnc     s16
+ 2779:	  8A29	12 85 B7	        CALL    LNDONE
+ 2780:				        IJMP_   XEC
+ 2781+ 1  8A2C	01 50		        JMP     XEC
+ 2782:				;
+ 2783:				;=======
+ 2784:				;
+ 2785:				;*S16:    %TST    (S16A,NEW)
+ 2786:	  8A2E	12 84 E9	s16:    call   tst
+ 2787:	  8A31	4E 45 D7	        db      'NE',('W' OR 80H)
+ 2788:	  8A34	50 05		        jnc     s16a
+ 2789:	  8A36	12 85 B1	        CALL    DONE
+ 2790:				        IJMP_   START
+ 2791+ 1  8A39	01 2F		        JMP     START
+ 2792:				;
+ 2793:				;=======
+ 2794:				;*S16A:   %TST    (S17,RESET)
+ 2795:	  8A3B	12 84 E9	s16a:   call   tst
+ 2796:	  8A3E	52 45 53 45	        db      'RESE',('T' OR 80H)
+	  8A42	D4
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 50
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2797:	  8A43	50 06		        jnc     s17
+ 2798:	  8A45	12 85 B1	        CALL    DONE
+ 2799:	  8A48	02 00 00		JMP	0000H
+ 2800:				;
+ 2801:				;=======
+ 2802:				;
+ 2803:				;*S17:    %TST    (S17A,ROM)
+ 2804:	  8A4B	12 84 E9	s17:    call   tst
+ 2805:	  8A4E	52 4F CD	        db      'RO',('M' OR 80H)
+ 2806:	  8A51	50 0A		        jnc     s17a
+ 2807:	  8A53	12 85 B1	        CALL    DONE
+ 2808:	  8A56	D2 01			SETB	ROMMOD
+ 2809:	  8A58	C2 02			CLR	EXTMOD
+ 2810:	  8A5A	02 85 E5	        JMP     NXT
+ 2811:				;
+ 2812:				;*S17A:   %TST    (S17B,RAM)
+ 2813:	  8A5D	12 84 E9	s17a:   call   tst
+ 2814:	  8A60	52 41 CD	        db      'RA',('M' OR 80H)
+ 2815:	  8A63	50 08		        jnc     s17b
+ 2816:	  8A65	12 85 B1	        CALL    DONE
+ 2817:	  8A68	C2 01			CLR	ROMMOD
+ 2818:	  8A6A	02 85 E5	        JMP     NXT
+ 2819:				;
+ 2820:				;*S17B:   %TST    (S17C,PROM)
+ 2821:	  8A6D	12 84 E9	s17b:   call   tst
+ 2822:	  8A70	50 52 4F CD	        db      'PRO',('M' OR 80H)
+ 2823:	  8A74	50 0A		        jnc     s17c
+ 2824:	  8A76	12 85 B1	        CALL    DONE
+ 2825:	  8A79	D2 01			SETB	ROMMOD
+ 2826:	  8A7B	D2 02			SETB	EXTMOD
+ 2827:	  8A7D	02 85 E5	        JMP     NXT
+ 2828:				;
+ 2829:				;*S17C:   %TST    (S18,HEX)
+ 2830:	  8A80	12 84 E9	s17c:   call   tst
+ 2831:	  8A83	48 45 D8	        db      'HE',('X' OR 80H)
+ 2832:	  8A86	50 08		        jnc     s18
+ 2833:	  8A88	12 85 B1	        CALL    DONE
+ 2834:	  8A8B	D2 04			SETB	HEXMOD
+ 2835:	  8A8D	02 85 E5	        JMP     NXT
+ 2836:				;
+ 2837:				;*S18:    %TST    (S19,DECIMAL)
+ 2838:	  8A90	12 84 E9	s18:    call   tst
+ 2839:	  8A93	44 45 43 49	        db      'DECIMA',('L' OR 80H)
+	  8A97	4D 41 CC
+ 2840:	  8A9A	50 08		        jnc     s19
+ 2841:	  8A9C	12 85 B1	        CALL    DONE
+ 2842:	  8A9F	C2 04			CLR	HEXMOD
+ 2843:	  8AA1	02 85 E5	        JMP     NXT
+ 2844:				;
+ 2845:				;*S19:    %TST    (S20,REM)
+ 2846:	  8AA4	12 84 E9	s19:    call   tst
+ 2847:	  8AA7	52 45 CD	        db      'RE',('M' OR 80H)
+ 2848:	  8AAA	50 05		        jnc     s20
+ 2849:	  8AAC	12 84 E3	        CALL    SKPTXT
+ 2850:				        IJMP_   STMT
+ 2851+ 1  8AAF	01 53		        JMP     STMT
+ 2852:				;
+ 2853:	  8AB1			S20:    IJMP_   CMD_NG
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 51
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2854+ 1  8AB1	01 2C		        JMP     CMD_NG
+ 2855:				;
+ 2856:				;$EJECT
+ 2857:				;
+ 2858:				;	INTERPRETIVE LANGUAGE SUBROUTINES:
+ 2859:				;	============ ======== ===========
+ 2860:				;
+ 2861:	  8AB3			EXPR:   ICALL_  AR_EXP
+ 2862+ 1  8AB3	12 8A C3	        CALL    AR_EXP
+ 2863:	  8AB6			E0:     ICALL_  RELOP
+ 2864+ 1  8AB6	12 8B A5	        CALL    RELOP
+ 2865:	  8AB9	50 46			JNC	E5
+ 2866:				        ICALL_  AR_EXP
+ 2867+ 1  8ABB	12 8A C3	        CALL    AR_EXP
+ 2868:	  8ABE	12 84 47	        CALL    CMPR
+ 2869:				        HOP_    E0
+ 2870+ 1  8AC1	80 F3		        SJMP    E0
+ 2871:				;
+ 2872:	  8AC3			AR_EXP: ICALL_  TERM
+ 2873+ 1  8AC3	12 8B 02	        CALL    TERM
+ 2874:				;*E1:     %TST    (E2,+)
+ 2875:	  8AC6	12 84 E9	e1:     call   tst
+ 2876:	  8AC9	AB		        db      ('+' OR 80H)
+ 2877:	  8ACA	50 08		        jnc     e2
+ 2878:				        ICALL_  TERM
+ 2879+ 1  8ACC	12 8B 02	        CALL    TERM
+ 2880:	  8ACF	12 83 1D		CALL	IADD
+ 2881:				        HOP_    E1
+ 2882+ 1  8AD2	80 F2		        SJMP    E1
+ 2883:				;
+ 2884:				;*E2:     %TST    (E3,-)
+ 2885:	  8AD4	12 84 E9	e2:     call   tst
+ 2886:	  8AD7	AD		        db      ('-' OR 80H)
+ 2887:	  8AD8	50 08		        jnc     e3
+ 2888:				        ICALL_  TERM
+ 2889+ 1  8ADA	12 8B 02	        CALL    TERM
+ 2890:	  8ADD	12 83 23		CALL	ISUB
+ 2891:				        HOP_    E1
+ 2892+ 1  8AE0	80 E4		        SJMP    E1
+ 2893:				;
+ 2894:				;*E3:     %TST    (E4,OR)
+ 2895:	  8AE2	12 84 E9	e3:     call   tst
+ 2896:	  8AE5	4F D2		        db      'O',('R' OR 80H)
+ 2897:	  8AE7	50 08		        jnc     e4
+ 2898:				        ICALL_  TERM
+ 2899+ 1  8AE9	12 8B 02	        CALL    TERM
+ 2900:	  8AEC	12 83 39		CALL	IOR
+ 2901:				        HOP_    E1
+ 2902+ 1  8AEF	80 D5		        SJMP    E1
+ 2903:				;
+ 2904:				;*E4:     %TST    (E5,XOR)
+ 2905:	  8AF1	12 84 E9	e4:     call   tst
+ 2906:	  8AF4	58 4F D2	        db      'XO',('R' OR 80H)
+ 2907:	  8AF7	50 08		        jnc     e5
+ 2908:				        ICALL_  TERM
+ 2909+ 1  8AF9	12 8B 02	        CALL    TERM
+ 2910:	  8AFC	12 83 43		CALL	IXOR
+ 2911:				        HOP_    E1
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 52
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2912+ 1  8AFF	80 C5		        SJMP    E1
+ 2913:				;
+ 2914:	  8B01	22		E5:     RET
+ 2915:				;
+ 2916:				;=======
+ 2917:				;
+ 2918:	  8B02			TERM:   ICALL_  FACT
+ 2919+ 1  8B02	12 8B 42	        CALL    FACT
+ 2920:				;*TERM_0: %TST    (TERM_1,*)
+ 2921:	  8B05	12 84 E9	term_0: call   tst
+ 2922:	  8B08	AA		        db      ('*' OR 80H)
+ 2923:	  8B09	50 08		        jnc     term_1
+ 2924:				        ICALL_  FACT
+ 2925+ 1  8B0B	12 8B 42	        CALL    FACT
+ 2926:	  8B0E	12 83 AF		CALL	IMUL
+ 2927:				        HOP_    TERM_0
+ 2928+ 1  8B11	80 F2		        SJMP    TERM_0
+ 2929:				;
+ 2930:				;*TERM_1: %TST    (TERM_2,/)
+ 2931:	  8B13	12 84 E9	term_1: call   tst
+ 2932:	  8B16	AF		        db      ('/' OR 80H)
+ 2933:	  8B17	50 08		        jnc     term_2
+ 2934:				        ICALL_  FACT
+ 2935+ 1  8B19	12 8B 42	        CALL    FACT
+ 2936:	  8B1C	12 83 C2		CALL	IDIV
+ 2937:				        HOP_    TERM_0
+ 2938+ 1  8B1F	80 E4		        SJMP    TERM_0
+ 2939:				;
+ 2940:				;*TERM_2: %TST    (TERM_3,AND)
+ 2941:	  8B21	12 84 E9	term_2: call   tst
+ 2942:	  8B24	41 4E C4	        db      'AN',('D' OR 80H)
+ 2943:	  8B27	50 08		        jnc     term_3
+ 2944:				        ICALL_  FACT
+ 2945+ 1  8B29	12 8B 42	        CALL    FACT
+ 2946:	  8B2C	12 83 2F		CALL	IAND
+ 2947:				        HOP_    TERM_0
+ 2948+ 1  8B2F	80 D4		        SJMP    TERM_0
+ 2949:				;
+ 2950:				;*TERM_3: %TST    (TERM_4,MOD)
+ 2951:	  8B31	12 84 E9	term_3: call   tst
+ 2952:	  8B34	4D 4F C4	        db      'MO',('D' OR 80H)
+ 2953:	  8B37	50 08		        jnc     term_4
+ 2954:				        ICALL_  FACT
+ 2955+ 1  8B39	12 8B 42	        CALL    FACT
+ 2956:	  8B3C	12 83 BE		CALL	IMOD
+ 2957:				        HOP_    TERM_0
+ 2958+ 1  8B3F	80 C4		        SJMP    TERM_0
+ 2959:				;
+ 2960:	  8B41	22		TERM_4: RET
+ 2961:				;
+ 2962:				;=======
+ 2963:				;
+ 2964:				;*FACT:   %TST    (FACT_1,-)
+ 2965:	  8B42	12 84 E9	fact:   call   tst
+ 2966:	  8B45	AD		        db      ('-' OR 80H)
+ 2967:	  8B46	50 07		        jnc     fact_1
+ 2968:				        ICALL_  VAR
+ 2969+ 1  8B48	12 8B 5E	        CALL    VAR
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 53
+
+
+
+ Line  I  Addr  Code            Source
+
+ 2970:	  8B4B	12 83 4D		CALL	NEG
+ 2971:	  8B4E	22		        RET
+ 2972:				;
+ 2973:				;*FACT_1: %TST    (VAR,NOT)
+ 2974:	  8B4F	12 84 E9	fact_1: call   tst
+ 2975:	  8B52	4E 4F D4	        db      'NO',('T' OR 80H)
+ 2976:	  8B55	50 07		        jnc     var
+ 2977:				        ICALL_  VAR
+ 2978+ 1  8B57	12 8B 5E	        CALL    VAR
+ 2979:	  8B5A	12 83 5C		CALL	ICPL
+ 2980:	  8B5D	22		        RET
+ 2981:				;
+ 2982:				;
+ 2983:				;=======
+ 2984:				;
+ 2985:	  8B5E			VAR:    TSTV_   VAR_0
+ 2986+ 1  8B5E	12 85 19	        CALL    TSTV
+ 2987+ 1  8B61	50 04		        JNC     VAR_0
+ 2988:	  8B63	12 82 5B		CALL	FETCH
+ 2989:	  8B66	22		        RET
+ 2990:				;
+ 2991:	  8B67			VAR_0:  TSTN_   VAR_1
+ 2992+ 1  8B67	12 85 7E	        CALL    TSTN
+ 2993+ 1  8B6A	50 01		        JNC     VAR_1
+ 2994:	  8B6C	22		        RET
+ 2995:				;
+ 2996:				;*VAR_1:  %TST    (VAR_1A,RND)
+ 2997:	  8B6D	12 84 E9	var_1:  call   tst
+ 2998:	  8B70	52 4E C4	        db      'RN',('D' OR 80H)
+ 2999:	  8B73	50 10		        jnc     var_1a
+ 3000:	  8B75	12 84 1F	        CALL    RND
+ 3001:				        ICALL_  VAR_2
+ 3002+ 1  8B78	12 8B 94	        CALL    VAR_2
+ 3003:	  8B7B	12 83 BE		CALL	IMOD
+ 3004:	  8B7E	12 83 5F		CALL	IABS
+ 3005:	  8B81	12 83 6D		CALL	IINC
+ 3006:	  8B84	22		        RET
+ 3007:				;
+ 3008:				;*VAR_1A: %TST    (VAR_2,ABS)
+ 3009:	  8B85	12 84 E9	var_1a: call   tst
+ 3010:	  8B88	41 42 D3	        db      'AB',('S' OR 80H)
+ 3011:	  8B8B	50 07		        jnc     var_2
+ 3012:				        ICALL_  VAR_2
+ 3013+ 1  8B8D	12 8B 94	        CALL    VAR_2
+ 3014:	  8B90	12 83 5F		CALL	IABS
+ 3015:	  8B93	22		        RET
+ 3016:				;
+ 3017:				;*VAR_2:  %TST    (SYN_NG,%1()
+ 3018:	  8B94	12 84 E9	var_2:  call   tst
+ 3019:	  8B97	A8		        db      ('(' OR 80H)            ;to match TB51.LST
+ 3020:	  8B98	50 09		        jnc     syn_ng
+ 3021:				        ICALL_  EXPR
+ 3022+ 1  8B9A	51 B3		        CALL    EXPR
+ 3023:				;*        %TST    (SYN_NG,%1))
+ 3024:	  8B9C	12 84 E9	        call   tst
+ 3025:	  8B9F	A9		        db      (')' OR 80H)            ;to match TB51.LST
+ 3026:	  8BA0	50 01		        jnc     syn_ng
+ 3027:	  8BA2	22		        RET
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 54
+
+
+
+ Line  I  Addr  Code            Source
+
+ 3028:				;
+ 3029:				;=======
+ 3030:				;
+ 3031:	  8BA3			SYN_NG: IJMP_   CMD_NG
+ 3032+ 1  8BA3	01 2C		        JMP     CMD_NG
+ 3033:				;
+ 3034:				;$EJECT
+ 3035:				;
+ 3036:	  8BA5			RELOP:
+ 3037:				;	Search for relational operator in text string.
+ 3038:				;	If found, push appropriate operator code on AES and return with
+ 3039:				;	carry set.
+ 3040:				;	Otherwise restore cursor and return with carry=0.
+ 3041:				;
+ 3042:				;*        %TST    (REL_1,=)
+ 3043:	  8BA5	12 84 E9	        call   tst
+ 3044:	  8BA8	BD		        db      ('=' OR 80H)
+ 3045:	  8BA9	50 05		        jnc     rel_1
+ 3046:				        LIT_    010B            ;Test for _=_
+ 3047+ 1  8BAB	12 81 32		CALL	LIT
+ 3048+ 1  8BAE	02			DB	010B
+ 3049:	  8BAF	22		        RET
+ 3050:				;
+ 3051:				;*REL_1:  %TST    (REL_2,<=)
+ 3052:	  8BB0	12 84 E9	rel_1:  call   tst
+ 3053:	  8BB3	3C BD		        db      '<',('=' OR 80H)
+ 3054:	  8BB5	50 05		        jnc     rel_2
+ 3055:				        LIT_    110B            ;Test for <=_
+ 3056+ 1  8BB7	12 81 32		CALL	LIT
+ 3057+ 1  8BBA	06			DB	110B
+ 3058:	  8BBB	22		        RET
+ 3059:				;
+ 3060:				;*REL_2:  %TST    (REL_3,<>)
+ 3061:	  8BBC	12 84 E9	rel_2:  call   tst
+ 3062:	  8BBF	3C BE		        db      '<',('>' OR 80H)
+ 3063:	  8BC1	50 05		        jnc     rel_3
+ 3064:				        LIT_    101B            ;Test for <_>
+ 3065+ 1  8BC3	12 81 32		CALL	LIT
+ 3066+ 1  8BC6	05			DB	101B
+ 3067:	  8BC7	22		        RET
+ 3068:				;
+ 3069:				;*REL_3:  %TST    (REL_4,<)
+ 3070:	  8BC8	12 84 E9	rel_3:  call   tst
+ 3071:	  8BCB	BC		        db      ('<' OR 80H)
+ 3072:	  8BCC	50 05		        jnc     rel_4
+ 3073:				        LIT_    100B            ;Test for <__
+ 3074+ 1  8BCE	12 81 32		CALL	LIT
+ 3075+ 1  8BD1	04			DB	100B
+ 3076:	  8BD2	22		        RET
+ 3077:				;
+ 3078:				;*REL_4:  %TST    (REL_5,>=)
+ 3079:	  8BD3	12 84 E9	rel_4:  call   tst
+ 3080:	  8BD6	3E BD		        db      '>',('=' OR 80H)
+ 3081:	  8BD8	50 05		        jnc     rel_5
+ 3082:				        LIT_    011B            ;Test for _=>
+ 3083+ 1  8BDA	12 81 32		CALL	LIT
+ 3084+ 1  8BDD	03			DB	011B
+ 3085:	  8BDE	22		        RET
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 55
+
+
+
+ Line  I  Addr  Code            Source
+
+ 3086:				;
+ 3087:				;*REL_5:  %TST    (REL_6,>)
+ 3088:	  8BDF	12 84 E9	rel_5:  call   tst
+ 3089:	  8BE2	BE		        db      ('>' OR 80H)
+ 3090:	  8BE3	50 05		        jnc     rel_6
+ 3091:				        LIT_    001B            ;Test for __>
+ 3092+ 1  8BE5	12 81 32		CALL	LIT
+ 3093+ 1  8BE8	01			DB	001B
+ 3094:	  8BE9	22		        RET
+ 3095:				;
+ 3096:	  8BEA	C3		REL_6:	CLR	C
+ 3097:	  8BEB	22		        RET
+ 3098:				;
+ 3099:				;=======
+ 3100:				;
+ 3101:				;$EJECT
+ 3102:				;$LIST
+ 3103:				;
+ 3104:	  8BEC	0F			INC	R7		;Dummy ML program.
+ 3105:	  8BED	8F 90			MOV	P1,R7
+ 3106:	  8BEF	22			RET
+ 3107:				;
+ 3108:	  8BF0			INTROM:				;Start of ROM program buffer.
+ 3109:				;$INCLUDE(TBACEY.SRC)
+ 3110:	  8BF0	08 35		        dw      2101
+ 3111:	  8BF2	50 52 2E 22	        db      'PR."Hello"',CR
+	  8BF6	48 65 6C 6C
+	  8BFA	6F 22 0D
+ 3112:	  8BFD	08 36		        dw      2102
+ 3113:	  8BFF	50 52 2E 22	        db      'PR."This is being run under Tiny Basic V2.3"',CR
+	  8C03	54 68 69 73
+	  8C07	20 69 73 20
+	  8C0B	62 65 69 6E
+	  8C0F	67 20 72 75
+	  8C13	6E 20 75 6E
+	  8C17	64 65 72 20
+	  8C1B	54 69 6E 79
+	  8C1F	20 42 61 73
+	  8C23	69 63 20 56
+	  8C27	32 2E 33 22
+	  8C2B	0D
+ 3114:	  8C2C	0B E0		        dw      3040
+ 3115:	  8C2E	50 52 2E 3A	        db      'PR.:IN."TYPE anything TO END PROGRAM",D',CR
+	  8C32	49 4E 2E 22
+	  8C36	54 59 50 45
+	  8C3A	20 61 6E 79
+	  8C3E	74 68 69 6E
+	  8C42	67 20 54 4F
+	  8C46	20 45 4E 44
+	  8C4A	20 50 52 4F
+	  8C4E	47 52 41 4D
+	  8C52	22 2C 44 0D
+ 3116:	  8C56	0B EA		        dw      3050
+ 3117:	  8C58	50 52 2E 22	        db      'PR."Have fun!!.....J Lum  4/25/92"',CR
+	  8C5C	48 61 76 65
+	  8C60	20 66 75 6E
+	  8C64	21 21 2E 2E
+	  8C68	2E 2E 2E 4A
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 56
+
+
+
+ Line  I  Addr  Code            Source
+
+	  8C6C	20 4C 75 6D
+	  8C70	20 20 34 2F
+	  8C74	32 35 2F 39
+	  8C78	32 22 0D
+ 3118:	  8C7B	0B F4		        dw      3060
+ 3119:	  8C7D	45 4E 44 0D	        db      'END',CR
+ 3120:	  8C81	80			DB	80H		;Marks end of program.
+ 3121:				;
+ 3122:					END
+ 3123:
+
+
+
+
+
+                     register banks used:  ---
+
+                     1 error detected
+
+
+
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 57
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0130
+AC				  BIT	      D6
+ACC				  DATA	      E0
+ADD_16				  CODE	    8315	1048
+ADR_ER				  CODE	    81BB	 681
+AES				  DATA	      51	 254
+AESLEN				  NUMBER    0024	 196
+AESP				  DATA	      50	 253
+AES_ER				  CODE	    80DD	 457
+ALPHAB				  CODE	    8526	1668
+APND_1				  CODE	    82E2	1003
+APND_2				  CODE	    8306	1026
+APND_4				  CODE	    82E0	1002
+APN_ER				  CODE	    8308	1030
+APPEND				  CODE	    82C5	 986
+AR_EXP				  CODE	    8AC3	2872
+ASCTBL				  CODE	    80AF	 419
+B				  DATA	      F0
+BAUDID				  CODE	    8010	 304
+BEL				  NUMBER    0007	 274
+BIG_PROBLEM			  CODE	    843C	1362
+CHAR				  REGISTER    R4	 204
+CHAR_FLG			  BIT	      09	 221
+CMD_NG				  CODE	    882C	2467
+CMPR				  CODE	    8447	1374
+CMPR_1				  CODE	    8466	1413
+CMPR_2				  CODE	    846C	1422
+CMPR_4				  CODE	    845E	1404
+CNTRET				  CODE	    8098	 388
+CNTRL				  CODE	    808B	 381
+CNTR_2				  CODE	    8093	 385
+COND				  CODE	    87C5	2297
+COND_				  MACRO	        	  43
+CONT				  CODE	    883A	2473
+CONT_1				  CODE	    8840	2475
+COUT_1				  CODE	    808A	 376
+COUT_2				  CODE	    8082	 372
+COUT_3				  CODE	    8086	 374
+CR				  NUMBER    000D	 272
+CREATE				  CODE	    82B8	 969
+CREA_1				  CODE	    82C4	 975
+CURS_H				  DATA	      78	 264
+CURS_L				  DATA	      77	 263
+CY				  BIT	      D7
+C_IN				  CODE	    8050	 324
+C_IN_1				  CODE	    806B	 345
+C_IN_2				  CODE	    805F	 339
+C_OUT				  CODE	    806E	 355
+C_SAVE				  DATA	      79	 265
+DD001				  CODE	    8229	 808
+DD002				  CODE	    8288	 914
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 58
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+DD003				  CODE	    84A1	1498
+DD004				  CODE	    84C7	1547
+DD005				  CODE	    8050	 331
+DD006				  CODE	    806E	 359
+DD007				  CODE	    8071	 361
+DD008				  CODE	    8078	 365
+DD009				  CODE	    807B	 367
+DD010				  CODE	    86ED	2083
+DEST_H				  REGISTER    R3	 203
+DEST_L				  REGISTER    R1	 201
+DIV_1				  CODE	    8415	1326
+DIV_2				  CODE	    841A	1329
+DIV_LP				  CODE	    83E8	1300
+DIV_NG				  CODE	    841D	1332
+DIV_RP				  CODE	    83FF	1313
+DONE				  CODE	    85B1	1806
+DONE_1				  CODE	    85B9	1811
+DONE_2				  CODE	    85BD	1814
+DPH				  DATA	      83
+DPL				  DATA	      82
+DUPL				  CODE	    811E	 534
+D_BLNK				  CODE	    84D5	1568
+E0				  CODE	    8AB6	2863
+E1				  CODE	    8AC6	2875
+E2				  CODE	    8AD4	2885
+E3				  CODE	    8AE2	2895
+E4				  CODE	    8AF1	2905
+E5				  CODE	    8B01	2914
+EA				  BIT	      AF
+ERRENT				  CODE	    8832	2470
+ERROUT				  CODE	    80D1	 441
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXPR				  CODE	    8AB3	2861
+EXP_ER				  CODE	    80D4	 450
+EXP_OV				  CODE	    8312	1043
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+EXTINI				  CODE	    8703	2097
+EXTMOD				  BIT	      02	 215
+EXTRAM				  NUMBER    2034	 192
+EXTROM				  NUMBER    9080	 194
+EXTVAR				  BIT	      00	 213
+F0				  BIT	      D5
+FACT				  CODE	    8B42	2965
+FACT_1				  CODE	    8B4F	2974
+FETBDN				  CODE	    82B3	 955
+FETCBY				  CODE	    82AD	 951
+FETCH				  CODE	    825B	 862
+FETDBY				  CODE	    8294	 926
+FETDIR				  CODE	    81CB	 701
+FETERR				  CODE	    8292	 922
+FETEXT				  CODE	    8287	 913
+FETJTB				  CODE	    826F	 885
+FETRBI				  CODE	    829A	 933
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 59
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+FETSFR				  CODE	    81D1	 710
+FETVAR				  CODE	    8274	 897
+FETXBY				  CODE	    82A6	 943
+FET_0				  CODE	    825D	 875
+FET_1				  CODE	    826A	 881
+FIN				  CODE	    8816	2401
+FLAGS				  DATA	      21	 219
+FNDDON				  CODE	    873B	2162
+FNDLBL				  CODE	    871D	2138
+FND_1				  CODE	    8723	2148
+FORDON				  CODE	    89E5	2733
+FOR_ER				  CODE	    89F4	2741
+GETLN				  CODE	    85F0	1894
+GETL_0				  CODE	    85F6	1901
+GETL_1				  CODE	    85FB	1904
+GETL_2				  CODE	    8637	1940
+GETL_3				  CODE	    862F	1935
+GETL_4				  CODE	    8627	1930
+GETL_5				  CODE	    8612	1918
+GETL_6				  CODE	    8607	1910
+GETL_7				  CODE	    861B	1923
+GETROM				  CODE	    84A5	1502
+GET_BUF				  CODE	    849E	1495
+GET_C				  CODE	    8499	1488
+HEXMOD				  BIT	      04	 217
+HOP_				  MACRO	        	  57
+H_FLG				  BIT	      0D	 225
+IABS				  CODE	    835F	1167
+IADD				  CODE	    831D	1060
+IAND				  CODE	    832F	1089
+ICALL_				  MACRO	        	  61
+ICPL				  CODE	    835C	1159
+IDIV				  CODE	    83C2	1269
+IDIV_0				  CODE	    83C4	1275
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+IFDN_1				  CODE	    85C7	1830
+IFDN_2				  CODE	    85CB	1833
+IFDONE				  CODE	    85C1	1826
+IFDONE_				  MACRO	        	  33
+IINC				  CODE	    836D	1189
+IINC_1				  CODE	    8376	1198
+IJMP_				  MACRO	        	  53
+IMOD				  CODE	    83BE	1263
+IMUL				  CODE	    83AF	1247
+IMUL_1				  CODE	    8383	1214
+IMUL_2				  CODE	    838D	1220
+IMUL_3				  CODE	    8397	1226
+INDEX				  CODE	    856C	1710
+INDTBL				  CODE	    817E	 631
+INIT				  CODE	    870D	2113
+INIT_1				  CODE	    86FC	2092
+INIT_2				  CODE	    8707	2100
+INIT_3				  CODE	    870C	2103
+INNUM				  CODE	    86B4	2043
+INSL_1				  CODE	    879D	2257
+INSRT				  CODE	    87A5	2266
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 60
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+INSR_1				  CODE	    87AE	2279
+INSR_2				  CODE	    87B1	2281
+INSR_4				  CODE	    87C2	2291
+INSR_L				  CODE	    8791	2243
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+INTROM				  CODE	    8BF0	3108
+INUM_0				  CODE	    86BA	2051
+INUM_1				  CODE	    86D3	2065
+INUM_2				  CODE	    86DA	2068
+INUM_3				  CODE	    86C3	2056
+INUM_4				  CODE	    86C8	2059
+INUM_5				  CODE	    86CF	2063
+INUM_6				  CODE	    86E0	2072
+IOR				  CODE	    8339	1106
+IP				  DATA	      B8
+ISUB				  CODE	    8323	1075
+IT0				  BIT	      88
+IT1				  BIT	      8A
+IXOR				  CODE	    8343	1123
+KILL_2				  CODE	    8743	2178
+KILL_3				  CODE	    874E	2183
+KILL_9				  CODE	    8757	2188
+KILL_L				  CODE	    873D	2166
+LABL_H				  DATA	      7B	 268
+LABL_L				  DATA	      7A	 267
+LF				  NUMBER    000A	 273
+LINIT_				  MACRO	        	  38
+LINI_1				  CODE	    85E1	1863
+LIT				  CODE	    8132	 559
+LIT_				  MACRO	        	   8
+LIT_1				  CODE	    8141	 568
+LNDONE				  CODE	    85B7	1810
+LOAD_PNTR			  CODE	    8492	1478
+LOOP				  CODE	    87E0	2341
+LOOP_0				  CODE	    87ED	2364
+LOOP_1				  CODE	    8810	2391
+LOOP_2				  CODE	    880D	2386
+LP_CNT				  REGISTER    R5	 205
+LST				  CODE	    86A5	2031
+LSTLIN				  CODE	    868E	2005
+LSTL_1				  CODE	    86A4	2023
+LSTL_2				  CODE	    869D	2020
+LSTRET				  CODE	    86B1	2037
+LST_1				  CODE	    86A9	2033
+L_CURS				  DATA	      75	 258
+L_INIT				  CODE	    85DC	1855
+MLCALL				  CODE	    881B	2448
+MLCALL_				  MACRO	        	  65
+MODE				  DATA	      20	 212
+MOD_FLG				  BIT	      0C	 224
+MSKTBL				  CODE	    81EB	 737
+MSK_PC				  CODE	    81E8	 733
+MUL_16				  CODE	    8377	1202
+NEG				  CODE	    834D	1140
+NEG_0				  CODE	    8350	1145
+NEG_IF_NEG			  CODE	    8369	1180
+NEXT_LOOP_			  MACRO	        	  48
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 61
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+NIBOUT				  CODE	    80A0	 410
+NIBO_1				  CODE	    80AB	 415
+NIBO_2				  CODE	    80A7	 413
+NIBO_3				  CODE	    80AE	 417
+NLINE				  CODE	    806C	 351
+NL_NXT				  CODE	    85E3	1870
+NOTSYM				  CODE	    8571	1714
+NOTVAR				  CODE	    8533	1674
+NO_PROBLEM			  CODE	    8440	1365
+NO_SFR				  NUMBER    000E	 596
+NO_VAR				  NUMBER    000C	 247
+NXT				  CODE	    85E5	1875
+NXT_1				  CODE	    85ED	1887
+OPEN_1				  CODE	    8778	2219
+OPEN_2				  CODE	    8785	2230
+OPEN_3				  CODE	    875C	2197
+OPEN_4				  CODE	    876A	2206
+OPEN_5				  CODE	    8763	2200
+OPEN_6				  CODE	    878A	2236
+OPEN_L				  CODE	    8758	2192
+OV				  BIT	      D2
+OV_TST				  CODE	    830B	1035
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PNTR_H				  REGISTER    R2	 202
+PNTR_L				  REGISTER    R0	 200
+POP_ACC				  CODE	    8105	 501
+POP_TOS				  CODE	    80F3	 477
+PRN				  CODE	    8643	1951
+PRNHEX				  CODE	    8670	1984
+PRNH_1				  CODE	    867E	1992
+PRNRET				  CODE	    868D	2001
+PRNTOS				  CODE	    8649	1959
+PRN_1				  CODE	    8659	1967
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+PT1				  BIT	      BB
+PUSH_C				  CODE	    846E	1423
+PUSH_TOS			  CODE	    810B	 511
+PUTROM				  CODE	    84CB	1551
+PUT_BUF				  CODE	    84C4	1542
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RAMLIM				  NUMBER    3000	 193
+RAM_INIT			  CODE	    86E8	2079
+RB8				  BIT	      9A
+RD				  BIT	      B7
+RDCHDN				  CODE	    84C1	1535
+READ_CHAR			  CODE	    84B6	1518
+READ_LABEL			  CODE	    85CF	1840
+RELOP				  CODE	    8BA5	3036
+REL_1				  CODE	    8BB0	3052
+REL_2				  CODE	    8BBC	3061
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 62
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+REL_3				  CODE	    8BC8	3070
+REL_4				  CODE	    8BD3	3079
+REL_5				  CODE	    8BDF	3088
+REL_6				  CODE	    8BEA	3096
+REN				  BIT	      9C
+REREAD				  CODE	    84C2	1537
+RESET				  CODE	    0000
+REWIND				  CODE	    8474	1451
+REWROM				  CODE	    847E	1457
+RI				  BIT	      98
+RND				  CODE	    841F	1339
+ROMMOD				  BIT	      01	 214
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RSTR				  CODE	    87D9	2330
+RUNMOD				  BIT	      03	 216
+RUNROM				  CODE	    8049	 317
+RWXROM				  CODE	    8486	1462
+RXD				  BIT	      B0
+S0				  CODE	    886B	2503
+S1				  CODE	    88A4	2536
+S10				  CODE	    8943	2637
+S10B				  CODE	    8953	2646
+S10C				  CODE	    895B	2653
+S10D				  CODE	    8966	2660
+S11				  CODE	    8969	2663
+S12				  CODE	    896F	2669
+S13				  CODE	    8980	2678
+S13A				  CODE	    8997	2692
+S13B				  CODE	    89C3	2718
+S13C				  CODE	    89F6	2747
+S14				  CODE	    8A03	2756
+S14B				  CODE	    8A1C	2769
+S15				  CODE	    8A21	2776
+S16				  CODE	    8A2E	2786
+S16A				  CODE	    8A3B	2795
+S17				  CODE	    8A4B	2804
+S17A				  CODE	    8A5D	2813
+S17B				  CODE	    8A6D	2821
+S17C				  CODE	    8A80	2830
+S18				  CODE	    8A90	2838
+S19				  CODE	    8AA4	2846
+S2				  CODE	    88B6	2547
+S20				  CODE	    8AB1	2853
+S3				  CODE	    88CC	2559
+S3A				  CODE	    88DB	2566
+S3B				  CODE	    88E3	2573
+S3C				  CODE	    88EE	2580
+S5				  CODE	    88FE	2590
+S5A				  CODE	    8909	2598
+S6				  CODE	    8911	2604
+S6A				  CODE	    8917	2607
+S6B				  CODE	    8914	2605
+S8				  CODE	    891A	2612
+S8A				  CODE	    892D	2621
+S8B				  CODE	    8934	2627
+S9				  CODE	    8939	2634
+SAV				  CODE	    87D3	2320
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 63
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+SAVE_PNTR			  CODE	    848B	1468
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SE3				  CODE	    887E	2513
+SE3A				  CODE	    888F	2524
+SE4				  CODE	    8898	2528
+SEED_H				  DATA	      36	 240
+SEED_L				  DATA	      35	 239
+SEQ_FETCH			  CODE	    8257	 855
+SEQ_FLG				  BIT	      0B	 223
+SEQ_STORE			  CODE	    81F3	 749
+SETRBI				  CODE	    824A	 838
+SFID_1				  CODE	    81AD	 669
+SFID_2				  CODE	    81B6	 678
+SFRTBL				  CODE	    8146	 582
+SFR_ID				  CODE	    81A8	 661
+SGN_FLG				  BIT	      0A	 222
+SINT				  CODE	    0023
+SKPLIN				  CODE	    84DF	1594
+SKPTXT				  CODE	    84E3	1596
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+SPC				  CODE	    8099	 394
+SPLIT_DBA			  CODE	    81D7	 716
+SPLSFR				  CODE	    81E1	 728
+SP_BASE				  NUMBER    007F	 270
+SP_INI				  CODE	    8010	 296
+START				  CODE	    882F	2469
+STK_ER				  CODE	    811B	 528
+STMT				  CODE	    8853	2487
+STORE				  CODE	    81F7	 756
+STOR_0				  CODE	    81F9	 769
+STOR_1				  CODE	    820C	 778
+STRCBY				  CODE	    824F	 845
+STRDBY				  CODE	    8234	 818
+STRDIR				  CODE	    81BD	 685
+STREXT				  CODE	    8228	 807
+STRJTB				  CODE	    8211	 782
+STRLEN				  DATA	      37	 243
+STROUT				  CODE	    80BF	 426
+STRO_1				  CODE	    80C3	 428
+STRO_2				  CODE	    80CD	 435
+STRRBI				  CODE	    823A	 825
+STRSFR				  CODE	    81C5	 695
+STRTBL				  CODE	    8154	 600
+STRVAR				  CODE	    8216	 795
+STRXBY				  CODE	    824F	 844
+SYN_ER				  CODE	    80E8	 465
+SYN_NG				  CODE	    8BA3	3031
+S_INIT				  CODE	    8003	 289
+T0				  BIT	      B4
+T1				  BIT	      B5
+TABCNT				  DATA	      76	 260
+TABSIZ				  NUMBER    0008	 195
+TB8				  BIT	      9B
+TCON				  DATA	      88
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 64
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+TERM				  CODE	    8B02	2918
+TERM_0				  CODE	    8B05	2921
+TERM_1				  CODE	    8B13	2931
+TERM_2				  CODE	    8B21	2941
+TERM_3				  CODE	    8B31	2951
+TERM_4				  CODE	    8B41	2960
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TMP0				  DATA	      30	 231
+TMP1				  DATA	      31	 232
+TMP2				  DATA	      32	 233
+TMP3				  DATA	      33	 234
+TMP4				  DATA	      34	 235
+TOKEN				  CODE	    8858	2490
+TOS_H				  REGISTER    R7	 207
+TOS_L				  REGISTER    R6	 206
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TST				  CODE	    84E9	1606
+TSTCBY				  CODE	    8560	1704
+TSTL_				  MACRO	        	  23
+TSTN				  CODE	    857E	1738
+TSTN_				  MACRO	        	  18
+TSTN_1				  CODE	    8587	1744
+TSTRBI				  CODE	    8545	1686
+TSTS				  CODE	    8593	1778
+TSTS_				  MACRO	        	  28
+TSTS_1				  CODE	    85A3	1788
+TSTS_2				  CODE	    85AA	1792
+TSTV				  CODE	    8519	1651
+TSTV_				  MACRO	        	  13
+TSTV_1				  CODE	    8573	1719
+TSTXBY				  CODE	    8552	1695
+TST_1				  CODE	    84F1	1616
+TST_2				  CODE	    8502	1626
+TXD				  BIT	      B1
+T_BAD				  CODE	    850C	1636
+T_GOOD				  CODE	    8508	1630
+US_VAR				  DATA	      38	 248
+VAR				  CODE	    8B5E	2985
+VAR_0				  CODE	    8B67	2991
+VAR_1				  CODE	    8B6D	2997
+VAR_1A				  CODE	    8B85	3009
+VAR_2				  CODE	    8B94	3018
+VERS				  NUMBER    0023	  78
+WR				  BIT	      B6
+WRCH_1				  CODE	    84D4	1564
+WRITE_CHAR			  CODE	    84CD	1555
+XEC				  CODE	    8850	2486
+XFER				  CODE	    87CA	2311
+
+ASEM-51 V1.3                             Tiny-Basic51 - Modified for Metalink ASM51                              PAGE 65
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+XFERNG				  CODE	    87D1	2315
+XINIT				  CODE	    8715	2131
+XRAD_1				  CODE	    82EC	1007
+ZERSUP				  BIT	      08	 220

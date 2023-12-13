@@ -1,0 +1,17 @@
+                   ; Scream for SAB80535 dev board
+                   ; assumes 6.0000 MHz clock
+                   ; 1200,8N1
+                   
+0000:              .ORG 0000H
+                   
+0000: 75 89 20              MOV     TMOD,#20H       ;Timer 1, mode 2 (auto-relo
+0003: 75 8D F3              MOV     TH1,#0F3H       ;1200 baud rate
+0006: 75 98 50              MOV     SCON,#50H       ;8-bit, 1 stop, REN enabled
+0009: D2 8E                 SETB    TR1             ;start Timer 1
+000B: 75 99 41     AGAIN:   MOV     SBUF,#'A'       ;letter "A" to be transferr
+000E: 30 99 FD     HERE:    JNB     TI,HERE                 ;wait for the last 
+0011: C2 99                 CLR     TI              ;clear TI for the next char
+0013: 80 F6                 SJMP    AGAIN           ;keep sending A
+                   
+0015:              .END
+                   

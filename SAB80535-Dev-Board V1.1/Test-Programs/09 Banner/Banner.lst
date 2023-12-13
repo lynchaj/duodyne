@@ -1,0 +1,468 @@
+                   ;This example program asks for a word to be entered, and the
+                   ;it prints it in large letters, as defined in the bitmap dat
+                   
+                   
+                   ;this line must be set so that the program is assembled
+                   ;to be run from a place in memory where there is RAM.
+                   
+                   ;.org    0x2000
+8000:              .org     0x8000
+                   
+                   
+                   ;these equ lines allow us to call functions within PAULMON2
+                   ;by their names.
+                   
+8000:              .equ     cout, 0x0030            ;print Acc to Serial Port
+8000:              .equ    Cin, 0x0032             ;Get Acc from serial port
+8000:              .equ    pHex, 0x0034            ;Print Hex value of Acc
+8000:              .equ    pHex16, 0x0036          ;Print Hex value of DPTR
+8000:              .equ    pStr, 0x0038         ;Print string pointed to by DPT
+                                                   ;must be terminated by 0 or 
+                                                   ;pressing ESC will stop the 
+8000:              .equ    gHex, 0x003A            ;Get Hex input into Acc
+                                                   ;Carry set if ESC has been p
+8000:              .equ    gHex16, 0x003C          ;Get Hex input into DPTR
+                                                   ;Carry set if ESC has been p
+8000:              .equ    ESC, 0x003E             ;Check for ESC key
+                                                   ;Carry set if ESC has been p
+8000:              .equ    Upper, 0x0040           ;Convert Acc to uppercase
+                                                   ;Non-ASCII values are unchan
+8000:              .equ    Init, 0x0042            ;Initialize serial port
+8000:              .equ    newline, 0x0048         ;print CR/LF (13 and 10)
+8000:              .equ    lenstr, 0x004A          ;return the length of a stri
+8000:              .equ    pint8u, 0x004D          ;print Acc at an integer, 0 
+8000:              .equ    pint8, 0x0050           ;print Acc at an integer, -1
+8000:              .equ    pint16u, 0x0053         ;print DPTR as an integer, 0
+                   
+                   
+                   ;here's some internal RAM we'll use:
+                   
+8000:                       .equ    string, 0x20
+8000:                       .equ    num, 0x2A
+                   
+                   
+                   begin:
+8000: 12 00 48              lcall   newline
+8003: 90 80 B0              mov     dptr, #mesg1
+8006: 12 00 38              lcall   pstr
+8009: 75 2A 00              mov     num, #0
+                   
+                   get_string:
+                            ;get a character
+800C: 12 00 32              lcall   cin
+800F: 12 00 40              lcall   upper
+8012: B4 0D 02              cjne    a, #13, not_cr
+8015: 80 20                 sjmp    got_string      ;stop looking if carriage r
+8017: F5 F0        not_cr:  mov     b, a            ;keep the input character i
+                            ;is this character one of the ones we know about (i
+8019: 90 80 DF              mov     dptr, #chars-1
+                   search_next:
+801C: A3                    inc     dptr
+801D: E4                    clr     a
+801E: 93                    movc    a, @a+dptr
+801F: 60 EB                 jz      get_string      ;if end of list, ignore and
+8021: B5 F0 F8              cjne    a, b, search_next
+                            ;if we get here, the user's input character is ok
+8024: 12 00 30              lcall   cout
+8027: 74 20                 mov     a, #string
+8029: 25 2A                 add     a, num          ;where to store the charact
+802B: F8                    mov     r0, a           ;r0 points to location to s
+802C: A6 F0                 mov     @r0, b
+802E: 05 2A                 inc     num
+8030: E5 2A                 mov     a, num
+8032: B4 09 D7              cjne    a, #9, get_string
+8035: 80 00                 sjmp    got_string
+                   
+                            ;when we get to here, we've got a string from the u
+                            ;in internal memory, at "string", length is in "num
+                   got_string:
+8037: E5 2A                 mov     a, num
+8039: 60 C5                 jz      begin           ;don't allow null string
+                   
+803B: 12 00 48              lcall   newline
+                            ;mov    a, num
+                            ;lcall  phex
+803E: 12 00 48             lcall   newline
+8041: 12 00 48             lcall   newline
+                   
+                   
+                   
+8044: 7D 00                 mov     r5, #0          ;r5 counts line
+                   line_loop:
+                   
+8046: 7B 00                 mov     r3, #0          ;r3 counts character
+                   char_loop:
+                   
+8048: 74 20                 mov     a, #string
+804A: 2B                    add     a, r3
+804B: F8                    mov     r0, a
+804C: 86 F0                 mov     b, @r0
+                            ;mov    a, b
+                            ;lcall  cout
+                            ;find which character within the string we have
+804E: 90 80 DF              mov     dptr, #chars-1
+8051: 7C FF                 mov     r4, #255
+                   csearch:
+8053: 0C                    inc     r4
+8054: A3                    inc     dptr
+8055: E4                    clr     a
+8056: 93                    movc    a, @a+dptr
+8057: B5 F0 F9              cjne    a, b, csearch
+                            ;mov    a, r4
+                            ;lcall  phex
+                            ;now r4 has the index of this character
+805A: EC                    mov     a, r4
+805B: 75 F0 09              mov     b, #9
+805E: A4                    mul     ab
+805F: 90 80 FD              mov     dptr, #data
+8062: 25 82                 add     a, dpl
+8064: F5 82                 mov     dpl, a
+8066: E5 F0                 mov     a, b
+8068: 35 83                 addc    a, dph
+806A: F5 83                 mov     dph, a
+                            ;now dptr points to the address of this character's
+806C: ED                    mov     a, r5
+806D: 25 82                 add     a, dpl
+806F: F5 82                 mov     dpl, a
+8071: E5 83                 mov     a, dph
+8073: 34 00                 addc    a, #0
+8075: F5 83                 mov     dph, a
+                            ;now dptr points to the byte we need to print
+8077: E4                    clr     a
+8078: 93                    movc    a, @a+dptr
+8079: 78 08                 mov     r0, #8
+                   bit_loop:
+807B: 33                    rlc     a
+807C: C0 E0                 push    acc
+807E: 74 20                 mov     a, #' '
+8080: 50 02                 jnc     btlp2
+8082: 74 23                 mov     a, #'#'
+8084: 12 00 30     btlp2:   lcall   cout
+8087: D0 E0                 pop     acc
+8089: D8 F0                 djnz    r0, bit_loop    ;print all 8 characters
+                   
+808B: 74 20                 mov     a, #' '
+808D: 12 00 30              lcall   cout
+                   
+8090: 0B                    inc     r3
+8091: EB                    mov     a, r3
+8092: B5 2A B3              cjne    a, num, char_loop
+                   
+8095: 12 00 48              lcall   newline
+8098: 0D                    inc     r5
+8099: ED                    mov     a, r5
+809A: B4 09 A9              cjne    a, #9, line_loop
+                            
+809D: 12 00 48              lcall   newline
+80A0: 12 00 48              lcall   newline
+                   
+80A3: 90 80 D2              mov     dptr, #mesg2
+80A6: 12 00 38              lcall   pstr
+80A9: 12 00 32              lcall   cin
+80AC: 12 00 48              lcall   newline
+80AF: 22                    ret
+                   
+80B0: 50 6C 65 61 
+      73 65 20 74 
+      79 70 65 20 
+      61 20 77 6F 
+      72 64 20 28 
+      39 20 63 68 
+      61 72 20 6D 
+      61 78 29 3A 
+      20 00        mesg1:   .db     "Please type a word (9 char max): ",0
+80D2: 50 72 65 73 
+      73 20 61 6E 
+      79 20 6B 65 
+      79 00        mesg2:   .db     "Press any key",0
+                   
+80E0: 20 41 42 43 
+      44 45 46 47 
+      48 49 4A 4B 
+      4C 4D 4E 4F 
+      50 51 52 53 
+      54 55 56 57 
+      58 59 5A 3F 
+      00           chars:   .db     " ABCDEFGHIJKLMNOPQRSTUVWXYZ?",0
+                   
+                   data:
+80FD: 00                    .db     00000000b
+80FE: 00                    .db     00000000b
+80FF: 00                    .db     00000000b
+8100: 00                    .db     00000000b
+8101: 00                    .db     00000000b
+8102: 00                    .db     00000000b
+8103: 00                    .db     00000000b
+8104: 00                    .db     00000000b
+8105: 00                    .db     00000000b
+                   
+8106: 10                   .db     00010000b
+8107: 38                   .db     00111000b
+8108: 38                   .db     00111000b
+8109: 6C                   .db     01101100b
+810A: 6C                   .db     01101100b
+810B: 7C                   .db     01111100b
+810C: FE                   .db     11111110b
+810D: C6                   .db     11000110b
+810E: C6                   .db     11000110b
+                   
+810F: FC                   .db     11111100b
+8110: FE                   .db     11111110b
+8111: C6                   .db     11000110b
+8112: C6                   .db     11000110b
+8113: FC                   .db     11111100b
+8114: C6                   .db     11000110b
+8115: C6                   .db     11000110b
+8116: FE                   .db     11111110b
+8117: FC                   .db     11111100b
+                   
+8118: 7C                   .db     01111100b
+8119: FE                   .db     11111110b
+811A: C6                   .db     11000110b
+811B: C0                   .db     11000000b
+811C: C0                   .db     11000000b
+811D: C0                   .db     11000000b
+811E: C6                   .db     11000110b
+811F: FE                   .db     11111110b
+8120: 7C                   .db     01111100b
+                   
+8121: FC                   .db     11111100b
+8122: FE                   .db     11111110b
+8123: C6                   .db     11000110b
+8124: C6                   .db     11000110b
+8125: C6                   .db     11000110b
+8126: C6                   .db     11000110b
+8127: C6                   .db     11000110b
+8128: FE                   .db     11111110b
+8129: FC                   .db     11111100b
+                   
+812A: FE                   .db     11111110b
+812B: FE                   .db     11111110b
+812C: C0                   .db     11000000b
+812D: C0                   .db     11000000b
+812E: FC                   .db     11111100b
+812F: C0                   .db     11000000b
+8130: C0                   .db     11000000b
+8131: FE                   .db     11111110b
+8132: FE                   .db     11111110b
+                   
+8133: FE                   .db     11111110b
+8134: FE                   .db     11111110b
+8135: C0                   .db     11000000b
+8136: C0                   .db     11000000b
+8137: FC                   .db     11111100b
+8138: FC                   .db     11111100b
+8139: C0                   .db     11000000b
+813A: C0                   .db     11000000b
+813B: C0                   .db     11000000b
+                   
+813C: 7C                   .db     01111100b
+813D: FE                   .db     11111110b
+813E: C6                   .db     11000110b
+813F: C0                   .db     11000000b
+8140: CE                   .db     11001110b
+8141: CE                   .db     11001110b
+8142: C6                   .db     11000110b
+8143: FE                   .db     11111110b
+8144: 7E                   .db     01111110b
+                   
+8145: C6                   .db     11000110b
+8146: C6                   .db     11000110b
+8147: C6                   .db     11000110b
+8148: C6                   .db     11000110b
+8149: FE                   .db     11111110b
+814A: FE                   .db     11111110b
+814B: C6                   .db     11000110b
+814C: C6                   .db     11000110b
+814D: C6                   .db     11000110b
+                   
+814E: FE                   .db     11111110b
+814F: FE                   .db     11111110b
+8150: 18                   .db     00011000b
+8151: 18                   .db     00011000b
+8152: 18                   .db     00011000b
+8153: 18                   .db     00011000b
+8154: 18                   .db     00011000b
+8155: FE                   .db     11111110b
+8156: FE                   .db     11111110b
+                   
+8157: FE                   .db     11111110b
+8158: FE                   .db     11111110b
+8159: 0C                   .db     00001100b
+815A: 0C                   .db     00001100b
+815B: 0C                   .db     00001100b
+815C: 4C                   .db     01001100b
+815D: CC                   .db     11001100b
+815E: FC                   .db     11111100b
+815F: 7C                   .db     01111100b
+                   
+8160: C6                   .db     11000110b
+8161: C6                   .db     11000110b
+8162: CC                   .db     11001100b
+8163: CC                   .db     11001100b
+8164: F8                   .db     11111000b
+8165: CC                   .db     11001100b
+8166: CC                   .db     11001100b
+8167: C6                   .db     11000110b
+8168: C6                   .db     11000110b
+                   
+8169: C0                   .db     11000000b
+816A: C0                   .db     11000000b
+816B: C0                   .db     11000000b
+816C: C0                   .db     11000000b
+816D: C0                   .db     11000000b
+816E: C0                   .db     11000000b
+816F: C0                   .db     11000000b
+8170: FE                   .db     11111110b
+8171: FE                   .db     11111110b
+                   
+8172: C6                   .db     11000110b
+8173: EE                   .db     11101110b
+8174: FE                   .db     11111110b
+8175: D6                   .db     11010110b
+8176: D6                   .db     11010110b
+8177: C6                   .db     11000110b
+8178: C6                   .db     11000110b
+8179: C6                   .db     11000110b
+817A: C6                   .db     11000110b
+                   
+817B: C6                   .db     11000110b
+817C: E6                   .db     11100110b
+817D: E6                   .db     11100110b
+817E: F6                   .db     11110110b
+817F: D6                   .db     11010110b
+8180: DE                   .db     11011110b
+8181: CE                   .db     11001110b
+8182: C6                   .db     11000110b
+8183: C6                   .db     11000110b
+                   
+8184: 7C                   .db     01111100b
+8185: FE                   .db     11111110b
+8186: C6                   .db     11000110b
+8187: C6                   .db     11000110b
+8188: C6                   .db     11000110b
+8189: C6                   .db     11000110b
+818A: C6                   .db     11000110b
+818B: FE                   .db     11111110b
+818C: 7C                   .db     01111100b
+                   
+818D: FC                   .db     11111100b
+818E: FE                   .db     11111110b
+818F: C6                   .db     11000110b
+8190: C6                   .db     11000110b
+8191: FE                   .db     11111110b
+8192: FC                   .db     11111100b
+8193: C0                   .db     11000000b
+8194: C0                   .db     11000000b
+8195: C0                   .db     11000000b
+                   
+8196: 7C                   .db     01111100b
+8197: FE                   .db     11111110b
+8198: C6                   .db     11000110b
+8199: C6                   .db     11000110b
+819A: C6                   .db     11000110b
+819B: C6                   .db     11000110b
+819C: C6                   .db     11000110b
+819D: FC                   .db     11111100b
+819E: 7A                   .db     01111010b
+                   
+819F: FC                   .db     11111100b
+81A0: FE                   .db     11111110b
+81A1: C6                   .db     11000110b
+81A2: C6                   .db     11000110b
+81A3: FE                   .db     11111110b
+81A4: FC                   .db     11111100b
+81A5: CC                   .db     11001100b
+81A6: C6                   .db     11000110b
+81A7: C6                   .db     11000110b
+                   
+81A8: 7E                   .db     01111110b
+81A9: FE                   .db     11111110b
+81AA: C0                   .db     11000000b
+81AB: C0                   .db     11000000b
+81AC: 7C                   .db     01111100b
+81AD: 06                   .db     00000110b
+81AE: 06                   .db     00000110b
+81AF: FE                   .db     11111110b
+81B0: FC                   .db     11111100b
+                   
+81B1: FE                   .db     11111110b
+81B2: FE                   .db     11111110b
+81B3: 18                   .db     00011000b
+81B4: 18                   .db     00011000b
+81B5: 18                   .db     00011000b
+81B6: 18                   .db     00011000b
+81B7: 18                   .db     00011000b
+81B8: 18                   .db     00011000b
+81B9: 18                   .db     00011000b
+                   
+81BA: C6                   .db     11000110b
+81BB: C6                   .db     11000110b
+81BC: C6                   .db     11000110b
+81BD: C6                   .db     11000110b
+81BE: C6                   .db     11000110b
+81BF: C6                   .db     11000110b
+81C0: C6                   .db     11000110b
+81C1: FE                   .db     11111110b
+81C2: 7C                   .db     01111100b
+                   
+81C3: C6                   .db     11000110b
+81C4: C6                   .db     11000110b
+81C5: C6                   .db     11000110b
+81C6: C6                   .db     11000110b
+81C7: C6                   .db     11000110b
+81C8: C6                   .db     11000110b
+81C9: 7C                   .db     01111100b
+81CA: 38                   .db     00111000b
+81CB: 10                   .db     00010000b
+                   
+81CC: C6                   .db     11000110b
+81CD: C6                   .db     11000110b
+81CE: C6                   .db     11000110b
+81CF: C6                   .db     11000110b
+81D0: D6                   .db     11010110b
+81D1: D6                   .db     11010110b
+81D2: FE                   .db     11111110b
+81D3: EE                   .db     11101110b
+81D4: C6                   .db     11000110b
+                   
+81D5: C6                   .db     11000110b
+81D6: C6                   .db     11000110b
+81D7: C6                   .db     11000110b
+81D8: 6C                   .db     01101100b
+81D9: 38                   .db     00111000b
+81DA: 6C                   .db     01101100b
+81DB: C6                   .db     11000110b
+81DC: C6                   .db     11000110b
+81DD: C6                   .db     11000110b
+                   
+81DE: C6                   .db     11000110b
+81DF: C6                   .db     11000110b
+81E0: C6                   .db     11000110b
+81E1: 6C                   .db     01101100b
+81E2: 6C                   .db     01101100b
+81E3: 38                   .db     00111000b
+81E4: 10                   .db     00010000b
+81E5: 10                   .db     00010000b
+81E6: 10                   .db     00010000b
+                   
+81E7: FE                   .db     11111110b
+81E8: FE                   .db     11111110b
+81E9: 0C                   .db     00001100b
+81EA: 0C                   .db     00001100b
+81EB: 38                   .db     00111000b
+81EC: 60                   .db     01100000b
+81ED: 60                   .db     01100000b
+81EE: FE                   .db     11111110b
+81EF: FE                   .db     11111110b
+                   
+81F0: 7C                   .db     01111100b
+81F1: FE                   .db     11111110b
+81F2: C6                   .db     11000110b
+81F3: 06                   .db     00000110b
+81F4: 0C                   .db     00001100b
+81F5: 18                   .db     00011000b
+81F6: 00                   .db     00000000b
+81F7: 18                   .db     00011000b
+81F8: 18                   .db     00011000b
+                   

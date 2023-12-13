@@ -1,6 +1,0 @@
-.ORG 0000H
-
-SELF:	SJMP SELF
-
-.END
-

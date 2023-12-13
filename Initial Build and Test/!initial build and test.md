@@ -47,19 +47,23 @@ EPM7128S dev board Replace 470 ohm isolated resistor networks DIP-14 with same i
 EPM7128S add 2 screw terminal for 9VDC
 EPM7128S add VCC and GND lugs for logic probe
 
-SAB80535 add VCC and GND lugs for logic probe
-SAB80535 enlarge small labels for readability
-SAB80535 Cut VCC trace between U10-pin32 and C12-pin1 so VBB is connected to GND via C12 not VCC
+SAB80535 add VCC and GND lugs for logic probe (fixed 1.1)
+SAB80535 enlarge small labels for readability (fixed 1.1)
+SAB80535 Cut VCC trace between U10-pin32 and C12-pin1 so VBB is connected to GND via C12 not VCC (fixed 1.1)
 SAB80535 Rotate U5 180 degrees and U11 & U12 90 degrees so labels are consistent with board
-SAB80535 Replace R6 with 10K ohm resistor because LED is way too bright
-SAB80535 Label J2 (9VDC screw terminal) connections 9VDC & GND
-SAB80535 Add jumper select for pin 37 (VCC for SAB80C535 and 0.1uF to GND for SAB80535)
-SAB80535 Replace SIL-6 TTL serial connectors with right angle 2x6 IDC and flip orientation
-SAB80535 Replace 22.1184 MHz crystal with 11.0592 MHz crystal
-SAB80535 Change LM7805 voltage regulator from vertical to horizontal with room for heatsink
-SAB80535 FE/SS label is reversed; SS is 1-2 and FE is 3-4
-SAB80535 Label pins 1 and 2 on LCD interface pin socket
-SAB80535 Replace 14-pin LCD interface with 16-pin version for LED backlight
+SAB80535 Replace R6 with 10K ohm resistor because LED is way too bright (fixed 1.1)
+SAB80535 Label J2 (9VDC screw terminal) connections 9VDC & GND (fixed 1.1)
+SAB80535 Add jumper select for pin 37 (VCC for SAB80C535 and 0.1uF to GND for SAB80535) (fixed 1.1)
+SAB80535 Replace SIL-6 TTL serial connectors with right angle 2x6 IDC and flip orientation (fixed 1.1)
+SAB80535 Replace 22.1184 MHz crystal with 11.0592 MHz crystal (fixed 1.1)
+SAB80535 Change LM7805 voltage regulator from vertical to horizontal with room for heatsink (fixed 1.1)
+SAB80535 FE/SS label is reversed; SS is 1-2 and FE is 3-4 (fixed 1.1)
+SAB80535 Label pins 1 and 2 on LCD interface pin socket (fixed 1.1)
+SAB80535 Replace 14-pin LCD interface with 16-pin version for LED backlight (fixed 1.1)
+SAB80535 Add LEDs for key signals (ROM /CS, RAM /CS, PPI0 & PPI1 /CS, LCD CS, LATCH /CS, /OE, /WR, T0, and T1) (fixed 1.1)
+SAB80535 Replace Flash ROM PLCC-32 with DIP-32 ZIF socket (fixed 1.1)
+SAB80535 Change LCD Vo Adjust circuit to use 10K Potentiometer (fixed 1.1)
+
 
 SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed)
 
