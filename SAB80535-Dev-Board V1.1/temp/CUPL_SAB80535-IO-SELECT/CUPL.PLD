@@ -1,0 +1,47 @@
+Name     SAB80535-IO-SELECT.tru ;
+PartNo   00 ;
+Date     13.12.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 7 = A10;
+PIN 6 = A11;
+PIN 5 = A12;
+PIN 4 = A13;
+PIN 3 = A14;
+PIN 2 = A15;
+PIN 13 = A5;
+PIN 11 = A6;
+PIN 10 = A7;
+PIN 9 = A8;
+PIN 8 = A9;
+
+/* outputs */
+PIN 15 = IOxSEL;
+PIN 23 = Y0;
+PIN 22 = Y1;
+PIN 20 = Y3;
+PIN 19 = Y4;
+PIN 18 = Y5;
+PIN 17 = Y6;
+PIN 21 = Y2;
+PIN 16 = Y7;
+
+/* combinatorial logic */
+IOxSEL = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A8 # !A9;
+Y0 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A5 # A6 # A7 # !A8 # !A9;
+Y1 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A5 # A6 # A7 # !A8 # !A9;
+Y2 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A5 # !A6 # A7 # !A8 # !A9;
+Y3 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A5 # !A6 # A7 # !A8 # !A9;
+Y4 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A5 # A6 # !A7 # !A8 # !A9;
+Y5 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A5 # A6 # !A7 # !A8 # !A9;
+Y6 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # A5 # !A6 # !A7 # !A8 # !A9;
+Y7 = !A10 # !A11 # !A12 # !A13 # !A14 # !A15 # !A5 # !A6 # !A7 # !A8 # !A9;

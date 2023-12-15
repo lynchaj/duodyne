@@ -1,0 +1,45 @@
+Name     SAB80535-CS-V2.tru ;
+PartNo   00 ;
+Date     13.12.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g22v10 ;
+
+ar = 'b'0 ;
+sp = 'b'0 ;
+
+/* inputs */
+PIN 7 = A19;
+PIN 2 = A2;
+PIN 3 = A3;
+PIN 4 = A4;
+PIN 6 = IOxSEL;
+PIN 8 = WR;
+PIN 5 = Y0;
+
+/* outputs */
+PIN 14 = CSxRAM;
+PIN 23 = CSxPPI0;
+PIN 22 = CSxPPI1;
+PIN 20 = CSxMMU;
+PIN 19 = CSxUSBxSD;
+PIN 18 = CSxI2C;
+PIN 17 = CSxFF;
+PIN 21 = CSxLCD;
+PIN 16 = CSxLATCH;
+PIN 15 = A;
+
+/* combinatorial logic */
+A = !A2 # A3 # !A4 # WR # Y0;
+CSxFF = A2 # !A3 # !A4 # WR # Y0;
+CSxI2C = !A2 # A3 # !A4 # Y0;
+CSxLATCH = !A2 # !A3 # !A4 # Y0;
+CSxLCD = A2 # !A3 # A4 # Y0;
+CSxMMU = !A2 # !A3 # A4 # WR # Y0;
+CSxPPI0 = A2 # A3 # A4 # Y0;
+CSxPPI1 = !A2 # A3 # A4 # Y0;
+CSxRAM = !A19 # !IOxSEL;
+CSxUSBxSD = A2 # A3 # !A4 # Y0;
