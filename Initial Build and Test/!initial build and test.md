@@ -66,11 +66,13 @@ SAB80535 Change LCD Vo Adjust circuit to use 10K Potentiometer (fixed 1.1)
 
 SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed)
 
-Disk IO Change U26 (74AHC02) supply from VCC (5V) to VDD (3.3V)
-Disk IO Remove R36 (22K) and R44 (22K); Replace R35 (10K) and R43 (10K) with wires
-Disk IO Connect U28 & U29 D0-D7 to U14 bD0-bD7
+Disk IO Change U26 (74AHC02) supply from VCC (5V) to VDD (3.3V) (fixed 1.1)
+Disk IO Remove R36 (22K) and R44 (22K); Replace R35 (10K) and R43 (10K) with wires (fixed 1.1)
+Disk IO Connect U28 & U29 D0-D7 to U14 bD0-bD7 (fixed 1.1)
 
-front-panel Add mounting holes for OLED and microSD module
+front-panel Add mounting holes for OLED and microSD module (fixed 1.1)
+front-panel Reverse orientation of switches SW10-SW13 (fixed 1.1)
+front-panel Add 0.1uF bypass capacitor near U1 (fixed 1.1)
 
 All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
 
