@@ -1,0 +1,37 @@
+Name     FDC-DMA-GAL.tru ;
+PartNo   00 ;
+Date     15.04.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 4 = CSxFDC;
+PIN 3 = PULSE;
+PIN 5 = bA0;
+PIN 6 = bA1;
+PIN 7 = bA2;
+PIN 8 = bRD;
+PIN 2 = bRESET;
+PIN 9 = bWR;
+
+/* outputs */
+PIN 19 = FDCxRESET;
+PIN 18 = FDCxTC;
+PIN 17 = MSRxDATA;
+PIN 15 = LDCR;
+PIN 13 = LDOR;
+PIN 14 = FDCxDACK;
+PIN 12 = CSxFDCxLED;
+
+/* combinatorial logic */
+CSxFDCxLED = CSxFDC;
+FDCxDACK = (!bA0 & bRD) # !bA1 # !bA2 # CSxFDC;
+FDCxRESET = (bA0 & bA1 & !bA2 & !CSxFDC) # !bRESET;
+FDCxTC = (!bA0 & bA1 & !bA2 & !CSxFDC) # (bA0 & bA1 & bA2 & !CSxFDC) # !PULSE;
+LDCR = !bA0 # bA1 # !bA2 # CSxFDC;
+LDOR = bA0 # !bA1 # !bA2 # CSxFDC # bWR;
+MSRxDATA = bA1 # bA2 # CSxFDC;
