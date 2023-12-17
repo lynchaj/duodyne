@@ -94,6 +94,11 @@ If the first test passes, repeat with the second test image (TMS9995_test_2_epro
 
 The third test image has two versions.   The first version configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E .  This version tests most of the system including ROM and RAM.   The second version is a ROM only version. It also configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E , but does not use any external RAM.
 
+
+## Patches
+   on the .75 Version of the board do not populate R11  
+   on the .70 Version of the board, cut pin 3 of RN4 prior to installing and then tie Pin 13 of U11 High
+
 ## BOM
 Qty|Reference(s)|Value
 --- | ----------- | -----
@@ -122,7 +127,6 @@ Qty|Reference(s)|Value
 5|R2, R4, R9, R14, R15|10K ohm
 1|R8|10 ohm
 1|R10|470 ohm
-1|R11|1K ohm
 2|RN1, RN2|4700 8 Resistor Network
 1|RN3|1K 8 Resistor Network
 1|RN4|10K  8 Resistor Network
