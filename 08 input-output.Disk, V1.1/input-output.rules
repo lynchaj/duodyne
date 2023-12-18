@@ -1,0 +1,154 @@
+
+(rules PCB input-output
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 19966)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.5)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.7)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via 
+    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" ThinPower
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (via_rule
+    ThinPower "Via[0-1]_800:400_um-ThinPower"
+  )
+  (class default
+    "Net-(D2-Pad2)" "Net-(D3-Pad2)" "Net-(D4-Pad2)" "Net-(D3-Pad1)" "Net-(RN1-Pad9)" "Net-(RN1-Pad5)" "Net-(RN1-Pad4)" "Net-(RN1-Pad3)"
+    "Net-(RN1-Pad2)" "Net-(D1-Pad2)" "~(EIRQ0)" "~(EIRQ1)" "~(EIRQ2)" "~(EIRQ3)" "~(EIRQ4)" "~(EIRQ5)"
+    "~(EIRQ6)" "~(EIRQ7)" "~(M1)" "~(IORQ)" "~(WR)" "~(RD)" A0 A1
+    A2 A3 A4 A5 A6 A7 D0 D1
+    D2 D3 D4 D5 D6 D7 ONE ZERO
+    bD6 bD5 bD4 bD3 bD2 bD1 bD0 "~(bWR)"
+    "~(bRD)" bA0 bD7 "~(bRESET)" "~(bM1)" bA7 bA6 bA5
+    bA4 "~(bIORQ)" bA1 bA2 bA3 "/PPIDE/~(ACTIVE)" "/FDC/~(INT_FDC)" "Net-(D6-Pad2)"
+    "Net-(D7-Pad2)" "/WIZNET/~(CS2)" /WIZNET/MOSI /WIZNET/SCK /WIZNET/MISO "Net-(J12-Pad8)" "Net-(J12-Pad9)" "Net-(JP1-Pad1)"
+    /bus/D15 /bus/D31 /bus/D14 /bus/D30 /bus/D13 /bus/D29 /bus/D12 /bus/D28
+    /bus/D11 /bus/D27 /bus/D10 /bus/D26 /bus/D9 /bus/D25 /bus/D8 /bus/D24
+    /bus/D23 /bus/D22 /bus/D21 /bus/D20 /bus/D19 /bus/D18 /bus/D17 /bus/D16
+    "/bus/~(BUSERR)" /bus/UDS "/bus/~(VPA)" /bus/LDS "/bus/~(VMA)" /bus/S2 "/bus/~(BHE)" /bus/S1
+    /bus/IPL2 /bus/S0 /bus/IPL1 /bus/AUXCLK3 /bus/IPL0 /bus/AUXCLK2 /bus/A15 /bus/A31
+    /bus/A14 /bus/A30 /bus/A13 /bus/A29 /bus/A12 /bus/A28 /bus/A11 /bus/A27
+    /bus/A10 /bus/A26 /bus/A9 /bus/A25 /bus/A8 /bus/A24 /bus/A23 /bus/A22
+    /bus/A21 /bus/A20 /bus/A19 /bus/A18 /bus/A17 /bus/A16 /bus/IC3 "~(TEND1)"
+    /bus/IC2 "~(DREQ1)" /bus/IC1 "~(TEND0)" /bus/IC0 "~(DREQ0)" /bus/AUXCLK1 /bus/AUXCLK0
+    /bus/E /bus/ST /bus/PHI "/bus/~(MREQ)" "/bus/~(INT2)" "/bus/~(INT1)" "/bus/~(BUSACK)" /bus/CRUCLK
+    /bus/CRUOUT /bus/CRUIN "/bus/~(NMI)" "~(RES_IN)" "~(RES_OUT)" /bus/USER8 "/bus/~(BUSRQ)" /bus/USER7
+    "/bus/~(WAIT)" /bus/USER6 "/bus/~(HALT)" /bus/USER5 "/bus/~(RFSH)" /bus/USER4 /bus/USER3 /bus/USER2
+    /bus/USER1 /bus/USER0 "~(BAI)" "~(BAO)" "~(IEI)" "~(IEO)" "/bus/I2C_SCL" "/bus/I2C_SDA"
+    /PPIDE/PC0 /PPIDE/PA0 /PPIDE/PC1 /PPIDE/PA1 /PPIDE/PC2 /PPIDE/PA2 /PPIDE/PC3 /PPIDE/PA3
+    /PPIDE/PC4 /PPIDE/PA4 /PPIDE/PC5 /PPIDE/PA5 /PPIDE/PC6 /PPIDE/PA6 /PPIDE/PC7 /PPIDE/PA7
+    /PPIDE/PB7 /PPIDE/PB0 /PPIDE/PB6 /PPIDE/PB1 /PPIDE/PB5 /PPIDE/PB2 /PPIDE/PB4 /PPIDE/PB3
+    "/PPIDE/~(PC7)" /PPIDE/DMARQ "/PPIDE/~(PC5)" "/PPIDE/~(PC6)" /PPIDE/IORDY /PPIDE/CSEL "/PPIDE/~(DMACK)" /PPIDE/INTRQ
+    "/PPIDE/~(IOCS16)" "/PPIDE/~(PDIAG)" "/PPIDE/~(PC3)" "/PPIDE/~(PC4)" "Net-(P7-Pad1)" "Net-(P7-Pad2)" /FDC/RDY "unconnected-(P10-Pad4)"
+    "unconnected-(P10-Pad6)" "INT_FDC" "/FDC/FDC_DMA" "/GAL/~(CS_FDC_LED)" "unconnected-(RN1-Pad6)" "unconnected-(RN1-Pad7)" "unconnected-(RN1-Pad8)" "unconnected-(RP1-Pad2)"
+    "unconnected-(RP1-Pad9)" "~(CS_DISK)" "~(CS_FDC)" "~(CS_PPIDE)" "Net-(J13-Pad1)" "Net-(D5-Pad1)" "Net-(D5-Pad2)" "~(PULSE)"
+    "/WIZNET/~(ENET_INT)" "Net-(JP3-Pad1)" CLK "Net-(R29-Pad2)" "Net-(R30-Pad1)" "Net-(R31-Pad1)" "Net-(R33-Pad1)" "/WIZNET/~(CS1)"
+    "Net-(R37-Pad1)" "Net-(R38-Pad1)" "/WIZNET/~(CS0)" "/WIZNET/~(RST)" "Net-(R46-Pad1)" "Net-(U5-Pad10)" "unconnected-(U6-Pad1)" "unconnected-(U6-Pad12)"
+    "unconnected-(U6-Pad23)" "Net-(R47-Pad2)" "unconnected-(U6-Pad34)" "unconnected-(U7-Pad2)" "Net-(R48-Pad2)" "unconnected-(U7-Pad3)" "unconnected-(U7-Pad5)" "unconnected-(U7-Pad6)"
+    "unconnected-(U7-Pad9)" "unconnected-(U7-Pad10)" "unconnected-(U7-Pad13)" "unconnected-(U3-Pad3)" "unconnected-(U3-Pad4)" "unconnected-(U8-Pad22)" "unconnected-(U8-Pad25)" "unconnected-(U8-Pad38)"
+    "unconnected-(U9-Pad2)" "unconnected-(U9-Pad3)" "unconnected-(U9-Pad5)" "unconnected-(U9-Pad6)" "unconnected-(U3-Pad5)" "unconnected-(U9-Pad9)" "unconnected-(U9-Pad10)" "unconnected-(U3-Pad6)"
+    "unconnected-(U10-Pad16)" "unconnected-(U11-Pad5)" "unconnected-(U11-Pad6)" "unconnected-(U11-Pad7)" "unconnected-(U11-Pad13)" "unconnected-(U11-Pad14)" "~(CS_SPI)" bCLK
+    "unconnected-(U9-Pad12)" "unconnected-(U16-Pad2)" "unconnected-(U9-Pad13)" "unconnected-(U10-Pad1)" "unconnected-(U10-Pad11)" "unconnected-(U7-Pad12)" "unconnected-(U16-Pad5)" "unconnected-(U11-Pad8)"
+    "unconnected-(U11-Pad9)" "unconnected-(U11-Pad12)" "~(MSR-DATA)" "~(FDC-DACK)" "FDC-TC" "~(LDOR)" "~(LDCR)" "FDC-RESET"
+    "unconnected-(U11-Pad1)" "unconnected-(U11-Pad11)" "unconnected-(U15-Pad4)" "unconnected-(U15-Pad6)" "unconnected-(U16-Pad6)" "unconnected-(U16-Pad9)" "unconnected-(U15-Pad14)" "unconnected-(U15-Pad16)"
+    "/WIZNET/~(LATCH_WR)" "unconnected-(U16-Pad12)" "unconnected-(U16-Pad15)" "unconnected-(U16-Pad16)" "unconnected-(U16-Pad19)" "/WIZNET/~(SD_RDNTR)" "16MHZ-CLK" "/FDC/~(RWC)"
+    "/FDC/~(IDX)" "/FDC/~(MO1)" "/FDC/~(DS2)" "/FDC/~(DS1)" "/FDC/~(MO2)" "/FDC/~(DIRC)" "/FDC/~(STEP)" "/FDC/~(WD)"
+    "/FDC/~(WE)" "/FDC/~(TR00)" "/FDC/~(WP)" "/FDC/~(RDD)" "/FDC/~(HS)" "/FDC/~(DCHG)" /FDC/PCVAL "Net-(J9-Pad2)"
+    "/WIZNET/~(SD_RDTR)" /WIZNET/RCO "/WIZNET/~(SD_WRTR)" "/WIZNET/~(CLR)" "/WIZNET/~(TR)" "Net-(U23-Pad12)" "unconnected-(U24-Pad7)" "/WIZNET/~(STAT_RD)"
+    "/WIZNET/~(CTRL_WR)" "Net-(JP2-Pad2)" "unconnected-(U24-Pad14)" /WIZNET/QD "/WIZNET/~(QD)" "unconnected-(U25-Pad12)" "unconnected-(U25-Pad13)" "unconnected-(U25-Pad14)"
+    "/WIZNET/~(SER_RD)" "/WIZNET/~(MOSI)" "unconnected-(U27-Pad10)" "unconnected-(U27-Pad15)" "unconnected-(U28-Pad9)" "unconnected-(U29-Pad9)" "unconnected-(U31-PadJ2-4)" "unconnected-(J12-Pad10)"
+    "unconnected-(J12-Pad11)" "/bus/~(INT0)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC VDD "-12V" +12V "/PPIDE/VCC_PP" "/PPIDE/VCC_IDE"
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class ThinPower
+    "/PPIDE/GND_PLCC" "/FDC/GND_PLCC"
+    (clearance_class ThinPower)
+    (via_rule ThinPower)
+    (rule
+      (width 700.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
