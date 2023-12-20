@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 11236)
+    (start_pass_no 8383)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -44,13 +44,13 @@
     "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" ThinPower
+    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" default
   )
   (via_rule
     default "Via[0-1]_800:400_um"
@@ -107,7 +107,7 @@
     /TTS/A1 /TTS/A0 "/TTS/~(CS_RAM)" "Net-(C80-Pad1)" "/TTS/~(CS_ROM)" "/TTS/~(ALD)" "/TTS/~(UART_PAR)" "Net-(C81-Pad1)"
     "AUDIO_SNR" "AUDIO_SNL" "Net-(C58-Pad2)" "Net-(C65-Pad2)" "AUDIO_DAC" "Net-(C66-Pad1)" "Net-(C66-Pad2)" "Net-(C67-Pad1)"
     "Net-(C67-Pad2)" "Net-(C68-Pad1)" "Net-(C68-Pad2)" "Net-(C69-Pad1)" "Net-(C70-Pad1)" "Net-(C71-Pad1)" "Net-(C72-Pad1)" "Net-(C74-Pad2)"
-    "Net-(C75-Pad2)" "Net-(C76-Pad2)" "unconnected-(U16-Pad19)" "Net-(J10-Pad1)" "~(INT0)" "~(EIRQ0)" "~(EIRQ1)" "~(EIRQ2)"
+    "Net-(C75-Pad2)" "Net-(C76-Pad2)" "unconnected-(U16-Pad19)" "Net-(J10-Pad1)" "/bus/~(INT0)" "~(EIRQ0)" "~(EIRQ1)" "~(EIRQ2)"
     "~(EIRQ3)" "~(EIRQ4)" "~(EIRQ5)" "~(EIRQ6)" "~(EIRQ7)" "Net-(J11-Pad2)" "~(WAIT)" bA7
     bA6 bA5 bA4 bA3 bA2 bA1 bA0 "~(bRD)"
     "~(bWR)" "~(bM1)" "~(bIORQ)" "~(CS_ADC_WR)" "/Sound/~(SN_WAIT)" "Net-(RN3-Pad6)" "unconnected-(U1-Pad11)" "unconnected-(U6-Pad7)"
@@ -133,7 +133,7 @@
     )
   )
   (class "kicad_default"
-    (clearance_class "kicad_default")
+    (clearance_class default)
     (via_rule kicad_default)
     (rule
       (width 250.0)
@@ -145,7 +145,7 @@
   (class Power
     GND VCC "-12V" +12V "/ADC-DAC/VPRE" "/ADC-DAC/VIN+" VDD VSS
     VB
-    (clearance_class Power)
+    (clearance_class default)
     (via_rule Power)
     (rule
       (width 1000.0)
@@ -155,7 +155,7 @@
     )
   )
   (class ThinPower
-    (clearance_class ThinPower)
+    (clearance_class default)
     (via_rule ThinPower)
     (rule
       (width 700.0)
