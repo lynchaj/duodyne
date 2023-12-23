@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 27278)
+    (start_pass_no 55987)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -28,7 +28,7 @@
   (rule
     (width 250.0)
     (clear 200.2)
-    (clear 125.0 (type smd_to_turn_gap))
+    (clear -0.1 (type smd_to_turn_gap))
     (clear 50.0 (type smd_smd))
   )
   (padstack "Via[0-1]_800:400_um"
@@ -44,13 +44,13 @@
     "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
   )
   (via 
-    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" default
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
   )
   (via 
-    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" default
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
   )
   (via 
-    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" default
+    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" ThinPower
   )
   (via_rule
     default "Via[0-1]_800:400_um"
@@ -68,7 +68,7 @@
     "Net-(D3-Pad1)" "Net-(D4-Pad1)" "Net-(C2-Pad2)" "Net-(C2-Pad1)" "Net-(C3-Pad1)" "Net-(C4-Pad2)" "Net-(D2-Pad1)" "Net-(D6-Pad1)"
     "Net-(R18-Pad2)" "Net-(R19-Pad2)" "Net-(R20-Pad2)" "Net-(R23-Pad2)" "Net-(R24-Pad2)" "Net-(R25-Pad2)" "Net-(R28-Pad2)" "Net-(C3-Pad2)"
     "Net-(C4-Pad1)" "Net-(C5-Pad2)" "Net-(C5-Pad1)" "Net-(D5-Pad1)" "Net-(D10-Pad1)" "Net-(D11-Pad2)" "Net-(J3-Pad2)" "Net-(J4-Pad2)"
-    "Net-(J8-Pad1)" "Net-(J10-Pad2)" "Net-(R17-Pad2)" "Net-(R26-Pad2)" "Net-(R35-Pad2)" "Net-(J14-Pad4)" "Net-(J14-Pad10)" "Net-(R1-Pad1)"
+    "Net-(J8-Pad1)" "unconnected-(J9-Pad8)" "Net-(R17-Pad2)" "Net-(R26-Pad2)" "Net-(R35-Pad2)" "Net-(J14-Pad4)" "Net-(J14-Pad10)" "Net-(R1-Pad1)"
     "Net-(R3-Pad1)" "Net-(R4-Pad1)" "Net-(R6-Pad1)" "Net-(R7-Pad1)" "Net-(R10-Pad1)" "Net-(R13-Pad1)" "Net-(R14-Pad1)" "Net-(R15-Pad1)"
     "Net-(R16-Pad1)" "Net-(U16-Pad6)" "Net-(U16-Pad12)" "Net-(U16-Pad5)" "Net-(U16-Pad10)" "Net-(U16-Pad2)" "Net-(U16-Pad8)" "Net-(U19-Pad5)"
     "Net-(U19-Pad3)" "Net-(U19-Pad9)" "Net-(U25-Pad5)" "Net-(U25-Pad3)" "Net-(U25-Pad9)" "Net-(U25-Pad1)" "Net-(U27-Pad14)" "Net-(U27-Pad13)"
@@ -124,7 +124,7 @@
     )
   )
   (class "kicad_default"
-    (clearance_class default)
+    (clearance_class "kicad_default")
     (via_rule kicad_default)
     (rule
       (width 250.0)
@@ -136,7 +136,7 @@
   (class Power
     GND VCC "/USB-SD/VBUS" "/USB-SD/VDD3" "/USB-SD/VDD2" VDD1 "-12V" +12V
     VSS VDD
-    (clearance_class default)
+    (clearance_class Power)
     (via_rule Power)
     (rule
       (width 1000.0)
@@ -147,7 +147,7 @@
   )
   (class ThinPower
     "/DUART/GND_UART"
-    (clearance_class default)
+    (clearance_class ThinPower)
     (via_rule ThinPower)
     (rule
       (width 700.0)

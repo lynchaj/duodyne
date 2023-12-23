@@ -75,4 +75,6 @@ front-panel Reverse orientation of switches SW10-SW13 (fixed 1.1)
 front-panel Add 0.1uF bypass capacitor near U1 (fixed 1.1)
 
 All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
+All boards Ensure crystal oscillators are free of other traces interfering with connections
+(RAMROM, Multi IO, Voice IO, Media IO, VDCENET, SAB80535)
 
