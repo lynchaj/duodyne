@@ -64,11 +64,15 @@ SAB80535 Add LEDs for key signals (ROM /CS, RAM /CS, PPI0 & PPI1 /CS, LCD CS, LA
 SAB80535 Replace Flash ROM PLCC-32 with DIP-32 ZIF socket (fixed 1.1)
 SAB80535 Change LCD Vo Adjust circuit to use 10K Potentiometer (fixed 1.1)
 
-SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed)
+SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed) (fixed 1.1)
+SelfHost Add BusMonitor function (fixed 1.1)
 
 Disk IO Change U26 (74AHC02) supply from VCC (5V) to VDD (3.3V) (fixed 1.1)
 Disk IO Remove R36 (22K) and R44 (22K); Replace R35 (10K) and R43 (10K) with wires (fixed 1.1)
 Disk IO Connect U28 & U29 D0-D7 to U14 bD0-bD7 (fixed 1.1)
+Disk IO Move SD socket up to top of board (fixed 1.1)
+Disk IO Remove U16 74LS273 as not used (fixed 1.1)
+Disk IO Add comment referring back to MT011 source document (fixed 1.1)
 
 front-panel Add mounting holes for OLED and microSD module (fixed 1.1)
 front-panel Reverse orientation of switches SW10-SW13 (fixed 1.1)
