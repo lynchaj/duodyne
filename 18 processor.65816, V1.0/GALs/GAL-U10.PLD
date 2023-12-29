@@ -28,10 +28,10 @@ PIN   14  = data_dir	; /*                                 */
 PIN   13  = !m1	        ; /*                                 */
 
 
-rd =  phi & rw ;
-wr =  phi & !rw ;
-mreq = bus # !phi ;
-iorq = io  # !phi ;
+rd   = phi &  rw & ( vda # vpa) ;
+wr   = phi & !rw & ( vda # vpa) ;
+mreq = bus # !io # !phi ;
+iorq = io # !phi # !vda # vpa ;
 m1 = 'b'0 ;
 busak = 'b'0   ;
 data_dir = !(rw & !bus) # !onboardio ;

@@ -1,6 +1,8 @@
 %SIGNAL
 PIN  13 =  A 
 PIN  14 =  A1 
+PIN   7 =  B 
+PIN  15 =  B1 
 PIN   8 =  CPUA0 
 PIN  10 =  CPUA1 
 PIN   3 =  CPUA2 
@@ -24,6 +26,14 @@ PIN  20 =  OPTION
 A1 =>
     !CPUA1
   # !CPUA2
+  # CPUA3
+  # CPU_IORQ
+  # CPU_RW
+
+B1 =>
+    !CPUA0
+  # CPUA1
+  # CPUA2
   # CPUA3
   # CPU_IORQ
   # CPU_RW
@@ -61,12 +71,7 @@ INTI2C =>
     !INT_I2C
 
 OPTION =>
-    !CPUA0
-  # CPUA1
-  # CPUA2
-  # CPUA3
-  # CPU_IORQ
-  # CPU_RW
+    B
 
 ar =>
     0 
@@ -75,6 +80,9 @@ sp =>
     0 
 
 A1.oe  =>
+    1 
+
+B1.oe  =>
     1 
 
 CS_I2C.oe  =>

@@ -1,0 +1,44 @@
+Name     IO-DECODER ;
+PartNo   00 ;
+Date     12/29/2023 ;
+Revision 01 ;
+Designer Dan Werner ;
+Company  a ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+
+/* inputs */
+PIN 1 = CPUA0;
+PIN 2 = CPUA1;
+PIN 3 = CPUA2;
+PIN 4 = CPUA3;
+PIN 5 = CSIO;
+PIN 6 = INT_I2C;
+PIN 7 = CPU_RW;
+PIN 13 = A;
+
+/* outputs */
+PIN 23 = CS_UART ;
+PIN 22 = FP_LATCH_WR;
+PIN 21 = FP_LATCH_RD;
+PIN 20 = OPTION;
+PIN 19 = CS_I2C;
+PIN 18 = INTI2C;
+PIN 17 = CS_I2C_WR;
+PIN 16 = PAGEWR;
+PIN 15 = PGENWR;
+PIN 14 = A1;
+
+/* combinatorial logic */
+A1          = CPUA3 # !CPUA2 # !CPUA1 # CSIO # CPU_RW;
+CS_I2C      = CPUA3 # !CPUA2 # !CPUA1 # CSIO ;
+CS_I2C_WR   = A;
+CS_UART     = !CPUA3 # CSIO ;
+INTI2C      = !INT_I2C;
+FP_LATCH_RD = CPUA3 #  CPUA2 # CPUA1  # CPUA0  # CSIO # !CPU_RW;
+FP_LATCH_WR = CPUA3 #  CPUA2 # CPUA1  # CPUA0  # CSIO # CPU_RW;
+OPTION      = CPUA3 #  CPUA2 # CPUA1  # !CPUA0 # CSIO # CPU_RW;
+PAGEWR      = CPUA3 #  CPUA2 # !CPUA1 # CPUA0  # CSIO # CPU_RW;
+PGENWR      = CPUA3 #  CPUA2 # !CPUA1 # !CPUA0 # CSIO # CPU_RW;
