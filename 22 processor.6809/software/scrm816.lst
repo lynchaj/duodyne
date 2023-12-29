@@ -1,0 +1,139 @@
+ca65 V2.19 - Git 128b15a71
+Main file   : scrm816.asm
+Current file: scrm816.asm
+
+000000r 1               .P816
+000000r 1               ;__SCRM816_________________________________________________________________________________________
+000000r 1               ;
+000000r 1               ;	SCREAM FOR THE RBC 65c816N SBC
+000000r 1               ;
+000000r 1               ;	WRITTEN BY: DAN WERNER -- 9/14/2017
+000000r 1               ;
+000000r 1               ;__________________________________________________________________________________________________
+000000r 1               ;
+000000r 1               ; DATA CONSTANTS
+000000r 1               ;__________________________________________________________________________________________________
+000000r 1               
+000000r 1               ;        CHIP    65816           ; SET CHIP
+000000r 1               ;        LONGA   OFF             ; ASSUME EMULATION MODE
+000000r 1               ;        LONGI   OFF             ;
+000000r 1               ;        PW      128
+000000r 1               ;        PL      60
+000000r 1               ;        INCLIST ON
+000000r 1               
+000000r 1                       .SEGMENT "ROM"
+000000r 1               
+000000r 1               IO_AREA         = $DF00
+000000r 1               ;__________________________________________________________________________________________________
+000000r 1               ; $8000-$8007 UART 16C550
+000000r 1               ;__________________________________________________________________________________________________
+000000r 1               UART0           = IO_AREA+$58   ;   DATA IN/OUT
+000000r 1               UART1           = IO_AREA+$59   ;   CHECK RX
+000000r 1               UART2           = IO_AREA+$5A   ;   INTERRUPTS
+000000r 1               UART3           = IO_AREA+$5B   ;   LINE CONTROL
+000000r 1               UART4           = IO_AREA+$5C   ;   MODEM CONTROL
+000000r 1               UART5           = IO_AREA+$5D   ;   LINE STATUS
+000000r 1               UART6           = IO_AREA+$5E   ;   MODEM STATUS
+000000r 1               UART7           = IO_AREA+$5F   ;   SCRATCH REG.
+000000r 1               
+000000r 1               
+000000r 1               IRQVECTADD      = $30           ; VECTOR FOR USER IRQ RTN
+000000r 1               WORKPTR         = $32           ; WORK POINTER FOR COMMAND PROCESSOR
+000000r 1               JUMPPTR         = $34           ; JUMP VECTOR FOR LOOKUP TABLE
+000000r 1               TEMPWORD        = $36           ;
+000000r 1               TEMPWORD1       = $38           ;
+000000r 1               TEMPWORD2       = $3A           ;
+000000r 1               TEMPBYTE        = $3B           ;
+000000r 1               ACC             = $3D           ; ACC STORAGE
+000000r 1               XREG            = $3E           ; X REG STORAGE
+000000r 1               YREG            = $3F           ; Y REG STORAGE
+000000r 1               PREG            = $40           ; CURRENT STACK POINTER
+000000r 1               PCL             = $41           ; PROGRAM COUNTER LOW
+000000r 1               PCH             = $42           ; PROGRAM COUNTER HIGH
+000000r 1               SPTR            = $43           ; CPU STATUS REGISTER
+000000r 1               CKSM            = $44           ; CHECKSUM
+000000r 1               BYTECT          = $45           ; BYTE COUNT
+000000r 1               STRPTR          = $48           ;
+000000r 1               COUNTER         = $4A           ;
+000000r 1               SRC             = $4C           ;
+000000r 1               DEST            = $4E           ;
+000000r 1               INBUFFER        = $0200         ;
+000000r 1               
+000000r 1               
+000000r 1                       .SEGMENT "ROM"
+000000r 1                       .ORG    $E000
+00E000  1               
+00E000  1               ;__COLD_START___________________________________________________
+00E000  1               ;
+00E000  1               ; PERFORM SYSTEM COLD INIT
+00E000  1               ;
+00E000  1               ;_______________________________________________________________
+00E000  1               COLD_START:
+00E000  1  78                   SEI                     ;  Disable Interrupts
+00E001  1  D8                   CLD                     ;  VERIFY DECIMAL MODE IS OFF
+00E002  1               
+00E002  1  A9 80                LDA     #$80            ;
+00E004  1  8D 5B DF             STA     UART3           ; SET DLAB FLAG
+00E007  1  A9 0C                LDA     #12             ; SET TO 12 = 9600 BAUD
+00E009  1  8D 58 DF             STA     UART0           ;
+00E00C  1  A9 00                LDA     #00             ;
+00E00E  1  8D 59 DF             STA     UART1           ;
+00E011  1  A9 03                LDA     #03             ;
+00E013  1  8D 5B DF             STA     UART3           ; SET 8 BIT DATA, 1 STOPBIT
+00E016  1  8D 5C DF             STA     UART4           ; SET 8 BIT DATA, 1 STOPBIT
+00E019  1               
+00E019  1               
+00E019  1  A2 00                LDX     #$00
+00E01B  1               TX:
+00E01B  1  AD 5D DF             LDA     UART5           ; READ LINE STATUS REGISTER
+00E01E  1  29 20                AND     #$20            ; TEST IF UART IS READY TO SEND (BIT 5)
+00E020  1  C9 00                CMP     #$00
+00E022  1  F0 F7                BEQ     TX              ; IF NOT REPEAT
+00E024  1               
+00E024  1               ;   LDA     #'A'
+00E024  1  8A                   TXA
+00E025  1  8D 00 01             STA     $0100
+00E028  1  AD 00 01             LDA     $0100
+00E02B  1  8D 58 DF             STA     UART0           ; THEN WRITE THE CHAR TO UART
+00E02E  1  E8                   INX
+00E02F  1  4C 1B E0             JMP     TX
+00E032  1               
+00E032  1  00                   BRK                     ; PERFORM BRK (START MONITOR)
+00E033  1               
+00E033  1               
+00E033  1                       .SEGMENT "VECTORS"
+00E033  1               ; 65c816 Native Vectors
+00E033  1                       .ORG    $FFE4
+00FFE4  1               COPVECTOR:
+00FFE4  1  00 E0                .WORD   COLD_START
+00FFE6  1               BRKVECTOR:
+00FFE6  1  00 E0                .WORD   COLD_START
+00FFE8  1               ABTVECTOR:
+00FFE8  1  00 E0                .WORD   COLD_START
+00FFEA  1               NMIVECTOR:
+00FFEA  1  00 E0                .WORD   COLD_START
+00FFEC  1               resv1:
+00FFEC  1  00 E0                .WORD   COLD_START
+00FFEE  1               IRQVECTOR:
+00FFEE  1  00 E0                .WORD   COLD_START
+00FFF0  1               
+00FFF0  1               
+00FFF0  1  00 00 00 00          .WORD   $0000,$0000
+00FFF4  1               
+00FFF4  1               
+00FFF4  1               ; 6502 Emulation Vectors
+00FFF4  1                       .ORG    $FFF4
+00FFF4  1               ECOPVECTOR:
+00FFF4  1  00 E0                .WORD   COLD_START
+00FFF6  1               resv2:
+00FFF6  1  00 E0                .WORD   COLD_START
+00FFF8  1               EABTVECTOR:
+00FFF8  1  00 E0                .WORD   COLD_START
+00FFFA  1               ENMIVECTOR:
+00FFFA  1  00 E0                .WORD   COLD_START
+00FFFC  1               RSTVECTOR:
+00FFFC  1  00 E0                .WORD   COLD_START      ;
+00FFFE  1               EINTVECTOR:
+00FFFE  1  00 E0                .WORD   COLD_START
+010000  1               
+010000  1                       .END

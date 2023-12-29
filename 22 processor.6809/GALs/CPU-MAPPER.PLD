@@ -1,0 +1,25 @@
+Name     CPU-MAPPER ;
+PartNo   00 ;
+Date     12/29/2023 ;
+Revision 01 ;
+Designer Dan Werner ;
+Company  a ;
+Assembly None ;
+Location  ;
+Device   g16v8a ;
+
+
+/* inputs */
+PIN 1 = mA14;
+PIN 2 = mA15;
+PIN 3 = CPUA14;
+PIN 4 = CPUA15;
+PIN 5 = PGEN;
+
+/* outputs */
+PIN 19 = SELA14;
+PIN 18 = SELA15;
+
+/* combinatorial logic */
+SELA14= (CPUA14 & mA14) # (PGEN & mA14) # (!PGEN & CPUA14) ;
+SELA15= (CPUA15 & mA15) # (PGEN & mA15) # (!PGEN & CPUA15) ;

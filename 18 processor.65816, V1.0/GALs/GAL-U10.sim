@@ -32,18 +32,23 @@ data_dir =>
 iorq =>
     io
   # !phi
+  # !vda
+  # vpa
 
 m1 =>
     0 
 
 mreq =>
     bus
+  # !io
   # !phi
 
 rd =>
-    phi & rw
+    phi & rw & vda
+  # phi & rw & vpa
 
 wr =>
-    phi & !rw
+    phi & !rw & vda
+  # phi & !rw & vpa
 
 %END

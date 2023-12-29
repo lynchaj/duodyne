@@ -1,0 +1,23 @@
+%SIGNAL
+PIN   3 =  CPUA14 
+PIN   4 =  CPUA15 
+PIN   5 =  PGEN 
+PIN  19 =  SELA14 
+PIN  18 =  SELA15 
+PIN   1 =  mA14 
+PIN   2 =  mA15 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+SELA14 =>
+    CPUA14 & !PGEN
+  # PGEN & mA14
+
+SELA15 =>
+    CPUA15 & !PGEN
+  # PGEN & mA15
+
+%END
