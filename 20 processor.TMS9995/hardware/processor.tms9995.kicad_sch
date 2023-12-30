@@ -6,7 +6,7 @@
 
   (title_block
     (title "Duodyne TMS9995 CPU board")
-    (date "2023-12-16")
+    (date "2023-12-30")
     (rev "V1.0")
   )
 
@@ -242,9 +242,6 @@
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/173f069b-1a25-4ec4-b7fc-e8987ccb1676"
       (reference "#PWR042") (unit 1) (value "VCC") (footprint "")
     )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/29169240-15e5-47bb-8e29-c78bde4e79ff"
-      (reference "#PWR043") (unit 1) (value "GND") (footprint "")
-    )
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/eb1fd595-c228-41ba-986d-c6a2281ef12f"
       (reference "#PWR044") (unit 1) (value "VCC") (footprint "")
     )
@@ -293,12 +290,6 @@
     (path "/00000000-0000-0000-0000-000064122c47/3e82b738-a89f-44f6-990d-46da8d7b139e"
       (reference "#PWR060") (unit 1) (value "GND") (footprint "")
     )
-    (path "/00000000-0000-0000-0000-000064122c47/d7f217b2-63cd-448a-8237-28b1f70a4a4d"
-      (reference "#PWR061") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/00000000-0000-0000-0000-000064122c47/f68cd8ee-9942-4899-a677-8bef31643488"
-      (reference "#PWR062") (unit 1) (value "VCC") (footprint "")
-    )
     (path "/00000000-0000-0000-0000-000064122c47/6c07ed90-d592-4244-820d-0ce706162e4d"
       (reference "#PWR063") (unit 1) (value "VCC") (footprint "")
     )
@@ -322,6 +313,15 @@
     )
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/afde1c57-8977-4a19-a365-2659e31b285c"
       (reference "#PWR070") (unit 1) (value "GND") (footprint "")
+    )
+    (path "/00000000-0000-0000-0000-000064122c47/77aa5aea-f720-4e04-bce5-42f8a3219d69"
+      (reference "#PWR0101") (unit 1) (value "VCC") (footprint "")
+    )
+    (path "/00000000-0000-0000-0000-000064122c47/05bc7168-1484-49d7-b2d3-238f763ceb62"
+      (reference "#PWR0102") (unit 1) (value "VCC") (footprint "")
+    )
+    (path "/00000000-0000-0000-0000-000064122c47/3f4bcc59-4517-4ed9-ac49-0c6f7d9bba53"
+      (reference "#PWR0103") (unit 1) (value "GND") (footprint "")
     )
     (path "/00000000-0000-0000-0000-0000643138dc/1852e14f-4b7c-4953-8076-6d8ca6e51eb3"
       (reference "C1") (unit 1) (value "0.1u") (footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
@@ -413,9 +413,6 @@
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/d019e729-d586-4e16-abe8-b2ff6d47b915"
       (reference "C41") (unit 1) (value "15pf") (footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
     )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/6f917208-18bf-48eb-bc7d-bf2e7e317aa0"
-      (reference "C42") (unit 1) (value "10u") (footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm")
-    )
     (path "/00000000-0000-0000-0000-0000643138dc/00000000-0000-0000-0000-000069da04ba"
       (reference "D1") (unit 1) (value "PWR") (footprint "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm")
     )
@@ -433,6 +430,9 @@
     )
     (path "/00000000-0000-0000-0000-000064122c47/1a307c45-b3c8-4dde-9d39-e77dcb582e1a"
       (reference "D6") (unit 1) (value "IDE ACT") (footprint "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm")
+    )
+    (path "/00000000-0000-0000-0000-000064122c47/6cb95640-414b-4fe6-8536-fe1d9f2f7126"
+      (reference "D7") (unit 1) (value "UART") (footprint "LED_THT:LED_D3.0mm_Horizontal_O3.81mm_Z2.0mm")
     )
     (path "/00000000-0000-0000-0000-0000643138dc/00000000-0000-0000-0000-0000640ace56"
       (reference "H1") (unit 1) (value "MountingHole") (footprint "MountingHole:MountingHole_3.2mm_M3_Pad")
@@ -452,10 +452,10 @@
     (path "/00000000-0000-0000-0000-000064122c47/dc780eca-4885-479a-93d6-5bff0f548d53"
       (reference "J4") (unit 1) (value "Enable Serial Int") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
     )
-    (path "/00000000-0000-0000-0000-000064122c47/048e3a0b-f65e-4769-85b8-3354c180712e"
+    (path "/00000000-0000-0000-0000-000064122c47/a34738bb-c992-4138-aac2-3102d9ebd9c5"
       (reference "J5") (unit 1) (value "TTL SERIAL 0") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Horizontal")
     )
-    (path "/00000000-0000-0000-0000-000064122c47/7024ff45-b99f-4db3-b7a4-ddfe58e098d5"
+    (path "/00000000-0000-0000-0000-000064122c47/02370643-7ec8-4f4d-8aba-f36053c7fd25"
       (reference "J6") (unit 1) (value "TTL SER 0 PWR") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
     )
     (path "/00000000-0000-0000-0000-000064122c47/76b0a2f3-a87e-434f-90b1-6e8bb9d2e5ab"
@@ -464,13 +464,13 @@
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/12346d2d-a6fc-4e86-b1f2-1824210ca704"
       (reference "J8") (unit 1) (value "TMS9995 CLOCK") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Horizontal")
     )
+    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/0cc4fd76-c378-49fd-808b-853929bbd714"
+      (reference "J9") (unit 1) (value "RES SELECT") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
+    )
     (path "/00000000-0000-0000-0000-00006439f52f/00000000-0000-0000-0000-0000645681d6"
       (reference "JP1") (unit 1) (value "BUS CPU") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical")
     )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/ad11d460-bd10-4cc5-ad78-3ca648dd8168"
-      (reference "JP2") (unit 1) (value "RES SEL") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
-    )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/8a6135b2-6754-430a-8c04-1b109ec0cfe4"
+    (path "/00000000-0000-0000-0000-00006416c532/09acfec8-6907-4596-9d2a-309c7179c8c7"
       (reference "JP3") (unit 1) (value "RES OUT") (footprint "Jumper:SolderJumper-2_P1.3mm_Bridged_Pad1.0x1.5mm")
     )
     (path "/00000000-0000-0000-0000-000064122c47/c15eaa75-2ad3-4662-a896-ab2f5431c89f"
@@ -502,6 +502,9 @@
     )
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/9c51999d-7af4-401e-8c3e-87ffc9d8e05e"
       (reference "R4") (unit 1) (value "10K") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
+    )
+    (path "/00000000-0000-0000-0000-000064122c47/eeab0463-7b09-472e-9cc2-60566f48886e"
+      (reference "R5") (unit 1) (value "470Ω") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
     )
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/aa16a948-7115-4f9a-9757-4f956f4b9a09"
       (reference "R7") (unit 1) (value "470") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
@@ -551,7 +554,7 @@
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/06c0594b-037a-4b57-9473-e3da9eec0334"
       (reference "U1") (unit 3) (value "74LS14") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
-    (path "/00000000-0000-0000-0000-0000643138dc/f42e38bd-a59b-4a25-8369-cc07f819526b"
+    (path "/00000000-0000-0000-0000-000064122c47/3aa97707-4606-4ddc-941e-5202fdd0eef9"
       (reference "U1") (unit 4) (value "74LS14") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/6b5429a4-8032-4f59-a214-d3d113dc6dbe"
@@ -578,7 +581,7 @@
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/74bca526-009c-4018-87f4-b640c74bd1de"
       (reference "U2") (unit 5) (value "74LS07") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
-    (path "/00000000-0000-0000-0000-0000643138dc/3427cc64-0394-418e-aa59-290ae39d06e5"
+    (path "/00000000-0000-0000-0000-000064122c47/74c67209-2ea7-44a6-a297-31e098218e9d"
       (reference "U2") (unit 6) (value "74LS07") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
     (path "/00000000-0000-0000-0000-0000643138dc/00000000-0000-0000-0000-0000603a96fc"
