@@ -6,7 +6,7 @@
 
   (title_block
     (title "Duodyne 6809 CPU board")
-    (date "2023-12-29")
+    (date "2023-12-30")
     (rev "V1.00")
   )
 
@@ -159,9 +159,6 @@
     (path "/00000000-0000-0000-0000-000064122c47/377aafc5-e54a-4376-b8ba-9bf6b95e9aef"
       (reference "#PWR018") (unit 1) (value "VCC") (footprint "")
     )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/ee03a8a8-b612-4f25-b3e7-fcd176d0eb9d"
-      (reference "#PWR019") (unit 1) (value "VCC") (footprint "")
-    )
     (path "/00000000-0000-0000-0000-000064122c47/97596c84-27ce-4048-a699-e4872fc03342"
       (reference "#PWR020") (unit 1) (value "GND") (footprint "")
     )
@@ -221,9 +218,6 @@
     )
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/b8719e59-7a0a-4ba6-991f-41f58e94fcb1"
       (reference "#PWR0107") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/00000000-0000-0000-0000-000064122c47/00000000-0000-0000-0000-00006423526f"
-      (reference "#PWR0108") (unit 1) (value "GND") (footprint "")
     )
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/ed69963f-027d-4792-9372-6a6ffaf51f59"
       (reference "#PWR0109") (unit 1) (value "VCC") (footprint "")
@@ -353,9 +347,6 @@
     )
     (path "/00000000-0000-0000-0000-000064122c47/675bddb5-26d2-40ff-85f9-25df473233b3"
       (reference "#PWR0151") (unit 1) (value "VCC") (footprint "")
-    )
-    (path "/00000000-0000-0000-0000-000064122c47/1e526709-5db4-4bf8-982b-71c2b7317818"
-      (reference "#PWR0152") (unit 1) (value "GND") (footprint "")
     )
     (path "/00000000-0000-0000-0000-0000643138dc/00000000-0000-0000-0000-000066ef3cb5"
       (reference "C2") (unit 1) (value "0.1u") (footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
@@ -502,7 +493,7 @@
       (reference "J1") (unit 1) (value "IO Address Select") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical")
     )
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/ccdb0986-66fd-45c0-b020-9f08c2cfb945"
-      (reference "J2") (unit 1) (value "65816 RESET") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Horizontal")
+      (reference "J2") (unit 1) (value "6809 RESET") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Horizontal")
     )
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/59e4b649-c943-4500-8e90-5772679f08ed"
       (reference "J3") (unit 1) (value "6809 ONLY") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Horizontal")
@@ -521,6 +512,12 @@
     )
     (path "/00000000-0000-0000-0000-000064122c47/1e186278-ab59-4e96-8e8c-f91484277eb8"
       (reference "J8") (unit 1) (value "UART IRQ Selection") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x09_P2.54mm_Vertical")
+    )
+    (path "/00000000-0000-0000-0000-00006439f52f/5e1dda24-162e-4d56-8311-415b58747d8b"
+      (reference "J9") (unit 1) (value "FIRQ Selection") (footprint "Connector_PinHeader_2.54mm:PinHeader_2x09_P2.54mm_Vertical")
+    )
+    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/60274137-ba62-4368-8050-6d754a6d21a9"
+      (reference "J10") (unit 1) (value "MRDY") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
     (path "/00000000-0000-0000-0000-000064137070/00000000-0000-0000-0000-000064172976"
       (reference "J11") (unit 1) (value "FPANEL") (footprint "Connector_IDC:IDC-Header_2x20_P2.54mm_Horizontal")
@@ -552,9 +549,6 @@
     (path "/00000000-0000-0000-0000-00006416c532/00000000-0000-0000-0000-000064220138"
       (reference "P3") (unit 1) (value "CONN_02X25") (footprint "Connector_IDC:IDC-Header_2x25_P2.54mm_Horizontal")
     )
-    (path "/00000000-0000-0000-0000-000064122c47/00000000-0000-0000-0000-000064235269"
-      (reference "R1") (unit 1) (value "470") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
-    )
     (path "/00000000-0000-0000-0000-000064122c47/5431c09c-e55e-4494-a6b5-990df89abbcf"
       (reference "R2") (unit 1) (value "10K") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
     )
@@ -575,12 +569,6 @@
     )
     (path "/ff72463c-5183-4732-aac6-18e75b0f54a5/b7989ea5-e673-4ff5-86eb-aae2e2e4bb02"
       (reference "R8") (unit 1) (value "470Ω") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
-    )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/c98a86fc-082f-42e9-8687-f527fb59ce42"
-      (reference "R9") (unit 1) (value "1K") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
-    )
-    (path "/00000000-0000-0000-0000-000064122c47/9b3a6a15-5a93-4166-860b-c6308aa60ee2"
-      (reference "R10") (unit 1) (value "470") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
     )
     (path "/00000000-0000-0000-0000-000064122c47/cdefb784-fd4f-4e83-a84b-19a09abe0fa7"
       (reference "R12") (unit 1) (value "470") (footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
@@ -612,7 +600,7 @@
     (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/3399f586-f40c-4252-8731-5478a1466223"
       (reference "U1") (unit 1) (value "74LS04") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
-    (path "/ba44e7a1-24af-4410-9b7f-d27d944b565f/21cd8abb-8182-41f6-94dc-5092c9290407"
+    (path "/00000000-0000-0000-0000-0000643138dc/6f8fa082-42a9-465b-9b74-5ddb797236ac"
       (reference "U1") (unit 2) (value "74LS04") (footprint "Package_DIP:DIP-14_W7.62mm_Socket_LongPads")
     )
     (path "/00000000-0000-0000-0000-0000643138dc/12f609b4-0e69-4e47-b0dd-4767e9a0cba0"
