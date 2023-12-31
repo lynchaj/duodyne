@@ -1,6 +1,6 @@
 # TMS9995 CPU Card
 
-This is a Duodyne implimentation of Stuart Conner's Mini-Cortex system.  The Mini-Cortex system is a further development of his TMS 9995 breadboard project to produce a system similar to a Powertran Cortex, but using more modern components. The system is based around a TMS 9995 running at 3 MHz, with 32K byte EEPROM, and will use 512K bytes of RAM from a Duodyne ROMRAM carf accessed through a memory mapper. An on-board serial port and IDE interface exists on the card.
+This is a Duodyne implimentation of Stuart Conner's Mini-Cortex system.  The Mini-Cortex system is a further development of his TMS 9995 breadboard project to produce a system similar to a Powertran Cortex, but using more modern components. The system is based around a TMS 9995 running at 3 MHz, with 32K byte EEPROM, and will use 512K bytes of RAM from a Duodyne ROMRAM card accessed through a memory mapper. An on-board serial port and IDE interface exists on the card.
 
 The main EEPROM image provides a boot menu which enables the user to select between the EVMBUG system monitor from TI's TMS 9995 Evaluation Module, a port of the Powertran Cortex Power BASIC made for a TM 990 computer, the Marinchip Disk Executive (MDEX) operating system, and an implementation of V6 Unix including a C compiler.
 
@@ -41,8 +41,9 @@ It can be problematic formatting a new card using Windows 10 as it does not alwa
 
 ## Jumper Settings
 ```
+JP3 - Enable Reset signal from TMS9918 board to go to RES_OUT on bus. closed for Stand Alone Operation, open for secondary CPU
+
 JP1- CPU Signal Pullups - Jumpers should be installed if this is the only CPU card in the system, otherwise leave unjumpered
-JP2 - Reset Selection - 1&2 closed for External bus Reset in 2&3 closed for CPU to assert reset to the bus
 JP4 - Jumper to enable on board LED for IDE or connect external LED for IDE Activity
 JP5 - 2&3 for power on IDE connector 
 
@@ -53,6 +54,8 @@ J7 - External User flag bits (CRU 0046-004C)
 J2 - 1&2 for Stand Alone Operation, 2&3 for secondary CPU
 J3 - 1&2 for Stand Alone Operation, 2&3 for secondary CPU
 J8 - 2&3 for Stand Alone Operation, 1&2 for secondary CPU
+
+J9  - Reset Selection -  closed for External bus Reset in 
 ```
 ## Powering up
 The serial port on the TMS9995 board is configured for 9600 Baud, 7 data bits, even parity, one stop bit, no flow control.
@@ -75,8 +78,7 @@ MDEX documentation is available on the site http://www.powertrancortex.com/docum
 
 The first version of Unix ported was LSX Unix (https://www.mailcom.com/lsx/), which was designed to run with 40K byte RAM and two 256K byte floppies. LSX Unix was adapted from Unix V6 by Dr. Heinz Lycklama (https://www.60bits.net/msu/mycomp/terak/termubel.htm). This port has been further ported to the TI 990 minicomputer by Dave Pitts, who has also made improvements to the code build system.
 
-
-
+[Dave Pitts' TI-990 web page.](https://www.cozx.com/dpitts/ti990.html)
 [EVMBUG documentation](https://www.stuartconner.me.uk/tibug_evmbug/tibug_evmbug.htm#evmbug)
 
 
@@ -96,6 +98,7 @@ If the first test passes, repeat with the second test image (TMS9995_test_2_epro
 
 The third test image has two versions.   The first version configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E .  This version tests most of the system including ROM and RAM.   The second version is a ROM only version. It also configures the serial port to 9600 Baud, 7 bits/character, even parity, 2 stops bits, no flow control, and then loops continually sending the ASCII characters >21 ("!") to >7E , but does not use any external RAM.
 
+Note that the TMS9995 uses the RAM3 chip on the ROMRAM card, therefore it must be populated for the TMS9995 board to function.
 
 ## Patches
    on the .75 Version of the board do not populate R11  
@@ -104,34 +107,40 @@ The third test image has two versions.   The first version configures the serial
 ## BOM
 Qty|Reference(s)|Value
 --- | ----------- | -----
-22|C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15, C16, C17, C19, C21, C23, C25, C27|0.1uf
-5|C18, C20, C22, C24, C42|10uf Electrolytic
-1|C26|22uf Electrolytic
-1|C28|47uf Electrolytic
+22|C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15, C16, C17, C19, C21, C23, C25, C27|0.1u
+4|C18, C20, C22, C24|10u
+1|C26|22u
+1|C28|47uF
 2|C40, C41|15pf
-3|D1,D2,D3,D5,D6|LED
+1|D1|PWR LED
+1|D2|IDLE LED
+1|D3|MAP LED
 1|D4|1N4148
-1|J1|Pin Header 02x08 Male
-1|J2|Pin Header 01x03 Male
-1|J3|Pin Header 01x03 Male
-1|J4|Pin Header 01x02 Male
-1|J5|Pin Header 01x06 Male
-1|J6|Pin Header 01x02 Male
-1|J7|Pin Header 01x06 Male
-1|J8|Pin Header 01x03_Male
-1|JP1|Pin Header 02x04 Male
-1|JP2|Pin Header 01x03 Male
-1|JP4|Pin Header 01x02 Male
-1|JP5|Pin Header 01x03 Male
-3|P1, P2, P3|Pin Header 02X25 Male
-1|P4|Pin Header 02x20 Male
+1|D5|TMS9995 LED
+1|D6|IDE ACT LED
+1|D7|UART  LED
+1|J1|Connector_Generic:Conn_02x08_Odd_Even
+1|J2|Connector:Conn_01x03_Male
+1|J3|Connector:Conn_01x03_Male
+1|J4|Connector:Conn_01x02_Male
+1|J5|Connector_Generic:Conn_01x06
+1|J6|Connector_Generic:Conn_01x02
+1|J7|Connector:Conn_01x06_Male
+1|J8|Connector:Conn_01x03_Male
+1|J9|Connector_Generic:Conn_01x02
+1|JP1|Connector_Generic:Conn_02x04_Odd_Even
+1|JP3|Jumper:Jumper_2_Bridged
+1|JP4|Jumper:Jumper_2_Open
+1|JP5|Connector_Generic:Conn_01x03
+3|P1, P2, P3|Connector_Generic:Conn_02x25_Odd_Even
+1|P4|Connector_Generic:Conn_02x20_Odd_Even
 5|R1, R3, R7, R12, R13|470 ohm
 5|R2, R4, R9, R14, R15|10K ohm
+2|R5, R10|470 ohm
 1|R8|10 ohm
-1|R10|470 ohm
-2|RN1, RN2|4700 8 Resistor Network
-1|RN3|1K 8 Resistor Network
-1|RN4|10K  8 Resistor Network
+2|RN1, RN2|4700 ohm resistor net (9 pin)
+1|RN3|1K ohm resistor net (9 pin)
+1|RN4|10K ohm resistor net (9 pin)
 1|SW1|Switch:SW_Push
 1|U1|74LS14
 1|U2|74LS07
@@ -151,5 +160,4 @@ Qty|Reference(s)|Value
 1|U22|74LS259
 1|U23|74LS612
 1|U24|74LS08
-1|Y1|12MHz Crystal
-
+1|Y1|12MHz crystal
