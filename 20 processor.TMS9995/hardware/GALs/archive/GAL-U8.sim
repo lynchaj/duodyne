@@ -1,0 +1,121 @@
+%SIGNAL
+PIN  18 =  9902SEL 
+PIN  21 =  CFSEL 
+PIN   7 =  CPUA6 
+PIN   6 =  CPUA7 
+PIN  15 =  CPU_IORQ 
+PIN  14 =  CPU_MREQ 
+PIN   9 =  CRUCLK 
+PIN   3 =  DBIN 
+PIN  16 =  FLAGSEL 
+PIN   4 =  ISFE 
+PIN  20 =  MAPSEL 
+PIN   1 =  MEMEN 
+PIN  22 =  OFFBOARD_MEM 
+PIN  23 =  ONBOARD_ROM 
+PIN  11 =  PROTECT 
+PIN  19 =  PWE 
+PIN   5 =  RA15 
+PIN   8 =  ROMEN 
+PIN  10 =  USER 
+PIN  17 =  WAIT 
+PIN   2 =  WE 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+9902SEL =>
+    CPUA6
+  # CPUA7
+  # ISFE
+  # !MEMEN
+  # RA15
+  # USER
+
+CFSEL =>
+    CPUA6
+  # CPUA7
+  # ISFE
+  # MEMEN
+  # !RA15
+  # USER
+
+CPU_IORQ =>
+    !9902SEL
+  # !CFSEL
+  # ISFE
+  # !MAPSEL
+  # MEMEN
+  # !RA15
+  # USER
+
+CPU_MREQ =>
+    OFFBOARD_MEM
+  # !ISFE & RA15
+
+FLAGSEL =>
+    !CPUA6
+  # CPUA7
+  # CRUCLK
+  # ISFE
+  # RA15
+
+MAPSEL =>
+    !CPUA6
+  # CPUA7
+  # ISFE
+  # MEMEN
+  # !RA15
+  # USER
+
+OFFBOARD_MEM =>
+    MEMEN
+  # !ISFE & RA15
+  # !RA15 & !ROMEN & WE
+
+ONBOARD_ROM =>
+    MEMEN
+  # RA15
+  # ROMEN
+
+PWE =>
+    WE
+  # PROTECT & USER
+
+WAIT =>
+    !CFSEL
+  # !ONBOARD_ROM
+
+9902SEL.oe  =>
+    1 
+
+CFSEL.oe  =>
+    1 
+
+CPU_IORQ.oe  =>
+    1 
+
+CPU_MREQ.oe  =>
+    1 
+
+FLAGSEL.oe  =>
+    1 
+
+MAPSEL.oe  =>
+    1 
+
+OFFBOARD_MEM.oe  =>
+    1 
+
+ONBOARD_ROM.oe  =>
+    1 
+
+PWE.oe  =>
+    1 
+
+WAIT.oe  =>
+    1 
+
+%END

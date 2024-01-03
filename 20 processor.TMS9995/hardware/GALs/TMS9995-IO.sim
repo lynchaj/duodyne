@@ -1,0 +1,86 @@
+%SIGNAL
+PIN  18 =  9902SEL 
+PIN  21 =  CFSEL 
+PIN  13 =  CPUA2 
+PIN  11 =  CPUA3 
+PIN   3 =  CPUA4 
+PIN   2 =  CPUA5 
+PIN   7 =  CPUA6 
+PIN   6 =  CPUA7 
+PIN  15 =  CPU_IORQ 
+PIN   9 =  CRUCLK 
+PIN  16 =  FLAGSEL 
+PIN   4 =  ISFE 
+PIN  20 =  MAPSEL 
+PIN   1 =  MEMEN 
+PIN   5 =  RA15 
+PIN   8 =  ROMEN 
+PIN  10 =  USER 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+9902SEL =>
+    !MEMEN
+  # ISFE
+  # RA15
+  # CPUA7
+  # CPUA6
+  # USER
+
+CFSEL =>
+    MEMEN
+  # ISFE
+  # !RA15
+  # CPUA7
+  # CPUA6
+  # USER
+  # CPUA5
+  # CPUA4
+  # CPUA3
+  # CPUA2
+
+CPU_IORQ =>
+    MEMEN
+  # ISFE
+  # !CFSEL
+  # !MAPSEL
+  # !9902SEL
+  # USER
+  # !RA15
+
+FLAGSEL =>
+    CRUCLK
+  # ISFE
+  # RA15
+  # CPUA7
+  # !CPUA6
+
+MAPSEL =>
+    MEMEN
+  # ISFE
+  # !RA15
+  # CPUA7
+  # !CPUA6
+  # USER
+  # CPUA5
+  # CPUA4
+
+9902SEL.oe  =>
+    1 
+
+CFSEL.oe  =>
+    1 
+
+CPU_IORQ.oe  =>
+    1 
+
+FLAGSEL.oe  =>
+    1 
+
+MAPSEL.oe  =>
+    1 
+
+%END

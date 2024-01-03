@@ -1,0 +1,58 @@
+%SIGNAL
+PIN  13 =  CFSEL 
+PIN  14 =  CPU_MREQ 
+PIN   4 =  ISFE 
+PIN   1 =  MEMEN 
+PIN  22 =  OFFBOARD_MEM 
+PIN  23 =  ONBOARD_ROM 
+PIN  11 =  PROTECT 
+PIN  19 =  PWE 
+PIN   5 =  RA15 
+PIN   8 =  ROMEN 
+PIN  10 =  USER 
+PIN  17 =  WAIT 
+PIN   2 =  WE 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+CPU_MREQ =>
+    !ISFE & RA15
+  # OFFBOARD_MEM
+
+OFFBOARD_MEM =>
+    MEMEN
+  # !RA15 & !ROMEN & WE
+  # !ISFE & RA15
+
+ONBOARD_ROM =>
+    MEMEN
+  # ROMEN
+  # RA15
+
+PWE =>
+    WE
+  # PROTECT & USER
+
+WAIT =>
+    !ONBOARD_ROM
+  # !CFSEL
+
+CPU_MREQ.oe  =>
+    1 
+
+OFFBOARD_MEM.oe  =>
+    1 
+
+ONBOARD_ROM.oe  =>
+    1 
+
+PWE.oe  =>
+    1 
+
+WAIT.oe  =>
+    1 
+
+%END
