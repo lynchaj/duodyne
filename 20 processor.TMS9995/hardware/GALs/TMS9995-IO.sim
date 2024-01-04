@@ -8,14 +8,14 @@ PIN   2 =  CPUA5
 PIN   7 =  CPUA6 
 PIN   6 =  CPUA7 
 PIN  15 =  CPU_IORQ 
-PIN   9 =  CRUCLK 
-PIN  16 =  FLAGSEL 
 PIN   4 =  ISFE 
 PIN  20 =  MAPSEL 
 PIN   1 =  MEMEN 
+PIN  23 =  ONBOARD_ROM 
 PIN   5 =  RA15 
 PIN   8 =  ROMEN 
 PIN  10 =  USER 
+PIN  17 =  WAIT 
 %END
 
 %FIELD
@@ -51,13 +51,6 @@ CPU_IORQ =>
   # USER
   # !RA15
 
-FLAGSEL =>
-    CRUCLK
-  # ISFE
-  # RA15
-  # CPUA7
-  # !CPUA6
-
 MAPSEL =>
     MEMEN
   # ISFE
@@ -68,6 +61,15 @@ MAPSEL =>
   # CPUA5
   # CPUA4
 
+ONBOARD_ROM =>
+    MEMEN
+  # ROMEN
+  # RA15
+
+WAIT =>
+    !ONBOARD_ROM
+  # !CFSEL
+
 9902SEL.oe  =>
     1 
 
@@ -77,10 +79,13 @@ CFSEL.oe  =>
 CPU_IORQ.oe  =>
     1 
 
-FLAGSEL.oe  =>
+MAPSEL.oe  =>
     1 
 
-MAPSEL.oe  =>
+ONBOARD_ROM.oe  =>
+    1 
+
+WAIT.oe  =>
     1 
 
 %END

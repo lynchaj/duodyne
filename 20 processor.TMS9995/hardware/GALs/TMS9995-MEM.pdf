@@ -5,7 +5,7 @@
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Wed Jan 03 13:02:50 2024 "}
+  {DBtime "Wed Jan 03 17:56:11 2024 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,30 +33,33 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
-   {P MEMEN {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
-   {P WE {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
-   {P ISFE {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
-   {P RA15 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P MEMEN {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
+   {P WE {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P ISFE {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P RA15 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P CPUA7 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P CPUA6 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
    {P ROMEN {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
-   {P USER {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
-   {P PROTECT {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
-   {P CFSEL {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P CRUCLK {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P USER {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P PROTECT {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
    {P CPU_MREQ {Pt "I/O"}{Lq 0}{Ploc 350 20}}
-   {P WAIT {Pt "I/O"}{Lq 0}{Ploc 350 40}}
+   {P FLAGSEL {Pt "I/O"}{Lq 0}{Ploc 350 40}}
    {P PWE {Pt "I/O"}{Lq 0}{Ploc 350 60}}
    {P OFFBOARD {Pt "I/O"}{Lq 0}{Ploc 350 80}}
-   {P ONBOARD_ {Pt "I/O"}{Lq 0}{Ploc 350 100}}
   }
 
   {PKG
    [Ly "REFDES"]
    [Ts 25][Tj "CB"][Tr 0][Tm "N"]
-   {Rdl 225 210}
+   {Rdl 225 250}
 
    [Ly "PINNUM"]
    [Ts 15][Tj "RC"]
-   {Pnl 120 190}
+   {Pnl 120 230}
    [Ts 15][Tj "RC"]
+   {Pnl 120 190}
+   {Pnl 120 170}
    {Pnl 120 150}
    {Pnl 120 130}
    {Pnl 120 110}
@@ -69,17 +72,18 @@
    {Pnl 330 50}
    {Pnl 330 70}
    {Pnl 330 90}
-   {Pnl 330 110}
 
-   {Sd A 1 2 4 5 8 10 11 13 14 17 19 22 23}
+   {Sd A 1 2 4 5 6 7 8 9 10 11 14 16 19 22}
   }
 
   {PIC
    [Ly "GATE"]
    [Ts 15][Tj "LC"][Tr 0][Tm "N"]
-   {R 130 200 320 0}
+   {R 130 240 320 0}
+   {L 130 220 100 220}
+   {L 130 230 140 220 130 210}
    {L 130 180 100 180}
-   {L 130 190 140 180 130 170}
+   {L 130 160 100 160}
    {L 130 140 100 140}
    {L 130 120 100 120}
    {L 130 100 100 100}
@@ -91,23 +95,23 @@
    {L 320 40 350 40}
    {L 320 60 350 60}
    {L 320 80 350 80}
-   {L 320 100 350 100}
    [Ly "PINNAM"]
    [Tj "LC"]
-   {T "MEMEN" 140 180}
-   {T "WE" 140 140}
-   {T "ISFE" 140 120}
-   {T "RA15" 140 100}
+   {T "MEMEN" 140 220}
+   {T "WE" 140 180}
+   {T "ISFE" 140 160}
+   {T "RA15" 140 140}
+   {T "CPUA7" 140 120}
+   {T "CPUA6" 140 100}
    {T "ROMEN" 140 80}
-   {T "USER" 140 60}
-   {T "PROTECT" 140 40}
-   {T "CFSEL" 140 20}
+   {T "CRUCLK" 140 60}
+   {T "USER" 140 40}
+   {T "PROTECT" 140 20}
    [Tj "RC"]
    {T "CPU_MREQ" 310 20}
-   {T "WAIT" 310 40}
+   {T "FLAGSEL" 310 40}
    {T "PWE" 310 60}
    {T "OFFBOARD" 310 80}
-   {T "ONBOARD_" 310 100}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G22V10" 225 -10}
@@ -121,7 +125,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD C:\USERS\ANDREW\DESKTOP\SYSTEM CD UPDATES\DATA\DUODYNE\GITHUB\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-MEM 225 200}
+    {At PLD C:\USERS\ANDREW\DESKTOP\SYSTEM CD UPDATES\DATA\DUODYNE\GITHUB\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-MEM 225 240}
    }
   }
  }
@@ -139,23 +143,25 @@
    }
    {N RA15
    }
+   {N CPUA7
+   }
+   {N CPUA6
+   }
    {N ROMEN
+   }
+   {N CRUCLK
    }
    {N USER
    }
    {N PROTECT
    }
-   {N CFSEL
-   }
    {N CPU_MREQ
    }
-   {N WAIT
+   {N FLAGSEL
    }
    {N PWE
    }
    {N OFFBOARD
-   }
-   {N ONBOARD_
    }
   }
 
