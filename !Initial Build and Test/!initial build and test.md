@@ -1,7 +1,8 @@
 duodyne initial build and test findings
 
-4-slot backplane power LED much too bright
-4-slot backplane power connectors too close to processor slot
+* 4-slot backplane power LED much too bright
+* 4-slot backplane power connectors too close to processor slot
+
 
 * ROMRAM memory configuration jumpers flipped on PCB (fixed 1.1)
 * ROMRAM order the I2C jumper blocks the same as the I2C sockets -- would be even better if they could be made proximate (fixed 1.1)
@@ -12,6 +13,7 @@ duodyne initial build and test findings
 * ROMRAM use 30mm speaker instead of tiny piezo (fixed 1.1)
 * ROMRAM C15 reversed on back silkscreen (fixed 1.1)
 * ROMRAM use TO-92 hand solder footprints (fixed 1.1)
+
 
 * Z80 processor LEDs way too bright
 * Z80 processor replace reset circuit with DS1233 (EconoReset) (fixed 1.1)
@@ -32,20 +34,24 @@ duodyne initial build and test findings
 * Z80 processor update U36 GAL to DMA-CS-V4 configuration (fixed 1.1)
 * Z80 processor add jumper U36-13 to RN6-8 (fixed 1.1)
 
+
 * Zilog IO U2 and U4 are really 74LS244s even though the front silkscreen says 74LS241s (fixed 1.1)
 * Zilog IO Update U1 GAL to ZP-DATA-DIR-V2 configuration (fixed 1.1)
 * Zilog IO Disconnect D6 from D5 on 1PIO and 2PIO (fixed 1.1)
 * Zilog IO Mark default jumper locations on PCB front silkscreen (fixed 1.1)
 * Zilog IO Consolidate multi small jumpers into a larger jumper group (fixed 1.1)
 
+
 * Multi IO Replace 1K ohm isolated resistor networks DIP-14 with regular resistors due to obsolescence (fixed 1.1)
 * Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds) (fixed 1.1)
 * Multi IO add 3-pin jumper to select "reserved 2" on either 2x5 IDC PS/2 keyboard & mouse connector either pin 2 or 10 (fixed 1.1)
 * Multi IO add CH376S-EVT board as alternate to CH376S and associated parts install (fixed 1.1)
 
+
 * EPM7128S dev board Replace 470 ohm isolated resistor networks DIP-14 with same in DIP-16 due to obsolescence
 * EPM7128S add 2 screw terminal for 9VDC
 * EPM7128S add VCC and GND lugs for logic probe
+
 
 * SAB80535 add VCC and GND lugs for logic probe (fixed 1.1)
 * SAB80535 enlarge small labels for readability (fixed 1.1)
@@ -64,8 +70,10 @@ duodyne initial build and test findings
 * SAB80535 Replace Flash ROM PLCC-32 with DIP-32 ZIF socket (fixed 1.1)
 * SAB80535 Change LCD Vo Adjust circuit to use 10K Potentiometer (fixed 1.1)
 
+
 * SelfHost exchange J3-pin1 with J3-pin4 (Tx and Rx reversed) (fixed 1.1)
 * SelfHost Add BusMonitor function (fixed 1.1)
+
 
 * Disk IO Change U26 (74AHC02) supply from VCC (5V) to VDD (3.3V) (fixed 1.1)
 * Disk IO Remove R36 (22K) and R44 (22K); Replace R35 (10K) and R43 (10K) with wires (fixed 1.1)
@@ -73,6 +81,7 @@ duodyne initial build and test findings
 * Disk IO Move SD socket up to top of board (fixed 1.1)
 * Disk IO Remove U16 74LS273 as not used (fixed 1.1)
 * Disk IO Add comment referring back to MT011 source document (fixed 1.1)
+
 
 * front-panel Add mounting holes for OLED and microSD module (fixed 1.1)
 * front-panel Reverse orientation of switches SW10-SW13 (fixed 1.1)
