@@ -46,6 +46,7 @@ duodyne initial build and test findings
 * Zilog IO Mark default jumper locations on PCB front silkscreen (fixed 1.1)
 * Zilog IO Consolidate multi small jumpers into a larger jumper group (fixed 1.1)
 
+##
 
 * Multi IO Replace 1K ohm isolated resistor networks DIP-14 with regular resistors due to obsolescence (fixed 1.1)
 * Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds) (fixed 1.1)
