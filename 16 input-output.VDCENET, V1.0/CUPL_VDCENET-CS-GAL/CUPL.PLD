@@ -1,6 +1,6 @@
 Name     VDCENET-CS-GAL.tru ;
 PartNo   00 ;
-Date     29.05.2023 ;
+Date     07.01.2024 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -31,13 +31,17 @@ PIN 19 = bRESET;
 PIN 18 = HSYNOUT1;
 PIN 17 = VSYNOUT1;
 PIN 16 = CSYNOUT1;
+PIN 15 = VDCxLED;
+PIN 14 = ENETxLED;
 
 /* combinatorial logic */
 BUSxEN = CSxENET & CSxVDC1;
 CSYNOUT1 = !CSYNOUT;
 CSxVDC = !bRD # !bWR;
 ENETxINT01 = !ENETxINT0;
+ENETxLED = CSxVDC1;
 HSYNOUT1 = !HSYNOUT;
-RD = bRD;
+RD = !bRD;
+VDCxLED = CSxENET;
 VSYNOUT1 = !VSYNOUT;
 bRESET = !bRESET1;
