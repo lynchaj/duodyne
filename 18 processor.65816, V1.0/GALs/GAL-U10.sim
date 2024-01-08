@@ -2,12 +2,13 @@
 PIN   7 =  bus 
 PIN  17 = !busak 
 PIN  14 =  data_dir 
+PIN   5 =  dphi 
 PIN   6 =  io 
 PIN  18 =  iorq 
 PIN  13 = !m1 
-PIN   5 = !ml 
 PIN  19 =  mreq 
 PIN   9 =  onboardio 
+PIN  12 =  ophi 
 PIN   1 =  phi 
 PIN  16 = !rd 
 PIN   2 =  rw 
@@ -30,8 +31,8 @@ data_dir =>
   # !rw
 
 iorq =>
-    io
-  # !phi
+    !dphi
+  # io
   # !vda
   # vpa
 
@@ -43,12 +44,14 @@ mreq =>
   # !io
   # !phi
 
+ophi =>
+    phi
+
 rd =>
     phi & rw & vda
   # phi & rw & vpa
 
 wr =>
-    phi & !rw & vda
-  # phi & !rw & vpa
+    phi & !rw & vda & !vpa
 
 %END

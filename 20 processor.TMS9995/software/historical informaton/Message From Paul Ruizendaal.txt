@@ -1,0 +1,39 @@
+Dear Andrew and Dan,
+
+> What an interesting project! I am currently traveling in Africa with little connectivity, but I will revert more fully when I’m back next week.
+> 
+>> #1.  What cross development tools are you using to build the rom images and the operating systems that you have listed on your site?
+>> 
+>> #2.  Is the source code to the mini-cortex ported version of MDEX and Unix V6 posted anywhere?   We would like to add device drivers for the many other peripherals that we have available in our system to those operating systems and I was hoping to not have to start over with generic versions of these operating systems requiring first a port to the mini-cortex, then additions of our devices.
+>> 
+>> #3.  Is the source code for the boot rom available somewhere? If possible, we would also like to add support for our available boot devices to the ROM.
+
+I’m back home. Not sure where to best start, maybe with the mini-Cortex rom image. Also not sure how comfortable you are with ancient software, but from your hardware achievements I would assume that you are skilled in ancient software as well. Let me know if more detail is needed.
+
+Question #3
+
+The rom image was originally made by Stuart for his various projects. As he already explained, it consists of two parts: EVMBUG and Cortex basic. These two do not quite fill the rom and there is some space left over. Stuart used some free space to patch the EVMBUG startup routine with a boot menu. I then patched his patch to add some more options. All in all it is a patchy rom :^).
+
+The boot selection routine is at location 0x1500, the MDEX boot is at 0x7800 and the Unix boot is at 0x7b00 in the rom. I’ve attached the files. The .s files are supposed to be assembled and linked with the V6 Unix cross assembler tools (see below). The file “makebin.c” is a small program to patch Stuart’s original rom.
+
+Question #1, #2 for Unix
+
+As I mentioned in my earlier message, the ancient Unix source code is available from TUHS (e.g. https://www.tuhs.org/cgi-bin/utree.pl). Working from these sources I did my port. A step-by-step history in >300 commits is available here: https://www.jslite.net/repos/9995/timeline
+I’m not great at packaging and Dave Pitts did that for me. His result is available here: https://www.cozx.com/dpitts/tarballs/ti990/v6unix-1.3.0-source.tar.gz
+This tarball has properly set up the “make" files and builds both the cross compilation tools and a disk image (with options to build for the TI990 or the mini-Cortex).
+
+The two device drivers in this Unix port are the CF card driver (drv_cf.s) and the 9902 serial (drv_tty.c) drivers. The latter has an interrupt assist in “low.s”. For a detailed walk through of the V6 kernel the famous Lion’s book (https://en.wikipedia.org/wiki/A_Commentary_on_the_UNIX_Operating_System) is your best start. It is available online here: https://warsus.github.io/lions-/ Of course I am happy to help with any questions that you may have.
+
+Be careful when you check out code from my development repo: it currently contains an experimental version intended for an FPGA version of the mini-Cortex (https://gitlab.com/pnru/cortex).
+
+Question #1, #2 for MDEX
+
+Here there is nearly no source available, only partially linked object files, driver sources and a link script. This is how it was sold: users wrote their own device drivers working from the examples and linked those with the kernel object file into a kernel binary. The required tools and the “system generation” kit are available as MDEX disk images. The best place to start with all this is reading the system generation manual, available here: http://www.powertrancortex.com/documentation.html
+
+Let me know when you are ready for MDEX, as would need to dig a bit to retrieve the various files that I used to build the MDEX disk image. I used Dave Hunter’s Cortex emulator to build this if I remember well.
+
+Wbr,
+
+Paul
+
+
