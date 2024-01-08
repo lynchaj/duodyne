@@ -1,1 +1,1 @@
-This board provides a blank template for making input-output boards.  GAL information is notional and should be replaced with project specifics using Digital
+The VDCENET IO board provides MOSTEK 8568 VDC video and an RTL8019AS wired Ethernet interface 
