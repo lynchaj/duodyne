@@ -10,6 +10,7 @@ Device   g16v8a ;
 
 PIN   1   = phi         ; /*                */
 PIN   2   = rw          ; /*                */
+PIN   3   = himem       ; /*                */
 PIN   6   = io          ; /*                */
 PIN   7   = bus         ; /*                */
 PIN   8   = E           ; /*                */
@@ -29,6 +30,6 @@ PIN   13  = m1	        ; /*                                 */
 rd =  !(E & rw) ;
 wr =  !(E & !rw) ;
 mreq = !io # bus ;
-iorq = io ;
+iorq = io # himem ;
 m1 = 'b'0 ;
 data_dir = !(rw & onboardio & !bus) ;    /* Low to read from bus */

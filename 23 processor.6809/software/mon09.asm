@@ -2,471 +2,460 @@
 ;* MON09: A software debug monitor for the 6809
 ;*
 ;* The monitor is currently setup to run on a system which has 8K of ROM
-;* (for MON09) at the top of the memory may ($E000-$FFFF), and 48K of RAM
-;* from $2000-$DFFF. The 8K block from $0000-$1FFF is used for I/O devices
-;* etc. MON09 uses 160 bytes of memory at the very top of available RAM,
+;* (for MON09) at the top of the memory may ($E000-$FFFF), and RAM
+;* from $0000-$BFFF. The 256 byte block from $DF00-$DFFF is used for I/O devices
+;* etc. MON09 uses 256 bytes of memory at the very top of available RAM,
 ;* and the user stack pointer is initialized to point to the beginning of
 ;* this area, allowing the user stack to grow downward into free user RAM.
-;*
-;* Console and Host I/O device drivers are included for both 6551 and 6552
-;* type uarts, which are selected by the set symbol 'utype', and conditionally
-;* assembled into the code. THIS FILE MUST BE PROCESSED WITH 'MACRO' PRIOR
-;* TO ASSEMBLING WITH ASM09!!! You can modify the I/O drivers to support a
-;* different uart device if you wish. The serial I/O drivers are at the very
-;* end of the monitor source code (Just before the interrupt vectors).
 ;*
 ;* ?COPY.TXT 1985-2007 Dave Dunfield
 ;* **See COPY.TXT**.
 ;*
-;* HARDWARE INFORMATION
-utype           SET 6551        Uart is 6551
-ROM             = $E000       MON09 code goes here
-RAM             = $DF60       MON09 data goes here
-SER1            = $0000       Serial Port 1 (Console)
-SER2            = $0004       Serial Port 2 (Host)
-STACK           = RAM+$A0     MON09 Stack (Top of RAM)
 ;*
-        ORG     RAM     Internal MON09 variables
+;*   Modified for the Duodyne 6809 CPU board by D. Werner 1/15/2024
+;*   Single 16c550 UART supported at 9600,n,8,1
+;*
+;*   Commands not applicable to Duodyne have been removed to conserve
+;*   ROM space
+
+
+;* HARDWARE INFORMATION
+ROM             EQU $E000                         ; MON09 code goes here
+RAM             EQU $BF00                         ; MON09 data goes here
+STACK           EQU RAM+$F0                       ; MON09 Stack (Top of RAM)
+;*
+; UART 16C550 SERIAL
+MONUART0        EQU $DF58                         ; DATA IN/OUT
+MONUART1        EQU $DF59                         ; CHECK RX
+MONUART2        EQU $DF5A                         ; INTERRUPTS
+MONUART3        EQU $DF5B                         ; LINE CONTROL
+MONUART4        EQU $DF5C                         ; MODEM CONTROL
+MONUART5        EQU $DF5D                         ; LINE STATUS
+MONUART6        EQU $DF5E                         ; MODEM STATUS
+MONUART7        EQU $DF5F                         ; SCRATCH REG.
+;*
+BANK00          EQU $DF50
+BANK40          EQU $DF51
+BANK80          EQU $DF52
+BANKC0          EQU $DF53
+;*
+;*
+        ORG     RAM                               ;Internal MON09 variables
 ;*
 ;* MON09 INTERNAL MEMORY
 ;*
-SWIADR
-        RMB     2       SWI VECTOR ADDRESS
-SWI2ADR
-        RMB     2       SWI2 VECTOR ADDRESS
-SWI3ADR
-        RMB     2       SWI3 VECTOR ADDRESS
-IRQADR
-        RMB     2       IRQ VECTOR ADDRESS
-FIRQADR
-        RMB     2       FIRQ VECTOR ADDRESS
-IOCON
-        RMB     1       I/O CONFIGURATION BYTE
-UART1
-        RMB     2       UART 1 ADDRESS
-UART2
-        RMB     2       UART 2 ADDRESS
-SAVCC
-        RMB     1       SAVED CONDITION CODE REGISTER
-SAVA
-        RMB     1       SAVED 6809 A REGISTER
-SAVB
-        RMB     1       SAVED 6809 B REGISTER
-SAVDP
-        RMB     1       SAVED DIRECT PAGE REGISTER
-SAVX
-        RMB     2       SAVED X REGISTER
-SAVY
-        RMB     2       SAVED Y REGISTER
-SAVU
-        RMB     2       SAVED U REGISTER
-SAVPC
-        RMB     2       SAVED PROGRAM COUNTER
-SAVS
-        RMB     2       SAVED S REGISTER
-TEMP
-        RMB     2       TEMPORARY STORAGE
-STPFLG
-        RMB     1       REGISTER DISPLAY WHILE STEPPING FLAG
-PTRSAV
-        RMB     2       SINGLE STEP AND DISASSEMBLER CODE POINTER
-INSTYP
-        RMB     1       DISASSEMBLED INSTRUCTION TYPE
-POSBYT
-        RMB     1       POSTBYTE STORAGE AREA
-BRKTAB
-        RMB     24      BREAKPOINT TABLE
-DSPBUF
-        RMB     50      DISASSEMBLER DISPLAY BUFFER
-INSRAM
-        RMB     7       INSTRUCTION EXECUTION ADDRESS
+SWIADR:
+        RMB     2                                 ;SWI VECTOR ADDRESS
+SWI2ADR:
+        RMB     2                                 ;SWI2 VECTOR ADDRESS
+SWI3ADR:
+        RMB     2                                 ;SWI3 VECTOR ADDRESS
+IRQADR:
+        RMB     2                                 ;IRQ VECTOR ADDRESS
+FIRQADR:
+        RMB     2                                 ;FIRQ VECTOR ADDRESS
+SAVCC:
+        RMB     1                                 ;SAVED CONDITION CODE REGISTER
+SAVA:
+        RMB     1                                 ;SAVED 6809 A REGISTER
+SAVB:
+        RMB     1                                 ;SAVED 6809 B REGISTER
+SAVDP:
+        RMB     1                                 ;SAVED DIRECT PAGE REGISTER
+SAVX:
+        RMB     2                                 ;SAVED X REGISTER
+SAVY:
+        RMB     2                                 ;SAVED Y REGISTER
+SAVU:
+        RMB     2                                 ;SAVED U REGISTER
+SAVPC:
+        RMB     2                                 ;SAVED PROGRAM COUNTER
+SAVS:
+        RMB     2                                 ;SAVED S REGISTER
+TEMP:
+        RMB     2                                 ;TEMPORARY STORAGE
+STPFLG:
+        RMB     1                                 ;REGISTER DISPLAY WHILE STEPPING FLAG
+PTRSAV:
+        RMB     2                                 ;SINGLE STEP AND DISASSEMBLER CODE POINTER
+INSTYP:
+        RMB     1                                 ;DISASSEMBLED INSTRUCTION TYPE
+POSBYT:
+        RMB     1                                 ;POSTBYTE STORAGE AREA
+BRKTAB:
+        RMB     24                                ;BREAKPOINT TABLE
+DSPBUF:
+        RMB     50                                ;DISASSEMBLER DISPLAY BUFFER
+INSRAM:
+        RMB     7                                 ;INSTRUCTION EXECUTION ADDRESS
 ;*
-        ORG     ROM     MONITOR CODE
+        ORG     ROM                               ;MONITOR CODE
 ;*
 ;* INITIALIZATIONS.
 ;*
-RESET
-        LDS     #STACK      SET UP STACK
-        LDX     #SWIADR     POINT TO START
-CLRRAM
-        CLR     ,X+     CLEAR IT
-        CMPX    #INSRAM     AT BUFFER?
-        BLO     CLRRAM      KEEP GOING
-        LDX     #SER1       GET SERIAL PORT 1
-        STX     >UART1      SET IT UP
-        LBSR    INIT        INITIALIZE IT
-        LDX     #SER2       GET SERIAL PORT 2
-        STX     >UART2      SET IT UP
-        LBSR    INIT        INITIALIZE IT
-        LDA     #3      DEFAULT I/O CONFIGURATION
-        STA     IOCON       SET IT
-        LDD     #RAM        DEFAULT STACK AT TOP OF RAM
-        STD     SAVS        SAVE IT
-        LDA     #$D0        SET CC
-        STA     SAVCC       SAVE IT
-MONITOR
-        LBSR    WRMSG       OUTPUT MESSAGE
+RESET:
+        LDS     #STACK                            ;SET UP STACK
+
+;* Setup Memory Banks (RAM 0000-C000, ROM C000-FFFF)
+        LDA     #$80
+        STA     BANK00
+        LDA     #$81
+        STA     BANK40
+        LDA     #$82
+        STA     BANK80
+        LDA     #$03
+        STA     BANKC0
+
+        LDA     #$0B
+        STA     MONUART4                          ; Int disabled, banks enabled
+
+
+        LDX     #SWIADR                           ;POINT TO START
+CLRRAM:
+        CLR     ,X+                               ;CLEAR IT
+        CMPX    #INSRAM                           ;AT BUFFER?
+        BLO     CLRRAM                            ;KEEP GOING
+
+        LBSR    INIT                              ;INITIALIZE UART
+        LDD     #RAM                              ;DEFAULT STACK AT TOP OF RAM
+        STD     SAVS                              ;SAVE IT
+        LDA     #$D0                              ;SET CC
+        STA     SAVCC                             ;SAVE IT
+MONITOR:
+        LBSR    WRMSG                             ;OUTPUT MESSAGE
+        FCB     $0A,$0D,$0A,$0A
+        FCC     '  ____                  _                  '
         FCB     $0A,$0D
-        FCC     'MON09 Version 3.3'
-        FCB     $0A,$0D,$0A
-        FCC     '?COPY.TXT 1985-2007 Dave Dunfield'
+        FCC     ' |  _ \ _   _  ___   __| |_   _ _ __   ___ '
         FCB     $0A,$0D
-        FCC     '**See COPY.TXT**.'
+        FCC     ' | | | | | | |/ _ \ / _` | | | | '
+        FCB     $27
+        FCC     '_ \ / _ \ '
+        FCB     $0A,$0D
+        FCC     ' | |_| | |_| | (_) | (_| | |_| | | | |  __/'
+        FCB     $0A,$0D
+        FCC     ' |____/ \__,_|\___/ \__,_|\__, |_| |_|\___|'
+        FCB     $0A,$0D
+        FCC     '                          |___/            '
+        FCB     $0A,$0D
+        FCC     'MON09 Version 3.3a   1985-2007 Dave Dunfield'
+        FCB     $0A,$0D
+        FCC     '** Press ? for a list of commands **'
         FCB     $0A,$FF
 MAIN
-        LDS     #STACK      FIX STACK IN CASE ERROR
-        LBSR    WRMSG       OUTPUT MESSAGE
+        LDS     #STACK                            ;FIX STACK IN CASE ERROR
+        LBSR    WRMSG                             ;OUTPUT MESSAGE
         FCN     '* '
-        LBSR    GETECH      GET CHARACTER
-        CLRB    INDICATE NO SECOND CHAR
+        LBSR    GETECH                            ;GET CHARACTER
+        CLRB                                      ;INDICATE NO SECOND CHAR
 ;* LOOK FOR COMMAND IN TABLE
 LOOKC
-        LDX     #CMDTAB     POINT TO COMMAND TABLE
-        CLR     TEMP        INDICATE NO PARTIAL MATCH
+        LDX     #CMDTAB                           ;POINT TO COMMAND TABLE
+        CLR     TEMP                              ;INDICATE NO PARTIAL MATCH
 LOOK1
-        CMPD    ,X++        DOES IT MATCH
-        BEQ     LOOK3       YES IT DOES
-        CMPA    -2,X        DOES FIRST CHAR MATCH?
+        CMPD    ,X++                              ;DOES IT MATCH
+        BEQ     LOOK3                             ;YES IT DOES
+        CMPA    -2,X                              ;DOES FIRST CHAR MATCH?
         BNE     LOOK2                             ;NO, DON'T RECORD
-        DEC     TEMP        SET FLAG
+        DEC     TEMP                              ;SET FLAG
 LOOK2
-        LEAX    2,X     ADVANCE TO NEXT
-        TST     ,X      HAVE WE HIT THE END
-        BNE     LOOK1       NO, KEEP LOOKING
-        TSTB    ALREADY HAVE TWO CHARS?
-        BNE     ERROR       YES, ERROR
-        LDB     TEMP        ANY PARTIAL MATCHES?
-        BEQ     ERROR       NO, ERROR
-        TFR     A,B     SAVE CHAR IN 'A'
-        LBSR    GETECH      GET NEXT CHAR
-        EXG     A,B     SWAP BACK
-        BRA     LOOKC       AND CONTINUE
+        LEAX    2,X                               ;ADVANCE TO NEXT
+        TST     ,X                                ;HAVE WE HIT THE END
+        BNE     LOOK1                             ;NO, KEEP LOOKING
+        TSTB                                      ;ALREADY HAVE TWO CHARS?
+        BNE     ERROR                             ;YES, ERROR
+        LDB     TEMP                              ;ANY PARTIAL MATCHES?
+        BEQ     ERROR                             ;NO, ERROR
+        TFR     A,B                               ;SAVE CHAR IN 'A'
+        LBSR    GETECH                            ;GET NEXT CHAR
+        EXG     A,B                               ; SWAP BACK
+        BRA     LOOKC                             ;AND CONTINUE
 ;* COMMAND WAS FOUND, EXECUTE IT
 LOOK3
-        LBSR    SPACE       OUTPUT SPACE
-        JSR     [,X]        EXECUTE COMMAND
-        BRA     MAIN        AND RETURN
+        LBSR    SPACE                             ;OUTPUT SPACE
+        JSR     [,X]                              ;EXECUTE COMMAND
+        BRA     MAIN                              ;AND RETURN
 ;* ERROR HAS OCCURED
 ERROR
-        LBSR    WRMSG       OUTPUT MESSAGE
+        LBSR    WRMSG                             ;OUTPUT MESSAGE
         FCC     ' ?'
         FCB     $FF
-        BRA     MAIN        TRY AGAIN
+        BRA     MAIN                              ; TRY AGAIN
 ;* COMMAND LOOKUP TABLE
 CMDTAB
-        FCB     'D','M'     DISPLAY MEMORY
+        FCB     'D','M'                           ; DISPLAY MEMORY
         FDB     MEMORY
-        FCB     'D','I'     DISASSEMBLE
+        FCB     'D','I'                           ; DISASSEMBLE
         FDB     DISASM
-        FCB     'D','R'     DISPLAY REGISTERS
+        FCB     'D','R'                           ;DISPLAY REGISTERS
         FDB     DISREG
-        FCB     'D','B'     VIEW BREAKPOINTS
-        FDB     DSPBRK
-        FCB     'D','V'     DISPLAY VECTORS
+        FCB     'D','V'                           ;DISPLAY VECTORS
         FDB     DISVEC
-        FCB     'D','U'     DISPLAY UARTS
-        FDB     DISURT
-        FCB     'C','R'     CHANGE REGISTER
+        FCB     'C','R'                           ;CHANGE REGISTER
         FDB     CHGREG
-        FCB     'C','V'     CHANGE VECTORS
+        FCB     'C','V'                           ;CHANGE VECTORS
         FDB     CHGVEC
-        FCB     'C','U'     CHANGE UARTS
-        FDB     CHGURT      DO IT
-        FCB     'E',0       SUBSTITUTE MEMORY
+        FCB     'E',0                             ;SUBSTITUTE MEMORY
         FDB     SUBMEM
-        FCB     'L',0       DOWNLOAD
+        FCB     'L',0                             ;DOWNLOAD
         FDB     LOAD
-        FCB     'B',0       SET BREAKPOINT
-        FDB     SETBRK
-        FCB     'S',0       STEP
-        FDB     GOSTEP
-        FCB     'G',0       GO
+        FCB     'G',0                             ;GO
         FDB     GOEXEC
-        FCB     'T',0       TRANSPARENT MODE
-        FDB     TMODE
-        FCB     'F','M'     FILL MEMORY
+        FCB     'F','M'                           ;FILL MEMORY
         FDB     FILMEM
-        FCB     'R','R'     REPEATING READ
+        FCB     'R','R'                           ;REPEATING READ
         FDB     RDLOOP
-        FCB     'R','W'     REPEATING WRITE
+        FCB     'R','W'                           ;REPEATING WRITE
         FDB     WRLOOP
-        FCB     'M','T'     MEMORY TEST
+        FCB     'M','T'                           ;MEMORY TEST
         FDB     RAMTEST
-        FCB     'W',0       WRITE MEMORY
+        FCB     'W',0                             ;WRITE MEMORY
         FDB     WRIMEM
-        FCB     'M','M'     MOVE MEMORY
+        FCB     'M','M'                           ;MOVE MEMORY
         FDB     MOVMEM
-        FCB     'X','R'     REPEATING 16 BIT READ
+        FCB     'X','R'                           ;REPEATING 16 BIT READ
         FDB     XRLOOP
-        FCB     'X','W'     REPEATING 16 BIT WRITE
+        FCB     'X','W'                           ;REPEATING 16 BIT WRITE
         FDB     XWLOOP
-        FCB     '+',0       HEX ADDITION
+        FCB     '+',0                             ;HEX ADDITION
         FDB     HEXADD
-        FCB     '-',0       HEX SUBTRACTION
+        FCB     '-',0                             ;HEX SUBTRACTION
         FDB     HEXSUB
-        FCB     '?',0       HELP COMMAND
+        FCB     '?',0                             ;HELP COMMAND
         FDB     HELP
-        FCB     0       MARK END OF TABLE
+        FCB     0                                 ;MARK END OF TABLE
 ;*
 ;* 'F' - FILL MEMORY
 ;*
 FILMEM
-        LBSR    GETRNG      GET ADDRESSES
-        STD     TEMP        SAVE IT
-        LBSR    SPACE       SPACE OVER
-        LBSR    GETBYT      GET DATA BYTE
-        BNE     ERROR       INVALID
+        LBSR    GETRNG                            ;GET ADDRESSES
+        STD     TEMP                              ;SAVE IT
+        LBSR    SPACE                             ;SPACE OVER
+        LBSR    GETBYT                            ;GET DATA BYTE
+        BNE     ERROR                             ;INVALID
 FILL1
-        STA     ,X+     WRITE IT
-        CMPX    TEMP        ARE WE THERE
-        BLS     FILL1       NO, KEEP GOING
-        LBRA    LFCR        NEW LINE
+        STA     ,X+                               ;WRITE IT
+        CMPX    TEMP                              ;ARE WE THERE
+        BLS     FILL1                             ;NO, KEEP GOING
+        LBRA    LFCR                              ;NEW LINE
 ;*
 ;* 'MM' - MOVE MEMORY
 ;*
 MOVMEM
-        LBSR    GETRNG      GET A RANGE
-        STD     TEMP        SAVE LAST VALUE
-        LBSR    SPACE       SEPERATOR
-        LBSR    GETADR      GET DEST ADDRESS
-        TFR     D,Y     SET IT UP
+        LBSR    GETRNG                            ;GET A RANGE
+        STD     TEMP                              ;SAVE LAST VALUE
+        LBSR    SPACE                             ;SEPERATOR
+        LBSR    GETADR                            ;GET DEST ADDRESS
+        TFR     D,Y                               ;SET IT UP
 MOVM1
-        LDA     ,X+     GET SOURCE BYTE
-        STA     ,Y+     SAVE IN DEST
-        CMPX    TEMP        SAVE IT
-        BLS     MOVM1       KEEP MOVEING
-        LBRA    LFCR        NEW LINE
+        LDA     ,X+                               ;GET SOURCE BYTE
+        STA     ,Y+                               ;SAVE IN DEST
+        CMPX    TEMP                              ;SAVE IT
+        BLS     MOVM1                             ;KEEP MOVEING
+        LBRA    LFCR                              ;NEW LINE
 ;*
 ;* 'DM' - DISPLAY MEMORY
 ;*
 MEMORY
-        LBSR    GETRNG      GET ADDRESS
-        STD     TEMP        SAVE
+        LBSR    GETRNG                            ;GET ADDRESS
+        STD     TEMP                              ;SAVE
 MEM1
-        LBSR    LFCR        NEW LINE
-        LBSR    CHKCHR      CHECK FOR CHAR
-        LBEQ    MAIN        ESCAPE, QUIT
-        TFR     X,D     GET ADDRESS
-        PSHS    A,B     SAVE FOR LATER
-        LBSR    WRDOUT      DISPLAY
-        LDB     #16     DISPLAY 16 TO A LINE
+        LBSR    LFCR                              ;NEW LINE
+        LBSR    CHKCHR                            ;CHECK FOR CHAR
+        LBEQ    MAIN                              ;ESCAPE, QUIT
+        TFR     X,D                               ;GET ADDRESS
+        PSHS    A,B                               ;SAVE FOR LATER
+        LBSR    WRDOUT                            ;DISPLAY
+        LDB     #16                               ;DISPLAY 16 TO A LINE
 MEM2
-        LBSR    SPACE       OUTPUT A SPACE
-        BITB    #3      ON A BOUNDARY?
-        BNE     MEM3        NO, SPACE
-        LBSR    SPACE       EXTRA SPACE
+        LBSR    SPACE                             ;OUTPUT A SPACE
+        BITB    #3                                ;ON A BOUNDARY?
+        BNE     MEM3                              ;NO, SPACE
+        LBSR    SPACE                             ;EXTRA SPACE
 MEM3
-        LDA     ,X+     GET BYTE
-        LBSR    HEXOUT      DISPLAY
-        DECB    REDUCE COUNT
-        BNE     MEM2        CONTINUE
-        LDB     #4      FOUR SPACE
+        LDA     ,X+                               ;GET BYTE
+        LBSR    HEXOUT                            ;DISPLAY
+        DECB                                      ;REDUCE COUNT
+        BNE     MEM2                              ;CONTINUE
+        LDB     #4                                ;FOUR SPACE
 MEM4
-        LBSR    SPACE       DISPLAY A SPACE
-        DECB    REDUCE COUNT
-        BNE     MEM4        CONTINUE
-        PULS    X       RESTORE X
-        LDB     #16     COUNT OF 16
+        LBSR    SPACE                             ;DISPLAY A SPACE
+        DECB                                      ;REDUCE COUNT
+        BNE     MEM4                              ; CONTINUE
+        PULS    X                                 ;RESTORE X
+        LDB     #16                               ;COUNT OF 16
 MEM5
-        LDA     ,X+     GET CHAR
-        CMPA    #' '        <SPACE
-        BLO     MEM6        CONVERT TO DOT
-        CMPA    #$7F        PRINTABLE?
-        BLO     MEM7        OK TO DISPLAY
+        LDA     ,X+                               ;GET CHAR
+        CMPA    #' '                              ; <SPACE
+        BLO     MEM6                              ; CONVERT TO DOT
+        CMPA    #$7F                              ; PRINTABLE?
+        BLO     MEM7                              ; OK TO DISPLAY
 MEM6
-        LDA     #'.'        CHANGE TO DOT
+        LDA     #'.'                              ;CHANGE TO DOT
 MEM7
-        LBSR    PUTCHR      OUTPUT
-        DECB    REDUCE COUNT
-        BNE     MEM5        DISPLAY THEM ALL
-        CMPX    TEMP        PAST END?
-        BLS     MEM1        NO, KEEP GOING
-        LBRA    LFCR        NEW LINE
+        LBSR    PUTCHR                            ;OUTPUT
+        DECB                                      ;REDUCE COUNT
+        BNE     MEM5                              ; DISPLAY THEM ALL
+        CMPX    TEMP                              ; PAST END?
+        BLS     MEM1                              ; NO, KEEP GOING
+        LBRA    LFCR                              ; NEW LINE
 ;*
 ;* 'W' - WRITE TO MEMORY
 ;*
 WRIMEM
-        LBSR    GETADR      GET ADDRESS
-        TFR     D,X     SET IT UP
-        LBSR    SPACE       STEP OVER
-        LBSR    GETBYT      GET BYTE
-        STA     ,X      WRITE TO MEMORY
-        LBRA    LFCR        NEW LINE
+        LBSR    GETADR                            ;GET ADDRESS
+        TFR     D,X                               ;SET IT UP
+        LBSR    SPACE                             ; STEP OVER
+        LBSR    GETBYT                            ;GET BYTE
+        STA     ,X                                ;WRITE TO MEMORY
+        LBRA    LFCR                              ; NEW LINE
 ;*
 ;* 'E' - EDIT MEMORY
 ;*
 SUBMEM
-        LBSR    GETADR      GET ADDRESS
-        TFR     D,X     COPY
+        LBSR    GETADR                            ;GET ADDRESS
+        TFR     D,X                               ;COPY
 SUBM1
-        LBSR    LFCR        NEW LINE
-        TFR     X,D     GET ADDRESS
-        LBSR    WRDOUT      OUTPUT
-        LDB     #8      NEW COUNT
+        LBSR    LFCR                              ; NEW LINE
+        TFR     X,D                               ;GET ADDRESS
+        LBSR    WRDOUT                            ; OUTPUT
+        LDB     #8                                ;NEW COUNT
 SUBM2
-        LBSR    SPACE       SEPERATOR
-        LDA     ,X      GET BYTE
-        LBSR    HEXOUT      DISPLAY
-        LDA     #'-'        PROMPT
-        LBSR    PUTCHR      OUTPUT
-        LBSR    GETBYT      GET A BYTE
-        BNE     SUBM4       INVALID
-        STA     ,X      RESAVE
+        LBSR    SPACE                             ; SEPERATOR
+        LDA     ,X                                ;GET BYTE
+        LBSR    HEXOUT                            ; DISPLAY
+        LDA     #'-'                              ; PROMPT
+        LBSR    PUTCHR                            ; OUTPUT
+        LBSR    GETBYT                            ; GET A BYTE
+        BNE     SUBM4                             ; INVALID
+        STA     ,X                                ;RESAVE
 SUBM3
-        LEAX    1,X     ADVANCE
-        DECB    REDUCE COUNT
-        BNE     SUBM2       MORE, CONTINUE
-        BRA     SUBM1       NEW LINE
+        LEAX    1,X                               ;ADVANCE
+        DECB                                      ;REDUCE COUNT
+        BNE     SUBM2                             ;MORE, CONTINUE
+        BRA     SUBM1                             ;NEW LINE
 SUBM4
-        CMPA    #$0D        CR?
-        LBEQ    LFCR        IF SO, QUIT
-        CMPA    #' '        SPACE?
-        BNE     SUBM5       NO
-        LBSR    SPACE       FILL FOR TWO DIGITS
-        BRA     SUBM3       ADVANCE
+        CMPA    #$0D                              ;CR?
+        LBEQ    LFCR                              ;IF SO, QUIT
+        CMPA    #' '                              ;SPACE?
+        BNE     SUBM5                             ;NO
+        LBSR    SPACE                             ;FILL FOR TWO DIGITS
+        BRA     SUBM3                             ;ADVANCE
 SUBM5
-        CMPA    #$08        BACKSPACE?
-        LBNE    ERROR       INVALID
-        LEAX    -1,X        BACKUP
-        BRA     SUBM1       NEW LINE
+        CMPA    #$08                              ; BACKSPACE?
+        LBNE    ERROR                             ; INVALID
+        LEAX    -1,X                              ; BACKUP
+        BRA     SUBM1                             ; NEW LINE
 ;*
 ;* 'DI' - DISASSEMBLE
 ;*
 DISASM
-        LBSR    GETRNG      GET ADDRESS
-        STD     TEMP        SAVE
-        TFR     X,Y     COPY TO Y
-        LBSR    LFCR        NEW LINE
-        LDU     #DSPBUF     POINT TO INPUT BUFFER
+        LBSR    GETRNG                            ;GET ADDRESS
+        STD     TEMP                              ;SAVE
+        TFR     X,Y                               ;COPY TO Y
+        LBSR    LFCR                              ; NEW LINE
+        LDU     #DSPBUF                           ; POINT TO INPUT BUFFER
 DISS1
-        LBSR    DISASS      DISASSEMBLE
-        TFR     U,X     COPY
-        LBSR    WRLIN       OUTPUT
-        LBSR    CHKCHR      END?
-        BEQ     DISS2       YES, QUIT
-        CMPY    TEMP        OVER?
-        BLO     DISS1       TRY AGAIN
+        LBSR    DISASS                            ;DISASSEMBLE
+        TFR     U,X                               ;COPY
+        LBSR    WRLIN                             ; OUTPUT
+        LBSR    CHKCHR                            ; END?
+        BEQ     DISS2                             ; YES, QUIT
+        CMPY    TEMP                              ; OVER?
+        BLO     DISS1                             ; TRY AGAIN
 DISS2
         RTS
 ;*
 ;* 'DV' - DISPLAY VECTORS
 ;*
 DISVEC
-        LDX     #VECTXT     POINT TO VECTOR TEXT
-        LDY     #SWIADR     POINT TO FIRST VECTOR
+        LDX     #VECTXT                           ; POINT TO VECTOR TEXT
+        LDY     #SWIADR                           ; POINT TO FIRST VECTOR
 DISV1
-        LBSR    WRLIN       OUTPUT A MESSAGE
-        LDD     ,Y++        GET A VECTOR
-        LBSR    WRDOUT      OUTPUT VECTOR ADDRESS
-        LDA     ,X      MORE TEXT?
-        BNE     DISV1       AND CONTINUE
-        LBRA    LFCR        NEW LINE
+        LBSR    WRLIN                             ; OUTPUT A MESSAGE
+        LDD     ,Y++                              ; GET A VECTOR
+        LBSR    WRDOUT                            ; OUTPUT VECTOR ADDRESS
+        LDA     ,X                                ;MORE TEXT?
+        BNE     DISV1                             ; AND CONTINUE
+        LBRA    LFCR                              ; NEW LINE
 VECTXT
         FCN     'SWI='
         FCN     ' SWI2='
         FCN     ' SWI3='
         FCN     ' IRQ='
         FCN     ' FIRQ='
-        FCB     0       END OF TABLE
-;*
-;* 'DU' DISPLAY UARTS
-;*
-DISURT
-        LDX     #URTEXT     POINT TO TEXT
-        LDY     #UART1      POINT TO UART
-        BRA     DISV1       DISPLAY IT
-URTEXT
-        FCN     'UART1='
-        FCN     ' UART2='
-        FCB     0
+        FCB     0                                 ; END OF TABLE
 ;*
 ;* 'CV' - CHANGE VECTOR
 ;*
 CHGVEC
-        LBSR    GETECH      GET CHAR & ECHO
-        CMPA    #'S'        SWI?
-        BNE     CHGV1       NO
-        LDA     #'1'        SAME AS '1'
-        BRA     CHGV3       CONTINUE
+        LBSR    GETECH                            ;GET CHAR & ECHO
+        CMPA    #'S'                              ;SWI?
+        BNE     CHGV1                             ;NO
+        LDA     #'1'                              ;SAME AS '1'
+        BRA     CHGV3                             ;CONTINUE
 CHGV1
-        CMPA    #'I'        IRQ?
-        BNE     CHGV2       NO, ITS OK
-        LDA     #'4'        CONVERT
-        BRA     CHGV3       AND CONTINUE
+        CMPA    #'I'                              ;IRQ?
+        BNE     CHGV2                             ;NO, ITS OK
+        LDA     #'4'                              ;CONVERT
+        BRA     CHGV3                             ;AND CONTINUE
 CHGV2
-        CMPA    #'F'        FIRQ?
-        BNE     CHGV3       NO
-        LDA     #'5'        CONVERT
+        CMPA    #'F'                              ;FIRQ?
+        BNE     CHGV3                             ;NO
+        LDA     #'5'                              ;CONVERT
 CHGV3
-        SUBA    #'1'        TEST IT
-        CMPA    #4      CHECK RANGE
-        LBHI    ERROR       INVALID
-        LDX     #SWIADR     POINT TO IT
+        SUBA    #'1'                              ;TEST IT
+        CMPA    #4                                ;CHECK RANGE
+        LBHI    ERROR                             ; INVALID
+        LDX     #SWIADR                           ;POINT TO IT
 CHGV4
-        LSLA    X2 FOR 2 BYTE ENTRIES
+        LSLA                                      ;X2 FOR 2 BYTE ENTRIES
         LEAX    A,X     ADVANCE TO VECTOR
-        LBSR    SPACE       SEPERATOR
-        LBSR    GETADR      GET NEW VALUE
-        STD     ,X      WRITE NEW VECTOR
-        LBRA    LFCR        NEW LINE & EXIT
-;*
-;* 'CU' - CHANGE UART ADDRESS
-;*
-CHGURT
-        LBSR    GETECH      GET AND ECHO
-        SUBA    #'1'        CONVERT
-        CMPA    #1      IN RANGE?
-        LBHI    ERROR       INVALID
-        LDX     #UART1      POINT TO IT
-        LSLA    X2 FOR 2 BYTE ENTRIES
-        LEAX    A,X     ADVANCE TO IT
-        LBSR    SPACE       SEPERATOR
-        LBSR    GETADR      GET ADDRESS
-        STD     ,X      SET IT
-        TFR     D,X     SET UP POINTER
-        LBSR    INIT        INITIALIZE IT
-        LBRA    LFCR        NEW LINE
+        LBSR    SPACE                             ; SEPERATOR
+        LBSR    GETADR                            ;GET NEW VALUE
+        STD     ,X                                ; WRITE NEW VECTOR
+        LBRA    LFCR                              ; NEW LINE & EXIT
 ;*
 ;* 'DR' - DISPLAY REGISTERS
 ;*
 DISREG
-        LDX     #REGTXT     POINT TO TEXT
-        LDY     #SAVCC      POINT TO VALUE
-        BSR     RSUB1       'CC='
-        LBSR    WRLIN       ' ['
-        LDU     #CCBITS     POINT TO BIT TABLE
-        LDB     -1,Y        GET BITS BACK
-        PSHS    Y       SAVE POINTER
-        LDY     #8      EIGHT BITS IN BYTE
+        LDX     #REGTXT                           ;POINT TO TEXT
+        LDY     #SAVCC                            ;POINT TO VALUE
+        BSR     RSUB1                             ;'CC='
+        LBSR    WRLIN                             ;' ['
+        LDU     #CCBITS                           ;POINT TO BIT TABLE
+        LDB     -1,Y                              ;GET BITS BACK
+        PSHS    Y                                 ;SAVE POINTER
+        LDY     #8                                ;EIGHT BITS IN BYTE
 REGB1
-        LDA     ,U+     GET BIT IDENTIFIER
-        ASLB    IS IT SET?
-        BCS     RBITS       YES, DISPLAY IT
-        LDA     #'-'        NO, DISPLAY DASH
+        LDA     ,U+                               ; GET BIT IDENTIFIER
+        ASLB                                      ;IS IT SET?
+        BCS     RBITS                             ;YES, DISPLAY IT
+        LDA     #'-'                              ;NO, DISPLAY DASH
 RBITS
-        LBSR    PUTCHR      OUTPUT A CHARACTER
-        LEAY    -1,Y        REDUCE COUNT
-        BNE     REGB1       MORE TO GO
-        PULS    Y       RESTORE Y
-        BSR     RSUB1       '] A='
-        BSR     RSUB1       ' B='
-        BSR     RSUB1       ' DP='
-        BSR     RSUB2       ' X='
-        BSR     RSUB2       ' Y='
-        BSR     RSUB2       ' U='
-        BSR     RSUB2       ' PC='
-        BSR     RSUB2       ' S='
-        LBRA    LFCR        QUIT
+        LBSR    PUTCHR                            ; OUTPUT A CHARACTER
+        LEAY    -1,Y                              ; REDUCE COUNT
+        BNE     REGB1                             ; MORE TO GO
+        PULS    Y                                 ; RESTORE Y
+        BSR     RSUB1                             ;'] A='
+        BSR     RSUB1                             ;' B='
+        BSR     RSUB1                             ;' DP='
+        BSR     RSUB2                             ;' X='
+        BSR     RSUB2                             ;' Y='
+        BSR     RSUB2                             ;' U='
+        BSR     RSUB2                             ;' PC='
+        BSR     RSUB2                             ;' S='
+        LBRA    LFCR                              ;QUIT
 ;* DISPLAY 8 BIT REGISTER VALUE
 RSUB1
-        LBSR    WRLIN       OUTPUT BYTE VALUE
-        LDA     ,Y+     GET REGISTER VALUE
-        LBRA    HEXOUT      OUTPUT IN HEX
+        LBSR    WRLIN                             ;OUTPUT BYTE VALUE
+        LDA     ,Y+                               ; GET REGISTER VALUE
+        LBRA    HEXOUT                            ;OUTPUT IN HEX
 ;* DISPLAY 16 BIT REGISTER VALUE
 RSUB2
-        LBSR    WRLIN       OUTPUT WORD VALUE
-        LDD     ,Y++        GET REGISTER VALUE
-        LBRA    WRDOUT      OUTPUT IN HEX
+        LBSR    WRLIN                             ; OUTPUT WORD VALUE
+        LDD     ,Y++                              ; GET REGISTER VALUE
+        LBRA    WRDOUT                            ; OUTPUT IN HEX
 ;* TABLE OF TEXT FOR REGISTER DISPLAY
 REGTXT
         FCN     'CC='
@@ -527,78 +516,6 @@ CHG3
 CHGTAB
         FCN     'CABDXYUPS'
 ;*
-;* 'DB' - DISPLAY BREAKPOINTS
-;*
-DSPBRK
-        LDA     #'0'        START WITH BRKPT ZERO
-        LDX     #BRKTAB     POINT TO TABLE
-DSPB1
-        PSHS    A       SAVE NUMBER
-        LDA     #'B'        PRECEDE WITH 'B'
-        LBSR    PUTCHR      OUTPUT
-        LDA     ,S      GET NUMBER BACK
-        LBSR    PUTCHR      OUTPUT
-        LDA     #'='        AND FOLLOW WITH '='
-        LBSR    PUTCHR      OUTPUT
-        LDD     ,X++        GET VALUE
-        BNE     DSPB2       NON-ZERO, DISPLAY
-        LBSR    WRMSG       OUTPUT MESSAGE INSTEAD
-        FCN     ';*;*;*;*'
-        BRA     DSPB3       CONTINUE
-DSPB2
-        LBSR    WRDOUT      OUTPUT VALUE
-DSPB3
-        LBSR    SPACE       SEPERATE WITH SPACE
-        LEAX    1,X     SKIP OPCODE SAVE
-        PULS    A       RESTORE NUMBER
-        INCA    ADVANCE
-        CMPA    #'8'        BEYOND END?
-        BLO     DSPB1       NO, CONTINUE
-        LBRA    LFCR        NEW LINE AND QUIT
-;*
-;* 'B' - SET BREAKPOINT
-;*
-SETBRK
-        LBSR    GETECH      GET CHARACTER
-        SUBA    #'0'        CONVERT TO NUMBER
-        CMPA    #8      IN RANGE?
-        LBHS    ERROR       NO, QUIT
-        PSHS    A       SAVE NUMBER
-        LSLA    DOUBLE FOR 16 BIT VALUES
-        ADDA    ,S+     TRIPLE FOR OPCODE BYTE
-        LDX     #BRKTAB     POINT TO BREAKPOINT TABLE
-        LEAX    A,X     ADVANCE TO BREAKPOINT
-        LBSR    SPACE       SEPERATE WITH SPACE
-        LBSR    GETADR      GET VALUE
-        STD     ,X      SAVE IN TABLE
-        LBRA    LFCR        NEW LINE AND QUIT
-;*
-;* 'S' - SINGLE STEP
-;*
-GOSTEP
-        LBSR    GETPC       GET ADDRESS
-        LBSR    LFCR        OUTPUT MESSAGE
-GOSTP1
-        LBSR    STEPDI      STEP AND DISPLAY INSTRUCTION
-        TST     STPFLG      DISPLAY REGISTERS?
-        BMI     NODSR                             ;NO, DON'T DISPLAY
-STPREG
-        LBSR    DISREG      DISPLAY REGISTERS
-NODSR
-        LBSR    GETCHR      GET KEY FROM TERMINAL
-        CMPA    #'?'        DISPLAY REGS?
-        BEQ     STPREG      IF SO, DISPLAY
-        CMPA    #' '        STEP TO NEXT?
-        BEQ     GOSTP1      IF SO, STEP
-        CMPA    #$1B        EXIT STEPPING?
-        BEQ     GOSTP2      IF SO, QUIT
-        CMPA    #$0D        TOGGLE REGISTER DISPLAY?
-        BNE     NODSR       IF NOT, IGNORE
-        COM     STPFLG      TOGGLE DISPLAY FLAG
-        BRA     NODSR       GET NEXT KEY
-GOSTP2
-        RTS
-;*
 ;* 'G' - GO (EXECUTE)
 ;*
 GOEXEC
@@ -634,32 +551,32 @@ GOEX4
 ;*
 ;* 'RR' - REPEATING READ
 ;*
-RDLOOP
-        LBSR    GETADR      GET ADDRESS
-        TFR     D,X     SET UP 'X'
-        LBSR    LFCR        NEW LINE
-RDLP1
-        LDA     ,X      READ LOCATION
-        LBSR    CHKCHR      ABORT?
-        BNE     RDLP1       NO, ITS OK
+RDLOOP:
+        LBSR    GETADR                            ;GET ADDRESS
+        TFR     D,X                               ;SET UP 'X'
+        LBSR    LFCR                              ;NEW LINE
+RDLP1:
+        LDA     ,X                                ;READ LOCATION
+        LBSR    CHKCHR                            ;ABORT?
+        BNE     RDLP1                             ;NO, ITS OK
         RTS
 ;*
 ;* 'RW' - REPEATING WRITE
 ;*
-WRLOOP
-        LBSR    GETADR      GET ADDRESS
-        TFR     D,X     SET UP 'X'
-        LBSR    SPACE       SPACE OVER
-        LBSR    GETBYT      GET DATA
-        LBNE    ERROR       INVALID
-        PSHS    A       SAVE ACCA
-        LBSR    LFCR        NEW LINE
-WRLP1
-        LDA     ,S      GET CHAR
-        STA     ,X      WRITE IT OUT
-        LBSR    CHKCHR      ABORT COMMAND?
-        BNE     WRLP1       CONTINUE
-        PULS    A,PC        GO HOME
+WRLOOP:
+        LBSR    GETADR                            ;GET ADDRESS
+        TFR     D,X                               ;SET UP 'X'
+        LBSR    SPACE                             ;SPACE OVER
+        LBSR    GETBYT                            ;GET DATA
+        LBNE    ERROR                             ;INVALID
+        PSHS    A                                 ;SAVE ACCA
+        LBSR    LFCR                              ;NEW LINE
+WRLP1:
+        LDA     ,S                                ;GET CHAR
+        STA     ,X                                ;WRITE IT OUT
+        LBSR    CHKCHR                            ;ABORT COMMAND?
+        BNE     WRLP1                             ;CONTINUE
+        PULS    A,PC                              ;GO HOME
 ;*
 ;* 'XR' - REPEATING 16 BIT READ
 ;*
@@ -829,44 +746,18 @@ HLP4
 HLP5
         RTS
 ;*
-;* 'T' - TRANSPARENT MODE
-;*
-TMODE           = *       TERMINAL ROUTINE
-TM1
-        LDX     >UART1      POINT TO MAIN UART
-TM2
-        LBSR    READ        TEST FOR CHAR FROM TERMINAL
-        BNE     TM3     NONE, IGNORE
-        CMPA    #$1B        ESCAPE?
-        LBEQ    LFCR        NEW LINE, AND RETURN
-        LDX     >UART2      POINT TO UART 2
-        LBSR    WRITE       OUTPUT TO AUX PORT
-TM3
-        LDX     >UART2      POINT TO UART 2
-        LBSR    READ        TEST FOR CHAR FROM AUX
-        BNE     TM1     NONE, IGNORE
-        LDX     >UART1      POINT TO UART 1
-        LBSR    WRITE       OUTPUT TO TERMINAL
-        BRA     TM2     GET NEXT CHAR
-;*
 ;* 'DL' - DOWNLOAD
 ;*
 LOAD
-        LDA     IOCON       GET I/O CONFIG
-        PSHS    A       SAVE
         LBSR    LFCR        NEW LINE
 DLO1
-        CLR     IOCON       INDICATE NO OUTPUT, READ UART
         BSR     DLOAD       DOWNLOAD RECORD
         BCC     DLO2        END
         LDA     ,S      GET OLD I/O CONFIG
-        STA     IOCON       RESET
         LDA     #'.'        GET DOT
         LBSR    PUTCHR      OUTPUT
         BRA     DLO1        CONTINUE
 DLO2
-        PULS    A       RESTORE A
-        STA     IOCON       SAVE
         LBRA    LFCR        New line & return
 ;* Download a record in either MOTOROLA or INTEL hex format
 DLOAD
@@ -913,8 +804,6 @@ DLMOT1
         BEQ     DLRTS       Download OK
 ;* Error occured on loading
 LODERR
-        LDA     #3      GET DEFAULT I/O
-        STA     IOCON       SET I/O
         LBSR    WRMSG       OUTPUT
         FCC     ' ?Load error'
         FCB     $FF
@@ -1106,185 +995,165 @@ HEXOUT
 ;*
 ;* OUTPUT A NIBBLE (IN HEX) FROM REGISTER A
 ;*
-HOUT
-        ANDA    #$0F        Remove upper half
-        ADDA    #'0'        Convert to printable
-        CMPA    #'9'        In range?
-        BLS     HOUT1       Yes, display
-        ADDA    #7      Convert to alpha
-HOUT1
-        BRA     PUTCHR      Output character
+HOUT:
+        ANDA    #$0F                              ; Remove upper half
+        ADDA    #'0'                              ; Convert to printable
+        CMPA    #'9'                              ; In range?
+        BLS     HOUT1                             ; Yes, display
+        ADDA    #7                                ;Convert to alpha
+HOUT1:
+        BRA     PUTCHR                            ; Output character
 ;*
 ;* WRITE ERROR MESSAGE FOLLOWING TEXT
 ;*
-WRMSG
-        PSHS    X       SAVE X
-        LDX     2,S     GET OLD PC
-        BSR     WRLIN       OUTPUT LINE
-        STX     2,S     UPDATE OLD PC
-        PULS    X,PC        RESTORE X, RETURN
+WRMSG:
+        PSHS    X                                 ;SAVE X
+        LDX     2,S                               ;GET OLD PC
+        BSR     WRLIN                             ;OUTPUT LINE
+        STX     2,S                               ;UPDATE OLD PC
+        PULS    X,PC                              ;RESTORE X, RETURN
 ;*
 ;* DISPLAY MESSAGE(X)
 ;*
-WRLIN
-        LDA     ,X+     GET CHAR FROM MESSAGE
-        BEQ     WRLND       END, QUIT
-        CMPA    #$FF        NEWLINE END, LFCR & EXIT
-        BEQ     LFCR        IF SO, NEW LINE, RETURN
-        BSR     PUTCHR      OUTPUT TO TERM
-        BRA     WRLIN       KEEP GOING
+WRLIN:
+        LDA     ,X+                               ;GET CHAR FROM MESSAGE
+        BEQ     WRLND                             ;END, QUIT
+        CMPA    #$FF                              ;NEWLINE END, LFCR & EXIT
+        BEQ     LFCR                              ;IF SO, NEW LINE, RETURN
+        BSR     PUTCHR                            ;OUTPUT TO TERM
+        BRA     WRLIN                             ;KEEP GOING
 WRLND
         RTS
 ;*
 ;* GET CHAR. FROM TERMINAL, AND ECHO
 ;*
-GETECH
-        BSR     GETCHR      GET CHARACTER
-        CMPA    #' '        SPACE?
+GETECH:
+        BSR     GETCHR                            ;GET CHARACTER
+        CMPA    #' '                              ;SPACE?
         BLS     WRLND                             ;IF < DON'T DISPLAY
-        CMPA    #$61        LOWER CASE?
-        BLO     PUTCHR      OK
-        ANDA    #$5F        CONVERT TO UPPER
-        BRA     PUTCHR      ECHO
+        CMPA    #$61                              ;LOWER CASE?
+        BLO     PUTCHR                            ;OK
+        ANDA    #$5F                              ;CONVERT TO UPPER
+        BRA     PUTCHR                            ;ECHO
 ;*
 ;* DISPLAY A SPACE ON THE TERMINAL
 ;*
-SPACE
-        PSHS    A       SAVE A
-        LDA     #' '        GET SPACE
-        BRA     LFC1        DISLAY AND GO HOME
+SPACE:
+        PSHS    A                                 ;SAVE A
+        LDA     #' '                              ;GET SPACE
+        BRA     LFC1                              ;DISLAY AND GO HOME
 ;*
 ;* DISPLAY LINE-FEED, CARRIAGE RETURN ON TERMINAL
 ;*
-LFCR
-        PSHS    A       SAVE
-        LDA     #$0A        GET LF
-        BSR     PUTCHR      OUTPUT
-        LDA     #$0D        GET CR
-LFC1
-        BSR     PUTCHR      OUTPUT
-        PULS    A,PC        RESTORE AND GO HOME
+LFCR:
+        PSHS    A                                 ;SAVE
+        LDA     #$0A                              ;GET LF
+        BSR     PUTCHR                            ;OUTPUT
+        LDA     #$0D                              ;GET CR
+LFC1:
+        BSR     PUTCHR                            ;OUTPUT
+        PULS    A,PC                              ;RESTORE AND GO HOME
 ;*
 ;* READ A CHARACTER FROM SELECTED INPUT DEVICE
 ;*
-GETCHR
-        PSHS    X       SAVE 'X'
-        LDX     >UART1      POINT TO CONSOLE
-        LDA     IOCON       GET I/O CONFIG
-        LSRA    SHIFT TO CARRY
-        BCS     GETC1       READ FROM UART
-        LDX     >UART2      POINT TO AUX UART
-GETC1
-        LBSR    READ        READ TERMINAL
-        BNE     GETC1       KEEP TRYING
+GETCHR:
+        PSHS    X                                 ;SAVE 'X'
+GETC1:
+        LBSR    READ                              ;READ TERMINAL
+        CMPA    #$FF
+        BEQ     GETC1                             ;KEEP TRYING
         PULS    X,PC
 ;*
 ;* WRITE A CHARACTER TO ALL ENABLED OUTPUT DEVICES
 ;*
-PUTCHR
-        PSHS    A,B,X       SAVE REGS
-        LDB     IOCON       GET I/O CONFIG
-        BITB    #2      WRITE TO TERM?
-        BEQ     PUT1        NO, TRY UART
-        LDX     >UART1      POINT TO UART1
-        LBSR    WRITE       OUTPUT TO TERMINAL
-PUT1
-        LDB     IOCON       INCASE CORRUPTED
-        BITB    #4      WRITE TO UART?
-        BEQ     PUT2        NO, SKIP IT
-        LDX     >UART2      POINT TO UART2
-        LBSR    WRITE       OUTPUT TO UART
-PUT2
-        PULS    A,B,X,PC    RESTORE AND GO HOME
+PUTCHR:
+        PSHS    A,B,X                             ;SAVE REGS
+        LBSR    WRITE                             ;OUTPUT TO TERMINAL
+        PULS    A,B,X,PC                          ;RESTORE AND GO HOME
 ;*
 ;* CHECK FOR <ESC> FROM TERMINAL. ALSO PERFORM <SPACE>, <CR>
 ;* SCREEN OUTPUT FLOW CONTROL.
 ;*
-CHKCHR
-        PSHS    X       SAVE PTR
-        LDX     >UART1      POINT TO CONSOLE UART
-        LDB     IOCON       GET I/O CONFIG
-        BMI     CHKC1       ALREADY HELD
-        LBSR    READ        READ TERMINAL
-        CMPA    #' '        SPACE?
-        BNE     CHKC3       NO, IGNORE IT
-CHKC1
-        ORB     #%10000000  SET HELD BIT
-        LBSR    READ        GET KEY FROM CONSOLE
-        CMPA    #' '        SPACE?
-        BEQ     CHKC2       YES, ALLOW
-        ANDB    #%01111111  DISABLE HELD BIT
-        CMPA    #$0D        CARRIAGE RETURN?
-        BEQ     CHKC2       ALLOW
-        CMPA    #$1B        ESCAPE?
-        BNE     CHKC1       NO, IGNORE
-CHKC2
-        STB     IOCON       RESAVE I/O CONFIG BYTE
-CHKC3
-        CMPA    #$1B        TEST FOR ESCAPE CHARACTER
+CHKCHR:
+        PSHS    X                                 ;SAVE PTR
+        LBSR    READ                              ;READ TERMINAL
+        CMPA    #' '                              ;SPACE?
+        BNE     CHKC3                             ;NO, IGNORE IT
+CHKC1:
+        ORB     #%10000000                        ;SET HELD BIT
+        LBSR    READ                              ;GET KEY FROM CONSOLE
+        CMPA    #' '                              ;SPACE?
+        BEQ     CHKC3                             ;YES, ALLOW
+        ANDB    #%01111111                        ;DISABLE HELD BIT
+        CMPA    #$0D                              ;CARRIAGE RETURN?
+        BEQ     CHKC3                             ;ALLOW
+        CMPA    #$1B                              ;ESCAPE?
+        BNE     CHKC1                             ;NO, IGNORE
+CHKC3:
+        CMPA    #$1B                              ;TEST FOR ESCAPE CHARACTER
         PULS    X,PC
 ;*
 ;* STEP ONE INSTRUCTION
 ;*
-STEPDI
-        LDY     SAVPC       GET PC
-        LDU     #DSPBUF     GET INPUT BUFFER
-        LBSR    DISASS      DISPLAY
-        TFR     U,X     POINT TO IT
-        LBSR    WRLIN       DISPLAY
-        BRA     STEPCE      AND PERFORM STEP
+STEPDI:
+        LDY     SAVPC                             ;GET PC
+        LDU     #DSPBUF                           ;GET INPUT BUFFER
+        LBSR    DISASS                            ;DISPLAY
+        TFR     U,X                               ;POINT TO IT
+        LBSR    WRLIN                             ;DISPLAY
+        BRA     STEPCE                            ;AND PERFORM STEP
 ;*
 ;* STEP WITHOUT DISPLAYING INSTRUCTION
 ;*
-STEP
-        LDY     SAVPC       GET PROGRAM COUNTER
-        LDU     #DSPBUF     POINT TO FREE RAM FOR DISASEMBLY OUTPUT
-        LBSR    DISASS      PERFORM DISASSEMBLY
-STEPCE
-        STY     SAVPC       SAVE NEW PC
-        LDU     PTRSAV      GET POINTER BACK
-        LDD     ,U+     GET OPCODE
+STEP:
+        LDY     SAVPC                             ;GET PROGRAM COUNTER
+        LDU     #DSPBUF                           ;POINT TO FREE RAM FOR DISASEMBLY OUTPUT
+        LBSR    DISASS                            ;PERFORM DISASSEMBLY
+STEPCE:
+        STY     SAVPC                             ;SAVE NEW PC
+        LDU     PTRSAV                            ;GET POINTER BACK
+        LDD     ,U+                               ;GET OPCODE
 ;* TEST FOR LONG CONDITIONAL BRANCHES
-LCBRAN
-        CMPA    #$10        PREFIX?
-        BNE     LOBRAN      NO, GOT FOR IT
-        LDB     ,U      GET OPCODE
-        CMPB    #$22        IN RANGE?
-        BLO     LOBRAN      NO
-        CMPB    #$2F        IN RANGE?
-        BHI     LOBRAN      NO
-        LDA     ,U+     GET OPCOIDE BYTE
-        LBSR    TSTCON      TEST CONDITIONAL
-        BEQ     LBRAN1      YES, DO IT
+LCBRAN:
+        CMPA    #$10                              ;PREFIX?
+        BNE     LOBRAN                            ;NO, GOT FOR IT
+        LDB     ,U                                ;GET OPCODE
+        CMPB    #$22                              ;IN RANGE?
+        BLO     LOBRAN                            ;NO
+        CMPB    #$2F                              ;IN RANGE?
+        BHI     LOBRAN                            ;NO
+        LDA     ,U+                               ;GET OPCOIDE BYTE
+        LBSR    TSTCON                            ;TEST CONDITIONAL
+        BEQ     LBRAN1                            ;YES, DO IT
         RTS
 ;* TEST FOR LONG BRANCHES
-LOBRAN
-        CMPA    #$16        IS IT LBRA?
-        BNE     LBRANS      NO, TRY LBSR
-LBRAN1
-        LDD     ,U++        GET OFFSET
-        LEAX    D,U     PERFORM BRANCH
-        BRA     SAVNPC      SAVE NEW PC
+LOBRAN:
+        CMPA    #$16                              ;IS IT LBRA?
+        BNE     LBRANS                            ;NO, TRY LBSR
+LBRAN1:
+        LDD     ,U++                              ;GET OFFSET
+        LEAX    D,U                               ;PERFORM BRANCH
+        BRA     SAVNPC                            ;SAVE NEW PC
 ;* TEST FOR LONG BRANCH TO SUB
-LBRANS
-        CMPA    #$17        'LBSR'?
-        BNE     SCOBRA      NO, TRY SHORT CONDITIONALS
-        LDD     ,U++        GET OFFSET
-        LEAX    D,U     SET UP ADDRESS
+LBRANS:
+        CMPA    #$17                              ;'LBSR'?
+        BNE     SCOBRA                            ;NO, TRY SHORT CONDITIONALS
+        LDD     ,U++                              ;GET OFFSET
+        LEAX    D,U                               ;SET UP ADDRESS
         BRA     SAVSTK
 ;* TEST FOR SHORT CONDITIONAL BRANCHES
-SCOBRA
-        CMPA    #$22        < 'BHI'?
-        BLO     SHBRAN      NO, TRY SHORT BRANCHES
-        CMPA    #$2F        > 'BLE'?
-        BHI     SHBRAN      NO, TRY SHORT BRANCHES
-        LBSR    TSTCON      SEE OF CONDITIONAL IS OK
-        BEQ     SBRAN1      YES, DO IT
+SCOBRA:
+        CMPA    #$22                              ;< 'BHI'?
+        BLO     SHBRAN                            ;NO, TRY SHORT BRANCHES
+        CMPA    #$2F                              ;> 'BLE'?
+        BHI     SHBRAN                            ;NO, TRY SHORT BRANCHES
+        LBSR    TSTCON                            ;SEE OF CONDITIONAL IS OK
+        BEQ     SBRAN1                            ;YES, DO IT
         RTS
 ;* TEST FOR SHORT BRANCHES
-SHBRAN
-        CMPA    #$20        SHORT BRANCH?
-        BNE     SBRANS      NO, TRY SHORT BRANCH TO SUB
+SHBRAN:
+        CMPA    #$20                              ; SHORT BRANCH?
+        BNE     SBRANS                            ; NO, TRY SHORT BRANCH TO SUB
 SBRAN1
         LDB     ,U+     GET OFFSET
         LEAX    B,U     EMULATE JUMP
@@ -1440,69 +1309,37 @@ JMPIND
         CMPA    #$6E        IS IT JUMP INDEXED?
         LBNE    NOREXE      NO, NON-TRANSFER INSTRUCTION
 ;* FIRST POINT Y AT REGISTER INVOLVED
-DJMPIN
-        LDA     ,U+     GET POSTBYTE
-        PSHS    A       SAVE IT
-        ANDA    #%01100000  SAVE ONLY REGISTER
-        LSRA    CONVERT
-        LSRA    REGISTER
-        LSRA    INTO INDEX VALUE
-        LSRA    SHIFT IT OVER
-        LDX     #INDTAB     POINT TO TABLE
-        LDY     A,X     GET REGISTER ADDRESS
-        STY     TEMP        SAVE FOR INC/DEC
-        LDY     ,Y      GET REGISTER CONTENTS
-        LDA     ,S      GET POSTBYTE BACK
-        BMI     NOT5BO      NOT A FIVE BIT OFFSET
+DJMPIN:
+        LDA     ,U+                               ;GET POSTBYTE
+        PSHS    A                                 ;SAVE IT
+        ANDA    #%01100000                        ;SAVE ONLY REGISTER
+        LSRA                                      ;CONVERT
+        LSRA                                      ;REGISTER
+        LSRA                                      ;INTO INDEX VALUE
+        LSRA                                      ;SHIFT IT OVER
+        LDX     #INDTAB                           ;POINT TO TABLE
+        LDY     A,X                               ;GET REGISTER ADDRESS
+        STY     TEMP                              ; SAVE FOR INC/DEC
+        LDY     ,Y                                ;GET REGISTER CONTENTS
+        LDA     ,S                                ;GET POSTBYTE BACK
+        BMI     NOT5BO                            ;NOT A FIVE BIT OFFSET
 ;* FIVE BIT REGISTER OFFSET
-        ANDA    #%00011111  SAVE ONLY OFFSET
-        CMPA    #%00010000  NEGATIVE?
-        BLO     SINOK       lNO, IT'S OK         ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-        ORA     #%11100000  CONVERT TO NEGATIVE
-SINOK
-        LEAX    A,Y     GET ADDRESS
-        BRA     XSAVPC      SAVE IT
+        ANDA    #%00011111                        ;SAVE ONLY OFFSET
+        CMPA    #%00010000                        ;NEGATIVE?
+        BLO     SINOK                             ;NO, ITS OK
+        ORA     #%11100000                        ;CONVERT TO NEGATIVE
+SINOK:
+        LEAX    A,Y                               ;GET ADDRESS
+        BRA     XSAVPC                            ;SAVE IT
 ;* TEST FOR NO OFFSET
-NOT5BO
-        ANDA    #%10001111  REMOVE REGISTER & INDIRECT BIT
-        CMPA    #$84        NO OFFSET?
-        BNE     TOFF8       NO, TRY OFFSET OF 8
-        TFR     Y,X     COPY
-        BRA     XSAVPC      SAVE IT
+NOT5BO:
+        ANDA    #%10001111                        ;REMOVE REGISTER & INDIRECT BIT
+        CMPA    #$84                              ;NO OFFSET?
+        BNE     TOFF8                             ;NO, TRY OFFSET OF 8
+        TFR     Y,X                               ;COPY
+        BRA     XSAVPC                            ;SAVE IT
 ;* TEST FOR EIGHT BIT OFFSET
-TOFF8
+TOFF8:
         CMPA    #$88        8 BIT OFSET?
         BNE     TOFF16      NO, TRY 16 BIT OFFSET
         LDB     ,U+     GET OFFSET
@@ -2048,7 +1885,7 @@ NMIH1
         BNE     NMIH1       DO THEM ALL
         STS     SAVS        SAVE STACK POINTER
         LBSR    WRMSG       DISPLAY MESSAGE
-        FCC     ';*;*;* NMI Interrupt ;*;*;*'
+        FCC     '*** NMI Interrupt ***'
         FCB     $FF     NEW LINE
         BRA     BRKREG      DISPLAY REGISTERS
 ;*
@@ -2083,12 +1920,12 @@ SWIHN25
         STX     SAVPC       SAVED PC
         STS     SAVS        SAVE STACK POINTER
         LBSR    WRMSG       DISPLAY MESSAGE
-        FCN     ';*;*;* Breakpoint #'
+        FCN     '*** Breakpoint #'
         LDA     #$38        GET NUMBER, PLUS ASCII CONVERT
         SUBA    INSTYP      CONVERT TO PROPER DIGIT
         LBSR    PUTCHR      DISPLAY
         LBSR    WRMSG       OUTPUT MESSAGE
-        FCC     ' ;*;*;*'      TRAILING MESSAGE
+        FCC     ' ***'      TRAILING MESSAGE
         FCB     $FF     NEW LINE
 BRKREG
         LBSR    DISREG      DISPLAY
@@ -2127,7 +1964,7 @@ REGTAB
         FCN     '?'     E
         FCN     '?'     F
 ;* PUSH/PULL REGISTER TABLE
-PSHTAB
+PSHTAB:
         FCC     'CC'
         FCN     'A'
         FCN     'B'
@@ -2139,7 +1976,7 @@ PSHTAB
 ;*
 ;* OPCODE TABLE, OPCODE BYTE, TYPE BYTE, TEXT BYTE
 ;*
-OPTAB1
+OPTAB1:
         FCB     $86,1,1     'LDA' INSTRUCTIONS
         FCB     $96,3,1
         FCB     $A6,5,1
@@ -2363,7 +2200,7 @@ OPTAB1
         FCB     $8D,8,132   'BSR'
         FCB     $CF,0,0     'FCB', UNKNOWN OPCODE
 ;* OPERAND TABLE NUMBER TWO, $10 PREFIX INSTRUCTIONS
-OPTAB2
+OPTAB2:
         FCB     $83,2,89    'CMPD'
         FCB     $93,3,89
         FCB     $A3,5,89
@@ -2404,7 +2241,7 @@ OPTAB2
         FCB     $2F,9,131   'LBLE'
         FCB     $CF,1,0
 ;* OPERAND TABLE #3, $11 PREFIXES
-OPTAB3
+OPTAB3:
         FCB     $8C,2,96    'CMPS'
         FCB     $9C,3,96
         FCB     $AC,5,96
@@ -2415,7 +2252,7 @@ OPTAB3
         FCB     $B3,4,97
         FCB     $3F,0,98    'SWI3'
 ;* INSTRUCTION TEXT TABLE
-ITABLE
+ITABLE:
         FCC     'FCB '      0
         FCC     'LDA '      1
         FCC     'LDB '      2
@@ -2553,7 +2390,7 @@ ITABLE
 ;* CONDITIONAL TABLE, FIRST BYTE IS MASK, NEXT THREE BYTES ARE POSSIBLE
 ;* BIT SETTINGS
 ;*
-CONTAB
+CONTAB:
         FCB     $05,$00,$00,$00 'BHI', NO C OR Z
         FCB     $05,$01,$04,$05 'BLS', EITHER C OR Z
         FCB     $01,$00,$00,$00 'BCC', NO C
@@ -2570,16 +2407,16 @@ CONTAB
         FCB     $0E,$08,$02,$04 'BLE', V-=N OR Z=1
         FCB     $0C,$06,$0E
 ;* TRANSFER AND EXCHANGE REGISTER TABLE
-TFREGT
+TFREGT:
         FDB     SAVA
-INDTAB
+INDTAB:
         FDB     SAVX
         FDB     SAVY
         FDB     SAVU
         FDB     SAVS
         FDB     SAVPC
 ;* PULL TABLE FOR PULS
-PULSTAB
+PULSTAB:
         FDB     SAVCC
         FDB     SAVA
         FDB     SAVB
@@ -2589,7 +2426,7 @@ PULSTAB
         FDB     SAVU
         FDB     SAVPC
 ;* PULL TABLE FOR PULU
-PULUTAB
+PULUTAB:
         FDB     SAVCC
         FDB     SAVA
         FDB     SAVB
@@ -2599,26 +2436,22 @@ PULUTAB
         FDB     SAVS
         FDB     SAVPC
 ;* VECTOR HANDLERS
-SWI3
+SWI3:
         JMP     [SWI3ADR]
-SWI2
+SWI2:
         JMP     [SWI2ADR]
-IRQ
+IRQ:
         JMP     [IRQADR]
-FIRQ
+FIRQ:
         JMP     [FIRQADR]
 ;* HELP TEXT
-HTEXT
+HTEXT:
         FCB     0       NEW LINE TO START
-        FCN     'B 0-7 <addr>|Set breakpoint (0000=remove)'
         FCN     'CR <reg> <data>|Change register'
-        FCN     'CU <uart> <addr>|Change UART address'
         FCN     'CV <vec> <addr>|Change interrupt vector'
-        FCN     'DB|Display breakpoints'
         FCN     'DI <addr>,<addr>|Display memory in assembly format'
         FCN     'DM <addr>,<addr>|Display memory in hex dump format'
         FCN     'DR|Display processor registers'
-        FCN     'DU|Display UART addresses'
         FCN     'DV|Display interrupt vectors'
         FCN     'E <addr>|Edit memory'
         FCN     'FM <addr>,<addr> <data>|Fill memory'
@@ -2628,70 +2461,46 @@ HTEXT
         FCN     'MT <addr>,<addr>|Memory test'
         FCN     'RR <addr>|Repeating READ access'
         FCN     'RW <addr> <data>|Repeating WRITE access'
-        FCN     'S [<addr>]|Single step execution'
-        FCN     'T|Terminal passthrough to uart2'
         FCN     'W <addr> <data>|Write to memory'
         FCN     'XR <addr>|Repeating 16 bit read'
         FCN     'XW <addr> <word>|Repeating 16 bit write'
         FCN     '+ <value>+<value>|Hexidecimal addition'
         FCN     '- <value>-<value>|Hexidecimal subtraction'
         FCB     -1      END OF TABLE
+
 ;*
-;    ifeq    utype,6551
+;* MACHINE DEPENDANT I/O ROUTINES FOR 16C550 UART
 ;*
-;* MACHINE DEPENDANT I/O ROUTINES FOR 6551 UARTS
-;*
-;* INITIALIZE UART(X)
-INIT
-        LDD     #$0B1E      ENABLE RX, TX, 9600, 8NO1
-        CLR     1,X     RESET
-        STD     2,X     WRITE COMMAND REG
+INIT:
+        LDA     #$80                              ;
+        STA     MONUART3                          ; SET DLAB FLAG
+        LDA     #12                               ; SET TO 12 = 9600 BAUD
+        STA     MONUART0                          ; save baud rate
+        LDA     #00                               ;
+        STA     MONUART1                          ;
+        LDA     #03                               ;
+        STA     MONUART3                          ; SET 8 BIT DATA, 1 STOPBIT
         RTS
-;* READ UART(X)
-READ
-        LDA     1,X     GET STATUS
-        BITA    #%00001000  RECEIVER READY?
-        BEQ     NOCHR       NO CHARACTER
-        LDA     ,X      READ CHARAC>uR
-        ORCC    #%00000100  SET 'Z'
+;* READ UART
+READ:
+        LDA     MONUART5                          ; READ LINE STATUS REGISTER
+        ANDA    #$01                              ; TEST IF DATA IN RECEIVE BUFFER
+        CMPA    #$00
+        BEQ     NOCHR
+        LDA     MONUART0                          ; THEN READ THE CHAR FROM THE UART
         RTS
-NOCHR
-        LDA     #$FF        NO CHAR
+NOCHR:
+        LDA     #$FF                              ; NO CHAR
         RTS
-;* WRITE UART(X)
-WRITE
-        LDB     1,X     GET STATUS
-        BITB    #%00010000  XMITTER READY?
-        BEQ     WRITE       NO, TRY AGAIN
-        STA     ,X      OUTPUT
+;* WRITE UART
+WRITE:
+        LDB     MONUART5                          ; READ LINE STATUS REGISTER
+        ANDB    #$20                              ; TEST IF UART IS READY TO SEND (BIT 5)
+        CMPB    #$00
+        BEQ     WRITE                             ; IF NOT REPEAT
+        STA     MONUART0                          ; THEN WRITE THE CHAR TO UART
         RTS
-;    else
-;*
-;* MACHINE DEPENDANT I/O ROUTINES FOR 6552 UARTS
-;*
-;* INITIALIZE UART(X)
-;INIT    LDA #%01001101  9600 BAUD, 1 STOP BIT, NO ECHO
-;    STA 1,X     WRITE CONTROL REGISTER
-;    CLR 2,X     INSURE NO BREAK CONDITION
-;    LDA #%11100000  8 BITS, NO PARITY, DTR ON, RTS ON
-;    STA 1,X     WRITE FORMAT REGISTER
-;    RTS
-;;* READ UART(X)
-;READ    LDA ,X      GET STATUS
-;    BITA    #%00000001  RECEIVER READY?
-;    BEQ NOCHR       NO CHARACTER
-;    LDA 3,X     READ CHARACTER
-;    ORCC    #$04        SET 'Z'
-;    RTS
-;NOCHR   LDA #$FF        NO CHAR
-;    RTS
-;;* WRITE UART(X)
-;WRITE   LDB ,X      GET STATUS
-;    BITB    #%01000000  XMITTER READY?
-;    BEQ WRITE       NO, TRY AGAIN
-;    STA 3,X     OUTPUT
-;    RTS
-;    endif
+
 ;*
 ;* MACHINE VECTORS
 ;*
