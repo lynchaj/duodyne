@@ -1,4 +1,4 @@
-all:  	scream.com monitor.com
+all:  	scream.com monitor.com mon09.hex
 
 
 scream.com: scream.asm
@@ -15,11 +15,17 @@ monitor.com: monitor.asm
 	@rm monitor.s
 	truncate monitor.com -s 4130
 
+mon09.hex: mon09.asm
+	lwasm --6809 mon09.asm -s --list=mon09.lst --map=mon09.map --output=mon09.s --format=srec
+	srec_cat  mon09.s -exclude 0x0000 0xF000 -offset -0xE000 -o  mon09r.hex  -intel -address-length=2
+	@rm mon09.s
 
 pretty:
 	cp *.asm ./backup
 	pretty6502 -p1 -a0 -du -mu -c50 -l ./backup/scream.asm scream.asm
 	pretty6502 -p1 -a0 -du -mu -c50 -l ./backup/monitor.asm monitor.asm
+	pretty6502 -p1 -a0 -du -mu -c50 -l ./backup/mon09.asm mon09.asm
+
 
 clean:
 	@rm -f *.o

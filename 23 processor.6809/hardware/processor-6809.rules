@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 17003)
+    (start_pass_no 12593)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -72,7 +72,7 @@
     A9 A10 A11 A12 A13 A14 A15 D0
     D1 D2 D3 D4 D5 D6 D7 ~{6809ACTIVE}
     "Net-(D7-Pad2)" "Net-(JP1-Pad1)" "Net-(D9-Pad2)" "Net-(JP4-Pad1)" ONE ZERO "Net-(D9-Pad1)" "Net-(JP4-Pad3)"
-    "Net-(JP4-Pad5)" "Net-(JP4-Pad7)" /bus/~{WAIT} "Net-(J11-Pad19)" "Net-(J11-Pad17)" "Net-(J11-Pad15)" "~{CPU-IORQ}" "~{CPU-RESET}"
+    "Net-(JP4-Pad5)" "Net-(JP4-Pad7)" "~{CPU-WAIT}" "Net-(J11-Pad19)" "Net-(J11-Pad17)" "Net-(J11-Pad15)" "~{CPU-IORQ}" "~{CPU-RESET}"
     "CPU-R~{W}" "CPU-A1" "CPU-A0" /bus/A23 "~{CPU-M1}" "~{CPU-WR}" "~{CPU-RD}" "~{CPU-MREQ}"
     "DATA-DIR" /bus/A22 "~{FP-LATCH-RD}" "FP-LATCH-WR" ~{bNMI} bCLK /bus/~{RFSH} ~{EIRQ0}
     ~{EIRQ1} "/fpanel/FP-D7" "/fpanel/FP-D6" "/fpanel/FP-D5" "/fpanel/FP-D4" "/fpanel/FP-D3" "/fpanel/FP-D2" "/fpanel/FP-D1"
@@ -103,13 +103,13 @@
     "unconnected-(J11-Pad30)" "unconnected-(J11-Pad32)" "unconnected-(J11-Pad34)" "unconnected-(J11-Pad36)" "unconnected-(U16-Pad1)" "unconnected-(U16-Pad2)" "unconnected-(U16-Pad3)" "SEL-A15"
     "SEL-A14" "Net-(U16-Pad10)" "unconnected-(U7-Pad10)" "unconnected-(U7-Pad11)" "unconnected-(U10-Pad3)" "unconnected-(U10-Pad5)" "unconnected-(U10-Pad15)" "unconnected-(U10-Pad17)"
     "Net-(U1-Pad1)" "unconnected-(U14-Pad2)" "unconnected-(U14-Pad4)" "unconnected-(U14-Pad6)" "unconnected-(U14-Pad14)" "unconnected-(U14-Pad16)" "unconnected-(U14-Pad18)" "Net-(U16-Pad12)"
-    68TOGGLE "unconnected-(U17-Pad3)" "unconnected-(U17-Pad6)" "unconnected-(U17-Pad8)" "unconnected-(U17-Pad9)" "unconnected-(U17-Pad11)" "unconnected-(U17-Pad12)" "unconnected-(U17-Pad14)"
-    "unconnected-(U17-Pad17)" "unconnected-(U18-Pad2)" "unconnected-(U18-Pad3)" "unconnected-(U18-Pad5)" "unconnected-(U18-Pad6)" "unconnected-(U18-Pad9)" "unconnected-(U18-Pad10)" "unconnected-(U18-Pad12)"
-    "unconnected-(U18-Pad13)" "Net-(U20-Pad10)" "unconnected-(U20-Pad12)" "unconnected-(U20-Pad19)" "unconnected-(U20-Pad23)" "unconnected-(U20-Pad26)" "unconnected-(U20-Pad27)" "unconnected-(U20-Pad32)"
-    "unconnected-(U20-Pad34)" "unconnected-(RN1-Pad2)" "unconnected-(U20-Pad37)" "unconnected-(U1-Pad5)" "Net-(U1-Pad8)" "~{PAGE-WR}" "unconnected-(U1-Pad6)" "unconnected-(U28-Pad5)"
-    "unconnected-(U28-Pad6)" "unconnected-(U1-Pad3)" "unconnected-(U28-Pad35)" "unconnected-(U3-Pad15)" "unconnected-(U3-Pad20)" "unconnected-(U3-Pad8)" "unconnected-(U3-Pad9)" "unconnected-(U3-Pad10)"
-    "unconnected-(U3-Pad11)" "Net-(U3-Pad13)" "unconnected-(U9-Pad16)" "unconnected-(U9-Pad17)" "unconnected-(U9-Pad18)" "unconnected-(U5-Pad1)" "unconnected-(U19-Pad9)" "unconnected-(U19-Pad10)"
-    "unconnected-(U19-Pad11)" "unconnected-(U19-Pad12)" "unconnected-(U19-Pad13)" "unconnected-(U19-Pad14)" "unconnected-(U28-Pad33)" "unconnected-(U1-Pad4)" "Net-(J10-Pad2)" "unconnected-(J10-Pad3)"
+    68TOGGLE ~{WAIT} "unconnected-(U17-Pad6)" "unconnected-(U17-Pad8)" "unconnected-(U17-Pad9)" "unconnected-(U17-Pad11)" "unconnected-(U17-Pad12)" "unconnected-(U17-Pad14)"
+    "unconnected-(U18-Pad2)" "unconnected-(U18-Pad3)" "unconnected-(U18-Pad5)" "unconnected-(U18-Pad6)" "unconnected-(U18-Pad9)" "unconnected-(U18-Pad10)" "unconnected-(U18-Pad12)" "unconnected-(U18-Pad13)"
+    "Net-(U20-Pad10)" "unconnected-(U20-Pad12)" "unconnected-(U20-Pad19)" "unconnected-(U20-Pad23)" "unconnected-(U20-Pad26)" "unconnected-(U20-Pad27)" "unconnected-(U20-Pad32)" "unconnected-(U20-Pad34)"
+    "unconnected-(RN1-Pad2)" "unconnected-(U20-Pad37)" "unconnected-(U1-Pad5)" "Net-(U1-Pad8)" "~{PAGE-WR}" "unconnected-(U1-Pad6)" "unconnected-(U28-Pad5)" "unconnected-(U28-Pad6)"
+    "unconnected-(U1-Pad3)" "unconnected-(U28-Pad35)" "unconnected-(U3-Pad15)" "unconnected-(U3-Pad20)" "unconnected-(U3-Pad8)" "unconnected-(U3-Pad9)" "unconnected-(U3-Pad10)" "unconnected-(U3-Pad11)"
+    "Net-(U3-Pad13)" "unconnected-(U9-Pad16)" "unconnected-(U9-Pad17)" "unconnected-(U9-Pad18)" "unconnected-(U5-Pad1)" "unconnected-(U19-Pad9)" "unconnected-(U19-Pad10)" "unconnected-(U19-Pad11)"
+    "unconnected-(U19-Pad12)" "unconnected-(U19-Pad13)" "unconnected-(U19-Pad14)" "unconnected-(U1-Pad4)" "Net-(J10-Pad2)" "Net-(R1-Pad1)"
     (clearance_class default)
     (via_rule default)
     (rule
