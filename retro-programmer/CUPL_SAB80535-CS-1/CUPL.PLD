@@ -1,0 +1,32 @@
+Name     SAB80535-CS-1.tru ;
+PartNo   00 ;
+Date     15.12.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 2 = A2;
+PIN 3 = A3;
+PIN 4 = A4;
+PIN 6 = IOxSEL;
+PIN 8 = WR;
+PIN 5 = Y0;
+PIN 7 = ZA19;
+
+/* outputs */
+PIN 15 = CSxRAM;
+PIN 19 = CSxPPI0;
+PIN 18 = CSxPPI1;
+PIN 16 = CSxMMUxWR;
+PIN 17 = CSxLCD;
+
+/* combinatorial logic */
+CSxLCD = A2 # !A3 # A4 # Y0;
+CSxMMUxWR = !A2 # !A3 # A4 # WR # Y0;
+CSxPPI0 = A2 # A3 # A4 # Y0;
+CSxPPI1 = !A2 # A3 # A4 # Y0;
+CSxRAM = !ZA19 # !IOxSEL;

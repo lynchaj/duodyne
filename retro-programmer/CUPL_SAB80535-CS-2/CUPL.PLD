@@ -1,0 +1,34 @@
+Name     SAB80535-CS-2.tru ;
+PartNo   00 ;
+Date     15.12.2023 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 6 = A1;
+PIN 5 = A2;
+PIN 4 = A3;
+PIN 3 = A4;
+PIN 8 = OE;
+PIN 7 = WR;
+PIN 2 = Y0;
+
+/* outputs */
+PIN 19 = CSxUSBxSD;
+PIN 18 = CSxI2C;
+PIN 17 = CSxFFxWR;
+PIN 14 = CSxLATCHxOE;
+PIN 15 = A;
+PIN 16 = CSxLATCHxWR;
+
+/* combinatorial logic */
+A = !A1 # A2 # A3 # !A4 # WR # Y0;
+CSxFFxWR = A1 # !A2 # A3 # !A4 # WR # Y0;
+CSxI2C = !A1 # A2 # A3 # !A4 # Y0;
+CSxLATCHxOE = !A1 # !A2 # A3 # !A4 # OE # Y0;
+CSxLATCHxWR = A1 & A2 & !A3 & A4 & !WR & !Y0;
+CSxUSBxSD = A1 # A2 # A3 # !A4 # Y0;
