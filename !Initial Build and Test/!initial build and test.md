@@ -91,6 +91,8 @@ duodyne initial build and test findings
 * Disk IO Move SD socket up to top of board (fixed 1.1)
 * Disk IO Remove U16 74LS273 as not used (fixed 1.1)
 * Disk IO Add comment referring back to MT011 source document (fixed 1.1)
+* Disk IO Remove R34, R39, R40, and R45 (fixed 1.1)
+* Disk IO Replace R33, R37, R38, and R46 with IN5817 or BAT85 small signal Schottky barrier diode -- cathode towards 74HCT175 (fixed 1.1)
 
 ##
 
