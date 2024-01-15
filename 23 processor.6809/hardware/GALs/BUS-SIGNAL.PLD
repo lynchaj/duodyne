@@ -30,6 +30,6 @@ PIN   13  = m1	        ; /*                                 */
 rd =  !(E & rw) ;
 wr =  !(E & !rw) ;
 mreq = !io # bus ;
-iorq = io # himem ;
+iorq = io # !E ;
 m1 = 'b'0 ;
 data_dir = !(rw & onboardio & !bus) ;    /* Low to read from bus */
