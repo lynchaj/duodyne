@@ -1,0 +1,93 @@
+%SIGNAL
+PIN  13 =  A 
+PIN  14 =  A1 
+PIN   1 =  CPUA0 
+PIN   2 =  CPUA1 
+PIN   3 =  CPUA2 
+PIN   4 =  CPUA3 
+PIN   7 =  CPU_RW 
+PIN   5 =  CSIO 
+PIN  19 =  CS_I2C 
+PIN  17 =  CS_I2C_WR 
+PIN  23 =  CS_UART 
+PIN  21 =  FP_LATCH_RD 
+PIN  22 =  FP_LATCH_WR 
+PIN  18 =  INTI2C 
+PIN   6 =  INT_I2C 
+PIN  16 =  PAGEWR 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+A1 =>
+    !CPUA1
+  # !CPUA2
+  # CPUA3
+  # CPU_RW
+  # CSIO
+
+CS_I2C =>
+    !CPUA1
+  # !CPUA2
+  # CPUA3
+  # CSIO
+
+CS_I2C_WR =>
+    A
+
+CS_UART =>
+    !CPUA3
+  # CSIO
+
+FP_LATCH_RD =>
+    CPUA0
+  # CPUA1
+  # !CPUA2
+  # CPUA3
+  # !CPU_RW
+  # CSIO
+
+FP_LATCH_WR =>
+    CPUA0
+  # CPUA1
+  # !CPUA2
+  # CPUA3
+  # CPU_RW
+  # CSIO
+
+INTI2C =>
+    !INT_I2C
+
+PAGEWR =>
+    CPUA2
+  # CPUA3
+  # CPU_RW
+  # CSIO
+
+A1.oe  =>
+    1 
+
+CS_I2C.oe  =>
+    1 
+
+CS_I2C_WR.oe  =>
+    1 
+
+CS_UART.oe  =>
+    1 
+
+FP_LATCH_RD.oe  =>
+    1 
+
+FP_LATCH_WR.oe  =>
+    1 
+
+INTI2C.oe  =>
+    1 
+
+PAGEWR.oe  =>
+    1 
+
+%END

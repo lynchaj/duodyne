@@ -1,0 +1,444 @@
+                      (      monitor.asm):00001                 PRAGMA  CD
+                      (      monitor.asm):00002         
+                      (      monitor.asm):00003         ;__MONITOR_________________________________________________________________________________________
+                      (      monitor.asm):00004         ;
+                      (      monitor.asm):00005         ;       MINI ROM MONITOR FOR THE DUODYNE 6809 PROCESSOR
+                      (      monitor.asm):00006         ;
+                      (      monitor.asm):00007         ;       WRITTEN BY: DAN WERNER -- 1/14/2024
+                      (      monitor.asm):00008         ;       based on the ROM by Andrew Lynch
+                      (      monitor.asm):00009         ;
+                      (      monitor.asm):00010         ;___________________________________________________________________________________________________
+                      (      monitor.asm):00011         ;
+                      (      monitor.asm):00012         ; DATA CONSTANTS
+                      (      monitor.asm):00013         ;___________________________________________________________________________________________________
+                      (      monitor.asm):00014         ;
+                      (      monitor.asm):00015         
+                      (      monitor.asm):00016         ; REGISTERS FOR GO
+     0100             (      monitor.asm):00017         SP              EQU $0100                         ; S-HIGH
+                      (      monitor.asm):00018         ; END REGISTERS FOR GO
+     0102             (      monitor.asm):00019         CKSM            EQU $0102                         ; CHECKSUM
+     0103             (      monitor.asm):00020         BYTECT          EQU $0103                         ; BYTE COUNT
+     0104             (      monitor.asm):00021         XHI             EQU $0104                         ; XREG HIGH
+     0105             (      monitor.asm):00022         XLOW            EQU $0105                         ; XREG LOW
+                      (      monitor.asm):00023         
+                      (      monitor.asm):00024         
+     1000             (      monitor.asm):00025         MONSTACK        EQU $1000                         ; STACK POINTER
+                      (      monitor.asm):00026         
+                      (      monitor.asm):00027         ; UART 16C550 SERIAL
+     DF58             (      monitor.asm):00028         MONUART0        EQU $DF58                         ; DATA IN/OUT
+     DF59             (      monitor.asm):00029         MONUART1        EQU $DF59                         ; CHECK RX
+     DF5A             (      monitor.asm):00030         MONUART2        EQU $DF5A                         ; INTERRUPTS
+     DF5B             (      monitor.asm):00031         MONUART3        EQU $DF5B                         ; LINE CONTROL
+     DF5C             (      monitor.asm):00032         MONUART4        EQU $DF5C                         ; MODEM CONTROL
+     DF5D             (      monitor.asm):00033         MONUART5        EQU $DF5D                         ; LINE STATUS
+     DF5E             (      monitor.asm):00034         MONUART6        EQU $DF5E                         ; MODEM STATUS
+     DF5F             (      monitor.asm):00035         MONUART7        EQU $DF5F                         ; SCRATCH REG.
+                      (      monitor.asm):00036         
+     DF50             (      monitor.asm):00037         BANK00          EQU $DF50
+     DF51             (      monitor.asm):00038         BANK40          EQU $DF51
+     DF52             (      monitor.asm):00039         BANK80          EQU $DF52
+     DF53             (      monitor.asm):00040         BANKC0          EQU $DF53
+                      (      monitor.asm):00041         
+                      (      monitor.asm):00042         
+                      (      monitor.asm):00043                 ORG     $EFE0
+EFE0 F3               (      monitor.asm):00044                 FCB     $F3                               ;DI - DISABLE INTERRUPTS
+EFE1 010010           (      monitor.asm):00045                 FCB     $01,$00,$10                       ;LD   BC,$1000 -BYTES TO MOVE
+EFE4 110070           (      monitor.asm):00046                 FCB     $11,$00,$70                       ;LD   DE,$7000 -DESTINATION ADDRESS (6809 IS !A15)
+EFE7 212001           (      monitor.asm):00047                 FCB     $21,$20,$01                       ;LD   HL,$0120 -SOURCE ADDRESS
+EFEA EDB0             (      monitor.asm):00048                 FCB     $ED,$B0                           ;LDIR                  -COPY RAM
+EFEC DBF0             (      monitor.asm):00049                 FCB     $DB,$F0                           ;IN   A,$F0    -ENABLE 6809
+EFEE 0E00             (      monitor.asm):00050                 FCB     $0E,$00                           ;LD   C,00H    -CP/M SYSTEM RESET CALL
+EFF0 CD0500           (      monitor.asm):00051                 FCB     $CD,$05,$00                       ;CALL 0005H    -RETURN TO PROMPT
+                      (      monitor.asm):00052         ;
+                      (      monitor.asm):00053         ;
+                      (      monitor.asm):00054         ;
+                      (      monitor.asm):00055         
+                      (      monitor.asm):00056                 ORG     $FC00
+                      (      monitor.asm):00057         
+                      (      monitor.asm):00058         
+                      (      monitor.asm):00059         ;___________________________________________________________________________________________________
+                      (      monitor.asm):00060         ;
+                      (      monitor.asm):00061         ;       INITIALIZE 6809
+                      (      monitor.asm):00062         ;___________________________________________________________________________________________________
+FC00                  (      monitor.asm):00063         MAIN:
+FC00 10CE1000         (      monitor.asm):00064 [4]             LDS     #MONSTACK                         ; RESET STACK POINTER
+FC04 4F               (      monitor.asm):00065 [2]             CLRA                                      ; set direct page register to 0
+FC05 1F8B             (      monitor.asm):00066 [6]             TFR     A,DP                              ;
+                      (      monitor.asm):00067         
+FC07 4F               (      monitor.asm):00068 [2]             CLRA                                      ; CLEAR ACCUMULATOR A
+                      (      monitor.asm):00069         
+FC08 8680             (      monitor.asm):00070 [2]             LDA     #$80
+FC0A B7DF50           (      monitor.asm):00071 [5]             STA     BANK00
+FC0D 8682             (      monitor.asm):00072 [2]             LDA     #$82
+FC0F B7DF51           (      monitor.asm):00073 [5]             STA     BANK40
+FC12 8684             (      monitor.asm):00074 [2]             LDA     #$84
+FC14 B7DF52           (      monitor.asm):00075 [5]             STA     BANK80
+FC17 8603             (      monitor.asm):00076 [2]             LDA     #$03
+FC19 B7DF53           (      monitor.asm):00077 [5]             STA     BANKC0
+                      (      monitor.asm):00078         
+FC1C 860B             (      monitor.asm):00079 [2]             LDA     #$0B
+FC1E B7DF5C           (      monitor.asm):00080 [5]             STA     MONUART4                          ; Int disabled, banks enabled
+                      (      monitor.asm):00081         
+FC21 BDFDA5           (      monitor.asm):00082 [8]             JSR     SERIALINIT                        ; INIT SERIAL PORT
+                      (      monitor.asm):00083         
+                      (      monitor.asm):00084         ;__CONTRL_________________________________________________________________________________________
+                      (      monitor.asm):00085         ;
+                      (      monitor.asm):00086         ;       MONITOR MAIN LOOP
+                      (      monitor.asm):00087         ;__________________________________________________________________________________________________
+FC24                  (      monitor.asm):00088         CONTRL:
+FC24 BDFD9A           (      monitor.asm):00089 [8]             JSR     DISPLAY_CRLF                      ; DISPLAY CRLF
+FC27 863E             (      monitor.asm):00090 [2]             LDA     #'>'                              ; CARRIAGE RETURN
+FC29 BDFDBA           (      monitor.asm):00091 [8]             JSR     WRSER1                            ; OUTPUT CHARACTER
+FC2C BDFDCB           (      monitor.asm):00092 [8]             JSR     IOF_CONINW                        ;
+FC2F BDFDBA           (      monitor.asm):00093 [8]             JSR     WRSER1                            ; OUTPUT CHAR TO CONSOLE
+                      (      monitor.asm):00094         ;
+FC32 8144             (      monitor.asm):00095 [2]             CMPA    #'D'                              ; IS DUMP MEMORY?
+FC34 271E             (      monitor.asm):00096 [3]             BEQ     DUMP                              ;
+FC36 814C             (      monitor.asm):00097 [2]             CMPA    #'L'                              ; IS LOAD?
+FC38 2717             (      monitor.asm):00098 [3]             BEQ     MLOAD                             ; YES, JUMP
+FC3A 814D             (      monitor.asm):00099 [2]             CMPA    #'M'                              ; IS CHANGE?
+FC3C 273F             (      monitor.asm):00100 [3]             BEQ     CHANGE                            ; YES, JUMP
+FC3E 8150             (      monitor.asm):00101 [2]             CMPA    #'P'                              ; IS PRINT?
+FC40 2752             (      monitor.asm):00102 [3]             BEQ     PRINT                             ; YES, JUMP
+FC42 8147             (      monitor.asm):00103 [2]             CMPA    #'G'                              ; IS GO?
+FC44 272C             (      monitor.asm):00104 [3]             BEQ     GO                                ; YES JUMP
+                      (      monitor.asm):00105         ;
+                      (      monitor.asm):00106         ; COMMAND NOT FOUND ISSUE ERROR
+FC46 863F             (      monitor.asm):00107 [2]             LDA     #'?'                              ; PRINT '?'
+FC48 BDFDBA           (      monitor.asm):00108 [8]             JSR     WRSER1                            ; OUTPUT CHARACTER
+FC4B BDFD9A           (      monitor.asm):00109 [8]             JSR     DISPLAY_CRLF                      ; DISPLAY CRLF
+FC4E 7EFC24           (      monitor.asm):00110 [4]             JMP     CONTRL                            ; RECEIVE NEXT CHARACTER
+                      (      monitor.asm):00111         
+FC51                  (      monitor.asm):00112         MLOAD:
+FC51 7EFCA6           (      monitor.asm):00113 [4]             JMP     MONLOAD
+                      (      monitor.asm):00114         
+                      (      monitor.asm):00115         
+FC54                  (      monitor.asm):00116         DUMP:
+FC54 BDFD95           (      monitor.asm):00117 [8]             JSR     OUTS                              ;
+FC57 BDFD37           (      monitor.asm):00118 [8]             JSR     BADDR                             ;
+FC5A 3410             (      monitor.asm):00119 [5+2]           PSHS    X                                 ;
+FC5C BDFD95           (      monitor.asm):00120 [8]             JSR     OUTS                              ;
+FC5F BDFD37           (      monitor.asm):00121 [8]             JSR     BADDR                             ;
+FC62 3510             (      monitor.asm):00122 [5+2]           PULS    X                                 ;
+FC64 BDFD9A           (      monitor.asm):00123 [8]             JSR     DISPLAY_CRLF                      ;
+FC67                  (      monitor.asm):00124         DUMP_LOOP:
+FC67 BDFCE0           (      monitor.asm):00125 [8]             JSR     DUMP_LINE                         ;
+FC6A BC0104           (      monitor.asm):00126 [7]             CMPX    XHI                               ;
+FC6D 2BF8             (      monitor.asm):00127 [3]             BMI     DUMP_LOOP                         ;
+FC6F 7EFC24           (      monitor.asm):00128 [4]             JMP     CONTRL                            ; RECEIVE NEXT CHARACTER
+                      (      monitor.asm):00129         
+                      (      monitor.asm):00130         
+FC72                  (      monitor.asm):00131         GO:
+FC72 BDFD37           (      monitor.asm):00132 [8]             JSR     BADDR                             ; GET ADDRESS
+FC75 BDFD95           (      monitor.asm):00133 [8]             JSR     OUTS                              ; PRINT SPACE
+FC78 BE0104           (      monitor.asm):00134 [6]             LDX     XHI                               ; LOAD X WITH ADDRESS
+FC7B 6E84             (      monitor.asm):00135 [3+0]           JMP     $0000,X                           ; JUMP TO ADDRESS
+                      (      monitor.asm):00136         
+                      (      monitor.asm):00137         ; CHANGE MEMORY(M AAAA DD NN)
+FC7D                  (      monitor.asm):00138         CHANGE:
+FC7D BDFD37           (      monitor.asm):00139 [8]             JSR     BADDR                             ; BUILD ADDRESS
+FC80 BDFD95           (      monitor.asm):00140 [8]             JSR     OUTS                              ; PRINT SPACE
+FC83 BDFD93           (      monitor.asm):00141 [8]             JSR     OUT2HS                            ;
+FC86 BDFD45           (      monitor.asm):00142 [8]             JSR     BYTE                              ;
+FC89 301F             (      monitor.asm):00143 [4+1]           LEAX    -1,X                              ;
+FC8B A784             (      monitor.asm):00144 [4+0]           STA     ,X                                ;
+FC8D A184             (      monitor.asm):00145 [4+0]           CMPA    ,X                                ;
+FC8F 2647             (      monitor.asm):00146 [3]             BNE     LOAD19                            ; MEMORY DID NOT CHANGE
+FC91 7EFC24           (      monitor.asm):00147 [4]             JMP     CONTRL                            ;
+                      (      monitor.asm):00148         
+                      (      monitor.asm):00149         ; PRINT CONTENTS OF STACK
+FC94                  (      monitor.asm):00150         PRINT:
+FC94 10FF0100         (      monitor.asm):00151 [7]             STS     SP                                ;
+FC98 BE0100           (      monitor.asm):00152 [6]             LDX     SP                                ;
+FC9B C609             (      monitor.asm):00153 [2]             LDB     #$09                              ;
+FC9D                  (      monitor.asm):00154         PRINT2: ;
+FC9D BDFD93           (      monitor.asm):00155 [8]             JSR     OUT2HS                            ; OUT 2 HEX & SPACE
+FCA0 5A               (      monitor.asm):00156 [2]             DECB                                      ;
+FCA1 26FA             (      monitor.asm):00157 [3]             BNE     PRINT2                            ; DONE? IF NO DO MORE
+FCA3 7EFC24           (      monitor.asm):00158 [4]             JMP     CONTRL                            ; DONE? IF YES RETURN TO MAIN LOOP
+                      (      monitor.asm):00159         
+                      (      monitor.asm):00160         
+FCA6                  (      monitor.asm):00161         MONLOAD:
+                      (      monitor.asm):00162         
+FCA6                  (      monitor.asm):00163         LOAD3:
+FCA6 BDFDCB           (      monitor.asm):00164 [8]             JSR     IOF_CONINW
+FCA9 8153             (      monitor.asm):00165 [2]             CMPA    #'S'
+FCAB 26F9             (      monitor.asm):00166 [3]             BNE     LOAD3                             ; FIRST CHAR NOT (S)
+FCAD BDFDCB           (      monitor.asm):00167 [8]             JSR     IOF_CONINW                        ; READ CHAR
+FCB0 8139             (      monitor.asm):00168 [2]             CMPA    #'9'
+FCB2 2729             (      monitor.asm):00169 [3]             BEQ     LOAD21
+FCB4 8131             (      monitor.asm):00170 [2]             CMPA    #'1'
+FCB6 26EE             (      monitor.asm):00171 [3]             BNE     LOAD3                             ; SECOND CHAR NOT (1)
+FCB8 7F0102           (      monitor.asm):00172 [7]             CLR     CKSM                              ; ZERO CHECKSUM
+FCBB BDFD45           (      monitor.asm):00173 [8]             JSR     BYTE                              ; READ BYTE
+FCBE 8002             (      monitor.asm):00174 [2]             SUBA    #$02
+FCC0 B70103           (      monitor.asm):00175 [5]             STA     BYTECT                            ; BYTE COUNT
+                      (      monitor.asm):00176         ; BUILD ADDRESS
+FCC3 8D72             (      monitor.asm):00177 [7]             BSR     BADDR
+                      (      monitor.asm):00178         ; STORE DATA
+FCC5                  (      monitor.asm):00179         LOAD11:
+FCC5 BDFD45           (      monitor.asm):00180 [8]             JSR     BYTE
+FCC8 7A0103           (      monitor.asm):00181 [7]             DEC     BYTECT
+FCCB 2706             (      monitor.asm):00182 [3]             BEQ     LOAD15                            ; ZERO BYTE COUNT
+FCCD A784             (      monitor.asm):00183 [4+0]           STA     ,X                                ; STORE DATA
+FCCF 3001             (      monitor.asm):00184 [4+1]           LEAX    1,X
+FCD1 20F2             (      monitor.asm):00185 [3]             BRA     LOAD11
+                      (      monitor.asm):00186         
+FCD3                  (      monitor.asm):00187         LOAD15:
+FCD3 7C0102           (      monitor.asm):00188 [7]             INC     CKSM
+FCD6 27CE             (      monitor.asm):00189 [3]             BEQ     LOAD3
+FCD8                  (      monitor.asm):00190         LOAD19:
+FCD8 863F             (      monitor.asm):00191 [2]             LDA     #'?'
+FCDA BDFDBA           (      monitor.asm):00192 [8]             JSR     WRSER1
+FCDD                  (      monitor.asm):00193         LOAD21:
+FCDD                  (      monitor.asm):00194         C1
+FCDD 7EFC24           (      monitor.asm):00195 [4]             JMP     CONTRL
+                      (      monitor.asm):00196         
+                      (      monitor.asm):00197         
+                      (      monitor.asm):00198         
+FCE0                  (      monitor.asm):00199         DUMP_LINE:
+FCE0 BDFD7C           (      monitor.asm):00200 [8]             JSR     OUTADDR                           ;
+FCE3 BDFD95           (      monitor.asm):00201 [8]             JSR     OUTS                              ;
+FCE6 3410             (      monitor.asm):00202 [5+2]           PSHS    X                                 ;
+FCE8 C610             (      monitor.asm):00203 [2]             LDB     #$10                              ;
+FCEA                  (      monitor.asm):00204         DUMP_LINE_LOOP:
+FCEA BDFD93           (      monitor.asm):00205 [8]             JSR     OUT2HS                            ; OUT 2 HEX & SPACE
+FCED 5A               (      monitor.asm):00206 [2]             DECB                                      ;
+FCEE 26FA             (      monitor.asm):00207 [3]             BNE     DUMP_LINE_LOOP                    ; DONE? IF NO DO MORE
+FCF0 3510             (      monitor.asm):00208 [5+2]           PULS    X                                 ;
+FCF2 BDFD95           (      monitor.asm):00209 [8]             JSR     OUTS                              ;
+FCF5 863A             (      monitor.asm):00210 [2]             LDA     #':'                              ;
+FCF7 BDFDBA           (      monitor.asm):00211 [8]             JSR     WRSER1                            ;
+FCFA C610             (      monitor.asm):00212 [2]             LDB     #$10                              ;
+FCFC                  (      monitor.asm):00213         DUMP_LINE_LOOPA:
+FCFC A600             (      monitor.asm):00214 [4+1]           LDA     0,X                               ;
+FCFE 8120             (      monitor.asm):00215 [2]             CMPA    #32                               ;
+FD00 2B0A             (      monitor.asm):00216 [3]             BMI     DUMP_LINE_INVALID
+FD02 817F             (      monitor.asm):00217 [2]             CMPA    #127                              ;
+FD04 2A06             (      monitor.asm):00218 [3]             BPL     DUMP_LINE_INVALID
+FD06 BDFDBA           (      monitor.asm):00219 [8]             JSR     WRSER1                            ;
+FD09 7EFD11           (      monitor.asm):00220 [4]             JMP     DUMP_LINE_VALID
+FD0C                  (      monitor.asm):00221         DUMP_LINE_INVALID:                                ;
+FD0C 862E             (      monitor.asm):00222 [2]             LDA     #'.'                              ;
+FD0E BDFDBA           (      monitor.asm):00223 [8]             JSR     WRSER1                            ;
+FD11                  (      monitor.asm):00224         DUMP_LINE_VALID:                                  ;
+FD11 3001             (      monitor.asm):00225 [4+1]           LEAX    1,X                               ;
+FD13 5A               (      monitor.asm):00226 [2]             DECB                                      ;
+FD14 26E6             (      monitor.asm):00227 [3]             BNE     DUMP_LINE_LOOPA                   ; DONE? IF NO DO MORE
+FD16 BDFD9A           (      monitor.asm):00228 [8]             JSR     DISPLAY_CRLF                      ;
+FD19 39               (      monitor.asm):00229 [5]             RTS
+                      (      monitor.asm):00230         
+                      (      monitor.asm):00231         ; INPUT HEX CHAR
+FD1A                  (      monitor.asm):00232         INHEX:
+FD1A BDFDCB           (      monitor.asm):00233 [8]             JSR     IOF_CONINW                        ;
+FD1D 3402             (      monitor.asm):00234 [5+1]           PSHS    A                                 ;
+FD1F BDFDBA           (      monitor.asm):00235 [8]             JSR     WRSER1                            ;
+FD22 3502             (      monitor.asm):00236 [5+1]           PULS    A                                 ;
+FD24 8130             (      monitor.asm):00237 [2]             CMPA    #$30                              ;
+FD26 2BB5             (      monitor.asm):00238 [3]             BMI     C1                                ; NOT HEX
+FD28 8139             (      monitor.asm):00239 [2]             CMPA    #$39                              ;
+FD2A 2F0A             (      monitor.asm):00240 [3]             BLE     IN1HG                             ;
+FD2C 8141             (      monitor.asm):00241 [2]             CMPA    #$41                              ;
+FD2E 2BAD             (      monitor.asm):00242 [3]             BMI     C1                                ; NOT HEX
+FD30 8146             (      monitor.asm):00243 [2]             CMPA    #$46                              ;
+FD32 2EA9             (      monitor.asm):00244 [3]             BGT     C1                                ; NOT HEX
+FD34 8007             (      monitor.asm):00245 [2]             SUBA    #$07                              ;
+FD36                  (      monitor.asm):00246         IN1HG:  ;
+FD36 39               (      monitor.asm):00247 [5]             RTS                                       ;
+                      (      monitor.asm):00248         
+                      (      monitor.asm):00249         ; BUILD ADDRESS
+FD37                  (      monitor.asm):00250         BADDR:
+FD37 8D0C             (      monitor.asm):00251 [7]             BSR     BYTE                              ; READ 2 FRAMES
+FD39 B70104           (      monitor.asm):00252 [5]             STA     XHI
+FD3C 8D07             (      monitor.asm):00253 [7]             BSR     BYTE
+FD3E B70105           (      monitor.asm):00254 [5]             STA     XLOW
+FD41 BE0104           (      monitor.asm):00255 [6]             LDX     XHI                               ; (X) ADDRESS WE BUILT
+FD44 39               (      monitor.asm):00256 [5]             RTS
+                      (      monitor.asm):00257         
+                      (      monitor.asm):00258         ; INPUT BYTE (TWO FRAMES)
+FD45                  (      monitor.asm):00259         BYTE:
+FD45 8DD3             (      monitor.asm):00260 [7]             BSR     INHEX                             ; GET HEX CHAR
+FD47 48               (      monitor.asm):00261 [2]             ASLA
+FD48 48               (      monitor.asm):00262 [2]             ASLA
+FD49 48               (      monitor.asm):00263 [2]             ASLA
+FD4A 48               (      monitor.asm):00264 [2]             ASLA
+FD4B 1F89             (      monitor.asm):00265 [6]             TFR     A,B                               ; TAB
+FD4D 4D               (      monitor.asm):00266 [2]             TSTA                                      ; TAB
+FD4E 8DCA             (      monitor.asm):00267 [7]             BSR     INHEX
+FD50 840F             (      monitor.asm):00268 [2]             ANDA    #$0F                              ; MASK TO 4 BITS
+FD52 3404             (      monitor.asm):00269 [5+1]           PSHS    B                                 ; ABA
+FD54 ABE0             (      monitor.asm):00270 [4+2]           ADDA    ,S+                               ; ABA
+FD56 1F89             (      monitor.asm):00271 [6]             TFR     A,B                               ; TAB
+FD58 4D               (      monitor.asm):00272 [2]             TSTA                                      ; TAB
+FD59 FB0102           (      monitor.asm):00273 [5]             ADDB    CKSM
+FD5C F70102           (      monitor.asm):00274 [5]             STB     CKSM
+FD5F 39               (      monitor.asm):00275 [5]             RTS
+                      (      monitor.asm):00276         
+                      (      monitor.asm):00277         
+                      (      monitor.asm):00278         
+FD60                  (      monitor.asm):00279         MONOUTHL:
+FD60 44               (      monitor.asm):00280 [2]             LSRA                                      ; OUT HEX LEFT BCD DIGIT
+FD61 44               (      monitor.asm):00281 [2]             LSRA                                      ;
+FD62 44               (      monitor.asm):00282 [2]             LSRA                                      ;
+FD63 44               (      monitor.asm):00283 [2]             LSRA                                      ;
+                      (      monitor.asm):00284         
+FD64                  (      monitor.asm):00285         MONOUTHR:                                         ;
+FD64 840F             (      monitor.asm):00286 [2]             ANDA    #$0F                              ; OUT HEC RIGHT DIGIT
+FD66 8B30             (      monitor.asm):00287 [2]             ADDA    #$30                              ;
+FD68 8139             (      monitor.asm):00288 [2]             CMPA    #$39                              ;
+FD6A 2302             (      monitor.asm):00289 [3]             BLS     OUTHR1                            ;
+FD6C 8B07             (      monitor.asm):00290 [2]             ADDA    #$07                              ;
+FD6E                  (      monitor.asm):00291         OUTHR1:
+FD6E 7EFDBA           (      monitor.asm):00292 [4]             JMP     WRSER1                            ;
+                      (      monitor.asm):00293         
+FD71                  (      monitor.asm):00294         OUT2H:
+FD71 A600             (      monitor.asm):00295 [4+1]           LDA     0,X                               ; OUTPUT 2 HEX CHAR
+FD73 8DEB             (      monitor.asm):00296 [7]             BSR     MONOUTHL                          ; OUT LEFT HEX CHAR
+FD75 A600             (      monitor.asm):00297 [4+1]           LDA     0,X                               ;
+FD77 8DEB             (      monitor.asm):00298 [7]             BSR     MONOUTHR                          ; OUT RIGHT HEX CHAR
+FD79 3001             (      monitor.asm):00299 [4+1]           LEAX    1,X
+FD7B 39               (      monitor.asm):00300 [5]             RTS
+                      (      monitor.asm):00301         
+FD7C                  (      monitor.asm):00302         OUTADDR:
+FD7C 3410             (      monitor.asm):00303 [5+2]           PSHS    X                                 ;
+FD7E 3502             (      monitor.asm):00304 [5+1]           PULS    A                                 ;
+FD80 3402             (      monitor.asm):00305 [5+1]           PSHS    A                                 ;
+FD82 8DDC             (      monitor.asm):00306 [7]             BSR     MONOUTHL                          ; OUT LEFT HEX CHAR
+FD84 3502             (      monitor.asm):00307 [5+1]           PULS    A                                 ;
+FD86 8DDC             (      monitor.asm):00308 [7]             BSR     MONOUTHR                          ; OUT RIGHT HEX CHAR
+FD88 3502             (      monitor.asm):00309 [5+1]           PULS    A                                 ;
+FD8A 3402             (      monitor.asm):00310 [5+1]           PSHS    A                                 ;
+FD8C 8DD2             (      monitor.asm):00311 [7]             BSR     MONOUTHL                          ; OUT LEFT HEX CHAR
+FD8E 3502             (      monitor.asm):00312 [5+1]           PULS    A                                 ;
+FD90 8DD2             (      monitor.asm):00313 [7]             BSR     MONOUTHR                          ; OUT RIGHT HEX CHAR
+FD92 39               (      monitor.asm):00314 [5]             RTS
+                      (      monitor.asm):00315         
+FD93                  (      monitor.asm):00316         OUT2HS:
+FD93 8DDC             (      monitor.asm):00317 [7]             BSR     OUT2H                             ; OUTPUT 2 HEX CHAR + SPACE
+FD95                  (      monitor.asm):00318         OUTS:
+FD95 8620             (      monitor.asm):00319 [2]             LDA     #$20                              ; SPACE
+FD97 7EFDBA           (      monitor.asm):00320 [4]             JMP     WRSER1                            ;
+                      (      monitor.asm):00321         
+                      (      monitor.asm):00322         
+                      (      monitor.asm):00323         
+                      (      monitor.asm):00324         ;__________________________________________________________________________________________________________
+                      (      monitor.asm):00325         
+FD9A                  (      monitor.asm):00326         DISPLAY_CRLF:
+FD9A 860D             (      monitor.asm):00327 [2]             LDA     #$0D                              ; PRINT CR
+FD9C BDFDBA           (      monitor.asm):00328 [8]             JSR     WRSER1                            ; OUTPUT CHARACTER
+FD9F 860A             (      monitor.asm):00329 [2]             LDA     #$0A                              ; PRINT LF
+FDA1 BDFDBA           (      monitor.asm):00330 [8]             JSR     WRSER1                            ; OUTPUT CHARACTER
+FDA4 39               (      monitor.asm):00331 [5]             RTS
+                      (      monitor.asm):00332         
+FDA5                  (      monitor.asm):00333         SERIALINIT:
+FDA5 8680             (      monitor.asm):00334 [2]             LDA     #$80                              ;
+FDA7 B7DF5B           (      monitor.asm):00335 [5]             STA     MONUART3                          ; SET DLAB FLAG
+FDAA 860C             (      monitor.asm):00336 [2]             LDA     #12                               ; SET TO 12 = 9600 BAUD
+FDAC B7DF58           (      monitor.asm):00337 [5]             STA     MONUART0                          ; save baud rate
+FDAF 8600             (      monitor.asm):00338 [2]             LDA     #00                               ;
+FDB1 B7DF59           (      monitor.asm):00339 [5]             STA     MONUART1                          ;
+FDB4 8603             (      monitor.asm):00340 [2]             LDA     #03                               ;
+FDB6 B7DF5B           (      monitor.asm):00341 [5]             STA     MONUART3                          ; SET 8 BIT DATA, 1 STOPBIT
+FDB9 39               (      monitor.asm):00342 [5]             RTS
+                      (      monitor.asm):00343         
+FDBA                  (      monitor.asm):00344         WRSER1:
+FDBA 3402             (      monitor.asm):00345 [5+1]           PSHS    A
+FDBC                  (      monitor.asm):00346         TX_BUSYLP:
+FDBC B6DF5D           (      monitor.asm):00347 [5]             LDA     MONUART5                          ; READ LINE STATUS REGISTER
+FDBF 8420             (      monitor.asm):00348 [2]             ANDA    #$20                              ; TEST IF UART IS READY TO SEND (BIT 5)
+FDC1 8100             (      monitor.asm):00349 [2]             CMPA    #$00
+FDC3 27F7             (      monitor.asm):00350 [3]             BEQ     TX_BUSYLP                         ; IF NOT REPEAT
+FDC5 3502             (      monitor.asm):00351 [5+1]           PULS    A
+FDC7 B7DF58           (      monitor.asm):00352 [5]             STA     MONUART0                          ; THEN WRITE THE CHAR TO UART
+FDCA 39               (      monitor.asm):00353 [5]             RTS
+                      (      monitor.asm):00354         
+                      (      monitor.asm):00355         
+FDCB                  (      monitor.asm):00356         IOF_CONINW:                                       ;
+FDCB                  (      monitor.asm):00357         SERIAL_INCHW1:
+FDCB B6DF5D           (      monitor.asm):00358 [5]             LDA     MONUART5                          ; READ LINE STATUS REGISTER
+FDCE 8401             (      monitor.asm):00359 [2]             ANDA    #$01                              ; TEST IF DATA IN RECEIVE BUFFER
+FDD0 8100             (      monitor.asm):00360 [2]             CMPA    #$00
+FDD2 27F7             (      monitor.asm):00361 [3]             BEQ     SERIAL_INCHW1                     ; LOOP UNTIL DATA IS READY
+FDD4 B6DF58           (      monitor.asm):00362 [5]             LDA     MONUART0                          ; THEN READ THE CHAR FROM THE UART
+FDD7 39               (      monitor.asm):00363 [5]             RTS
+                      (      monitor.asm):00364         
+                      (      monitor.asm):00365         
+                      (      monitor.asm):00366         ;_____________________________________________________________________________________________________
+                      (      monitor.asm):00367         ;   Default ISRs.  Will be changed by OS Setup
+FDD8                  (      monitor.asm):00368         SWIVEC:
+FDD8                  (      monitor.asm):00369         IRQVEC:
+FDD8 3B               (      monitor.asm):00370 [6+?]           RTI
+                      (      monitor.asm):00371         
+                      (      monitor.asm):00372         
+                      (      monitor.asm):00373         
+                      (      monitor.asm):00374                 IFNDEF  STARTOFFLEX
+                      (      monitor.asm):00375                 ORG     $FFF2                             ; SET RESET VECTOR TO MAIN PROGRAM
+FFF2 FDD8             (      monitor.asm):00376                 FDB     SWIVEC
+FFF4 FC00             (      monitor.asm):00377                 FDB     MAIN
+FFF6 FC00             (      monitor.asm):00378                 FDB     MAIN
+FFF8 FDD8             (      monitor.asm):00379                 FDB     IRQVEC
+FFFA FC00             (      monitor.asm):00380                 FDB     MAIN
+FFFC FC00             (      monitor.asm):00381                 FDB     MAIN
+FFFE FC00             (      monitor.asm):00382                 FDB     MAIN
+                      (      monitor.asm):00383         
+                      (      monitor.asm):00384                 END
+
+Symbol Table:
+[ G] BADDR                            FD37
+[ G] BANK00                           DF50
+[ G] BANK40                           DF51
+[ G] BANK80                           DF52
+[ G] BANKC0                           DF53
+[ G] BYTE                             FD45
+[ G] BYTECT                           0103
+[ G] C1                               FCDD
+[ G] CHANGE                           FC7D
+[ G] CKSM                             0102
+[ G] CONTRL                           FC24
+[ G] DISPLAY_CRLF                     FD9A
+[ G] DUMP                             FC54
+[ G] DUMP_LINE                        FCE0
+[ G] DUMP_LINE_INVALID                FD0C
+[ G] DUMP_LINE_LOOP                   FCEA
+[ G] DUMP_LINE_LOOPA                  FCFC
+[ G] DUMP_LINE_VALID                  FD11
+[ G] DUMP_LOOP                        FC67
+[ G] GO                               FC72
+[ G] IN1HG                            FD36
+[ G] INHEX                            FD1A
+[ G] IOF_CONINW                       FDCB
+[ G] IRQVEC                           FDD8
+[ G] LOAD11                           FCC5
+[ G] LOAD15                           FCD3
+[ G] LOAD19                           FCD8
+[ G] LOAD21                           FCDD
+[ G] LOAD3                            FCA6
+[ G] MAIN                             FC00
+[ G] MLOAD                            FC51
+[ G] MONLOAD                          FCA6
+[ G] MONOUTHL                         FD60
+[ G] MONOUTHR                         FD64
+[ G] MONSTACK                         1000
+[ G] MONUART0                         DF58
+[ G] MONUART1                         DF59
+[ G] MONUART2                         DF5A
+[ G] MONUART3                         DF5B
+[ G] MONUART4                         DF5C
+[ G] MONUART5                         DF5D
+[ G] MONUART6                         DF5E
+[ G] MONUART7                         DF5F
+[ G] OUT2H                            FD71
+[ G] OUT2HS                           FD93
+[ G] OUTADDR                          FD7C
+[ G] OUTHR1                           FD6E
+[ G] OUTS                             FD95
+[ G] PRINT                            FC94
+[ G] PRINT2                           FC9D
+[ G] SERIAL_INCHW1                    FDCB
+[ G] SERIALINIT                       FDA5
+[ G] SP                               0100
+[ G] SWIVEC                           FDD8
+[ G] TX_BUSYLP                        FDBC
+[ G] WRSER1                           FDBA
+[ G] XHI                              0104
+[ G] XLOW                             0105
