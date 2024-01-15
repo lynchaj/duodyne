@@ -1,6 +1,6 @@
 Name     SAB80535-CS-1.tru ;
 PartNo   00 ;
-Date     15.12.2023 ;
+Date     15.01.2024 ;
 Revision 01 ;
 Designer Andrew ;
 Company  unknown ;
@@ -23,6 +23,7 @@ PIN 19 = CSxPPI0;
 PIN 18 = CSxPPI1;
 PIN 16 = CSxMMUxWR;
 PIN 17 = CSxLCD;
+PIN 14 = CSxROM;
 
 /* combinatorial logic */
 CSxLCD = A2 # !A3 # A4 # Y0;
@@ -30,3 +31,4 @@ CSxMMUxWR = !A2 # !A3 # A4 # WR # Y0;
 CSxPPI0 = A2 # A3 # A4 # Y0;
 CSxPPI1 = !A2 # A3 # A4 # Y0;
 CSxRAM = !ZA19 # !IOxSEL;
+CSxROM = ZA19 # !IOxSEL;
