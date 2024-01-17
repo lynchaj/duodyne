@@ -17,7 +17,7 @@ monitor.com: monitor.asm
 
 mon09.hex: mon09.asm
 	lwasm --6809 mon09.asm -s --list=mon09.lst --map=mon09.map --output=mon09.s --format=srec
-	srec_cat  mon09.s -exclude 0x0000 0xF000 -offset -0xE000 -o  mon09r.hex  -intel -address-length=2
+	srec_cat  mon09.s -exclude 0x0000 0xE000 -offset -0xE000 -o  mon09.hex  -intel -address-length=2
 	@rm mon09.s
 
 pretty:
