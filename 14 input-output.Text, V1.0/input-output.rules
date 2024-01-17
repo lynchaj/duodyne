@@ -1,0 +1,158 @@
+
+(rules PCB input-output
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 6938)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.5)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.7)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-ThinPower" "Via[0-1]_800:400_um" default
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (via_rule
+    ThinPower "Via[0-1]_800:400_um-ThinPower"
+  )
+  (class default
+    "Net-(D2-Pad1)" "Net-(D2-Pad2)" "/GDC-Text/AD11" "Net-(RN1-Pad9)" "Net-(RN1-Pad5)" "Net-(RN1-Pad4)" "Net-(RN1-Pad3)" "Net-(RN1-Pad2)"
+    "Net-(D1-Pad2)" "Net-(J8-Pad2)" "/GDC-Text/~(WE_RAM)" "/GDC-Text/VCC_VGA" "/bus/~(INT0)" "/bus/~(EIRQ7)" "/bus/~(EIRQ6)" "/bus/~(EIRQ5)"
+    "/bus/~(EIRQ4)" "/bus/~(EIRQ3)" "~(M1)" "~(IORQ)" "~(WR)" "~(RD)" A0 A1
+    A2 A3 A4 A5 A6 A7 D0 D1
+    D2 D3 D4 D5 D6 D7 ONE ZERO
+    bD6 bD5 bD4 bD3 bD2 bD1 bD0 "~(bWR)"
+    "~(bRD)" bA0 bD7 "~(bM1)" bA7 bA6 bA5 bA4
+    "~(bIORQ)" bA1 bA2 bA3 "unconnected-(J1-Pad1)" "unconnected-(J1-Pad2)" "unconnected-(J1-Pad3)" "unconnected-(J1-Pad4)"
+    "unconnected-(J1-Pad5)" "unconnected-(J1-Pad6)" "unconnected-(J1-Pad7)" "unconnected-(J1-Pad8)" "unconnected-(J1-Pad9)" "unconnected-(J1-Pad10)" "unconnected-(J1-Pad11)" "unconnected-(J1-Pad12)"
+    "unconnected-(J1-Pad13)" "unconnected-(J1-Pad14)" "unconnected-(J2-Pad1)" "unconnected-(J2-Pad2)" "unconnected-(J2-Pad3)" "unconnected-(J2-Pad4)" "unconnected-(J2-Pad5)" "unconnected-(J2-Pad6)"
+    "unconnected-(J2-Pad7)" "unconnected-(J2-Pad8)" "unconnected-(J2-Pad9)" "unconnected-(J2-Pad10)" "unconnected-(J2-Pad11)" "unconnected-(J2-Pad12)" "unconnected-(J2-Pad13)" "unconnected-(J2-Pad14)"
+    "unconnected-(J2-Pad15)" "unconnected-(J2-Pad16)" "unconnected-(J3-Pad1)" "unconnected-(J3-Pad2)" "unconnected-(J3-Pad3)" "unconnected-(J3-Pad4)" "unconnected-(J3-Pad5)" "unconnected-(J3-Pad6)"
+    "unconnected-(J3-Pad7)" "unconnected-(J3-Pad8)" "unconnected-(J3-Pad9)" "unconnected-(J3-Pad10)" "unconnected-(J3-Pad11)" "unconnected-(J3-Pad12)" "unconnected-(J3-Pad13)" "unconnected-(J3-Pad14)"
+    "unconnected-(J3-Pad15)" "unconnected-(J3-Pad16)" "unconnected-(J3-Pad17)" "unconnected-(J3-Pad18)" "unconnected-(J3-Pad19)" "unconnected-(J3-Pad20)" "unconnected-(J4-Pad1)" "unconnected-(J4-Pad2)"
+    "unconnected-(J4-Pad3)" "unconnected-(J4-Pad4)" "unconnected-(J4-Pad5)" "unconnected-(J4-Pad6)" "unconnected-(J4-Pad7)" "unconnected-(J4-Pad8)" "unconnected-(J4-Pad9)" "unconnected-(J4-Pad10)"
+    "unconnected-(J4-Pad11)" "unconnected-(J4-Pad12)" "unconnected-(J4-Pad13)" "unconnected-(J4-Pad14)" "unconnected-(J5-Pad1)" "unconnected-(J5-Pad2)" "unconnected-(J5-Pad3)" "unconnected-(J5-Pad4)"
+    "unconnected-(J5-Pad5)" "unconnected-(J5-Pad6)" "unconnected-(J5-Pad7)" "unconnected-(J5-Pad8)" "unconnected-(J5-Pad9)" "unconnected-(J5-Pad10)" "unconnected-(J5-Pad11)" "unconnected-(J5-Pad12)"
+    "unconnected-(J5-Pad13)" "unconnected-(J5-Pad14)" "unconnected-(J5-Pad15)" "unconnected-(J5-Pad16)" "unconnected-(J6-Pad1)" "unconnected-(J6-Pad2)" "unconnected-(J6-Pad3)" "unconnected-(J6-Pad4)"
+    "unconnected-(J6-Pad5)" "unconnected-(J6-Pad6)" "unconnected-(J6-Pad7)" "unconnected-(J6-Pad8)" "unconnected-(J6-Pad9)" "unconnected-(J6-Pad10)" "unconnected-(J6-Pad11)" "unconnected-(J6-Pad12)"
+    "unconnected-(J6-Pad13)" "unconnected-(J6-Pad14)" "unconnected-(J6-Pad15)" "unconnected-(J6-Pad16)" "unconnected-(J6-Pad17)" "unconnected-(J6-Pad18)" "unconnected-(J6-Pad19)" "unconnected-(J6-Pad20)"
+    /bus/D15 /bus/D31 /bus/D14 /bus/D30 /bus/D13 /bus/D29 /bus/D12 /bus/D28
+    /bus/D11 /bus/D27 /bus/D10 /bus/D26 /bus/D9 /bus/D25 /bus/D8 /bus/D24
+    /bus/D23 /bus/D22 /bus/D21 /bus/D20 /bus/D19 /bus/D18 /bus/D17 /bus/D16
+    "/bus/~(BUSERR)" /bus/UDS "/bus/~(VPA)" /bus/LDS "/bus/~(VMA)" /bus/S2 "/bus/~(BHE)" /bus/S1
+    /bus/IPL2 /bus/S0 /bus/IPL1 /bus/AUXCLK3 /bus/IPL0 /bus/AUXCLK2 /bus/A15 /bus/A31
+    /bus/A14 /bus/A30 /bus/A13 /bus/A29 /bus/A12 /bus/A28 /bus/A11 /bus/A27
+    /bus/A10 /bus/A26 /bus/A9 /bus/A25 /bus/A8 /bus/A24 /bus/A23 /bus/A22
+    /bus/A21 /bus/A20 /bus/A19 /bus/A18 /bus/A17 /bus/A16 /bus/IC3 "/bus/~(EIRQ2)"
+    /bus/IC2 "/bus/~(EIRQ1)" /bus/IC1 "/bus/~(EIRQ0)" /bus/IC0 "/bus/~(TEND1)" /bus/AUXCLK1 /bus/AUXCLK0
+    /bus/E /bus/ST /bus/PHI "/bus/~(MREQ)" "/bus/~(INT2)" "/bus/~(INT1)" "/bus/~(BUSACK)" /bus/CRUCLK
+    /bus/CLK /bus/CRUOUT /bus/CRUIN "/bus/~(NMI)" "~(RES_IN)" "~(RES_OUT)" /bus/USER8 "/bus/~(BUSRQ)"
+    /bus/USER7 "/bus/~(WAIT)" /bus/USER6 "/bus/~(HALT)" /bus/USER5 "/bus/~(RFSH)" /bus/USER4 /bus/USER3
+    /bus/USER2 /bus/USER1 /bus/USER0 "~(BAI)" "~(BAO)" "~(IEI)" "~(IEO)" "/bus/I2C_SCL"
+    "/bus/I2C_SDA" "/bus/~(DREQ1)" "/bus/~(TEND0)" "/bus/~(DREQ0)" "Net-(P5-Pad1)" "unconnected-(P5-Pad4)" "unconnected-(P5-Pad12)" "/GDC-Text/H-Sync"
+    "/GDC-Text/V-Sync" "unconnected-(P5-Pad15)" "Net-(Q1-Pad2)" "unconnected-(U11-Pad8)" "Net-(Q2-Pad2)" "/GDC-Text/AD0" "unconnected-(U12-Pad4)" "unconnected-(U12-Pad5)"
+    "unconnected-(U12-Pad6)" "unconnected-(U12-Pad8)" "/GDC-Text/MD0" "/GDC-Text/AD2" "/GDC-Text/MD2" "unconnected-(U15-Pad4)" "unconnected-(U15-Pad6)" "unconnected-(U15-Pad8)"
+    "unconnected-(U12-Pad9)" "unconnected-(U15-Pad12)" "unconnected-(U15-Pad14)" "unconnected-(U15-Pad16)" "Net-(J9-Pad2)" "/GDC-Text/AD4" "/GDC-Text/MD4" "/GDC-Text/AD6"
+    "/GDC-Text/MD6" "/GDC-Text/AD1" "/GDC-Text/MD1" "/GDC-Text/AD3" "/GDC-Text/MD3" "Net-(R8-Pad2)" "/GDC-Text/AD5" "/GDC-Text/MD5"
+    "Net-(R10-Pad2)" "/GDC-Text/AD7" "/GDC-Text/MD7" "/GDC-Text/VGA_TTL" "Net-(RN1-Pad6)" "Net-(RN1-Pad7)" "Net-(RN1-Pad8)" "/GDC-Text/~(PIX-CLK)"
+    "/GDC-Text/PIX-CLK" "/GDC-Text/HSYNC" "/GDC-Text/VSYNC" "unconnected-(U1-Pad8)" "unconnected-(U1-Pad9)" "unconnected-(U1-Pad10)" "unconnected-(U1-Pad11)" "/GDC-Text/2xWCLK"
+    "/GDC-Text/~(2xWCLK)" "/GDC-Text/~(DBIN)" "Net-(U2-Pad12)" "unconnected-(U2-Pad6)" "Net-(U12-Pad13)" "unconnected-(U2-Pad9)" "unconnected-(U3-Pad1)" "/GDC-Text/ALE"
+    "/GDC-Text/~(BLANK)" "Net-(U12-Pad2)" "Net-(U14-Pad10)" "Net-(U11-Pad19)" "unconnected-(U3-Pad9)" "Net-(U14-Pad8)" "Net-(U14-Pad12)" "unconnected-(U4-Pad6)"
+    "unconnected-(U4-Pad7)" "unconnected-(U4-Pad12)" "unconnected-(U4-Pad13)" "~(CS_TEXT)" "~(CS_TEXT_RD)" "~(CS_TEXT_WR)" "unconnected-(U5-Pad11)" "unconnected-(U5-Pad12)"
+    "unconnected-(U5-Pad13)" "unconnected-(U6-Pad1)" "unconnected-(U6-Pad2)" "unconnected-(U6-Pad3)" "unconnected-(U6-Pad4)" "unconnected-(U6-Pad5)" "unconnected-(U6-Pad6)" "unconnected-(U6-Pad7)"
+    "unconnected-(U6-Pad8)" "unconnected-(U6-Pad9)" "unconnected-(U6-Pad11)" "unconnected-(U6-Pad12)" "unconnected-(U6-Pad13)" "unconnected-(U6-Pad14)" "unconnected-(U6-Pad15)" "unconnected-(U6-Pad16)"
+    "unconnected-(U6-Pad17)" "unconnected-(U6-Pad18)" "unconnected-(U6-Pad19)" "/GDC-Text/BLANK" "unconnected-(U8-Pad7)" "/GDC-Text/AD8" "/GDC-Text/AD9" "/GDC-Text/AD10"
+    "/GDC-Text/AD12" "/GDC-Text/AD13" "/GDC-Text/AD14" "/GDC-Text/AD15" "/GDC-Text/A16" "/GDC-Text/A17" "unconnected-(U9-Pad1)" "/GDC-Text/~(OE_RAM)"
+    "/GDC-Text/CD0" "/GDC-Text/CD1" "/GDC-Text/CD2" "/GDC-Text/CD3" "/GDC-Text/CD4" "/GDC-Text/CD5" "/GDC-Text/CD6" "/GDC-Text/CD7"
+    "unconnected-(U10-Pad26)" "unconnected-(U12-Pad10)" "unconnected-(U15-Pad18)" "unconnected-(X1-Pad1)" "unconnected-(X1-Pad2)" "unconnected-(X1-Pad3)" "unconnected-(X1-Pad5)" "unconnected-(X1-Pad6)"
+    "unconnected-(X1-Pad9)" "unconnected-(X1-Pad10)" "unconnected-(X1-Pad12)" "unconnected-(X1-Pad13)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class default)
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC "-12V" +12V
+    (clearance_class default)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class ThinPower
+    (clearance_class default)
+    (via_rule ThinPower)
+    (rule
+      (width 700.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

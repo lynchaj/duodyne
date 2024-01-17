@@ -1,0 +1,1 @@
+This board provides a text-only VGA monitor compatible video capability.  The intent for this prototype is to prove functionality and eventually be integrated into the GDC IO board as its text mode only subsystem.  Possibly as a mezzanine board attachment or if space allows integrated on to the GDC IO planar.
