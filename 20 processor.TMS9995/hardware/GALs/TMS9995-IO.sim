@@ -23,52 +23,51 @@ PIN  17 =  WAIT
 
 %EQUATION
 9902SEL =>
-    !MEMEN
-  # ISFE
-  # RA15
+    CPUA6
   # CPUA7
-  # CPUA6
+  # ISFE
+  # !MEMEN
+  # RA15
   # USER
 
 CFSEL =>
-    MEMEN
-  # ISFE
-  # !RA15
-  # CPUA7
-  # CPUA6
-  # USER
-  # CPUA5
+    CPUA3
   # CPUA4
-  # CPUA3
-  # CPUA2
+  # CPUA5
+  # CPUA6
+  # CPUA7
+  # ISFE
+  # MEMEN
+  # !RA15
+  # USER
 
 CPU_IORQ =>
-    MEMEN
-  # ISFE
+    !9902SEL
   # !CFSEL
+  # ISFE
   # !MAPSEL
-  # !9902SEL
-  # USER
+  # MEMEN
   # !RA15
+  # USER
 
 MAPSEL =>
-    MEMEN
-  # ISFE
-  # !RA15
-  # CPUA7
-  # !CPUA6
-  # USER
+    CPUA4
   # CPUA5
-  # CPUA4
+  # !CPUA6
+  # CPUA7
+  # ISFE
+  # MEMEN
+  # !RA15
+  # USER
 
 ONBOARD_ROM =>
     MEMEN
-  # ROMEN
   # RA15
+  # ROMEN
 
 WAIT =>
-    !ONBOARD_ROM
-  # !CFSEL
+    !CFSEL
+  # !ONBOARD_ROM
 
 9902SEL.oe  =>
     1 
