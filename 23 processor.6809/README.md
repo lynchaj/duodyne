@@ -30,6 +30,7 @@ $58-$5F UART (RW)
 
 One "Toggle" address is jumper selectable and visible in the OP port range to switch between CPUs in the Duodyne system.
 
+Rom Images are in this repo.   Cubix operating system sources and images can be found here: https://github.com/danwerner21/CUBIX09
 
 # Bugs
 
