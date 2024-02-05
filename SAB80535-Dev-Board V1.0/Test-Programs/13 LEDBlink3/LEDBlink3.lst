@@ -1,0 +1,20 @@
+0000:              .ORG 0000H
+                   
+0000: 75 A0 FF     TOGLE:   MOV P2, #0FFH ;//move 11111111 to the p2 register//
+0003: 11 0E                 ACALL DELAY ;//execute the delay//
+0005: E5 A0                 MOV A, P2 ;//move p2 value to the accumulator//
+0007: F4                    CPL A ;//complement A value //
+0008: F5 A0                 MOV P2, A ;//move 00000000 to the port2 register//
+000A: 11 0E                 ACALL DELAY ;//execute the delay//
+000C: 80 F2                 SJMP TOGLE
+                   
+000E: 7D 10        DELAY:   MOV R5, #10H ;//load register R5 with 10//
+0010: 7E C8        TWO:     MOV R6, #200 ;//load register R6 with 200//
+0012: 7F C8        ONE:     MOV R7, #200 ;//load register R7 with 200//
+0014: DF FE        ZERO:    DJNZ R7, ZERO ;//decrement R7 till it is zero//
+0016: DE FA                 DJNZ R6, ONE ;//decrement R6 till it is zero//
+0018: DD F6                 DJNZ R5, TWO ;//decrement R5 till it is zero//
+001A: 22                    RET ;//go back to the main program //
+                   
+001B:              .END
+                   

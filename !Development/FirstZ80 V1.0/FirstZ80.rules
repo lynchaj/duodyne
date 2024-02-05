@@ -1,0 +1,107 @@
+
+(rules PCB FirstZ80
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 28341)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.6)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.6)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    "Net-(C1-Pad1)" "Net-(C2-Pad1)" "Net-(C2-Pad2)" "Net-(C3-Pad1)" "Net-(C3-Pad2)" "Net-(C4-Pad2)" "Net-(C5-Pad1)" "Net-(D1-Pad1)"
+    "Net-(D2-Pad1)" "Net-(D3-Pad1)" "Net-(D4-Pad1)" "Net-(D5-Pad1)" "Net-(D6-Pad1)" "Net-(D7-Pad1)" "Net-(D8-Pad1)" "Net-(D9-Pad1)"
+    "/~(RTS-TTL)" "/RX-TTL" "/TX-TTL" "/~(CTS-TTL)" "unconnected-(J3-Pad1)" /RX /TX "unconnected-(J3-Pad4)"
+    "unconnected-(J3-Pad6)" "/~(RTS)" "/~(CTS)" "unconnected-(J3-Pad9)" /PC0 /PA0 /PC1 /PA1
+    /PC2 /PA2 /PC3 /PA3 /PC4 /PA4 /PC5 /PA5
+    /PC6 /PA6 /PC7 /PA7 /PB7 /PB0 /PB6 /PB1
+    /PB5 /PB2 /PB4 /PB3 "Net-(R3-Pad2)" "Net-(R4-Pad2)" "Net-(R5-Pad1)" "/~(CS-PPI)"
+    "/~(CS-RAM)" "/~(CS-ROM)" "/~(CS-UART)" "/~(OUT1)" "/~(OUT2)" /RESET "/~(RESET)" /A07
+    "Net-(U1-Pad6)" "Net-(U1-Pad8)" /A15 "unconnected-(U1-Pad12)" "unconnected-(U1-Pad13)" /A11 /A12 /A13
+    /A14 "/CLK-CPU" /D04 /D03 /D05 /D06 /D02 /D07
+    /D00 /D01 "unconnected-(U2-Pad18)" "/~(MREQ)" "/~(IORQ)" "/~(RD)" "/~(WR)" "unconnected-(U2-Pad25)"
+    "unconnected-(U2-Pad27)" "unconnected-(U2-Pad28)" /A00 /A01 /A02 /A03 /A04 /A05
+    /A06 /A08 /A09 /A10 "Net-(U7-Pad15)" "/CLK-UART" "unconnected-(U7-Pad17)" "unconnected-(U7-Pad23)"
+    "unconnected-(U7-Pad24)" "unconnected-(U7-Pad29)" "Net-(JP2-Pad1)" "unconnected-(U7-Pad33)" "unconnected-(X1-Pad1)" "unconnected-(X2-Pad1)" "Net-(JP2-Pad2)" "Net-(U1-Pad11)"
+    "Net-(JP1-Pad1)" "Net-(R1-Pad2)"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC /9VDC /VI "/VCC_PP"
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
