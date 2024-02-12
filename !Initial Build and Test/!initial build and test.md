@@ -102,6 +102,16 @@ duodyne initial build and test findings
 
 ##
 
+* Media IO "C37 should have the value on the top of the PCB not the Bottom" (fixed 1.1)
+* Media IO "C42 and C46 footprints are a bit too close to the IC sockets and are too small for any 1000uf that I had in stock.   There is probably a 1000uf cap that would fit, but it seems like it might not be the one that many would have in stock."  Use an 8mm 1000 uF capacitor and be sure to get one that is not too tall (12mm height)
+* Media IO The PJ320E 3.5mm jack is way harder to source than the PJ320A.   Changing the footprint might make the board a bit more simple to get parts for. Use this one https://www.aliexpress.us/item/2251801525496024.html
+* Media IO "I am also having a tough time matching the footprint for the 8 pin RGB DIN connector.   I have several different 8 pin DIN sockets but the footprint does not match.   Do you have a part# or something more specific so I can widen my search a bit?"  Use Mouser 490-SDF-80J https://www.mouser.com/ProductDetail/490-SDF-80J
+* Media IO "The silk screen and comments on the schematic for the address jumper are wrong – default settings do not produce an “A0-A7” address." Should be IO Address Port $A0-$A7: 1-2 =off - A7 (high), 3-4 =on - A6 (low), 5-6 =off - A5 (high), 7-8 =on - A4 (low), 9-10 =on - A3 (low) (fixed 1.1)
+* Media IO update MEDIA-CS-GAL to give ~CS_ACR_WR a bit of a delay.  Use MEDIA-CS-V2-GAL JEDEC instead (fixed 1.1)
+* Media IO connect U1 pin 12 to U1 pin 8 (fixed 1.1)
+
+##
+
 * All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
 * All boards Ensure crystal oscillators are free of other traces interfering with connections
 (RAMROM, Multi IO, Voice IO, Media IO, VDCENET, SAB80535)
