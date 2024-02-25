@@ -52,6 +52,8 @@ duodyne initial build and test findings
 * Multi IO Swap Serial port A and Serial port B on TTL serial connector (A on the evens, B on the odds) (fixed 1.1)
 * Multi IO add 3-pin jumper to select "reserved 2" on either 2x5 IDC PS/2 keyboard & mouse connector either pin 2 or 10 (fixed 1.1)
 * Multi IO add CH376S-EVT board as alternate to CH376S and associated parts install (fixed 1.1)
+* Multi IO add 10K ohm pull up resistors between U8 pin 16 and pin 9 and U9 pin 16 and pin 9 (fixed 1.1)
+* Multi IO add jumpers on J1 and J13 (any) to prevent always on INT LED
 
 ##
 
@@ -107,8 +109,7 @@ duodyne initial build and test findings
 * Media IO The PJ320E 3.5mm jack is way harder to source than the PJ320A.   Changing the footprint might make the board a bit more simple to get parts for. Use this one https://www.aliexpress.us/item/2251801525496024.html
 * Media IO "I am also having a tough time matching the footprint for the 8 pin RGB DIN connector.   I have several different 8 pin DIN sockets but the footprint does not match.   Do you have a part# or something more specific so I can widen my search a bit?"  Use Mouser 490-SDF-80J https://www.mouser.com/ProductDetail/490-SDF-80J
 * Media IO "The silk screen and comments on the schematic for the address jumper are wrong – default settings do not produce an “A0-A7” address." Should be IO Address Port $A0-$A7: 1-2 =off - A7 (high), 3-4 =on - A6 (low), 5-6 =off - A5 (high), 7-8 =on - A4 (low), 9-10 =on - A3 (low) (fixed 1.1)
-* Media IO update MEDIA-CS-GAL to give ~CS_ACR_WR a bit of a delay.  Use MEDIA-CS-V2-GAL JEDEC instead (fixed 1.1)
-* Media IO connect U1 pin 12 to U1 pin 8 (fixed 1.1)
+* Media IO update MEDIA-CS-GAL to fix ~CS_ACR_WR inversion.  Use MEDIA-CS-V3-GAL JEDEC instead (fixed 1.1)
 
 ##
 

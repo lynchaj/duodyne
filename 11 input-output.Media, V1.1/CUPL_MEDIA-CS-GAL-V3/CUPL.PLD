@@ -1,0 +1,33 @@
+Name     MEDIA-CS-GAL-V3.tru ;
+PartNo   00 ;
+Date     24.02.2024 ;
+Revision 01 ;
+Designer Andrew ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   g16v8a ;
+
+/* inputs */
+PIN 3 = CSxMEDIA;
+PIN 6 = bA0;
+PIN 7 = bA1;
+PIN 5 = bA2;
+PIN 4 = bRD;
+PIN 2 = bWR;
+
+/* outputs */
+PIN 19 = VDPxWR;
+PIN 18 = VDPxRD;
+PIN 17 = CSxPSGxWR;
+PIN 16 = CSxPSGxA0;
+PIN 15 = CSxACRxWR;
+PIN 14 = CSxACR;
+
+/* combinatorial logic */
+CSxACR = !bA1 # !bA2 # CSxMEDIA;
+CSxACRxWR = !bA1 # !bA2 # CSxMEDIA # bWR;
+CSxPSGxA0 = !bA0 & !bA1 & bA2 & !CSxMEDIA;
+CSxPSGxWR = !bA1 & bA2 & !CSxMEDIA & !bWR;
+VDPxRD = bA2 # CSxMEDIA # bRD;
+VDPxWR = bA2 # CSxMEDIA # bWR;
