@@ -110,6 +110,17 @@ duodyne initial build and test findings
 * Media IO "I am also having a tough time matching the footprint for the 8 pin RGB DIN connector.   I have several different 8 pin DIN sockets but the footprint does not match.   Do you have a part# or something more specific so I can widen my search a bit?"  Use Mouser 490-SDF-80J https://www.mouser.com/ProductDetail/490-SDF-80J
 * Media IO "The silk screen and comments on the schematic for the address jumper are wrong – default settings do not produce an “A0-A7” address." Should be IO Address Port $A0-$A7: 1-2 =off - A7 (high), 3-4 =on - A6 (low), 5-6 =off - A5 (high), 7-8 =on - A4 (low), 9-10 =on - A3 (low) (fixed 1.1)
 * Media IO update MEDIA-CS-GAL to fix ~CS_ACR_WR inversion.  Use MEDIA-CS-V3-GAL JEDEC instead (fixed 1.1)
+* Media IO /VINT polarity reversed (fixed 1.1).
+
+* Steps to fix /VINT polarity on Media IO V1.0: 
+	** 1. cut trace (component side) between R24 pin 1 and U6 pin 25
+	** 2. cut trace between R24 pin 1 and U4 pin 9
+	** 3. cut trace between (copper side) U4 pin 9 and U4 pin 8 
+	** 4. cut trace (copper side) between D3 pin 1 and U4 pin 8 
+	** 5. jumper between R24 pin 1 and U4 pin 5
+	** 6. jumper between U6 pin 25 and D3 pin 1
+	** 7. jumper between D3 pin 1 and U4 pin 9 
+	** 8. jumper between U4 pin 8 and U4 pin 5
 
 ##
 
