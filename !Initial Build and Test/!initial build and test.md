@@ -112,15 +112,17 @@ duodyne initial build and test findings
 * Media IO update MEDIA-CS-GAL to fix ~CS_ACR_WR inversion.  Use MEDIA-CS-V3-GAL JEDEC instead (fixed 1.1)
 * Media IO /VINT polarity reversed (fixed 1.1).
 
+##
+
 * Steps to fix /VINT polarity on Media IO V1.0: 
-	** 1. cut trace (component side) between R24 pin 1 and U6 pin 25
-	** 2. cut trace between R24 pin 1 and U4 pin 9
-	** 3. cut trace between (copper side) U4 pin 9 and U4 pin 8 
-	** 4. cut trace (copper side) between D3 pin 1 and U4 pin 8 
-	** 5. jumper between R24 pin 1 and U4 pin 5
-	** 6. jumper between U6 pin 25 and D3 pin 1
-	** 7. jumper between D3 pin 1 and U4 pin 9 
-	** 8. jumper between U4 pin 8 and U4 pin 5
+* cut trace (component side) between R24 pin 1 and U6 pin 25
+* cut trace between (component side) R24 pin 1 and U4 pin 9
+* cut trace between (copper side) U4 pin 9 and U4 pin 5 
+* cut trace (copper side) between D3 pin 1 and U4 pin 8 
+* jumper between R24 pin 1 and U4 pin 8
+* jumper between U6 pin 25 and D3 pin 1
+* jumper between D3 pin 1 and U4 pin 9 
+* jumper between U4 pin 5 and U4 pin 8
 
 ##
 
