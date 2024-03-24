@@ -53,7 +53,8 @@ duodyne initial build and test findings
 * Multi IO add 3-pin jumper to select "reserved 2" on either 2x5 IDC PS/2 keyboard & mouse connector either pin 2 or 10 (fixed 1.1)
 * Multi IO add CH376S-EVT board as alternate to CH376S and associated parts install (fixed 1.1)
 * Multi IO add 10K ohm pull up resistors between U8 pin 16 and pin 9 and U9 pin 16 and pin 9 (fixed 1.1)
-* Multi IO add jumpers on J1 and J13 (any) to prevent always on INT LED
+* Multi IO add jumpers on J1 and J13 (any) to prevent always on INT LED (fixed 1.1)
+* Multi IO C23 in wrong place; should be near SD card socket (fixed 1.1)
 
 ##
 
@@ -111,6 +112,7 @@ duodyne initial build and test findings
 * Media IO "The silk screen and comments on the schematic for the address jumper are wrong – default settings do not produce an “A0-A7” address." Should be IO Address Port $A0-$A7: 1-2 =off - A7 (high), 3-4 =on - A6 (low), 5-6 =off - A5 (high), 7-8 =on - A4 (low), 9-10 =on - A3 (low) (fixed 1.1)
 * Media IO update MEDIA-CS-GAL to fix ~CS_ACR_WR inversion.  Use MEDIA-CS-V3-GAL JEDEC instead (fixed 1.1)
 * Media IO /VINT polarity reversed (fixed 1.1).
+* Media IO Add jumper for /VINT to /INT0
 
 ##
 
@@ -123,6 +125,15 @@ duodyne initial build and test findings
 * jumper between U6 pin 25 and D3 pin 1
 * jumper between D3 pin 1 and U4 pin 9 
 * jumper between U4 pin 5 and U4 pin 8
+
+##
+
+* Voice IO cut trace from U1 pin 19 to U21 pin 19 (component side); jumper U25 pin 19 to U21 pin 19 (copper side); Data Bus transceiver tied to TTS only, should be whole board select
+* Voice IO Update GAL U1 from Voice CS GAL to Voice CS V2 GAL
+* Voice IO Replace C80 and C81 (0.22uF) with 68pF capacitors
+
+
+
 
 ##
 
