@@ -131,6 +131,11 @@ duodyne initial build and test findings
 * Voice IO cut trace from U1 pin 19 to U21 pin 19 (component side); jumper U25 pin 19 to U21 pin 19 (copper side); Data Bus transceiver tied to TTS only, should be whole board select
 * Voice IO Update GAL U1 from Voice CS GAL to Voice CS V2 GAL
 * Voice IO Replace C80 and C81 (0.22uF) with 68pF capacitors
+* Voice IO Add 10K ohm resistor pull up to CTS256 pin 3 for optional debug monitor
+* Voice IO Add latch for user enabled reset to CTS256 & SP0256
+* Voice IO U9 Latch Enable incorrect; cut trace to U9, pin 11 (under U9, ZERO) and jumper between U9 pin 20 and U9 pin 11
+* Voice IO UART PARMS jumper data bits in reverse order; 1-2 -> 15-16, 3-4 -> 13-14, etc.
+
 
 
 
