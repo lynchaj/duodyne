@@ -112,7 +112,11 @@ duodyne initial build and test findings
 * Media IO "The silk screen and comments on the schematic for the address jumper are wrong – default settings do not produce an “A0-A7” address." Should be IO Address Port $A0-$A7: 1-2 =off - A7 (high), 3-4 =on - A6 (low), 5-6 =off - A5 (high), 7-8 =on - A4 (low), 9-10 =on - A3 (low) (fixed 1.1)
 * Media IO update MEDIA-CS-GAL to fix ~CS_ACR_WR inversion.  Use MEDIA-CS-V3-GAL JEDEC instead (fixed 1.1)
 * Media IO /VINT polarity reversed (fixed 1.1).
-* Media IO Add jumper for /VINT to /INT0
+* Media IO Add jumper for /VINT to /INT0 (fixed 1.1)
+* Media IO Add power conditioning circuit from Sergey's Omega MSX2 for VDP and CXA6145 (fixed 1.1)
+* Media IO Add VCC fill zone on component layer and GND fill zone on copper layer
+* Media IO Replace 30pF cap with 30pF trimmer cap on VDP U6 pin 63 (fixed 1.1)
+
 
 ##
 
@@ -129,14 +133,13 @@ duodyne initial build and test findings
 ##
 
 * Voice IO cut trace from U1 pin 19 to U21 pin 19 (component side); jumper U25 pin 19 to U21 pin 19 (copper side); Data Bus transceiver tied to TTS only, should be whole board select
-* Voice IO Update GAL U1 from Voice CS GAL to Voice CS V2 GAL
+* Voice IO Update GAL U1 from Voice CS GAL to Voice CS V3 GAL
 * Voice IO Replace C80 and C81 (0.22uF) with 68pF capacitors
 * Voice IO Add 10K ohm resistor pull up to CTS256 pin 3 for optional debug monitor
 * Voice IO Add latch for user enabled reset to CTS256 & SP0256
 * Voice IO U9 Latch Enable incorrect; cut trace to U9, pin 11 (under U9, ZERO) and jumper between U9 pin 20 and U9 pin 11
 * Voice IO UART PARMS jumper data bits in reverse order; 1-2 -> 15-16, 3-4 -> 13-14, etc.
-
-
+* Voice IO Adding an IO write wait state on Z80 processor board will improve CTS256 stability
 
 
 
