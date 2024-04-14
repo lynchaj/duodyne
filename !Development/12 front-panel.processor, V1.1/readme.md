@@ -15,34 +15,26 @@ For example, I was able to "ping" the ATtiny1614 and get a verbose status using:
 
 
 
-Once programmed the ATTINY will respond to the I2C address 0x25.   This address can be updated in the code by changing the line "const int MyAddress = 0x25;"
-
+Once programmed the ATTINY will respond to the I2C address 0x25.   This address can be updated in the code by changing the line 
+```
+const int MyAddress = 0x25;
+```
 
 The communication flow to the SD-I2C controller is very simple.  There are only 4 commands (I)nfo, (S)et block, (R)ead, (W)rite.  The SD-I2C controller expects a FAT formatted SD card with an raw HDD image file in the root directory called "IMAGE.IMG".   Cubix, DOS/65, or RomWBW image files should work without modification.
 
-
+```
 Info Command:
-
    Send one I2C data frame containing a single bytes:  'I'   (This tells the controller to put the SD information in the buffer)
    Send one I2C data frame containing a single bytes:  'R'   (This tells the controller that the host system wants to read the buffer)
    Read one I2C data frame -- should return 6 bytes:  'S' 'D' Byte1 Byte2 Byte3 Byte4  (the 4 bytes is one Double word containing the length in bytes of the image file- Big Endian)
    
-   
-   
 Set Block Command:
-
    Send one I2C data frame containing 5 bytes:  'S' Byte1 Byte2 Byte3 Byte4  (the 4 bytes is one Double word containing the LBA block number that you wish to access in the image file- Big Endian)  
    
-   
-   
 Read Command:
-
    Send one I2C data frame containing a single byte:  'R'   (This tells the controller that the host system wants to read the buffer)
    Read one I2C data frame -- should return 512 bytes 
 
-   
-
 Write Command:
-
    Send one I2C data frame containing  513 bytes:  'W' (512 bytes of sector data)  
-
+```
