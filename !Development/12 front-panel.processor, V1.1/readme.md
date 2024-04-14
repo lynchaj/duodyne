@@ -24,8 +24,8 @@ The communication flow to the SD-I2C controller is very simple.  There are only 
 
 ```
 Info Command:
-   Send one I2C data frame containing a single bytes:  'I'   (This tells the controller to put the SD information in the buffer)
-   Send one I2C data frame containing a single bytes:  'R'   (This tells the controller that the host system wants to read the buffer)
+   Send one I2C data frame containing a single byte:  'I'   (This tells the controller to put the SD information in the buffer)
+   Send one I2C data frame containing a single byte:  'R'   (This tells the controller that the host system wants to read the buffer)
    Read one I2C data frame -- should return 6 bytes:  'S' 'D' Byte1 Byte2 Byte3 Byte4  (the 4 bytes is one Double word containing the length in bytes of the image file- Big Endian)
    
 Set Block Command:
