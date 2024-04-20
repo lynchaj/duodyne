@@ -6,8 +6,8 @@
 
   (title_block
     (title "Duodyne 6809 CPU board")
-    (date "2024-01-14")
-    (rev "V1.01")
+    (date "2024-04-20")
+    (rev "V1.1")
   )
 
   (lib_symbols
@@ -461,7 +461,6 @@
   )
 
 
-  (no_connect (at 152.654 114.808) (uuid 0207c644-decb-4263-ac92-6996155098fd))
   (no_connect (at 152.146 72.644) (uuid 0c79c4f2-34e9-4174-aa20-e12f8d2b061a))
   (no_connect (at 152.654 127.508) (uuid 3a6407fd-ee3d-4dd8-a4ff-97d37ae66f41))
   (no_connect (at 152.146 67.564) (uuid 40013344-2ed9-4fb7-9677-f3e3e05762da))
@@ -635,6 +634,10 @@
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid b4d1d609-7158-41b0-b51e-697ac0f41ad8)
   )
+  (wire (pts (xy 152.654 114.808) (xy 156.972 114.808))
+    (stroke (width 0) (type default) (color 0 0 0 0))
+    (uuid ba538868-b6cf-480a-a31c-9053155e98d9)
+  )
   (wire (pts (xy 125.476 135.128) (xy 127.254 135.128))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid bb749f2f-1b1d-4ab4-9484-2bc69af3a938)
@@ -700,7 +703,7 @@
     (effects (font (size 2.54 2.54)) (justify left bottom))
     (uuid 930f1563-6d83-4d40-9b92-f001399bc6ee)
   )
-  (text "IO Address Port $50-$5F\n\n$50	     PAGER BANK 0(WR)\n$51	     PAGER BANK 1(WR)\n$52	     PAGER BANK 2(WR)\n$53	     PAGER BANK 3(WR)\n$54      Front Panel (RW)\n$55     \n$56-$57 I2C(RW)\n$58-$5F UART (RW)"
+  (text "IO Address Port $50-$5F\n\n$50	     PAGER BANK 0(WR)\n$51	     PAGER BANK 1(WR)\n$52	     PAGER BANK 2(WR)\n$53	     PAGER BANK 3(WR)\n$54      Front Panel (RW)\n$55      RESET SYSTEM \n$56-$57 I2C(RW)\n$58-$5F UART (RW)"
     (at 28.448 48.768 0)
     (effects (font (size 1.524 1.524)) (justify left bottom))
     (uuid bc80decc-df57-444a-abb0-0e15fde065d0)
@@ -896,6 +899,13 @@
     (effects (font (size 1.016 1.016)) (justify left))
     (uuid 9327e9c2-d451-424f-a22e-68d75a33e993)
     (property "Intersheet References" "${INTERSHEET_REFS}" (id 0) (at 169.8138 112.3315 0)
+      (effects (font (size 1.016 1.016)) (justify left) hide)
+    )
+  )
+  (global_label "~{RES_OUT}" (shape output) (at 156.972 114.808 0) (fields_autoplaced)
+    (effects (font (size 1.016 1.016)) (justify left))
+    (uuid 9691aadf-5132-43c7-9c88-02be9a09c7b6)
+    (property "Intersheet References" "${INTERSHEET_REFS}" (id 0) (at 165.4111 114.7445 0)
       (effects (font (size 1.016 1.016)) (justify left) hide)
     )
   )

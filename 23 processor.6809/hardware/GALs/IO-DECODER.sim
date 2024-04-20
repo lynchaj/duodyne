@@ -15,6 +15,7 @@ PIN  22 =  FP_LATCH_WR
 PIN  18 =  INTI2C 
 PIN   6 =  INT_I2C 
 PIN  16 =  PAGEWR 
+PIN  20 =  RES_OUT 
 %END
 
 %FIELD
@@ -66,6 +67,14 @@ PAGEWR =>
   # CPU_RW
   # CSIO
 
+RES_OUT =>
+    !CPUA0
+  # CPUA1
+  # !CPUA2
+  # CPUA3
+  # CPU_RW
+  # CSIO
+
 A1.oe  =>
     1 
 
@@ -88,6 +97,9 @@ INTI2C.oe  =>
     1 
 
 PAGEWR.oe  =>
+    1 
+
+RES_OUT.oe  =>
     1 
 
 %END
