@@ -1,8 +1,6 @@
 %SIGNAL
 PIN  13 =  A 
 PIN  14 =  A1 
-PIN   7 =  B 
-PIN  15 =  B1 
 PIN   8 =  CPUA0 
 PIN  10 =  CPUA1 
 PIN   3 =  CPUA2 
@@ -17,6 +15,7 @@ PIN  22 =  FP_LATCH_WR
 PIN  18 =  INTI2C 
 PIN  11 =  INT_I2C 
 PIN  20 =  OPTION 
+PIN  16 =  RESET 
 %END
 
 %FIELD
@@ -26,14 +25,6 @@ PIN  20 =  OPTION
 A1 =>
     !CPUA1
   # !CPUA2
-  # CPUA3
-  # CPU_IORQ
-  # CPU_RW
-
-B1 =>
-    !CPUA0
-  # CPUA1
-  # CPUA2
   # CPUA3
   # CPU_IORQ
   # CPU_RW
@@ -71,7 +62,20 @@ INTI2C =>
     !INT_I2C
 
 OPTION =>
-    B
+    !CPUA0
+  # CPUA1
+  # CPUA2
+  # CPUA3
+  # CPU_IORQ
+  # CPU_RW
+
+RESET =>
+    !CPUA0
+  # !CPUA1
+  # CPUA2
+  # CPUA3
+  # CPU_IORQ
+  # CPU_RW
 
 ar =>
     0 
@@ -80,9 +84,6 @@ sp =>
     0 
 
 A1.oe  =>
-    1 
-
-B1.oe  =>
     1 
 
 CS_I2C.oe  =>
@@ -104,6 +105,9 @@ INTI2C.oe  =>
     1 
 
 OPTION.oe  =>
+    1 
+
+RESET.oe  =>
     1 
 
 %END
