@@ -140,7 +140,7 @@ duodyne initial build and test findings
 * Voice IO U9 Latch Enable incorrect; cut trace to U9, pin 11 (under U9, ZERO) and jumper between U9 pin 20 and U9 pin 11
 * Voice IO UART PARMS jumper data bits in reverse order; 1-2 -> 15-16, 3-4 -> 13-14, etc.
 * Voice IO Adding an IO write wait state on Z80 processor board will improve CTS256 stability
-
+* Voice IO Add flip flop to parallel input circuit per Radio Shack original schematic
 
 
 ##
