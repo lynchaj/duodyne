@@ -23,7 +23,7 @@ $50	     PAGER BANK 0(WR)
 $51	     PAGER BANK 1(WR)
 $52	     PAGER BANK 2(WR)
 $53	     PAGER BANK 3(WR)
-$54      Front Panel (RW)
+$54          Front Panel (RW)
 $55     
 $56-$57 I2C(RW)
 $58-$5F UART (RW)
@@ -36,11 +36,14 @@ Rom Images are in this repo.   Cubix operating system sources and images can be 
 
 V1.00
 The following patches are required for the v1.00 6809 board prior to running:
-* Pin 33 of U2 (the CPU) must be tied high.  I used a 1K resistor to +5 on Pin 7 of the CPU
-* The Traces to Pins 7 and 8 on U9 (Address Decoder) need to be cut on the top of the board
-* Pin 7 of U9  needs to be connected to pin 4 of U19
+* Pin 33 of U2 (the CPU) must be tied high. Connect a 1K resistor between pin 33 and Pin 7 (+5V) of the CPU
+* The traces to Pins 7 and 8 on U9 (Address Decoder) need to be cut on the top of the board
+* Pin 7 of U9 needs to be connected to pin 4 of U19
 * Pin 8 of U9 needs to be connected to pin 7 of U19
-* patch Pin 19 of U9 to  Pin 3 of U2
+* Connect Pin 19 and 20 of U9 to Pin 3 of U2
+* On top of board cut the trace between pin 2 & 6 and also between 8 & 12 of U21 or alternately lift pins 6 & 8.
+* Connect pin 1 J2 (/RES_OUT) to pin 20 U3 IO_DECODE GAL
+* Update U3 IO-DECODE GAL. 
 
 V1.01
 * unknown
@@ -163,18 +166,29 @@ Qty|Reference(s)|Value
 2|U24, U29|74LS670
 1|U27|PCF8584
 1|U28|MC6809 (pref 68B09)
-1|U33|74LS374
+1|U33|74HCT374
 
+U18 UART CLOCK = 1.8432mhz
+U13 CPU CLOCK : 6809 Uses a 4xclock so use 4Mhz for 1mhz CPU, 8Mhz for 2Mhz CPU, etc.
+U33 Front panel LED driver should be 74HCT374.
+U5 Can be 27C010, Intel P28F001, SST29EE010 
 
 # SOFTWARE
 Three Rom images are provided
-* Screan - simple scream test, RAM-less
+* Scream - simple scream test, RAM-less
 * Monitor - basic monitor
 * mon09 - Full featured monitor
+
+The .HEX file can be used to program U5 EPROM/Flash device.
+
+### SCREAM
+Serial setting 38400N1
 
 ### MONITOR
 
 Monitor is a simple machine language monitor that will allow you to view and manipulate the 6809 operating environment.
+
+Serial setting 9600N1
 
 Monitor Supports the following Commands:
 
