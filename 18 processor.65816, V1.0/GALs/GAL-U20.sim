@@ -22,13 +22,6 @@ PIN  16 =  RESET
 %END
 
 %EQUATION
-A1 =>
-    !CPUA1
-  # !CPUA2
-  # CPUA3
-  # CPU_IORQ
-  # CPU_RW
-
 CS_I2C =>
     !CPUA1
   # !CPUA2
@@ -36,7 +29,11 @@ CS_I2C =>
   # CPU_IORQ
 
 CS_I2C_WR =>
-    A
+    !CPUA1
+  # !CPUA2
+  # CPUA3
+  # CPU_IORQ
+  # CPU_RW
 
 CS_UART =>
     !CPUA3
@@ -82,9 +79,6 @@ ar =>
 
 sp =>
     0 
-
-A1.oe  =>
-    1 
 
 CS_I2C.oe  =>
     1 
