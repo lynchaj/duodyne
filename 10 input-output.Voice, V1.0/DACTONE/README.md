@@ -77,6 +77,14 @@ key or about four seconds have elapsed in serial debug mode.
 The system tick timer is disabled during playback to the DAC and
 restored when done.
 
+## Building
+
+The program is written in C and Z80 assembly using the
+[Z88DK](https://z88dk.org/site/) development kit. Assuming you have
+z88dk installed and have configured the environment (see
+`set_environment.sh`), you can just run `make` to build the code.
+There is a pre-compiled binary available.
+
 ## License
 
 Copyright 2024 Rob Gowin
