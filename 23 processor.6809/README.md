@@ -47,7 +47,8 @@ The following patches are required for the v1.00 6809 board prior to running:
 
 V1.1
 * FIRQ needs a pull up.  Connect U28 Pin 4 to RN1 Pin 2
-* Activation Flip flop needs reset by RES_OUT rather then RES_IN.   Easiest patch is to connect RES_IN to RES_OUT-  RN4 pin 5 to U15 pin 2 (once done DO NOT JUMPER J4)
+* Activation Flip flop needs reset by RES_OUT rather then RES_IN.   Easiest patch is to connect RES_IN to RES_OUT-  J4 pin 1 to U15 pin 2 (once done DO NOT JUMPER J4)
+* cut connection between J4 pin 1 and P1 pin 20
 
 
 # JUMPER SETTINGS
