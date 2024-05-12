@@ -54,6 +54,29 @@ then use `afplay` to play the received tone:
 
 ### Serial capture and playback on Linux
 
+To capture the samples from the serial port for Linux, I'd suggest
+using the `socat` program, which may need to be installed for
+your version of Linux.
+
+Identify the device name for the USB serial adapter. On my system,
+that is `/dev/ttyUSB0`. Use the `stty` program to set the baud
+rate to 115200:
+
+    stty -F /dev/ttyUSB0 115200
+
+Then run this `socat` command:
+
+    socat stdio /dev/ttyUSB0 > test.wav
+
+Run the DACTONE program in serial debug mode on your Duodyne machine:
+
+    A>dactone -s 440
+
+When playback is complete, stop the `socat` program on your Linux machine
+by using Control-C. The play the received tone using `aplay`:
+
+    aplay test.wav
+
 ## Technical Notes
 
 The program uses Channel 3 of the second CTC chip to generate an
