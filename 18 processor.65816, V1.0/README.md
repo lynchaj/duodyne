@@ -9,7 +9,7 @@ The board contains:
 * PCF8584 I2C bus controller
 
 
-IO is mapped from $000300 - $000400
+IO is mapped from $00DF00 - $00DF00
 The on-board ROM is mapped from 00E000-00FFFF.
 
 On board IO Address Port $50-$5F
