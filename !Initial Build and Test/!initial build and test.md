@@ -141,6 +141,10 @@ duodyne initial build and test findings
 * Voice IO UART PARMS jumper data bits in reverse order; 1-2 -> 15-16, 3-4 -> 13-14, etc.
 * Voice IO Adding an IO write wait state on Z80 processor board will improve CTS256 stability
 * Voice IO Add flip flop to parallel input circuit per Radio Shack original schematic
+* Voice IO Connect R19 between U15 pin 3 and GND and R18 between U15 pin 2 and U15 pin 6
+* Voice IO Replace R16 and R17 4700 ohm resistors with 10K ohm
+* Voice IO Add 10nF cap between bins 2 & 6 of U15 to create a low pass filter with a knee around 3300 Hz
+* Voice IO Replace linear pots with log-taper pots for audio
 
 
 ##
@@ -148,4 +152,7 @@ duodyne initial build and test findings
 * All boards label the GAL sockets with their GAL names (like CPU-MAPPER) in addition to the Uxx designation
 * All boards Ensure crystal oscillators are free of other traces interfering with connections
 (RAMROM, Multi IO, Voice IO, Media IO, VDCENET, SAB80535)
+* All boards for non-bus master/devices and slave devices, link /BAI-/BAO on the peripherals boards
+* All boards for non-IM2 devices, link /IEO-/IEI on the peripherals boards
+* All boards use /RES_OUT only on the peripheral boards (eliminate /RES_IN)
 
