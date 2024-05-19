@@ -56,6 +56,7 @@ Rom Images are in this repo.   DOS/65 operating system sources and images can be
 V1.2
 * Activation Flip flop needs reset by RES_OUT rather then RES_IN.   Easiest patch is to connect RES_IN to RES_OUT-  JP1 pin 1 to U15 pin 2 (once done DO NOT JUMPER JP1)
 * cut connection between JP1 pin 1 and P1 pin 20
+* Add CPU_WR U10 pin 15 to U20 Pin 5.
 
 # BOM
 
