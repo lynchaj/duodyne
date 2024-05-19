@@ -1,19 +1,22 @@
 %SIGNAL
 PIN  13 =  A 
 PIN  14 =  A1 
+PIN  11 =  B 
+PIN  15 =  B1 
+PIN   7 =  C 
+PIN  18 =  C1 
 PIN   8 =  CPUA0 
 PIN  10 =  CPUA1 
 PIN   3 =  CPUA2 
 PIN   4 =  CPUA3 
 PIN   9 =  CPU_IORQ 
 PIN   2 =  CPU_RW 
+PIN   5 =  CPU_WR 
 PIN  19 =  CS_I2C 
 PIN  17 =  CS_I2C_WR 
 PIN  23 =  CS_UART 
 PIN  21 =  FP_LATCH_RD 
 PIN  22 =  FP_LATCH_WR 
-PIN  18 =  INTI2C 
-PIN  11 =  INT_I2C 
 PIN  20 =  OPTION 
 PIN  16 =  RESET 
 %END
@@ -27,7 +30,13 @@ A1 =>
   # !CPUA2
   # CPUA3
   # CPU_IORQ
-  # CPU_RW
+  # CPU_WR
+
+B1 =>
+    A
+
+C1 =>
+    B
 
 CS_I2C =>
     !CPUA1
@@ -36,7 +45,7 @@ CS_I2C =>
   # CPU_IORQ
 
 CS_I2C_WR =>
-    A
+    C
 
 CS_UART =>
     !CPUA3
@@ -57,9 +66,6 @@ FP_LATCH_WR =>
   # CPUA3
   # CPU_IORQ
   # CPU_RW
-
-INTI2C =>
-    !INT_I2C
 
 OPTION =>
     !CPUA0
@@ -86,6 +92,12 @@ sp =>
 A1.oe  =>
     1 
 
+B1.oe  =>
+    1 
+
+C1.oe  =>
+    1 
+
 CS_I2C.oe  =>
     1 
 
@@ -99,9 +111,6 @@ FP_LATCH_RD.oe  =>
     1 
 
 FP_LATCH_WR.oe  =>
-    1 
-
-INTI2C.oe  =>
     1 
 
 OPTION.oe  =>

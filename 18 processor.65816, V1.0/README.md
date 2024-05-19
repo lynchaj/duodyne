@@ -57,6 +57,11 @@ V1.2
 * Activation Flip flop needs reset by RES_OUT rather then RES_IN.   Easiest patch is to connect RES_IN to RES_OUT-  JP1 pin 1 to U15 pin 2 (once done DO NOT JUMPER JP1)
 * cut connection between JP1 pin 1 and P1 pin 20
 * Add CPU_WR U10 pin 15 to U20 Pin 5.
+* cut connection from U20 Pin 11 to U27 Pin 5
+* cut connection from U20 Pin 18 to U7 Pin 11
+* Add Jumper from U20 pin 15 to U20 pin 11
+* Add Jumper from U20 pin 18 to U20 pin 7
+
 
 # BOM
 
