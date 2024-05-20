@@ -8,8 +8,8 @@ converter
 on the Duodyne Voice board. 
 
 This image shows the output of the DAC from the command `dactone 440`
-when disconnected from the LM714 op amp and its resistors. The DAC
-outputs are connected to the positive and negative supplies using 5K
+when disconnected from the LM741 op amp and its resistors. The DAC
+outputs are connected to the positive and negative supplies using 4700 ohm
 registors as shown on the first page of the linked datasheet. 
 
 ![DAC output](img/DACOUTPUT.png)
@@ -82,7 +82,7 @@ by using Control-C. The play the received tone using `aplay`:
 The program uses Channel 3 of the second CTC chip to generate an
 approximately 8 kHz interrupt. The CTC runs at 7,372,800 Hz and is
 programmed to use a divide-by-16 prescalar. The time constant is
-programmed with 58d, giving
+programmed with $058D, giving
 
     7,372,800 / 16 / 58 = 7944 Hz
 

@@ -143,7 +143,7 @@ duodyne initial build and test findings
 * Voice IO Add flip flop to parallel input circuit per Radio Shack original schematic
 * Voice IO Connect R19 between U15 pin 3 and GND and R18 between U15 pin 2 and U15 pin 6
 * Voice IO Replace R16 and R17 4700 ohm resistors with 10K ohm
-* Voice IO Add 10nF cap between bins 2 & 6 of U15 to create a low pass filter with a knee around 3300 Hz
+* Voice IO Add 10nF cap between U15 pin 2 & U15 pin 6 to create a low pass filter with a knee around 3300 Hz
 * Voice IO Replace linear pots with log-taper pots for audio
 
 
