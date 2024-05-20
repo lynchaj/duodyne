@@ -5,7 +5,7 @@
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Sun May 12 15:43:08 2024 "}
+  {DBtime "Sun May 19 17:17:24 2024 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,32 +33,36 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
-   {P CPU_RW {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
-   {P CPUA2 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
-   {P CPUA3 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
-   {P CPUA0 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
-   {P CPU_IORQ {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
-   {P CPUA1 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
-   {P INT_I2C {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
-   {P A {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
-   {P A1 {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
-   {P RESET {Pt "I/O"}{Lq 0}{Ploc 360 20}}
-   {P CS_I2C_W {Pt "I/O"}{Lq 0}{Ploc 360 40}}
-   {P INTI2C {Pt "I/O"}{Lq 0}{Ploc 360 60}}
-   {P CS_I2C {Pt "I/O"}{Lq 0}{Ploc 360 80}}
-   {P OPTION {Pt "I/O"}{Lq 0}{Ploc 360 100}}
-   {P FP_LATCH {Pt "I/O"}{Lq 0}{Ploc 360 120}}
-   {P FP_LATC {Pt "I/O"}{Lq 0}{Ploc 360 140}}
-   {P CS_UART {Pt "I/O"}{Lq 0}{Ploc 360 160}}
+   {P CPU_RW {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P CPUA2 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P CPUA3 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P CPU_WR {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P C {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P CPUA0 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P CPU_IORQ {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P CPUA1 {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P B {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P A {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P A1 {Pt "I/O"}{Lq 0}{Ploc 360 20}}
+   {P B1 {Pt "I/O"}{Lq 0}{Ploc 360 40}}
+   {P RESET {Pt "I/O"}{Lq 0}{Ploc 360 60}}
+   {P CS_I2C_W {Pt "I/O"}{Lq 0}{Ploc 360 80}}
+   {P C1 {Pt "I/O"}{Lq 0}{Ploc 360 100}}
+   {P CS_I2C {Pt "I/O"}{Lq 0}{Ploc 360 120}}
+   {P OPTION {Pt "I/O"}{Lq 0}{Ploc 360 140}}
+   {P FP_LATCH {Pt "I/O"}{Lq 0}{Ploc 360 160}}
+   {P FP_LATC {Pt "I/O"}{Lq 0}{Ploc 360 180}}
+   {P CS_UART {Pt "I/O"}{Lq 0}{Ploc 360 200}}
   }
 
   {PKG
    [Ly "REFDES"]
    [Ts 25][Tj "CB"][Tr 0][Tm "N"]
-   {Rdl 230 210}
+   {Rdl 230 230}
 
    [Ly "PINNUM"]
    [Ts 15][Tj "RC"]
+   {Pnl 120 210}
    {Pnl 120 190}
    {Pnl 120 170}
    {Pnl 120 150}
@@ -77,14 +81,17 @@
    {Pnl 340 130}
    {Pnl 340 150}
    {Pnl 340 170}
+   {Pnl 340 190}
+   {Pnl 340 210}
 
-   {Sd A 2 3 4 8 9 10 11 13 14 16 17 18 19 20 21 22 23}
+   {Sd A 2 3 4 5 7 8 9 10 11 13 14 15 16 17 18 19 20 21 22 23}
   }
 
   {PIC
    [Ly "GATE"]
    [Ts 15][Tj "LC"][Tr 0][Tm "N"]
-   {R 130 200 330 0}
+   {R 130 220 330 0}
+   {L 130 200 100 200}
    {L 130 180 100 180}
    {L 130 160 100 160}
    {L 130 140 100 140}
@@ -102,26 +109,31 @@
    {L 330 120 360 120}
    {L 330 140 360 140}
    {L 330 160 360 160}
+   {L 330 180 360 180}
+   {L 330 200 360 200}
    [Ly "PINNAM"]
    [Tj "LC"]
-   {T "CPU_RW" 140 180}
-   {T "CPUA2" 140 160}
-   {T "CPUA3" 140 140}
-   {T "CPUA0" 140 120}
-   {T "CPU_IORQ" 140 100}
-   {T "CPUA1" 140 80}
-   {T "INT_I2C" 140 60}
-   {T "A" 140 40}
-   {T "A1" 140 20}
+   {T "CPU_RW" 140 200}
+   {T "CPUA2" 140 180}
+   {T "CPUA3" 140 160}
+   {T "CPU_WR" 140 140}
+   {T "C" 140 120}
+   {T "CPUA0" 140 100}
+   {T "CPU_IORQ" 140 80}
+   {T "CPUA1" 140 60}
+   {T "B" 140 40}
+   {T "A" 140 20}
    [Tj "RC"]
-   {T "RESET" 320 20}
-   {T "CS_I2C_W" 320 40}
-   {T "INTI2C" 320 60}
-   {T "CS_I2C" 320 80}
-   {T "OPTION" 320 100}
-   {T "FP_LATCH" 320 120}
-   {T "FP_LATC" 320 140}
-   {T "CS_UART" 320 160}
+   {T "A1" 320 20}
+   {T "B1" 320 40}
+   {T "RESET" 320 60}
+   {T "CS_I2C_W" 320 80}
+   {T "C1" 320 100}
+   {T "CS_I2C" 320 120}
+   {T "OPTION" 320 140}
+   {T "FP_LATCH" 320 160}
+   {T "FP_LATC" 320 180}
+   {T "CS_UART" 320 200}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G22V10" 230 -10}
@@ -135,7 +147,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD N:\VINTAGE\PROJECTS\DUODYNE\18 PROCESSOR.65816, V1.0\GALS\GAL-U20 230 200}
+    {At PLD N:\VINTAGE\PROJECTS\DUODYNE\18 PROCESSOR.65816, V1.0\GALS\GAL-U20 230 220}
    }
   }
  }
@@ -151,23 +163,29 @@
    }
    {N CPUA3
    }
+   {N CPU_WR
+   }
+   {N C
+   }
    {N CPUA0
    }
    {N CPU_IORQ
    }
    {N CPUA1
    }
-   {N INT_I2C
+   {N B
    }
    {N A
    }
    {N A1
    }
+   {N B1
+   }
    {N RESET
    }
    {N CS_I2C_W
    }
-   {N INTI2C
+   {N C1
    }
    {N CS_I2C
    }

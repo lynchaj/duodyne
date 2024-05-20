@@ -24,7 +24,8 @@ PIN   15  = !wr     	; /*                                 */
 PIN   14  = data_dir	; /*                                 */
 
 rd   = phi &  rw & ( vda # vpa) ;
-wr   = phi & !rw & vda & !vpa ;
+/*wr   = phi & !rw & vda & !vpa ;*/
+wr   = phi &  !rw & ( vda # vpa) ;
 mreq = bus # !io # !phi # !(vda # vpa) ;
 iorq = io # !phi # !vda # vpa ;
 data_dir = !(rw & !bus) # !onboardio ;
