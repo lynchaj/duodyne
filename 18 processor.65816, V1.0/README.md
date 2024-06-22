@@ -62,6 +62,9 @@ V1.2
 * Add Jumper from U20 pin 15 to U20 pin 11
 * Add Jumper from U20 pin 18 to U20 pin 7
 
+V1.3
+* R15 incorrectly ties M1 to GND.  Do not populate the GND side of this resistor, but instead solder that side to the nearest VCC pin.
+
 
 # BOM
 
