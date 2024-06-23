@@ -16,12 +16,9 @@ PIN 2 = CPU_RW;
 PIN 3 = CPUA2;
 PIN 4 = CPUA3;
 PIN 5 = CPU_WR;
-PIN 7 = C;
 PIN 8 = CPUA0;
 PIN 9 = CPU_IORQ;
 PIN 10 = CPUA1;
-PIN 11 = B;
-PIN 13 = A;
 
 
 /* outputs */
@@ -29,25 +26,10 @@ PIN 23 = CS_UART ;
 PIN 22 = FP_LATCH_WR;
 PIN 21 = FP_LATCH_RD;
 PIN 20 = OPTION;
-PIN 19 = CS_I2C;
-PIN 18 = C1;
-PIN 17 = CS_I2C_WR;
 PIN 16 = RESET;
-PIN 15 = B1;
-PIN 14 = A1;
 
 /* combinatorial logic */
-A1 = !CPUA1 # !CPUA2 # CPU_WR # CPU_IORQ # CPUA3;
-B1 = A; /* +10ns */
-C1 = B; /* +10ns */
-/*CS_I2C_WR = !CPUA1 # !CPUA2 # CPU_WR # CPU_IORQ # CPUA3;*/
-
 CS_UART = !CPUA3 # CPU_IORQ ;
-
-CS_I2C = CPUA3 # !CPUA1 # !CPUA2 # CPU_IORQ;
-CS_I2C_WR = C;     /* WR needs to be AT LEAST 20ns after CS */
-
-
 FP_LATCH_WR= !(CPUA3 #  CPUA1 # CPUA2 # CPUA0 # CPU_IORQ # CPU_RW);
 FP_LATCH_RD= CPUA3 #  CPUA1 # CPUA2 # CPUA0 # CPU_IORQ # !CPU_RW;
 OPTION= !(CPUA3 #  CPUA1 # CPUA2 # CPU_IORQ # !CPUA0 # CPU_RW);

@@ -17,15 +17,15 @@ PIN   7   = bus         ; /*                */
 PIN   9   = onboardio   ; /*                */
 
 
-PIN   19  = mreq    	; /*                                 */
-PIN   18  = iorq    	; /*                                 */
-PIN   16  = !rd     	; /*                                 */
-PIN   15  = !wr     	; /*                                 */
-PIN   14  = data_dir	; /*                                 */
+PIN   19  = mreq    		; /*                                 */
+PIN   18  = iorq    		; /*                                 */
+PIN   16  = !rd     		; /*                                 */
+PIN   15  = !wr     		; /*                                 */
+PIN   14  = data_dir		; /*                                 */
+
 
 rd   = phi &  rw & ( vda # vpa) ;
-/*wr   = phi & !rw & vda & !vpa ;*/
-wr   = phi &  !rw & ( vda # vpa) ;
+wr   = phi & !rw & vda & !vpa ;
 mreq = bus # !io # !phi # !(vda # vpa) ;
 iorq = io # !phi # !vda # vpa ;
 data_dir = !(rw & !bus) # !onboardio ;
