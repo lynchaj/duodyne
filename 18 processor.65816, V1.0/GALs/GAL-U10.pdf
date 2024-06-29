@@ -5,7 +5,7 @@
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Sun May 19 14:29:08 2024 "}
+  {DBtime "Sun Jun 23 11:24:03 2024 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -33,27 +33,30 @@
  {SYMBOL
   {PIN_DEF
    [Ly "PINCON"]
-   {P PHI {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
-   {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
-   {P VDA {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
-   {P VPA {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P PHI {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P RW {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P VDA {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P VPA {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P CS_I2C_W {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
    {P IO {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
    {P BUS {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
    {P ONBOARDI {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
    {P DATA_DIR {Pt "I/O"}{Lq 0}{Ploc 360 20}}
    {P WR' {Pt "I/O"}{Lq 0}{Ploc 360 40}}
    {P RD' {Pt "I/O"}{Lq 0}{Ploc 360 60}}
-   {P IORQ {Pt "I/O"}{Lq 0}{Ploc 360 80}}
-   {P MREQ {Pt "I/O"}{Lq 0}{Ploc 360 100}}
+   {P CS_I2C_W {Pt "I/O"}{Lq 0}{Ploc 360 80}}
+   {P IORQ {Pt "I/O"}{Lq 0}{Ploc 360 100}}
+   {P MREQ {Pt "I/O"}{Lq 0}{Ploc 360 120}}
   }
 
   {PKG
    [Ly "REFDES"]
    [Ts 25][Tj "CB"][Tr 0][Tm "N"]
-   {Rdl 230 170}
+   {Rdl 230 190}
 
    [Ly "PINNUM"]
    [Ts 15][Tj "RC"]
+   {Pnl 120 170}
    {Pnl 120 150}
    {Pnl 120 130}
    {Pnl 120 110}
@@ -67,14 +70,16 @@
    {Pnl 340 70}
    {Pnl 340 90}
    {Pnl 340 110}
+   {Pnl 340 130}
 
-   {Sd A 1 2 3 4 6 7 9 14 15 16 18 19}
+   {Sd A 1 2 3 4 5 6 7 9 14 15 16 17 18 19}
   }
 
   {PIC
    [Ly "GATE"]
    [Ts 15][Tj "LC"][Tr 0][Tm "N"]
-   {R 130 160 330 0}
+   {R 130 180 330 0}
+   {L 130 160 100 160}
    {L 130 140 100 140}
    {L 130 120 100 120}
    {L 130 100 100 100}
@@ -89,12 +94,14 @@
    {L 340 60 360 60}
    {L 330 80 360 80}
    {L 330 100 360 100}
+   {L 330 120 360 120}
    [Ly "PINNAM"]
    [Tj "LC"]
-   {T "PHI" 140 140}
-   {T "RW" 140 120}
-   {T "VDA" 140 100}
-   {T "VPA" 140 80}
+   {T "PHI" 140 160}
+   {T "RW" 140 140}
+   {T "VDA" 140 120}
+   {T "VPA" 140 100}
+   {T "CS_I2C_W" 140 80}
    {T "IO" 140 60}
    {T "BUS" 140 40}
    {T "ONBOARDI" 140 20}
@@ -102,8 +109,9 @@
    {T "DATA_DIR" 320 20}
    {T "WR'" 320 40}
    {T "RD'" 320 60}
-   {T "IORQ" 320 80}
-   {T "MREQ" 320 100}
+   {T "CS_I2C_W" 320 80}
+   {T "IORQ" 320 100}
+   {T "MREQ" 320 120}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G16V8AS" 230 -10}
@@ -117,7 +125,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD N:\VINTAGE\PROJECTS\DUODYNE\18 PROCESSOR.65816, V1.0\GALS\GAL-U10 230 160}
+    {At PLD N:\VINTAGE\PROJECTS\DUODYNE\18 PROCESSOR.65816, V1.0\GALS\GAL-U10 230 180}
    }
   }
  }
@@ -135,6 +143,8 @@
    }
    {N VPA
    }
+   {N CS_I2C_W
+   }
    {N IO
    }
    {N BUS
@@ -146,6 +156,8 @@
    {N WR'
    }
    {N RD'
+   }
+   {N CS_I2C_W
    }
    {N IORQ
    }
