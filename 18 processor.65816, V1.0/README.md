@@ -8,7 +8,7 @@ The board contains:
 * 16c550 UART
 
 
-IO is mapped from $00DF00 - $00DF00
+IO is mapped from $00DF00 - $00DF00 for boards prior to V1.31 and is mapped at $xx0300-$xx03FF for 1.31 and later
 The on-board ROM is mapped from 00E000-00FFFF.
 
 On board IO Address Port $50-$5F
@@ -23,7 +23,7 @@ $57
 $58-$5F UART (RW)
 
 Rom Images are in this repo.   DOS/65 operating system sources and images can be found here: https://github.com/danwerner21/6x0x-DOS65
-
+DOS/65 does not work on boards prior to V1.31
 
 # Jumper Settings
         JP1  - Allow RES_IN to generate board Reset

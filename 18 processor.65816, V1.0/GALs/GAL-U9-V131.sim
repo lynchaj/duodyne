@@ -1,0 +1,85 @@
+%SIGNAL
+PIN  21 =  a8 
+PIN  22 =  a9 
+PIN   2 =  a10 
+PIN   3 =  a11 
+PIN   4 =  a12 
+PIN   5 =  a13 
+PIN   6 =  a14 
+PIN   7 =  a15 
+PIN   8 =  a16 
+PIN   9 =  a17 
+PIN  10 =  a18 
+PIN  11 =  a19 
+PIN  14 =  a20 
+PIN   1 = !a21 
+PIN  13 =  a22 
+PIN  23 =  a23 
+PIN  16 =  cs_bus 
+PIN  15 =  cs_rom 
+PIN  20 =  h_in 
+PIN  19 =  h_out 
+PIN  17 =  io 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+cs_bus =>
+    !cs_rom
+
+cs_rom =>
+    !a13
+  # !a14
+  # !a15
+  # h_in
+
+h_out =>
+    a16
+  # a17
+  # a18
+  # a19
+  # a20
+  # !a21
+  # a22
+  # a23
+
+io =>
+    !a8
+  # !a9
+  # a10
+  # a11
+  # a12
+  # a13
+  # a14
+  # a15
+
+a8.oe  =>
+    0 
+
+a9.oe  =>
+    0 
+
+a20.oe  =>
+    0 
+
+a23.oe  =>
+    0 
+
+cs_bus.oe  =>
+    1 
+
+cs_rom.oe  =>
+    1 
+
+h_in.oe  =>
+    0 
+
+h_out.oe  =>
+    1 
+
+io.oe  =>
+    1 
+
+%END

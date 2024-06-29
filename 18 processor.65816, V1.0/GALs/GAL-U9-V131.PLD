@@ -1,0 +1,45 @@
+Name     GAL-U9-V131 ;
+PartNo   00 ;
+Date     06/29/20243 ;
+Revision 0131 ;
+Designer Dan Werner ;
+Company  a ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN [2..11] = [a10..19] ; /* Upper 9 address*/
+PIN   1   = !a21        ; /*                */
+PIN   13  = a22         ; /*                                */
+PIN   14  = a20         ; /*                                */
+PIN   23  = a23         ; /*                                */
+PIN   21  = a8          ; /*                                */
+PIN   22  = a9          ; /*                                */
+
+PIN   20  = h_in        ; /*                                */
+
+
+/* *************** OUTPUT PINS *********************/
+PIN   15  = cs_rom     ; /*                                 */
+PIN   16  = cs_bus     ; /*                                 */
+PIN   17  = io         ; /*                                 */
+PIN   19  = h_out      ; /*                                 */
+
+
+
+/* ****  MEMORY MAP ******
+
+XX0300..XX03FF	I/O AREA (BOARD AND EXTERNAL -- ALL BANKS)
+000000..0002FF  EXTERNAL ADDRESS
+000400..00DFFF  EXTERNAL ADDRESS
+00E000..00FFFF	8K ONBOARD ROM
+010000..FFFFFF	EXTERNAL ADDRESS (less IO area)
+
+************************ */
+
+
+h_out   =   a23  # a22  # a21 #  a20 #  a19 #  a18 #  a17 #  a16 ;
+io	    =	a15 # a14 # a13 # a12 # a11 # a10 # !a9  # !a8 ;
+cs_rom	=	h_in # !a15 # !a14 # !a13 ;
+cs_bus	=	!cs_rom	;
