@@ -1,0 +1,70 @@
+                save
+                listing off
+
+;allophone addresses            
+PA1 equ 00H     ;pause       10ms
+PA2 equ 01H     ;pause       30ms
+PA3 equ 02H     ;pause       50ms
+PA4 equ 03H     ;pause      100ms
+PA5 equ 04H     ;pause      200ms
+OY  equ 05H     ;bOY        290ms
+AY  equ 06H     ;skY        170ms
+EH  equ 07H     ;eND         50ms
+KK3 equ 08H     ;Comb        80ms
+PP  equ 09H     ;Pow        150ms
+JH  equ 0AH     ;dodGe      400ms
+NN1 equ 0BH     ;thiN       170ms
+IH  equ 0CH     ;sIt         60ms
+TT2 equ 0DH     ;To         100ms
+RR1 equ 0EH     ;Rural      130ms
+AX  equ 0FH     ;sUcceed     50ms  
+MM  equ 10H     ;Milk       180ms
+TT1 equ 11H     ;parT        80ms
+DH1 equ 12H     ;THey       140ms
+IY  equ 13H     ;sEE        170ms
+EY  equ 14H     ;bEIge      200ms
+DD1 equ 15H     ;coulD       50ms
+UW1 equ 16H     ;tO          60ms
+AO  equ 17H     ;OUght       70ms
+AA  equ 18H     ;hOt         60ms
+YY2 equ 19H     ;Yes        130ms
+AE  equ 1AH     ;hAt         80ms
+HH1 equ 1BH     ;He          90ms
+BB1 equ 1CH     ;Business    40ms
+TH  equ 1DH     ;THin       130ms
+UH  equ 1EH     ;bOOk        70ms
+UW2 equ 1FH     ;fOOd       170ms
+AW  equ 20H     ;OUt        250ms
+DD2 equ 21H     ;Do          80ms
+GG3 equ 22H     ;wiG        120ms
+VV  equ 23H     ;Vest       130ms
+GG1 equ 24H     ;Guest       80ms
+SH  equ 25H     ;SHip       120ms
+ZH  equ 26H     ;aZUre      130ms
+RR2 equ 27H     ;bRain       80ms
+FF  equ 28H     ;Food       110ms
+KK2 equ 29H     ;sKy        140ms
+KK1 equ 2AH     ;Can't      120ms
+ZZ  equ 2BH     ;Zoo        150ms
+NG  equ 2CH     ;aNchor     200ms
+LL  equ 2DH     ;Lake        80ms
+WW  equ 2EH     ;Wool       140ms
+XR  equ 2FH     ;repaiR     250ms
+WH  equ 30H     ;WHig       150ms
+YY1 equ 31H     ;Yes         90ms
+CH  equ 32H     ;Church     150ms
+ER1 equ 33H     ;fIR        110ms
+ER2 equ 34H     ;fIR        210ms
+OW  equ 35H     ;bEAU       170ms
+DH2 equ 36H     ;THey       180ms
+SS  equ 37H     ;veST        60ms
+NN2 equ 38H     ;No         140ms
+HH2 equ 38H     ;Hoe        130ms
+OR  equ 3AH     ;stORe      240ms
+AR  equ 3BH     ;alARum     200ms
+YR  equ 3CH     ;cleAR      250ms
+GG2 equ 3DH     ;Got         80ms
+EL  equ 3EH     ;saddLE     140ms
+BB2 equ 3FH     ;Business    60ms
+
+                restore
