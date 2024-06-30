@@ -1,7 +1,5 @@
 %SIGNAL
 PIN   7 =  bus 
-PIN   5 =  cs_i2c_wr 
-PIN  17 =  cs_i2c_wrd 
 PIN  14 =  data_dir 
 PIN   6 =  io 
 PIN  18 =  iorq 
@@ -19,9 +17,6 @@ PIN  15 = !wr
 %END
 
 %EQUATION
-cs_i2c_wrd =>
-    cs_i2c_wr
-
 data_dir =>
     bus
   # !onboardio
@@ -36,14 +31,13 @@ iorq =>
 mreq =>
     bus
   # !io
-  # !phi
-  # !vda & !vpa
 
 rd =>
     phi & rw & vda
   # phi & rw & vpa
 
 wr =>
-    phi & !rw & vda & !vpa
+    phi & !rw & vda
+  # phi & !rw & vpa
 
 %END
