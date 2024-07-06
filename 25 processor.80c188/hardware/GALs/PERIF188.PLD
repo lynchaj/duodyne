@@ -20,7 +20,7 @@ PIN  8  = !WR                     ; /*                                 */
 PIN  9  = !RD                     ; /*                                 */
 /*PIN 10  =                       ; /*                                 */
 PIN 11  = DELAYIN                 ; /*                                 */
-/*PIN 13  =                       ; /*                                 */
+PIN 23  =  A3                     ; /*                                 */
 
 /* *************** OUTPUT PINS *********************/
 PIN 20  = !FP_LATCH_RD            ; /* READ FRONT PANEL                */
@@ -30,40 +30,32 @@ PIN 17  = !UART_CS                ; /* SERIAL I/O = UART               */
 PIN 16  = !I2C_CS                 ; /* PCF CS                          */
 PIN 15  = !I2C_CS_WR              ; /* PCF WR                          */
 PIN 14  = !WR_LS259               ; /*  WRITE ONLY ADDRESSABLE LATCH   */
-PIN 13  = DELAY                   ; /*  DELAY LINE                     */
-
-AD0	=	!A6 & !A5 & !A4 ;
-AD1	=	!A6 & !A5 &  A4 ;
-AD2	=	!A6 &  A5 & !A4 ;
-AD3	=	!A6 &  A5 &  A4 ;
-AD4	=	 A6 & !A5 & !A4 ;
-AD5	=	 A6 & !A5 &  A4 ;
-AD6	=	 A6 &  A5 & !A4 ;
-AD7	=	 A6 &  A5 &  A4 ;
+PIN 13  = !DELAY                   ; /*  DELAY LINE                     */
 
 
-FDC	=	PCS4 & !ALE ;
-FIDE	=	PCS5 & !ALE ;
+AD0	=	!A6 & !A5 & !A4 & !A3 ;
+AD1	=	!A6 & !A5 & !A4 &  A3 ;
+AD2	=	!A6 & !A5 &  A4 & !A3 ;
+AD3	=	!A6 & !A5 &  A4 &  A3 ;
+AD4	=	!A6 &  A5 & !A4 & !A3 ;
+AD5	=	!A6 &  A5 & !A4 &  A3 ;
+AD6	=	!A6 &  A5 &  A4 & !A3 ;
+AD7	=	!A6 &  A5 &  A4 &  A3 ;
+AD8	=	 A6 & !A5 & !A4 & !A3 ;
+AD9	=	 A6 & !A5 & !A4 &  A3 ;
 
 
 /* *************** OUTPUT SIGNALS ******************/
-    /* FLOPPY */
-FDC_CS	=	FDC & AD0 ;	/* FURTHER QUALIFIED BY A0 */
-FDC_DACK =	FDC & (AD1 # AD5) ;
-FDC_LDOR =	FDC & AD2 ;
-FDC_LDCR =	FDC & AD3 ;
-FDC_TC	=	FDC & (AD4 # AD5) ;
-
-    /* 8255 PPIO, PPIDE */
-PPORT_CS =	FDC & AD6 ;
+FP_LATCH_RD	=	PCS4 & !ALE & AD6 & RD ;
+FP_LATCH_WR	=	PCS4 & !ALE & AD6 & WR ;
+RESET_OUT  	=	PCS4 & !ALE & AD5 & WR ;
+I2C_CS     	=	PCS4 & !ALE & AD4 ;
+I2C_CS_WR 	=   DELAYIN ;
+DELAY       =	PCS4 & !ALE & AD4 & WR ;
 
     /* 74LS259 8-BIT ADDRESSABLE LATCH (WRITE ONLY)  */
-WR_LS259	=	FDC & AD7 & WR ;
+WR_LS259	=	PCS4 & !ALE & AD7 & WR ;
 
     /* UART  TL16C550C (BETTER THAN 550A, OR 450) */
 UART_CS	=	PCS5 & AD0 & !ALE ;	/* MORE RESTRICTIVE THAN SBC-188 2.00.007 */
 					/* WHICH WOULD BE   PCS5 & !ALE */
-
-    /* FAST PIO IDE */
-FIDE_CS0 =	FIDE & AD4 ;		/* REGISTERS 0..7 IN FIRST BANK */
-FIDE_CS1 =	FIDE & AD5 ;		/* REGISTERS 6..7 IN SECOND BANK */
