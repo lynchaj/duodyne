@@ -60,8 +60,8 @@ V1.2
 
 V1.3
 * R15 incorrectly ties M1 to GND.  Do not populate the GND side of this resistor, but instead solder that side to the nearest VCC pin.
-Additional Delay needs added to the I2c Write
 * Do not populate U27, U28, R2, R3, and JP2
+* U26 lift pin 3 and short pins 2 & 3 -- then use V1.31 GALs and ROMS
 
 # BOM (V1.31)
 
