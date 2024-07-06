@@ -1,0 +1,79 @@
+Name     PERIF188 ;
+PartNo   18802 ;
+Date     12/01/2019 ;
+Revision 01 ;
+Designer JRCoffman ;
+Company  Coffman Consulting ;
+Assembly SBC188b ;
+Location  ;
+Device   G22V10 ;
+
+/* *************** INPUT PINS *********************/
+PIN  1  =  ALE                    ; /* ADDRESS LATCH ENABLE            */ 
+PIN  2  = !PCS4                   ; /*                                 */ 
+PIN  3  = !PCS5                   ; /*                                 */ 
+PIN  4  = !PCS6                   ; /*                                 */ 
+PIN  5  =  A6                     ; /*                                 */ 
+PIN  6  =  A5                     ; /*                                 */ 
+PIN  7  =  A4                     ; /*                                 */ 
+PIN  8  = !WR                     ; /*                                 */ 
+/*PIN  9  = !RD                     ; /*                                 */ 
+/*PIN 10  =                         ; /*                                 */ 
+/*PIN 11  =                         ; /*                                 */ 
+/*PIN 13  =                         ; /*                                 */ 
+
+/* *************** OUTPUT PINS *********************/
+PIN 23  =  FDC_TC                 ; /* TERMINAL COUNT, END OPERATION   */ 
+PIN 22  = !FDC_CS                 ; /* FDC CONTROLLER SELECT           */ 
+PIN 21  = !FDC_DACK               ; /* DMA ACKNOWLEDGE                 */ 
+PIN 20  = !FDC_LDOR               ; /* OPERATIONS REGISTER             */ 
+PIN 19  = !FDC_LDCR               ; /* CONTROL REGISTER                */ 
+PIN 18  = !PPORT_CS               ; /* 8255 PARALLEL PORT & PPIDE      */ 
+PIN 17  = !UART_CS                ; /* SERIAL I/O = UART               */ 
+PIN 16  = !FIDE_CS0               ; /*                                 */ 
+PIN 15  = !FIDE_CS1               ; /*                                 */ 
+/*PIN 23  = !FIDE_DMAK              ; /*  POLARITY MAY BE WRONG          */ 
+PIN 14  = !WR_LS259               ; /*  WRITE ONLY ADDRESSABLE LATCH   */ 
+
+
+AD0	=	!A6 & !A5 & !A4 ; 
+AD1	=	!A6 & !A5 &  A4 ; 
+AD2	=	!A6 &  A5 & !A4 ; 
+AD3	=	!A6 &  A5 &  A4 ; 
+AD4	=	 A6 & !A5 & !A4 ; 
+AD5	=	 A6 & !A5 &  A4 ; 
+AD6	=	 A6 &  A5 & !A4 ; 
+AD7	=	 A6 &  A5 &  A4 ; 
+
+FDC	=	PCS4 & !ALE ;
+FIDE	=	PCS5 & !ALE ;
+
+
+/* *************** OUTPUT SIGNALS ******************/
+    /* FLOPPY */
+FDC_CS	=	FDC & AD0 ;	/* FURTHER QUALIFIED BY A0 */
+FDC_DACK =	FDC & (AD1 # AD5) ;
+FDC_LDOR =	FDC & AD2 ; 
+FDC_LDCR =	FDC & AD3 ;
+FDC_TC	=	FDC & (AD4 # AD5) ; 
+
+    /* 8255 PPIO, PPIDE */
+PPORT_CS =	FDC & AD6 ;
+    
+    /* 74LS259 8-BIT ADDRESSABLE LATCH (WRITE ONLY)  */  
+WR_LS259	=	FDC & AD7 & WR ;
+
+
+
+    /* UART  TL16C550C (BETTER THAN 550A, OR 450) */ 
+UART_CS	=	PCS5 & AD0 & !ALE ;	/* MORE RESTRICTIVE THAN SBC-188 2.00.007 */ 
+					/* WHICH WOULD BE   PCS5 & !ALE */
+
+    /* FAST PIO IDE */
+FIDE_CS0 =	FIDE & AD4 ;		/* REGISTERS 0..7 IN FIRST BANK */ 
+FIDE_CS1 =	FIDE & AD5 ;		/* REGISTERS 6..7 IN SECOND BANK */ 
+/*FIDE_DMAK =	FIDE & AD7 ;		/* DMA NOT POSSIBLE WITH 8-BIT I/F; PIO ONLY */ 
+
+
+
+
