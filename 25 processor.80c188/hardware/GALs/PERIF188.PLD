@@ -29,8 +29,9 @@ PIN 18  = !RESET_OUT              ; /* RESET SYSTEM                    */
 PIN 17  = !UART_CS                ; /* SERIAL I/O = UART               */
 PIN 16  = !I2C_CS                 ; /* PCF CS                          */
 PIN 15  = !I2C_CS_WR              ; /* PCF WR                          */
-PIN 14  = !WR_LS259               ; /*  WRITE ONLY ADDRESSABLE LATCH   */
-PIN 22  = !DELAY                   ; /*  DELAY LINE                     */
+PIN 14  = !WR_LS259               ; /* WRITE ONLY ADDRESSABLE LATCH    */
+PIN 21  = !PIC_CS                 ; /* INTERRUPT CONTROLLER CS         */
+PIN 22  = !DELAY                  ; /* DELAY LINE                      */
 
 
 AD0	=	!A6 & !A5 & !A4 & !A3 ;
@@ -52,10 +53,10 @@ RESET_OUT  	=	PCS4 & !ALE & AD5 & WR ;
 I2C_CS     	=	PCS4 & !ALE & AD4 ;
 I2C_CS_WR 	=   DELAYIN ;
 DELAY       =	PCS4 & !ALE & AD4 & WR ;
+PIC_CS     	=	PCS4 & !ALE & AD3 ;
 
     /* 74LS259 8-BIT ADDRESSABLE LATCH (WRITE ONLY)  */
 WR_LS259	=	PCS4 & !ALE & AD7 & WR ;
 
     /* UART  TL16C550C (BETTER THAN 550A, OR 450) */
-UART_CS	=	PCS5 & AD0 & !ALE ;	/* MORE RESTRICTIVE THAN SBC-188 2.00.007 */
-					/* WHICH WOULD BE   PCS5 & !ALE */
+UART_CS	=	PCS5 & AD0 & !ALE ;
