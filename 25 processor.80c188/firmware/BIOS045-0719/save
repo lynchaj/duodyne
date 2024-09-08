@@ -1,0 +1,31 @@
+#! /bin/sh
+#
+export ZSUF=tar.gz
+export ZIP="tar cvfz"
+export DRIVE=MICRO2GB
+export DIR=SBC188
+
+echo "SAVE has control"   $1    $2    ..
+
+if [ ! "$1" ]; then
+	echo listing ...
+	ls -l --color=always *.$ZSUF
+	echo end of list
+	exit
+fi
+if [ -e "$1" ]; then
+	echo "\"$1\"" already exists
+	exit
+fi
+if [ -e "$1.$ZSUF" ]; then
+	echo \"$1.$ZSUF\" already exists
+	exit
+fi
+
+$ZIP $1.$ZSUF COPYING save M* make* *.lib *.cfg *.asm *. *.inc *.b* e*.sys *.c *.h *.doc *.txt FPEM/*.asm FPEM/make* UNASM/* TOOLS/*
+echo Done Compression.
+
+cp -v $1.$ZSUF /media/jrc/$DRIVE/$DIR
+
+echo Done Save.
+exit

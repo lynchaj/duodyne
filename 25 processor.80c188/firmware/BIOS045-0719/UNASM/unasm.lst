@@ -1,0 +1,3421 @@
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-1
+
+
+					NAME	UNASM
+				        PAGE    55,120
+ = 0001				        M186    =       1
+					.LIST
+				
+ 0000				_TEXT   SEGMENT PUBLIC PARA 'CODE'
+ 0000				_TEXT   ENDS
+				;CONST   SEGMENT PUBLIC PARA 'CONST'
+				;CONST   ENDS
+ 0000				_DATA   SEGMENT PUBLIC PARA 'DATA'
+ 0000				_DATA   ENDS
+ 0000				_BSS    SEGMENT PUBLIC PARA 'BSS'
+ 0000				_BSS    ENDS
+				
+				;DGROUP  GROUP   CONST,_DATA,_BSS
+				DGROUP  GROUP   _DATA,_BSS
+				
+				
+				        public  _unasm_msg
+				
+ 0000				_TEXT   SEGMENT
+				
+				;UNASM_DATA	SEGMENT	WORD PUBLIC 'DATA'
+				;UNASM_DATA	SEGMENT	PARA PUBLIC 'CODE'
+				        ASSUME  CS:_TEXT,DS:_TEXT
+				
+ 0000				_unasm_msg:
+				
+ 0000  0050[			msg		db	80 DUP(?)
+	   ??			
+			 ]	
+				
+ = 0000				msgData		equ	msg+0
+ = 000E				msgInstr	equ	msgData+14
+ = 0016				msgArgs		equ	msgInstr+8
+				
+				;;UNASM_DATA	ENDS
+				
+				
+				;;UNASM_TEXT	SEGMENT	WORD PUBLIC 'CODE'
+				;;	ASSUME	CS:UNASM_TEXT,DS:UNASM_DATA
+				        ASSUME  CS:_TEXT,DS:_TEXT
+				
+				;;	extrn	PrintString:NEAR
+				;;	extrn	PrintNewLine:NEAR
+				;;	extrn	U_IP:WORD
+				
+				;;  C-declaration of unasm (all 3 pointers are far)
+				;;
+				;;   char* unasm(byte *IP, word *length, word IP);
+				;;
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-2
+
+
+				;;
+				
+ = 0000				is_far  equ     0
+ = 0004				arg1    equ     is_far+4        ; far ptr   Instruction ptr
+ = 0008				arg2    equ     arg1+4          ; far ptr   length ptr
+ = 000C				arg3    equ     arg2+4          ; word      base IP
+				
+					public	_unasm
+ 0050				_unasm	PROC	near
+ 0050  C8 0000 00			ENTER	0,0
+					PUSHM	DS,ES,SI,DI
+ 0054  57                    4		PUSH	DI 
+ 0055  56                    3		PUSH	SI 
+ 0056  06                    2		PUSH	ES 
+ 0057  1E                    1		PUSH	DS 
+				
+				;;	MOV	AX,SEG UNASM_DATA
+				;;	MOV	DS,AX
+				
+ 0058  0E			        PUSH    CS
+ 0059  1F			        POP     DS
+				
+				;*************************************************************************
+				;desc:	display next instruction
+				;	ES:DI	points to instruction to disassemble
+				;returns
+				;	dx = byte length
+				;	ES:DI	points to next instrution
+				;*************************************************************************
+				
+ 005A  1E			        push    ds
+ 005B  07			        pop     es
+ 005C  B9 004F				mov	cx,80-1		;clear msg buffer
+ 005F  B0 20				mov	al,' '
+ 0061  FC				cld
+ 0062  8D 3E 0000 R			lea	di,msg
+ 0066  F3/ AA				rep	stosb   	;clear the buffer
+ 0068  2A C0				sub	al,al
+ 006A  AA				stosb
+				
+ 006B  C4 7E 04				LES	DI,DWORD PTR [BP+arg1]	;GET ARGUMENT
+				
+				COMMENT	^
+					lea	bx,msg
+					mov	ax,es
+					call	StoreHexWord
+					call	StoreColon
+					mov	ax,di
+					call	StoreHexWord
+				^ END COMMENT
+				
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-3
+
+
+ 006E  33 D2				xor	dx,dx			;keep track of number of bytes in instr
+				
+ 0070  8D 1E 000E R			lea	bx,msgInstr
+ 0074  26: 8A 05			mov	al,es:[di]		;get 1st byte of instruction
+ 0077  32 E4				xor	ah,ah
+				MSH	shl	ax,2			;build index to table
+ 0079  D1 E0                 2		shl	ax,1 
+ 007B  D1 E0                 2		shl	ax,1 
+ 007D  05 077A R			add	ax,offset disop
+ 0080  8B F0				mov	si,ax
+ 0082  83 3C 00				cmp	word ptr DS:[si],0	;valid instruction name?
+ 0085  74 07				je	UA_1			;nope - have to wait
+ 0087  56				push	si
+ 0088  8B 34				mov	si,DS:[si]
+ 008A  E8 0768 R			call	StoreString
+ 008D  5E				pop	si
+ 008E				UA_1:
+ 008E  FF 64 02				jmp	DS:[si+2]
+				
+ 0091				UNASM_END:
+ 0091  8D 1E 0000 R			lea	bx,msgData		;insert instruction bytes
+ 0095  8B CA				mov	cx,dx			;if dx <0,then we just found a prefix code
+ 0097  41				inc	cx			;-1 becomes 0
+ 0098  75 01				jnz	UA_10			;inc 0 to 1
+ 009A  41				inc	cx
+ 009B				UA_10:
+ 009B  26: 8A 05			mov	al,es:[di]
+ 009E  47				inc	di
+ 009F  E8 074B R			call	StoreHexByte
+ 00A2  E2 F7				loop	UA_10
+				
+				;;	lea	si,msg
+				;;	call	PrintString
+				;;	call	PrintNewLine
+ 00A4  83 FA 00				cmp	dx,0
+ 00A7  7C A7				jl	_unasm
+				
+ 00A9  B9 0050				mov	cx,80
+ 00AC  8D 36 004F R			lea	si,msg+80-1
+ 00B0  B8 0020				mov	ax,0020H
+ 00B3				zap_loop:
+ 00B3  38 04				cmp	byte ptr [si],al
+ 00B5  77 05				ja	unasm_done
+ 00B7  88 24				mov	byte ptr [si],ah
+ 00B9  4E				dec	si
+ 00BA  E2 F7				loop	zap_loop
+				
+ 00BC				unasm_done:
+ 00BC  C4 5E 08				les	bx,dword ptr [bp+arg2]
+ 00BF  2B 7E 04				sub	di,word ptr [bp+arg1]
+ 00C2  26: 89 3F			mov	es:[bx],di		;instruction length
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-4
+
+
+ 00C5  8C DA				MOV	DX,DS			;return char string ptr
+ 00C7  8D 06 0000 R			LEA	AX,msg
+					POPM	DS,ES,SI,DI
+ 00CB  1F                    1		POP	DS 
+ 00CC  07                    2		POP	ES 
+ 00CD  5E                    3		POP	SI 
+ 00CE  5F                    4		POP	DI 
+ 00CF  C9				LEAVE
+ 00D0  C3				ret
+ 00D1				_unasm	ENDP
+				
+				
+				;****************************************************************************
+				;* Disassemble Addressing modes
+				;****************************************************************************
+ 00D1				ARITHIMM:				;done
+ 00D1  8D 36 0C1E R			LEA	SI,DS:$ARITHGRP
+ 00D5  E8 065E R			CALL	GETSUBNAME
+ 00D8  26: 8A 2D			mov	ch,es:[di]		;get real s,w bits
+ 00DB  E9 03A7 R			JMP	IMMRM0
+				
+ 00DE				DROPARG:				;done
+ 00DE  42				INC	DX
+ 00DF  EB B0				JMP	NEAR PTR UNASM_END
+				
+ 00E1				ENTERARGS:				;done
+ 00E1  8D 1E 0016 R			LEA	BX,msgArgs
+ 00E5  26: 8B 45 01			mov	AX,ES:[DI+1]
+ 00E9  E8 0744 R			call	StoreHexWord
+ 00EC  E8 075E R			call	StoreComma
+ 00EF  26: 8A 45 03			mov	al,ES:[DI+3]
+ 00F3  E8 074B R			call	StoreHexByte
+ 00F6  83 C2 03				add	dx,3
+ 00F9  EB 96				JMP	NEAR PTR UNASM_END
+				
+				
+				
+				COMMENT ^
+				ESCRM:					;done
+					LEA	BX,msgArgs
+					MOV	AX,ES:[DI]
+					AND	AX,0000011100111000B
+					AND	AL,AH
+					CALL	StoreHexByte
+					CALL	StoreComma
+					CALL	GetModRM
+					JMP	NEAR PTR UNASM_END
+				^ END COMMENT 
+				
+ 00FB				ESC_D8:
+ 00FB  42				inc	dx
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-5
+
+
+ 00FC  8D 36 0C5E R			LEA	SI,DS:$FARITH
+ 0100  E8 065E R			CALL	GETSUBNAME
+ 0103  8D 1E 0016 R			LEA	BX,msgArgs
+ 0107  26: 8A 45 01			mov	AL,ES:[DI+1]
+ 010B  3C C0				CMP	AL,11000000B	;CHECK MOD BITS
+ 010D  73 09				JAE	D8RR
+				; HAVE MEMORY REFERENCE
+ 010F  26: 8A 2D			MOV	CH,ES:[DI]		;GET FORMAT BITS
+ 0112  E8 069B R			CALL	FGetModRM
+ 0115  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0118				D8RR:
+ 0118  24 37				AND	AL,00110111b		;check for FCOM & FCOMP
+ 011A  3C 11				CMP	AL,00010001B		; = FCOM ST(1) &c.
+ 011C  74 0F				JE	D8done
+				
+ 011E  2B C0				SUB	AX,AX
+ 0120  E8 072E R			call	FPac
+ 0123  E8 075E R			call	StoreComma
+ 0126  26: 8A 45 01			mov	AL,ES:[DI+1]
+ 012A  E8 072E R			call	FPac
+ 012D				D8done:
+ 012D  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+ 0130				ESC_D9:
+ 0130  42				inc	dx
+ 0131  26: 8A 45 01			mov	al,byte ptr es:[di+1]
+ 0135  3C C0				CMP	al,11000000B	;CHECK MOD BITS
+ 0137  73 1F				jae	D9spc
+ 0139  8D 36 0C9E R			lea	si,DS:$FARITH1
+ 013D  B5 08				mov	ch,8			;Dword format
+ 013F  A8 20				test	al,00100000B		
+ 0141  74 08				jz	D9go
+ 0143  D0 ED				shr	ch,1
+ 0145  A8 08				test	al,00001000B
+ 0147  75 02				jnz	D9go
+ 0149  D0 ED				shr	ch,1
+ 014B				D9go:
+ 014B  E8 065E R			CALL	GETSUBNAME
+ 014E  8D 1E 0016 R			lea	bx,msgArgs
+ 0152  E8 069B R			call	FGetModRM
+ 0155  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0158				D9spc:
+ 0158  A8 20				TEST	AL,00100000B			;CHECK
+ 015A  75 15				jnz	D9op5
+ 015C  8D 36 0CEE R			lea	si,DS:$FLDRR1
+ 0160  E8 065E R			CALL	GETSUBNAME
+ 0163  A8 10				test	al,00010000B
+ 0165  75 07				jnz	D9_done
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-6
+
+
+ 0167  8D 1E 0016 R			lea	bx,msgArgs
+ 016B  E8 072E R			call	FPac
+ 016E				D9_done:
+ 016E  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0171				D9op5:
+ 0171  25 001F				AND	ax,0011111B
+ 0174  03 C0				add	ax,ax
+ 0176  8B F0				mov	si,ax
+ 0178  8B B4 0D0E R			mov	si,DS:$FARITH3[si]
+ 017C  E8 0768 R			call	StoreString
+				
+ 017F  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+ 0182				ESC_DA:
+ 0182  42				inc	dx
+ 0183  26: 80 7D 01 C0			CMP	BYTE PTR ES:[DI+1],11000000B
+ 0188  73 14				JAE	DAspc
+ 018A  8D 36 0C8E R			LEA	SI,DS:$FIARITH
+ 018E  E8 065E R			CALL	GETSUBNAME
+ 0191  8D 1E 0016 R			LEA	BX,msgArgs
+				; HAVE MEMORY REFERENCE
+ 0195  26: 8A 2D			MOV	CH,ES:[DI]		;GET FORMAT BITS
+ 0198  E8 069B R			CALL	FGetModRM
+ 019B  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 019E				DAspc:
+ 019E  8D 36 0F39 R			lea	si,DS:$FUCOMPP
+ 01A2  26: 80 7D 01 E9			cmp	byte ptr ES:[DI+1],0E9h
+ 01A7  75 03				jne	DAerr
+ 01A9  E8 0768 R			call	StoreString
+ 01AC				DAerr:
+ 01AC  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 01AF				ESC_DB:
+ 01AF  42				inc	dx
+ 01B0  26: 8A 45 01			mov	al,byte ptr es:[di+1]
+ 01B4  3C C0				CMP	al,11000000B	;CHECK MOD BITS
+ 01B6  73 19				jae	DBspc
+ 01B8  8D 36 0CBE R			lea	si,DS:$FIARITH1
+ 01BC  B5 0A				MOV	CH,0AH		;DWORD PTR
+ 01BE  A8 20				TEST	AL,00100000B
+ 01C0  74 02				JZ	DB00
+ 01C2  32 ED				XOR	CH,CH
+ 01C4				DB00:
+ 01C4  E8 065E R			call	GETSUBNAME
+ 01C7  8D 1E 0016 R			lea	bx,msgArgs
+ 01CB  E8 069B R			call	FGetModRM
+ 01CE  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-7
+
+
+ 01D1				DBspc:
+ 01D1  25 001F				AND	ax,0011111B
+ 01D4  03 C0				add	ax,ax
+ 01D6  8B F0				mov	si,ax
+ 01D8  8B B4 0CDE R			mov	si,DS:$FCTRL[si]
+ 01DC  E8 0768 R			call	StoreString
+				
+ 01DF  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+ 01E2				ESC_DC:
+ 01E2  8D 36 0C5E R			LEA	SI,DS:$FARITH
+ 01E6  26: 80 7D 01 C0			CMP	BYTE PTR ES:[DI+1],11000000B	;CHECK MOD BITS
+ 01EB  73 11				JAE	DcRR
+ 01ED  E8 065E R			CALL	GETSUBNAME
+ 01F0  8D 1E 0016 R			LEA	BX,msgArgs
+				; HAVE MEMORY REFERENCE
+ 01F4  26: 8A 2D			MOV	CH,ES:[DI]		;GET FORMAT BITS
+ 01F7  E8 069B R			CALL	FGetModRM
+ 01FA  42				inc	dx
+ 01FB  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 01FE				DcRR:
+ 01FE  8D 36 0C6E R			LEA	SI,DS:$FARITHR
+ 0202  E8 065E R			CALL	GETSUBNAME
+ 0205  8D 1E 0016 R			LEA	BX,msgArgs
+ 0209  26: 8A 45 01			mov	AL,ES:[DI+1]
+ 020D  E8 072E R			call	FPac
+ 0210  E8 075E R			call	StoreComma
+ 0213  2B C0				SUB	AX,AX
+ 0215  E8 072E R			call	FPac
+ 0218  42				inc	dx
+ 0219  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+ 021C				ESC_DD:
+ 021C  42				inc	dx
+ 021D  26: 8A 45 01			mov	al,byte ptr es:[di+1]
+ 0221  3C C0				CMP	al,11000000B	;CHECK MOD BITS
+ 0223  73 1A				jae	DDspc
+ 0225  8D 36 0CAE R			lea	si,DS:$FARITH2
+ 0229  B5 0C				MOV	CH,0CH		;QWORD PTR
+ 022B  A8 20				TEST	AL,00100000B
+ 022D  74 03				JZ	DD00
+ 022F  80 C5 02				ADD	CH,2		;WORD PTR
+ 0232				DD00:
+ 0232  E8 065E R			call	GETSUBNAME
+ 0235  8D 1E 0016 R			lea	bx,msgArgs
+ 0239  E8 069B R			call	FGetModRM
+ 023C  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-8
+
+
+ 023F				DDspc:
+ 023F  8D 36 0CFE R			LEA	SI,DS:$FLDRR2
+ 0243  E8 065E R			call	GETSUBNAME
+ 0246  8D 1E 0016 R			lea	bx,msgArgs
+ 024A  26: 8A 45 01			MOV	AL,ES:[DI+1]
+ 024E  E8 072E R			call	FPac
+				
+ 0251  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+ 0254				ESC_DE:
+ 0254  42				inc	dx
+ 0255  26: 8A 45 01			mov	al,es:[di+1]
+ 0259  3C C0				cmp	al,11000000B
+ 025B  73 14				jae	DEspc
+				
+ 025D  8D 36 0C8E R			lea	si,DS:$FIARITH
+ 0261  E8 065E R			CALL	GETSUBNAME
+ 0264  8D 1E 0016 R			lea	bx,msgArgs
+ 0268  26: 8A 2D			mov	ch,es:[di]
+ 026B  E8 069B R			call	FGetModRM
+ 026E  E9 0091 R			JMP	NEAR PTR UNASM_END
+ 0271				DEspc:
+ 0271  24 07				and	al,7			;extract register
+ 0273  3C 01				cmp	al,1
+ 0275  74 1D				je	DErr1
+ 0277  8D 36 0C7E R			lea	si,DS:$FARITHP
+ 027B  E8 065E R			call	GETSUBNAME
+ 027E  8D 1E 0016 R			lea	bx,msgArgs
+ 0282  26: 8A 45 01			mov	al,es:[di+1]		;get register #
+ 0286  E8 072E R			call	FPac
+ 0289  E8 075E R			call	StoreComma
+ 028C  2A C0				sub	al,al
+ 028E  E8 072E R			call	FPac
+ 0291  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0294				DErr1:
+ 0294  8D 36 0C6E R			lea	si,DS:$FARITHR
+ 0298  E8 065E R			call	GETSUBNAME
+ 029B  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 029E				ESC_DF:
+ 029E  42				inc	dx
+ 029F  26: 8A 45 01			mov	al,es:[di+1]
+ 02A3  26: 8A 2D			mov	ch,es:[di]
+ 02A6  8D 36 0CCE R			lea	si,DS:$FIARITH2
+ 02AA  3C C0				cmp	al,11000000B
+ 02AC  73 1A				jae	DFspc
+ 02AE  A8 20				test	al,00100000B
+ 02B0  74 09				jz	DFgo
+ 02B2  80 ED 02				sub	ch,2			;word -> Qword ptr
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-9
+
+
+ 02B5  A8 08				test	al,001000B
+ 02B7  75 02				jnz	DFgo
+ 02B9  32 ED				xor	ch,ch			;Tbyte Ptr
+ 02BB				DFgo:		
+ 02BB  E8 065E R		      	call	GETSUBNAME
+ 02BE  8D 1E 0016 R			lea	bx,msgArgs
+ 02C2  E8 069B R			call	FGetModRM
+ 02C5  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 02C8				DFspc:
+ 02C8  3C E0				cmp	al,0E0h
+ 02CA  75 12				jne	DFerr
+ 02CC  8D 36 0F11 R			lea	si,DS:$FSTSW
+ 02D0  E8 0768 R			call	StoreString
+ 02D3  8D 1E 0016 R			lea	bx,msgArgs
+ 02D7  8D 36 0B92 R			lea	si,DS:$REG16
+ 02DB  E8 0768 R			call	StoreString
+ 02DE				DFerr:
+ 02DE  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				
+				
+ 02E1				FARADR:					;done
+ 02E1  8D 1E 0016 R			LEA	BX,msgArgs
+ 02E5  26: 8B 45 03			MOV	AX,ES:[DI+3]
+ 02E9  E8 0744 R			CALL	StoreHexWord
+ 02EC  E8 0763 R			CALL	StoreColon
+ 02EF  26: 8B 45 01			MOV	AX,ES:[DI+1]
+ 02F3  E8 0744 R			CALL	StoreHexWord
+ 02F6  83 C2 04				add	dx,4
+ 02F9  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 02FC				GRP1:						;done ?
+ 02FC  8D 36 0C3E R			LEA	SI,DS:$GRP1
+ 0300  E8 065E R			CALL	GETSUBNAME
+ 0303  8D 1E 0016 R			LEA	BX,msgArgs
+ 0307  26: 8A 2D			mov	ch,es:[di]
+ 030A  E8 0671 R			call	GetModRM
+ 030D  26: F6 45 01 38			test	byte ptr es:[di+1],00111000B	;test immediate - special case
+ 0312  75 20				jne	GRP1b
+ 0314  E8 075E R			call	StoreComma
+ 0317  57				push	di
+ 0318  03 FA				add	di,dx
+ 031A  26: 8A 45 02			mov	al,es:[di+2]
+ 031E  F6 C5 01				test	CH,00000001B
+ 0321  75 06				jnz	GRP1a				;is word
+				
+ 0323  E8 074B R			call	StoreHexByte
+ 0326  42				inc	dx
+ 0327  EB 0A				JMP	Short GRP1c
+ 0329				GRP1a:
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-10
+
+
+ 0329  26: 8A 65 03			mov	ah,ES:[DI+3]		;fetch high order byte
+ 032D  83 C2 02				add	dx,2			;inc instruction length
+ 0330  E8 0744 R			call	StoreHexWord
+					
+ 0333				GRP1c:
+ 0333  5F				pop	DI
+ 0334				GRP1b:
+ 0334  42				inc	dx
+ 0335  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0338				GRP2:
+ 0338  8D 36 0C4E R			LEA	SI,DS:$GRP2
+ 033C  E8 065E R			CALL	GETSUBNAME
+ 033F  8D 1E 0016 R			LEA	BX,msgArgs
+ 0343  26: 8A 2D			mov	ch,es:[di]		;get word/byte bit
+ 0346  3C 06				cmp	al,6			;Call intersegment indirect
+ 0348  74 0B				je	GRP2a
+ 034A  3C 0A				cmp	al,0aH			;JMP intersegment indirect
+ 034C  74 07				je	GRP2a
+				
+ 034E  E8 0671 R			call	GetModRM
+ 0351  42				inc	dx
+ 0352  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0355				GRP2a:
+ 0355  B5 08				mov	ch,8			;signal Dword type
+ 0357  E8 069B R			call	FGetModRM
+ 035A  42				inc	dx
+ 035B  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 035E				ILLBYTE:				;done
+ 035E  8D 1E 0016 R			LEA	BX,msgArgs
+ 0362  26: 8A 05			MOV	AL,es:[di]
+ 0365  E8 074B R			CALL	StoreHexByte
+ 0368  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 036B				IMMAX:					;done
+ 036B  8D 1E 0016 R			LEA	BX,msgArgs
+ 036F  26: F6 05 01			TEST	BYTE PTR ES:[DI],1
+ 0373  75 15				JNE	IMMAX_WORD
+ 0375  8D 36 0B82 R			LEA	SI,DS:$REG8
+ 0379  E8 0768 R			CALL	StoreString
+ 037C  E8 075E R			CALL	StoreComma
+ 037F  26: 8A 45 01			MOV	AL,ES:[DI+1]
+ 0383  E8 074B R			CALL	StoreHexByte
+ 0386  42				INC	DX
+ 0387  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 038A				IMMAX_WORD:
+ 038A  8D 36 0B92 R			LEA	SI,DS:$REG16
+ 038E  E8 0768 R			CALL	StoreString
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-11
+
+
+ 0391  E8 075E R			CALL	StoreComma
+ 0394  26: 8B 45 01			MOV	AX,ES:[DI+1]
+ 0398  E8 0744 R			CALL	StoreHexWord
+ 039B  83 C2 02				ADD	DX,2
+ 039E  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 03A1				IMMRM:					;done
+ 03A1  26: 8A 2D			MOV	ch,es:[di]
+ 03A4  80 E5 01				AND	ch,00000001B		;mask to W bit only, S=0
+ 03A7				IMMRM0:
+ 03A7  8D 1E 0016 R			LEA	BX,msgArgs
+ 03AB  E8 0671 R			CALL	GetModRM
+ 03AE  E8 075E R			CALL	StoreComma
+ 03B1  57				push	di			;point to immediate data-2
+ 03B2  03 FA				add	di,dx
+ 03B4  42				inc	dx			;inc instruction length
+ 03B5  26: 8B 45 02			mov	ax,ES:[DI+2]		;fetch 1st immediate byte & second
+ 03B9  F6 C5 01				test	CH,00000001B
+ 03BC  75 06				jnz	IMMRM1			;is word
+				
+ 03BE  E8 074B R			call	StoreHexByte
+ 03C1  42				inc	dx
+ 03C2  EB 0C				JMP	Short IMMRM3
+				
+ 03C4				IMMRM1:
+ 03C4  42				inc	dx			;inc instruction length
+ 03C5  F6 C5 02				test	CH,00000010B		;sign extend to word?
+ 03C8  74 02				JZ	IMMRM2a
+				
+ 03CA				IMMRM2:
+ 03CA  98				cbw				;sign extend to word
+ 03CB  4A				dec	dx
+ 03CC				IMMRM2a:
+ 03CC  E8 0744 R			call	StoreHexWord
+ 03CF  42				inc	dx			;inc instruction length
+ 03D0				IMMRM3:
+ 03D0  5F				pop	di
+ 03D1  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 03D4				IMMREG:					;done
+ 03D4  8D 1E 0016 R			LEA	BX,msgArgs
+ 03D8  26: 8A 05			MOV	AL,ES:[DI]
+ 03DB  8A E8				MOV	CH,AL
+ 03DD  24 07				AND	AL,00000111B		;mask off register
+ 03DF  F6 C5 08				test	ch,00001000B		;byte or word instruction?
+ 03E2  75 11				jne	IMMREG1
+ 03E4  E8 06FE R			call	GetByteRegister
+ 03E7  E8 075E R			call	StoreComma
+ 03EA  26: 8A 45 01			mov	al,es:[di+1]
+ 03EE  E8 074B R			call	StoreHexByte
+ 03F1  42				inc	dx
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-12
+
+
+ 03F2  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 03F5				IMMREG1:
+ 03F5  E8 06F8 R			call	GetWordRegister
+ 03F8  E8 075E R			call	StoreComma
+ 03FB  26: 8B 45 01			mov	ax,es:[di+1]
+ 03FF  E8 0744 R			call	StoreHexWord
+ 0402  83 C2 02				add	dx,2
+ 0405  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0408				INCREG:					;done
+ 0408  8D 1E 0016 R			LEA	BX,msgArgs
+ 040C  26: 8A 05			MOV	AL,ES:[DI]
+ 040F  25 0007				AND	AX,00000111B
+ 0412  E8 06F8 R			CALL	GetWordRegister
+ 0415  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0418				INDJMP:					;almost done
+ 0418  8D 1E 0016 R			LEA	BX,msgArgs
+ 041C  26: 8A 2D			MOV	CH,ES:[DI]
+ 041F  E8 0671 R			CALL	GetModRM
+ 0422  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0425				IODX:					;done
+ 0425  8D 1E 0016 R			LEA	BX,msgArgs
+ 0429  26: 8A 2D			MOV	CH,ES:[DI]
+ 042C  F6 C5 02				test	ch,00000010B		;direction (in/out)
+ 042F  75 10				jne	IODX1
+ 0431  32 C0				xor	al,al			;register 0 is AX/AL
+ 0433  E8 06EB R			call	GetRegister
+ 0436  E8 075E R			call	StoreComma
+ 0439  B0 02				mov	al,2			;register 2 is DX
+ 043B  E8 06F8 R			call	GetWordRegister
+ 043E  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0441				IODX1:
+ 0441  B0 02				mov	al,2			;register 2 is DX
+ 0443  E8 06F8 R			call	GetWordRegister
+ 0446  E8 075E R			call	StoreComma
+ 0449  32 C0				xor	al,al			;register 0 is AX/AL
+ 044B  E8 06EB R			call	GetRegister
+ 044E  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0451				IOIMM:					;done
+ 0451  8D 1E 0016 R			LEA	BX,msgArgs
+ 0455  26: 8A 2D			MOV	CH,ES:[DI]
+ 0458  F6 C5 02				test	ch,00000010B		;direction (in/out)
+ 045B  75 13				jne	IOIMM1
+ 045D  32 C0				xor	al,al			;register 0 is AX/AL
+ 045F  E8 06EB R			call	GetRegister
+ 0462  E8 075E R			call	StoreComma
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-13
+
+
+ 0465  26: 8A 45 01			mov	al,es:[di+1]
+ 0469  E8 074B R			call	StoreHexByte
+ 046C  42				inc	dx
+ 046D  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0470				IOIMM1:
+ 0470  26: 8A 45 01			mov	al,es:[di+1]
+ 0474  E8 074B R			call	StoreHexByte
+ 0477  E8 075E R			call	StoreComma
+ 047A  32 C0				xor	al,al			;register 0 is AX/AL
+ 047C  E8 06EB R			call	GetRegister
+ 047F  42				inc	dx
+ 0480  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0483				MEMAL:					;done
+ 0483  8D 1E 0016 R			LEA	BX,msgArgs
+ 0487  26: 8A 2D			MOV	CH,ES:[DI]
+ 048A  F6 C5 02				test	ch,00000010B		;direction (to/from)
+ 048D  75 14				jne	MEMAL1
+ 048F  32 C0				xor	al,al			;register 0 is AX/AL
+ 0491  E8 06EB R			call	GetRegister
+ 0494  E8 075E R			call	StoreComma
+ 0497  E8 070C R			call	GetPointerType
+ 049A  26: 8B 45 01			mov	ax,es:[DI+1]
+ 049E  E8 0744 R			call	StoreHexWord
+ 04A1  EB 12				JMP	SHORT MEMAL2
+				
+ 04A3				MEMAL1:
+ 04A3  E8 070C R			call	GetPointerType
+ 04A6  26: 8B 45 01			mov	ax,es:[DI+1]
+ 04AA  E8 0744 R			call	StoreHexWord
+ 04AD  E8 075E R			call	StoreComma
+ 04B0  32 C0				xor	al,al			;register 0 is AX/AL
+ 04B2  E8 06EB R			call	GetRegister
+				
+ 04B5				MEMAL2:
+ 04B5  83 C2 02				add	dx,2
+ 04B8  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 04BB				LEAINS:
+ 04BB  B5 03				mov	ch,00000011B
+ 04BD  EB 03				jmp	short ModRM01
+				
+ 04BF				MODRM:					;done
+ 04BF  26: 8A 2D			mov	ch,es:[di]
+ 04C2				ModRM01:
+ 04C2  8D 1E 0016 R			LEA	BX,msgArgs
+ 04C6  26: 8A 45 01			mov	al,es:[di+1]
+ 04CA  24 38				and	al,00111000B		;get register number
+				MSH	shr	al,3			;and position it
+ 04CC  C0 E8 03              1		shr	al,3 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-14
+
+
+ 04CF  F6 C5 02				test	ch,00000010B		;direction?
+ 04D2  74 0D				je	ModRMTo			;register to reg/memory
+ 04D4  E8 06EB R			call	GetRegister
+ 04D7  E8 075E R			call	StoreComma
+ 04DA  E8 0671 R			call	GetModRM
+ 04DD  42				inc	dx
+ 04DE  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 04E1				ModRMTo:
+ 04E1  50				push	ax
+ 04E2  E8 0671 R			call	GetModRM
+ 04E5  E8 075E R			call	StoreComma
+ 04E8  58				pop	ax
+ 04E9  E8 06EB R			call	GetRegister
+ 04EC  42				inc	dx
+ 04ED  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 04F0				MODRM2:					;done
+ 04F0  8D 1E 0016 R			LEA	BX,msgArgs
+ 04F4  26: 8A 2D			mov	ch,es:[di]
+ 04F7  E8 0671 R			call	GetModRM
+ 04FA  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 04FD				MODRM3:					;done
+ 04FD  8D 1E 0016 R			LEA	BX,msgArgs		;this case always moves MEM to register
+ 0501  B5 08				mov	ch,8			;Dword format code
+ 0503  26: 8A 45 01			mov	al,es:[di+1]
+ 0507  25 0038				and	ax,00111000B		;get register number
+				MSH	shr	al,3			;and position it
+ 050A  C0 E8 03              1		shr	al,3 
+ 050D  E8 06F8 R			call	GetWordRegister
+ 0510  E8 075E R			call	StoreComma
+ 0513  E8 069B R			call	FGetModRM
+ 0516  42				inc	dx
+ 0517  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 051A				NOARGS:					;done
+ 051A  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 051D				PPSEG:					;done
+ 051D  8D 1E 0016 R			LEA	BX,msgArgs
+ 0521  26: 8A 05			MOV	AL,ES:[DI]
+ 0524  25 0018				AND	AX,00011000B		;get segment register bits
+				MSH	SHR	AX,3
+ 0527  C1 E8 03              1		SHR	AX,3 
+ 052A  E8 06F2 R			CALL	GetSegRegister
+ 052D  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0530				IMM8:
+ 0530  8D 1E 0016 R			LEA	BX,msgArgs
+ 0534  26: 8A 45 01			mov	al,es:[di+1]
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-15
+
+
+ 0538  E8 074B R			call	StoreHexByte
+ 053B  42				inc	dx
+ 053C  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 053F				IMM16:
+ 053F  8D 1E 0016 R			LEA	BX,msgArgs
+ 0543  26: 8B 45 01			mov	ax,es:[di+1]
+ 0547  E8 0744 R			call	StoreHexWord
+ 054A  42				inc	dx
+ 054B  42				inc	dx
+ 054C  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 054F				IMULIMM:
+ 054F  42				inc	dx
+ 0550  8D 1E 0016 R			LEA	BX,msgArgs
+ 0554  26: 8A 45 01			mov	al,es:[di+1]
+ 0558  24 38				and	al,00111000B		;get register number
+				MSH	shr	al,3			;and position it
+ 055A  C0 E8 03              1		shr	al,3 
+ 055D  E8 06F8 R			call	GetWordRegister
+ 0560  E8 075E R			call	StoreComma
+ 0563  B5 01				mov	ch,00000001B		;say word reg
+ 0565  52				push	dx
+ 0566  E8 0671 R			call	GetModRM	
+ 0569  E8 075E R			call	StoreComma
+ 056C  58				pop	ax
+ 056D  57				push	di
+ 056E  2B C2				sub	ax,dx			;AX = 0 or -2
+ 0570  2B F8				sub	di,ax			;DI is offset to constant
+ 0572  26: 8B 45 02			mov	ax,es:[di+2]		;get constant
+ 0576  5F				pop	di
+ 0577  EB 08				jmp	short PUSHIMM0
+				
+				
+ 0579				PUSHIMM:					;done
+ 0579  8D 1E 0016 R			LEA	BX,msgArgs
+ 057D  26: 8B 45 01			MOV	AX,ES:[DI+1]
+ 0581				PUSHIMM0:
+ 0581  42				inc	dx
+ 0582  42				inc	dx
+ 0583  26: F6 05 02			TEST	byte ptr ES:[DI],00000010B	;BYTE OR WORD?
+ 0587  74 02				JZ	PUSHIMM1			;It's a word
+				
+ 0589  98				CBW
+ 058A  4A				dec	dx
+ 058B				PUSHIMM1:
+ 058B  E8 0744 R			CALL	StoreHexWord
+ 058E  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0591				PREFIX:					;done
+ 0591  E8 0763 R			call	StoreColon
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-16
+
+
+				;;jrc	mov	dx,-1
+ 0594  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0597				REL8JMP:				;done
+ 0597  8D 1E 0016 R			LEA	BX,msgArgs
+ 059B  26: 8A 45 01			MOV	AL,ES:[DI+1]		;compute byte relative address
+ 059F  98				CBW
+ 05A0  03 46 0C				ADD	AX,WORD PTR [BP+arg3]	;USE BASE IP PASSED IN
+ 05A3  05 0002				ADD	AX,2
+ 05A6  E8 0744 R			CALL	StoreHexWord
+ 05A9  42				INC	DX
+ 05AA  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 05AD				REL16JMP:				;done
+ 05AD  8D 1E 0016 R			LEA	BX,msgArgs
+ 05B1  26: 8B 45 01			MOV	AX,ES:[DI+1]		;compute word relative address
+				;;	ADD	AX,DI
+ 05B5  03 46 0C				ADD	AX,WORD PTR [BP+arg3]
+ 05B8  05 0003				ADD	AX,3
+ 05BB  E8 0744 R			CALL	StoreHexWord
+ 05BE  83 C2 02				ADD	DX,2
+ 05C1  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 05C4				SEGRM:					;done
+ 05C4  8D 1E 0016 R			LEA	BX,msgArgs
+ 05C8  26: 8A 2D			mov	ch,es:[di]
+ 05CB  80 CD 01				or	ch,1			;identify it as a word access
+ 05CE  26: 8A 45 01			mov	al,es:[di+1]
+ 05D2  24 18				and	al,00011000B		;get register number
+				MSH	shr	al,3			;and position it
+ 05D4  C0 E8 03              1		shr	al,3 
+ 05D7  F6 C5 02				test	ch,00000010B		;direction?
+ 05DA  74 0D				je	SegRMTo			;register to reg/memory
+ 05DC  E8 06F2 R			call	GetSegRegister
+ 05DF  E8 075E R			call	StoreComma
+ 05E2  E8 0671 R			call	GetModRM
+ 05E5  42				inc	dx
+ 05E6  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 05E9				SegRMTo:
+ 05E9  50				push	ax
+ 05EA  E8 0671 R			call	GetModRM
+ 05ED  E8 075E R			call	StoreComma
+ 05F0  58				pop	ax
+ 05F1  E8 06F2 R			call	GetSegRegister
+ 05F4  42				inc	dx
+ 05F5  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 05F8				SHFT:					;done
+ 05F8  8D 36 0C2E R			LEA	SI,DS:$SHFTGRP
+ 05FC  E8 065E R			CALL	GETSUBNAME
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-17
+
+
+ 05FF  8D 1E 0016 R			LEA	BX,msgArgs
+ 0603  26: 8A 2D			mov	ch,es:[di]
+ 0606  E8 0671 R			call	GetModRM
+ 0609  E8 075E R			call	StoreComma
+ 060C  B0 01				mov	al,1
+ 060E  F6 C5 02				test	ch,2			;test for CL
+ 0611  75 07				jnz	SHFTCL
+ 0613  E8 074B R			call	StoreHexByte
+ 0616  42				inc	dx
+ 0617  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 061A				SHFTCL:
+ 061A  E8 06FE R			call	GetByteRegister
+ 061D  42				inc	dx
+ 061E  E9 0091 R			JMP	NEAR PTR UNASM_END
+					
+				
+ 0621				SHFTCNT:				;done
+ 0621  8D 36 0C2E R			LEA	SI,DS:$SHFTGRP
+ 0625  E8 065E R			CALL	GETSUBNAME
+ 0628  8D 1E 0016 R			LEA	BX,msgArgs
+ 062C  26: 8A 2D			mov	ch,es:[di]
+ 062F  E8 0671 R			call	GetModRM
+ 0632  E8 075E R			call	StoreComma
+ 0635  57				push	DI
+ 0636  03 FA				add	DI,DX			;point to [immediate data - 2]
+ 0638  26: 8A 45 02			mov	al,es:[di+2]
+ 063C  E8 074B R			call	StoreHexByte
+ 063F  83 C2 02				add	dx,2
+ 0642  5F				pop	di
+ 0643  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+ 0646				XCHGREG:				;done
+ 0646  8D 1E 0016 R			LEA	BX,msgArgs
+ 064A  33 C0				XOR	AX,AX			;write ax
+ 064C  E8 06F8 R			CALL	GetWordRegister
+ 064F  E8 075E R			CALL	StoreComma
+ 0652  26: 8A 05			MOV	AL,ES:[DI]
+ 0655  25 0007				AND	AX,00000111B
+ 0658  E8 06F8 R			CALL	GetWordRegister
+ 065B  E9 0091 R			JMP	NEAR PTR UNASM_END
+				
+				;****************************************************************************
+				; get sub function name
+				; input:	es:[di+1] points to modrm byte
+				;		SI points to table of name addresses
+ 065E				GETSUBNAME:
+ 065E  26: 8A 45 01			MOV	AL,ES:[DI+1]
+ 0662  25 0038				AND	AX,00111000B		;GET INSTRUCTION BITS
+				MSH	SHR	AX,2			;CONVERT TO WORD INDEX
+ 0665  D1 E8                 2		SHR	AX,1 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-18
+
+
+ 0667  D1 E8                 2		SHR	AX,1 
+ 0669  03 F0				ADD	SI,AX
+ 066B  8B 34				MOV	SI,DS:[SI]
+ 066D  E8 0768 R			CALL	StoreString
+ 0670  C3				RET
+				
+				;*************************************************************************
+				; Get Mod RM address 
+				; input:	ES:[di] points to instruction to decode
+				;		ch = sign extend and byte/word bits
+ 0671				GetModRM:
+ 0671  26: 8A 45 01			MOV	AL,ES:[DI+1]
+ 0675  24 C7				AND	AL,11000111B		;mask bits
+ 0677  32 E4				xor	ah,ah
+				MSH	shl	ax,2			;shift off mod bits
+ 0679  D1 E0                 2		shl	ax,1 
+ 067B  D1 E0                 2		shl	ax,1 
+ 067D  D0 E8				shr	al,1			;make lower 3 bits into a word index
+ 067F  80 FC 03				cmp	ah,3			;register specified?
+ 0682  74 63				je	GetModReg		;yep, go to it!
+				
+ 0684  E8 070C R			call	GetPointerType
+ 0687  80 FC 00				cmp	ah,00			;is there a displacement??
+ 068A  75 34				jne	GetModDisplace		;get displacement
+ 068C  3C 0C				cmp	al,01100B		;special case of direct address?
+ 068E  75 49				jne	GetModAddress
+					
+ 0690  26: 8B 45 02			mov	ax,es:[di+2]
+ 0694  E8 0744 R			call	StoreHexWord
+ 0697  83 C2 02				add	dx,2
+ 069A  C3				ret
+				
+				;*************************************************************************
+				; Get Mod RM address -- Floating Format
+				; input:	ES:[di] points to instruction to decode
+				;		ch = Format code in bits 3,2,1
+ 069B				FGetModRM:
+ 069B  26: 8A 45 01			MOV	AL,ES:[DI+1]
+ 069F  24 C7				AND	AL,11000111B		;mask bits
+ 06A1  32 E4				xor	ah,ah
+				MSH	shl	ax,2			;shift off mod bits
+ 06A3  D1 E0                 2		shl	ax,1 
+ 06A5  D1 E0                 2		shl	ax,1 
+ 06A7  D0 E8				shr	al,1			;make lower 3 bits into a word index
+				
+ 06A9  E8 071D R			call	FGetPointerType
+ 06AC  80 FC 00				cmp	ah,00			;is there a displacement??
+ 06AF  75 0F				jne	GetModDisplace		;get displacement
+ 06B1  3C 0C				cmp	al,01100B		;special case of direct address?
+ 06B3  75 24				jne	GetModAddress
+					
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-19
+
+
+ 06B5  26: 8B 45 02			mov	ax,es:[di+2]
+ 06B9  E8 0744 R			call	StoreHexWord
+ 06BC  83 C2 02				add	dx,2
+ 06BF  C3				ret
+				
+ 06C0				GetModDisplace:
+ 06C0  50				push	ax
+ 06C1  80 FC 01				cmp	ah,1
+ 06C4  75 08				jne	GetModD2
+				
+ 06C6  26: 8A 45 02			mov	al,es:[di+2]
+ 06CA  98				cbw
+ 06CB  42				inc	dx
+ 06CC  EB 07				jmp	short GetModD3
+				
+ 06CE				GetModD2:
+ 06CE  26: 8B 45 02			mov	ax,es:[di+2]
+ 06D2  83 C2 02				add	dx,2
+ 06D5				GetModD3:
+ 06D5  E8 0744 R			CALL	StoreHexWord
+ 06D8  58				pop	ax
+ 06D9				GetModAddress:
+ 06D9  32 E4				xor	ah,ah			;compute word index
+ 06DB  8D 36 0BFE R			lea	si,DS:$ModAddress
+ 06DF  03 F0				add	si,ax
+ 06E1  8B 34				mov	si,DS:[si]
+ 06E3  E8 0768 R			call	StoreString
+ 06E6  C3				RET
+				
+ 06E7				GetModReg:
+ 06E7  32 E4				xor	ah,ah			;re-position register number
+ 06E9  D1 E8				shr	ax,1
+				;;	jmp	Short GetRegister
+				
+				;*************************************************************************
+				; Get Register
+				; input:	al = register number
+				;		ch = bit 0 contains byte/word flag
+				;*************************************************************************
+ 06EB				GetRegister:
+ 06EB  F6 C5 01				test	ch,00000001B
+ 06EE  75 08				jne	GetWordRegister
+ 06F0  EB 0C				jmp	short GetByteRegister
+				
+				; Get segment register name
+				;input:	al = register number
+ 06F2				GetSegRegister:
+ 06F2  8D 36 0B7A R			LEA	SI,DS:$SEGS
+ 06F6  EB 0A				JMP	SHORT GetReg1
+				
+				;*************************************************************************
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-20
+
+
+				; Get word register name
+				;input:	al = register number
+				
+ 06F8				GetWordRegister:
+ 06F8  8D 36 0B92 R			LEA	SI,DS:$REG16
+ 06FC  EB 04				JMP	SHORT GetReg1
+				
+				;*************************************************************************
+				; Get byte register name
+				;input:	al = register number
+ 06FE				GetByteRegister:
+ 06FE  8D 36 0B82 R			LEA	SI,DS:$REG8
+				
+ 0702				GetReg1:
+ 0702  32 E4				XOR	AH,AH
+ 0704  D1 E0				SHL	AX,1
+ 0706  03 F0				ADD	SI,AX
+ 0708  E8 0768 R			CALL	StoreString
+ 070B  C3				RET
+				     
+				;*************************************************************************
+				; Get byte register name
+				;input:	ch = bit 0 is word/byte flag
+ 070C				GetPointerType:
+ 070C  8D 36 0BA2 R			lea	si,DS:$BytePtr
+ 0710  F6 C5 01				test	ch,00000001B		;byte or word?
+ 0713  74 04				je	GetPTR1
+				
+ 0715  8D 36 0BAB R			lea	si,DS:$WordPtr
+ 0719				GetPTR1:
+ 0719  E8 0768 R			Call	StoreString
+ 071C  C3				ret
+				
+				;*************************************************************************
+				; Get byte register name
+				;input:	ch = Pointer type in bits 3,2,1
+ 071D				FGetPointerType:
+ 071D  86 E9				xchg	ch,cl
+ 071F  8B F1				mov	si,cx
+ 0721  86 E9				xchg	ch,cl
+ 0723  83 E6 0E				and	si,00001110B
+ 0726  8B B4 0C0E R			mov	si,DS:Fformats[si]
+ 072A  E8 0768 R			call	 StoreString
+ 072D  C3				ret
+				;**************************************************************************
+				;desc:	FPac
+				;in:	al bits 0-2 have stack offset
+				;return:
+				;	ax destroyed
+				;	bx is incremented
+ 072E				FPac:
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-21
+
+
+ 072E  C7 07 5453			mov	word ptr [bx],'T'*256+'S'
+ 0732  43				inc	bx
+ 0733  43				inc	bx
+ 0734  24 07				and	al,07
+ 0736  74 0B				jz	FPac1
+ 0738  C6 07 28				mov	byte ptr [bx],'('
+ 073B  43				inc	bx
+ 073C  E8 0753 R			call	StoreHexNyb
+ 073F  C6 07 29				mov	byte ptr [bx],')'
+ 0742  43				inc	bx
+ 0743  C3			FPac1:	ret
+				
+				
+				;**************************************************************************
+				;desc:	StoreHexWord/Byte/Nybble
+				;in:	ax/al with value to print
+				;return:
+				;	ax destroyed
+				;	bx is incremented
+				;**************************************************************************
+ 0744				StoreHexWord	Proc	Near
+ 0744  50				push	ax
+ 0745  8A C4				mov	al,ah
+ 0747  E8 074B R			call	StoreHexByte
+ 074A  58				pop	ax
+ 074B				StoreHexByte:
+ 074B  50				push	ax
+				MSH	shr	al,4
+ 074C  C0 E8 04              1		shr	al,4 
+ 074F  E8 0753 R			call	StoreHexNyb
+ 0752  58				pop	ax
+ 0753				StoreHexNyb:
+ 0753  24 0F				and	al,0FH
+				COMMENT ^
+					cmp	al,09
+					jle	Sxb1
+					add	al,'a'-'9'-1
+				Sxb1:
+					add	al,'0'
+				^ END COMMENT
+ 0755  27			        daa
+ 0756  04 F0			        add     al,0F0H
+ 0758  14 40			        adc     al,40H
+ 075A  88 07				mov	[bx],al
+ 075C  43				inc	bx
+ 075D  C3				ret
+ 075E				StoreHexWord	Endp
+				
+				;*************************************************************************
+				;desc: Store Comma
+				;	bx updated
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-22
+
+
+				;*************************************************************************
+ 075E				StoreComma:
+ 075E  C6 07 2C				mov	byte ptr [bx],','
+ 0761  43				inc	bx
+ 0762  C3				ret
+				
+				;*************************************************************************
+				;desc: Store Colon
+				;	bx updated
+				;*************************************************************************
+ 0763				StoreColon:
+ 0763  C6 07 3A				mov	byte ptr [bx],':'
+ 0766  43				inc	bx
+ 0767  C3				ret
+				
+				;*************************************************************************
+				;desc: Store sign terminated string in buffer
+				;in:	DS:si points to sign terminated string
+				;returns:
+				;	DS:si points past string
+				;	ds:bx updated
+				;*************************************************************************
+ 0768				StoreString	Proc	Near
+ 0768  50				push	ax
+ 0769				SS1:
+ 0769  AC				lods	byte ptr DS:[si]
+ 076A  0A C0				or	al,al
+ 076C  78 05				js	SSEnd
+ 076E  88 07				mov	[bx],al
+ 0770  43				inc	bx
+ 0771  EB F6				jmp	short SS1
+ 0773				SSEnd:
+ 0773  24 7F				and	al,7fH		;clear sign bit
+ 0775  88 07				mov	[bx],al
+ 0777  43				inc	bx
+ 0778  58				pop	ax
+ 0779  C3				ret
+ 077A				StoreString	Endp
+				
+				
+				
+ 077A  0D5D R 04BF R		disop	dw	$ADD,MODRM			;00
+ 077E  0D5D R 04BF R			dw	$ADD,MODRM
+ 0782  0D5D R 04BF R			dw	$ADD,MODRM
+ 0786  0D5D R 04BF R			dw	$ADD,MODRM
+ 078A  0D5D R 036B R			dw	$ADD,IMMAX
+ 078E  0D5D R 036B R			dw	$ADD,IMMAX
+ 0792  1024 R 051D R			dw	$PUSH,PPSEG
+ 0796  1019 R 051D R			dw	$POP,PPSEG
+ 079A  100A R 04BF R			dw	$OR,MODRM
+ 079E  100A R 04BF R			dw	$OR,MODRM
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-23
+
+
+ 07A2  100A R 04BF R			dw	$OR,MODRM
+ 07A6  100A R 04BF R			dw	$OR,MODRM
+ 07AA  100A R 036B R			dw	$OR,IMMAX
+ 07AE  100A R 036B R			dw	$OR,IMMAX
+ 07B2  1024 R 051D R			dw	$PUSH,PPSEG
+ 07B6  0D93 R 035E R			dw	$DB,ILLBYTE
+				
+ 07BA  0D5A R 04BF R			dw	$ADC,MODRM			;10
+ 07BE  0D5A R 04BF R			dw	$ADC,MODRM
+ 07C2  0D5A R 04BF R			dw	$ADC,MODRM
+ 07C6  0D5A R 04BF R			dw	$ADC,MODRM
+ 07CA  0D5A R 036B R			dw	$ADC,IMMAX
+ 07CE  0D5A R 036B R			dw	$ADC,IMMAX
+ 07D2  1024 R 051D R			dw	$PUSH,PPSEG
+ 07D6  1019 R 051D R			dw	$POP,PPSEG
+ 07DA  1059 R 04BF R			dw	$SBB,MODRM
+ 07DE  1059 R 04BF R			dw	$SBB,MODRM
+ 07E2  1059 R 04BF R			dw	$SBB,MODRM
+ 07E6  1059 R 04BF R			dw	$SBB,MODRM
+ 07EA  1059 R 036B R			dw	$SBB,IMMAX
+ 07EE  1059 R 036B R			dw	$SBB,IMMAX
+ 07F2  1024 R 051D R			dw	$PUSH,PPSEG
+ 07F6  1019 R 051D R			dw	$POP,PPSEG
+				
+ 07FA  0D60 R 04BF R			dw	$AND,MODRM			;20
+ 07FE  0D60 R 04BF R			dw	$AND,MODRM
+ 0802  0D60 R 04BF R			dw	$AND,MODRM
+ 0806  0D60 R 04BF R			dw	$AND,MODRM
+ 080A  0D60 R 036B R			dw	$AND,IMMAX
+ 080E  0D60 R 036B R			dw	$AND,IMMAX
+ 0812  0DA2 R 0591 R			dw	$ES,PREFIX
+ 0816  0D8D R 051A R			dw	$DAA,NOARGS
+ 081A  1081 R 04BF R			dw	$SUB,MODRM
+ 081E  1081 R 04BF R			dw	$SUB,MODRM
+ 0822  1081 R 04BF R			dw	$SUB,MODRM
+ 0826  1081 R 04BF R			dw	$SUB,MODRM
+ 082A  1081 R 036B R			dw	$SUB,IMMAX
+ 082E  1081 R 036B R			dw	$SUB,IMMAX
+ 0832  0D88 R 0591 R			dw	$CS,PREFIX
+ 0836  0D90 R 051A R			dw	$DAS,NOARGS
+				
+ 083A  1090 R 04BF R			dw	$XOR,MODRM			;30
+ 083E  1090 R 04BF R			dw	$XOR,MODRM
+ 0842  1090 R 04BF R			dw	$XOR,MODRM
+ 0846  1090 R 04BF R			dw	$XOR,MODRM
+ 084A  1090 R 036B R			dw	$XOR,IMMAX
+ 084E  1090 R 036B R			dw	$XOR,IMMAX
+ 0852  106C R 0591 R			dw	$SS,PREFIX
+ 0856  0D4E R 051A R			dw	$AAA,NOARGS
+ 085A  0D7B R 04BF R			dw	$CMP,MODRM
+ 085E  0D7B R 04BF R			dw	$CMP,MODRM
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-24
+
+
+ 0862  0D7B R 04BF R			dw	$CMP,MODRM
+ 0866  0D7B R 04BF R			dw	$CMP,MODRM
+ 086A  0D7B R 036B R			dw	$CMP,IMMAX
+ 086E  0D7B R 036B R			dw	$CMP,IMMAX
+ 0872  0D9B R 0591 R			dw	$DS,PREFIX
+ 0876  0D57 R 051A R			dw	$AAS,NOARGS
+				
+ 087A  0F6D R 0408 R			dw	$INC,INCREG			;40
+ 087E  0F6D R 0408 R			dw	$INC,INCREG
+ 0882  0F6D R 0408 R			dw	$INC,INCREG 
+ 0886  0F6D R 0408 R			dw	$INC,INCREG
+ 088A  0F6D R 0408 R			dw	$INC,INCREG
+ 088E  0F6D R 0408 R			dw	$INC,INCREG
+ 0892  0F6D R 0408 R			dw	$INC,INCREG
+ 0896  0F6D R 0408 R			dw	$INC,INCREG
+ 089A  0D95 R 0408 R			dw	$DEC,INCREG
+ 089E  0D95 R 0408 R			dw	$DEC,INCREG
+ 08A2  0D95 R 0408 R			dw	$DEC,INCREG 
+ 08A6  0D95 R 0408 R			dw	$DEC,INCREG
+ 08AA  0D95 R 0408 R			dw	$DEC,INCREG
+ 08AE  0D95 R 0408 R			dw	$DEC,INCREG
+ 08B2  0D95 R 0408 R			dw	$DEC,INCREG
+ 08B6  0D95 R 0408 R			dw	$DEC,INCREG
+				
+ 08BA  1024 R 0408 R			dw	$PUSH,INCREG			;50
+ 08BE  1024 R 0408 R			dw	$PUSH,INCREG
+ 08C2  1024 R 0408 R			dw	$PUSH,INCREG
+ 08C6  1024 R 0408 R			dw	$PUSH,INCREG
+ 08CA  1024 R 0408 R			dw	$PUSH,INCREG
+ 08CE  1024 R 0408 R			dw	$PUSH,INCREG
+ 08D2  1024 R 0408 R			dw	$PUSH,INCREG
+ 08D6  1024 R 0408 R			dw	$PUSH,INCREG
+ 08DA  1019 R 0408 R			dw	$POP,INCREG
+ 08DE  1019 R 0408 R			dw	$POP,INCREG
+ 08E2  1019 R 0408 R			dw	$POP,INCREG
+ 08E6  1019 R 0408 R			dw	$POP,INCREG
+ 08EA  1019 R 0408 R			dw	$POP,INCREG
+ 08EE  1019 R 0408 R			dw	$POP,INCREG
+ 08F2  1019 R 0408 R			dw	$POP,INCREG
+ 08F6  1019 R 0408 R			dw	$POP,INCREG
+				
+ 08FA  1028 R 051A R			dw	$PUSHA,NOARGS			;60
+ 08FE  101C R 051A R			dw	$POPA,NOARGS
+ 0902  0D63 R 04BF R			dw	$BOUND,MODRM
+ 0906  0D93 R 035E R			dw	$DB,ILLBYTE
+ 090A  0D93 R 035E R			dw	$DB,ILLBYTE
+ 090E  0D93 R 035E R			dw	$DB,ILLBYTE
+ 0912  0D93 R 035E R			dw	$DB,ILLBYTE
+ 0916  0D93 R 035E R			dw	$DB,ILLBYTE
+ 091A  1024 R 0579 R			dw	$PUSH,PUSHIMM
+ 091E  0F67 R 054F R			dw	$IMUL,IMULIMM
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-25
+
+
+ 0922  1024 R 0579 R			dw	$PUSH,PUSHIMM
+ 0926  0F67 R 054F R			dw	$IMUL,IMULIMM
+ 092A  0F70 R 051A R			dw	$INSB,NOARGS
+ 092E  0F74 R 051A R			dw	$INSW,NOARGS
+ 0932  100F R 051A R			dw	$OUTSB,NOARGS
+ 0936  1014 R 051A R			dw	$OUTSW,NOARGS
+				
+ 093A  0FBC R 0597 R			dw	$JO,REL8JMP			;70
+ 093E  0FB0 R 0597 R			dw	$JNO,REL8JMP
+ 0942  0F89 R 0597 R			dw	$JB,REL8JMP
+ 0946  0FA3 R 0597 R			dw	$JNB,REL8JMP
+ 094A  0F94 R 0597 R			dw	$JE,REL8JMP
+ 094E  0FAD R 0597 R			dw	$JNE,REL8JMP
+ 0952  0F8B R 0597 R			dw	$JBE,REL8JMP
+ 0956  0F87 R 0597 R			dw	$JA,REL8JMP
+ 095A  0FC0 R 0597 R			dw	$JS,REL8JMP
+ 095E  0FB9 R 0597 R			dw	$JNS,REL8JMP
+ 0962  0FBE R 0597 R			dw	$JP,REL8JMP
+ 0966  0FB6 R 0597 R			dw	$JNP,REL8JMP
+ 096A  0F9B R 0597 R			dw	$JL,REL8JMP
+ 096E  0F98 R 0597 R			dw	$JGE,REL8JMP
+ 0972  0F9D R 0597 R			dw	$JLE,REL8JMP
+ 0976  0F96 R 0597 R			dw	$JG,REL8JMP
+				
+ 097A  0000 00D1 R			dw	0,ARITHIMM			;80
+ 097E  0000 00D1 R			dw	0,ARITHIMM
+ 0982  0000 00D1 R			dw	0,ARITHIMM
+ 0986  0000 00D1 R			dw	0,ARITHIMM
+ 098A  1084 R 04BF R			dw	$TEST,MODRM
+ 098E  1084 R 04BF R			dw	$TEST,MODRM
+ 0992  1088 R 04BF R			dw	$XCHG,MODRM
+ 0996  1088 R 04BF R			dw	$XCHG,MODRM
+ 099A  0FF1 R 04BF R			dw	$MOV,MODRM
+ 099E  0FF1 R 04BF R			dw	$MOV,MODRM
+ 09A2  0FF1 R 04BF R			dw	$MOV,MODRM
+ 09A6  0FF1 R 04BF R			dw	$MOV,MODRM
+ 09AA  0FF1 R 05C4 R			dw	$MOV,SEGRM
+ 09AE  0FC9 R 04BB R			dw	$LEA,LEAINS
+ 09B2  0FF1 R 05C4 R			dw	$MOV,SEGRM
+ 09B6  1019 R 04F0 R			dw	$POP,MODRM2
+				
+ 09BA  1004 R 051A R			dw	$NOP,NOARGS			;90
+ 09BE  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09C2  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09C6  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09CA  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09CE  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09D2  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09D6  1088 R 0646 R			dw	$XCHG,XCHGREG
+ 09DA  0D6C R 051A R			dw	$CBW,NOARGS
+ 09DE  0D8A R 051A R			dw	$CWD,NOARGS
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-26
+
+
+ 09E2  0D68 R 02E1 R			dw	$CALL,FARADR
+ 09E6  0F40 R 051A R			dw	$FWAIT,NOARGS
+ 09EA  102D R 051A R			dw	$PUSHF,NOARGS
+ 09EE  1020 R 051A R			dw	$POPF,NOARGS
+ 09F2  1052 R 051A R			dw	$SAHF,NOARGS
+ 09F6  0FC2 R 051A R			dw	$LAHF,NOARGS
+				
+ 09FA  0FF1 R 0483 R			dw	$MOV,MEMAL			;A0
+ 09FE  0FF1 R 0483 R			dw	$MOV,MEMAL
+ 0A02  0FF1 R 0483 R			dw	$MOV,MEMAL
+ 0A06  0FF1 R 0483 R			dw	$MOV,MEMAL
+ 0A0A  0FF4 R 051A R			dw	$MOVSB,NOARGS
+ 0A0E  0FF9 R 051A R			dw	$MOVSW,NOARGS
+ 0A12  0D7E R 051A R			dw	$CMPSB,NOARGS
+ 0A16  0D83 R 051A R			dw	$CMPSW,NOARGS
+ 0A1A  1084 R 036B R			dw	$TEST,IMMAX
+ 0A1E  1084 R 036B R			dw	$TEST,IMMAX
+ 0A22  1077 R 051A R			dw	$STOSB,NOARGS
+ 0A26  107C R 051A R			dw	$STOSW,NOARGS
+ 0A2A  0FD8 R 051A R			dw	$LODSB,NOARGS
+ 0A2E  0FDD R 051A R			dw	$LODSW,NOARGS
+ 0A32  105C R 051A R			dw	$SCASB,NOARGS
+ 0A36  1061 R 051A R			dw	$SCASW,NOARGS
+				
+ 0A3A  0FF1 R 03D4 R			dw	$MOV,IMMREG			;B0
+ 0A3E  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A42  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A46  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A4A  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A4E  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A52  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A56  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A5A  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A5E  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A62  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A66  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A6A  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A6E  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A72  0FF1 R 03D4 R			dw	$MOV,IMMREG
+ 0A76  0FF1 R 03D4 R			dw	$MOV,IMMREG
+				
+ 0A7A  0000 0621 R			dw	0,SHFTCNT			;C0
+ 0A7E  0000 0621 R			dw	0,SHFTCNT
+ 0A82  1048 R 053F R			dw	$RETN,IMM16
+ 0A86  1048 R 051A R			dw	$RETN,NOARGS
+ 0A8A  0FD1 R 04FD R			dw	$LES,MODRM3
+ 0A8E  0FC6 R 04FD R			dw	$LDS,MODRM3
+ 0A92  0FF1 R 03A1 R			dw	$MOV,IMMRM
+ 0A96  0FF1 R 03A1 R			dw	$MOV,IMMRM
+ 0A9A  0D9D R 00E1 R			dw	$ENTER,ENTERARGS
+ 0A9E  0FCC R 051A R			dw	$LEAVE,NOARGS
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-27
+
+
+ 0AA2  1044 R 053F R			dw	$RETF,IMM16
+ 0AA6  1044 R 051A R			dw	$RETF,NOARGS
+ 0AAA  0F7B R 051A R			dw	$INT3,NOARGS
+ 0AAE  0F78 R 0530 R			dw	$INT,IMM8
+ 0AB2  0F7F R 051A R			dw	$INTO,NOARGS
+ 0AB6  0F83 R 051A R			dw	$IRET,NOARGS
+				
+ 0ABA  0000 05F8 R			dw	0,SHFT				;D0
+ 0ABE  0000 05F8 R			dw	0,SHFT
+ 0AC2  0000 05F8 R			dw	0,SHFT
+ 0AC6  0000 05F8 R			dw	0,SHFT
+ 0ACA  0D54 R 00DE R			dw	$AAM,DROPARG
+ 0ACE  0D51 R 00DE R			dw	$AAD,DROPARG
+ 0AD2  0D93 R 035E R			dw	$DB,ILLBYTE
+ 0AD6  108C R 051A R			dw	$XLAT,NOARGS
+ 0ADA  0000 00FB R			dw	0,ESC_D8
+ 0ADE  0000 0130 R			dw	0,ESC_D9
+ 0AE2  0000 0182 R			dw	0,ESC_DA
+ 0AE6  0000 01AF R			dw	0,ESC_DB
+ 0AEA  0000 01E2 R			dw	0,ESC_DC
+ 0AEE  0000 021C R			dw	0,ESC_DD
+ 0AF2  0000 0254 R			dw	0,ESC_DE
+ 0AF6  0000 029E R			dw	0,ESC_DF
+				
+ 0AFA  0FEB R 0597 R			dw	$LOOPNZ,REL8JMP			;E0
+ 0AFE  0FE6 R 0597 R			dw	$LOOPZ,REL8JMP
+ 0B02  0FE2 R 0597 R			dw	$LOOP,REL8JMP
+ 0B06  0F90 R 0597 R			dw	$JCXZ,REL8JMP
+ 0B0A  0F6B R 0451 R			dw	$IN,IOIMM
+ 0B0E  0F6B R 0451 R			dw	$IN,IOIMM
+ 0B12  100C R 0451 R			dw	$OUT,IOIMM
+ 0B16  100C R 0451 R			dw	$OUT,IOIMM
+ 0B1A  0D68 R 05AD R			dw	$CALL,REL16JMP
+ 0B1E  0FA0 R 05AD R			dw	$JMP,REL16JMP
+ 0B22  0FA0 R 02E1 R			dw	$JMP,FARADR
+ 0B26  0FA0 R 0597 R			dw	$JMP,REL8JMP
+ 0B2A  0F6B R 0425 R			dw	$IN,IODX
+ 0B2E  0F6B R 0425 R			dw	$IN,IODX
+ 0B32  100C R 0425 R			dw	$OUT,IODX
+ 0B36  100C R 0425 R			dw	$OUT,IODX
+				
+ 0B3A  0FD4 R 051A R			dw	$LOCK,NOARGS			;F0
+ 0B3E  0D93 R 035E R			dw	$DB,ILLBYTE
+ 0B42  1038 R 0591 R			dw	$REP,PREFIX
+ 0B46  103B R 0591 R			dw	$REPZ,PREFIX
+ 0B4A  0F60 R 051A R			dw	$HLT,NOARGS
+ 0B4E  0D78 R 051A R			dw	$CMC,NOARGS
+ 0B52  0000 02FC R			dw	0,GRP1
+ 0B56  0000 02FC R			dw	0,GRP1
+ 0B5A  0D6F R 051A R			dw	$CLC,NOARGS
+ 0B5E  106E R 051A R			dw	$STC,NOARGS
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-28
+
+
+ 0B62  0D75 R 051A R			dw	$CLI,NOARGS
+ 0B66  1074 R 051A R			dw	$STI,NOARGS
+ 0B6A  0D72 R 051A R			dw	$CLD,NOARGS
+ 0B6E  1071 R 051A R			dw	$STD,NOARGS
+ 0B72  0000 0338 R			dw	0,GRP2
+ 0B76  0000 0338 R			dw	0,GRP2
+				
+ 0B7A  45 D3 43 D3 53 D3	$SEGS	DB 'E','S'+80H,'C','S'+80H,'S','S'+80H,'D','S'+80H
+       44 D3			
+ 0B82  41 CC 43 CC 44 CC	$REG8	DB 'A','L'+80H,'C','L'+80H,'D','L'+80H,'B','L'+80H
+       42 CC			
+ 0B8A  41 C8 43 C8 44 C8		DB 'A','H'+80H,'C','H'+80H,'D','H'+80H,'B','H'+80H
+       42 C8			
+ 0B92  41 D8 43 D8 44 D8	$REG16	DB 'A','X'+80H,'C','X'+80H,'D','X'+80H,'B','X'+80H
+       42 D8			
+ 0B9A  53 D0 42 D0 53 C9		DB 'S','P'+80H,'B','P'+80H,'S','I'+80H,'D','I'+80H
+       44 C9			
+				
+ 0BA2  42 79 74 65 20 50	$BytePtr	db	'Byte Ptr',' '+80H
+       74 72 A0			
+ 0BAB  57 6F 72 64 20 50	$WordPtr	db	'Word Ptr',' '+80H
+       74 72 A0			
+ 0BB4  44 77 6F 72 64 20	$DwordPtr	db	'Dword Ptr',' '+80H
+       50 74 72 A0		
+ 0BBE  51 77 6F 72 64 20	$QwordPtr	db	'Qword Ptr',' '+80H
+       50 74 72 A0		
+ 0BC8  54 62 79 74 65 20	$TbytePtr	db	'Tbyte Ptr',' '+80H
+       50 74 72 A0		
+				
+ 0BD2  5B 42 58 2B 53 49	$ModBXSI	db	'[BX+SI',']'+80H
+       DD			
+ 0BD9  5B 42 58 2B 44 49	$ModBXDI	db	'[BX+DI',']'+80H
+       DD			
+ 0BE0  5B 42 50 2B 53 49	$ModBPSI	db	'[BP+SI',']'+80H
+       DD			
+ 0BE7  5B 42 50 2B 44 49	$ModBPDI	db	'[BP+DI',']'+80H
+       DD			
+ 0BEE  5B 53 49 DD		$ModSI		db	'[SI',']'+80H
+ 0BF2  5B 44 49 DD		$ModDI		db	'[DI',']'+80H
+ 0BF6  5B 42 50 DD		$ModBP		db	'[BP',']'+80H
+ 0BFA  5B 42 58 DD		$ModBX		db	'[BX',']'+80H
+				
+ 0BFE  0BD2 R 0BD9 R 0BE0 R	$ModAddress	dw	$ModBXSI,$ModBXDI,$ModBPSI,$ModBPDI
+       0BE7 R			
+ 0C06  0BEE R 0BF2 R 0BF6 R			dw	$ModSI,$ModDI,$ModBP,$ModBX
+       0BFA R			
+ 0C0E  0BC8 R 0BA2 R 0BAB R	Fformats	dw	$TbytePtr,$BytePtr,$WordPtr,0,$DwordPtr,$DwordPtr,$QwordPtr,$Wor
+				dPtr
+       0000 0BB4 R 0BB4 R	
+       0BBE R 0BAB R		
+ 0C1E  0D5D R 100A R 0D5A R	$ARITHGRP	dw	$ADD,$OR,$ADC,$SBB,$AND,$SUB,$XOR,$CMP
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-29
+
+
+       1059 R 0D60 R 1081 R	
+       1090 R 0D7B R		
+ 0C2E  104C R 104F R 1032 R	$SHFTGRP	dw	$ROL,$ROR,$RCL,$RCR,$SHL,$SHR,$DB,$SAR
+       1035 R 1066 R 1069 R	
+       0D93 R 1056 R		
+ 0C3E  1084 R 0D93 R 1007 R	$GRP1		dw	$TEST,$DB,$NOT,$NEG,$MUL,$IMUL,$DIV,$IDIV
+       1001 R 0FFE R 0F67 R	
+       0D98 R 0F63 R		
+ 0C4E  0F6D R 0D95 R 0D68 R	$GRP2		dw	$INC,$DEC,$CALL,$CALL,$JMP,$JMP,$PUSH,$DB
+       0D68 R 0FA0 R 0FA0 R	
+       1024 R 0D93 R		
+ 0C5E  0DB0 R 0E7E R 0DCB R	$FARITH		DW	$FADD,$FMUL,$FCOM,$FCOMP,$FSUB,$FSUBR,$FDIV,$FDIVR
+       0DCF R 0F16 R 0F1F R	
+       0DEA R 0DF3 R		
+ 0C6E  0DB0 R 0E7E R 0000	$FARITHR	DW	$FADD,$FMUL,0,$FCOMPP,$FSUBR,$FSUB,$FDIVR,$FDIV
+       0DD4 R 0F1F R 0F16 R	
+       0DF3 R 0DEA R		
+ 0C7E  0DB4 R 0E82 R 0DCF R	$FARITHP	DW	$FADDP,$FMULP,$FCOMP,$FCOMPP,$FSUBRP,$FSUBP,$FDIVRP,$FDIVP
+       0DD4 R 0F24 R 0F1A R	
+       0DF8 R 0DEE R		
+ 0C8E  0E07 R 0E26 R 0E0C R	$FIARITH	DW	$FIADD,$FIMUL,$FICOM,$FICOMP,$FISUB,$FISUBR,$FIDIV,$FIDIVR
+       0E11 R 0E40 R 0E45 R	
+       0E17 R 0E1C R		
+ 0C9E  0E4B R 0000 0EFF R	$FARITH1	DW	$FLD,0,$FST,$FSTP,$FLDENV,$FLDCW,$FSTENV,$FSTCW
+       0F0D R 0E53 R 0E4E R	
+       0F07 R 0F02 R		
+ 0CAE  0E4B R 0000 0EFF R	$FARITH2	DW	$FLD,0,$FST,$FSTP,$FRSTOR,0,$FSAVE,$FSTSW
+       0F0D R 0ED8 R 0000	
+       0EDE R 0F11 R		
+ 0CBE  0E22 R 0000 0E37 R	$FIARITH1	DW	$FILD,0,$FIST,$FISTP,0,$FLD,0,$FSTP
+       0E3B R 0000 0E4B R	
+       0000 0F0D R		
+ 0CCE  0E22 R 0000 0E37 R	$FIARITH2	DW	$FILD,0,$FIST,$FISTP,$FBLD,$FILD,$FBSTP,$FISTP
+       0E3B R 0DB9 R 0E22 R	
+       0DBD R 0E3B R		
+ 0CDE  0DFE R 0DE5 R 0DC6 R	$FCTRL		DW	$FENI,$FDISI,$FCLEX,$FINIT,$FSETPM,0,0,0
+       0E32 R 0EE9 R 0000	
+       0000 0000		
+ 0CEE  0E4B R 0F49 R 0E87 R	$FLDRR1		DW	$FLD,$FXCH,$FNOP,0,0,0,0,0
+       0000 0000 0000 0000	
+       0000			
+ 0CFE  0E02 R 0F49 R 0EFF R	$FLDRR2		DW	$FFREE,$FXCH,$FST,$FSTP,$FUCOM,$FUCOMP,0,0
+       0F0D R 0F2E R 0F33 R	
+       0000 0000		
+ 0D0E  0DC2 R 0DAC R 0000	$FARITH3	DW	$FCHS,$FABS,0,0,$FTST,$FXAM,0,0
+       0000 0F2A R 0F45 R	
+       0000 0000		
+ 0D1E  0E59 R 0E6F R 0E69 R	$FCONST		DW	$FLD1,$FLDL2T,$FLDL2E,$FLDPI,$FLDLG2,$FLDLN2,$FLDZ,0
+       0E75 R 0E5D R 0E63 R	
+       0E7A R 0000		
+ 0D2E  0DA7 R 0F54 R 0ECC R	$FTRANS		DW	$F2XM1,$FYL2X,$FPTAN,$FPATAN,$FXTRACT,$FPREM1,$FDECSTP,$FINCSTP
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-30
+
+
+       0EBB R 0F4D R 0EC6 R	
+       0DDE R 0E2B R		
+ 0D3E  0EC1 R 0F59 R 0EFA R			DW	$FPREM,$FYL2XP1,$FSQRT,$FSINCOS,$FRNDINT,$FSCALE,$FSIN,$FCOS
+       0EF3 R 0ED1 R 0EE3 R	
+       0EEF R 0DDA R		
+				
+				
+				SYMBOL	Macro	Name
+				$&Name:
+					lastch = 0
+					IRPC	ch,Name
+						if lastch
+							db	lastch
+						endif
+						lastch = "&ch"
+					endm
+					db	lastch+80H
+				endm
+					SYMBOL	<AAA>
+ 0D4E                        1	$AAA: 
+ 0D4E  41                    2				db	lastch 
+ 0D4F  41                    2				db	lastch 
+ 0D50  C1                    1		db	lastch+80H 
+					SYMBOL	<AAD>
+ 0D51                        1	$AAD: 
+ 0D51  41                    2				db	lastch 
+ 0D52  41                    2				db	lastch 
+ 0D53  C4                    1		db	lastch+80H 
+					SYMBOL	<AAM>
+ 0D54                        1	$AAM: 
+ 0D54  41                    2				db	lastch 
+ 0D55  41                    2				db	lastch 
+ 0D56  CD                    1		db	lastch+80H 
+					SYMBOL	<AAS>
+ 0D57                        1	$AAS: 
+ 0D57  41                    2				db	lastch 
+ 0D58  41                    2				db	lastch 
+ 0D59  D3                    1		db	lastch+80H 
+					SYMBOL	<ADC>
+ 0D5A                        1	$ADC: 
+ 0D5A  41                    2				db	lastch 
+ 0D5B  44                    2				db	lastch 
+ 0D5C  C3                    1		db	lastch+80H 
+					SYMBOL	<ADD>
+ 0D5D                        1	$ADD: 
+ 0D5D  41                    2				db	lastch 
+ 0D5E  44                    2				db	lastch 
+ 0D5F  C4                    1		db	lastch+80H 
+					SYMBOL	<AND>
+ 0D60                        1	$AND: 
+ 0D60  41                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-31
+
+
+ 0D61  4E                    2				db	lastch 
+ 0D62  C4                    1		db	lastch+80H 
+					SYMBOL	<BOUND>
+ 0D63                        1	$BOUND: 
+ 0D63  42                    2				db	lastch 
+ 0D64  4F                    2				db	lastch 
+ 0D65  55                    2				db	lastch 
+ 0D66  4E                    2				db	lastch 
+ 0D67  C4                    1		db	lastch+80H 
+					SYMBOL	<CALL>
+ 0D68                        1	$CALL: 
+ 0D68  43                    2				db	lastch 
+ 0D69  41                    2				db	lastch 
+ 0D6A  4C                    2				db	lastch 
+ 0D6B  CC                    1		db	lastch+80H 
+					SYMBOL	<CBW>
+ 0D6C                        1	$CBW: 
+ 0D6C  43                    2				db	lastch 
+ 0D6D  42                    2				db	lastch 
+ 0D6E  D7                    1		db	lastch+80H 
+					SYMBOL	<CLC>
+ 0D6F                        1	$CLC: 
+ 0D6F  43                    2				db	lastch 
+ 0D70  4C                    2				db	lastch 
+ 0D71  C3                    1		db	lastch+80H 
+					SYMBOL	<CLD>
+ 0D72                        1	$CLD: 
+ 0D72  43                    2				db	lastch 
+ 0D73  4C                    2				db	lastch 
+ 0D74  C4                    1		db	lastch+80H 
+					SYMBOL	<CLI>
+ 0D75                        1	$CLI: 
+ 0D75  43                    2				db	lastch 
+ 0D76  4C                    2				db	lastch 
+ 0D77  C9                    1		db	lastch+80H 
+					SYMBOL	<CMC>
+ 0D78                        1	$CMC: 
+ 0D78  43                    2				db	lastch 
+ 0D79  4D                    2				db	lastch 
+ 0D7A  C3                    1		db	lastch+80H 
+					SYMBOL	<CMP>
+ 0D7B                        1	$CMP: 
+ 0D7B  43                    2				db	lastch 
+ 0D7C  4D                    2				db	lastch 
+ 0D7D  D0                    1		db	lastch+80H 
+					SYMBOL	<CMPSB>
+ 0D7E                        1	$CMPSB: 
+ 0D7E  43                    2				db	lastch 
+ 0D7F  4D                    2				db	lastch 
+ 0D80  50                    2				db	lastch 
+ 0D81  53                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-32
+
+
+ 0D82  C2                    1		db	lastch+80H 
+					SYMBOL	<CMPSW>
+ 0D83                        1	$CMPSW: 
+ 0D83  43                    2				db	lastch 
+ 0D84  4D                    2				db	lastch 
+ 0D85  50                    2				db	lastch 
+ 0D86  53                    2				db	lastch 
+ 0D87  D7                    1		db	lastch+80H 
+					SYMBOL	<CS>
+ 0D88                        1	$CS: 
+ 0D88  43                    2				db	lastch 
+ 0D89  D3                    1		db	lastch+80H 
+					SYMBOL	<CWD>
+ 0D8A                        1	$CWD: 
+ 0D8A  43                    2				db	lastch 
+ 0D8B  57                    2				db	lastch 
+ 0D8C  C4                    1		db	lastch+80H 
+					SYMBOL	<DAA>
+ 0D8D                        1	$DAA: 
+ 0D8D  44                    2				db	lastch 
+ 0D8E  41                    2				db	lastch 
+ 0D8F  C1                    1		db	lastch+80H 
+					SYMBOL	<DAS>
+ 0D90                        1	$DAS: 
+ 0D90  44                    2				db	lastch 
+ 0D91  41                    2				db	lastch 
+ 0D92  D3                    1		db	lastch+80H 
+					SYMBOL	<DB>
+ 0D93                        1	$DB: 
+ 0D93  44                    2				db	lastch 
+ 0D94  C2                    1		db	lastch+80H 
+					SYMBOL	<DEC>
+ 0D95                        1	$DEC: 
+ 0D95  44                    2				db	lastch 
+ 0D96  45                    2				db	lastch 
+ 0D97  C3                    1		db	lastch+80H 
+					SYMBOL	<DIV>
+ 0D98                        1	$DIV: 
+ 0D98  44                    2				db	lastch 
+ 0D99  49                    2				db	lastch 
+ 0D9A  D6                    1		db	lastch+80H 
+					SYMBOL	<DS>
+ 0D9B                        1	$DS: 
+ 0D9B  44                    2				db	lastch 
+ 0D9C  D3                    1		db	lastch+80H 
+					SYMBOL	<ENTER>
+ 0D9D                        1	$ENTER: 
+ 0D9D  45                    2				db	lastch 
+ 0D9E  4E                    2				db	lastch 
+ 0D9F  54                    2				db	lastch 
+ 0DA0  45                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-33
+
+
+ 0DA1  D2                    1		db	lastch+80H 
+					SYMBOL	<ES>
+ 0DA2                        1	$ES: 
+ 0DA2  45                    2				db	lastch 
+ 0DA3  D3                    1		db	lastch+80H 
+					SYMBOL	<ESC>
+ 0DA4                        1	$ESC: 
+ 0DA4  45                    2				db	lastch 
+ 0DA5  53                    2				db	lastch 
+ 0DA6  C3                    1		db	lastch+80H 
+					SYMBOL	<F2XM1>
+ 0DA7                        1	$F2XM1: 
+ 0DA7  46                    2				db	lastch 
+ 0DA8  32                    2				db	lastch 
+ 0DA9  58                    2				db	lastch 
+ 0DAA  4D                    2				db	lastch 
+ 0DAB  B1                    1		db	lastch+80H 
+					SYMBOL	<FABS>
+ 0DAC                        1	$FABS: 
+ 0DAC  46                    2				db	lastch 
+ 0DAD  41                    2				db	lastch 
+ 0DAE  42                    2				db	lastch 
+ 0DAF  D3                    1		db	lastch+80H 
+					SYMBOL	<FADD>
+ 0DB0                        1	$FADD: 
+ 0DB0  46                    2				db	lastch 
+ 0DB1  41                    2				db	lastch 
+ 0DB2  44                    2				db	lastch 
+ 0DB3  C4                    1		db	lastch+80H 
+					SYMBOL	<FADDP>
+ 0DB4                        1	$FADDP: 
+ 0DB4  46                    2				db	lastch 
+ 0DB5  41                    2				db	lastch 
+ 0DB6  44                    2				db	lastch 
+ 0DB7  44                    2				db	lastch 
+ 0DB8  D0                    1		db	lastch+80H 
+					SYMBOL	<FBLD>
+ 0DB9                        1	$FBLD: 
+ 0DB9  46                    2				db	lastch 
+ 0DBA  42                    2				db	lastch 
+ 0DBB  4C                    2				db	lastch 
+ 0DBC  C4                    1		db	lastch+80H 
+					SYMBOL	<FBSTP>
+ 0DBD                        1	$FBSTP: 
+ 0DBD  46                    2				db	lastch 
+ 0DBE  42                    2				db	lastch 
+ 0DBF  53                    2				db	lastch 
+ 0DC0  54                    2				db	lastch 
+ 0DC1  D0                    1		db	lastch+80H 
+					SYMBOL	<FCHS>
+ 0DC2                        1	$FCHS: 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-34
+
+
+ 0DC2  46                    2				db	lastch 
+ 0DC3  43                    2				db	lastch 
+ 0DC4  48                    2				db	lastch 
+ 0DC5  D3                    1		db	lastch+80H 
+					SYMBOL	<FCLEX>
+ 0DC6                        1	$FCLEX: 
+ 0DC6  46                    2				db	lastch 
+ 0DC7  43                    2				db	lastch 
+ 0DC8  4C                    2				db	lastch 
+ 0DC9  45                    2				db	lastch 
+ 0DCA  D8                    1		db	lastch+80H 
+					SYMBOL	<FCOM>
+ 0DCB                        1	$FCOM: 
+ 0DCB  46                    2				db	lastch 
+ 0DCC  43                    2				db	lastch 
+ 0DCD  4F                    2				db	lastch 
+ 0DCE  CD                    1		db	lastch+80H 
+					SYMBOL	<FCOMP>
+ 0DCF                        1	$FCOMP: 
+ 0DCF  46                    2				db	lastch 
+ 0DD0  43                    2				db	lastch 
+ 0DD1  4F                    2				db	lastch 
+ 0DD2  4D                    2				db	lastch 
+ 0DD3  D0                    1		db	lastch+80H 
+					SYMBOL	<FCOMPP>
+ 0DD4                        1	$FCOMPP: 
+ 0DD4  46                    2				db	lastch 
+ 0DD5  43                    2				db	lastch 
+ 0DD6  4F                    2				db	lastch 
+ 0DD7  4D                    2				db	lastch 
+ 0DD8  50                    2				db	lastch 
+ 0DD9  D0                    1		db	lastch+80H 
+					SYMBOL	<FCOS>
+ 0DDA                        1	$FCOS: 
+ 0DDA  46                    2				db	lastch 
+ 0DDB  43                    2				db	lastch 
+ 0DDC  4F                    2				db	lastch 
+ 0DDD  D3                    1		db	lastch+80H 
+					SYMBOL	<FDECSTP>
+ 0DDE                        1	$FDECSTP: 
+ 0DDE  46                    2				db	lastch 
+ 0DDF  44                    2				db	lastch 
+ 0DE0  45                    2				db	lastch 
+ 0DE1  43                    2				db	lastch 
+ 0DE2  53                    2				db	lastch 
+ 0DE3  54                    2				db	lastch 
+ 0DE4  D0                    1		db	lastch+80H 
+					SYMBOL	<FDISI>
+ 0DE5                        1	$FDISI: 
+ 0DE5  46                    2				db	lastch 
+ 0DE6  44                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-35
+
+
+ 0DE7  49                    2				db	lastch 
+ 0DE8  53                    2				db	lastch 
+ 0DE9  C9                    1		db	lastch+80H 
+					SYMBOL	<FDIV>
+ 0DEA                        1	$FDIV: 
+ 0DEA  46                    2				db	lastch 
+ 0DEB  44                    2				db	lastch 
+ 0DEC  49                    2				db	lastch 
+ 0DED  D6                    1		db	lastch+80H 
+					SYMBOL	<FDIVP>
+ 0DEE                        1	$FDIVP: 
+ 0DEE  46                    2				db	lastch 
+ 0DEF  44                    2				db	lastch 
+ 0DF0  49                    2				db	lastch 
+ 0DF1  56                    2				db	lastch 
+ 0DF2  D0                    1		db	lastch+80H 
+					SYMBOL	<FDIVR>
+ 0DF3                        1	$FDIVR: 
+ 0DF3  46                    2				db	lastch 
+ 0DF4  44                    2				db	lastch 
+ 0DF5  49                    2				db	lastch 
+ 0DF6  56                    2				db	lastch 
+ 0DF7  D2                    1		db	lastch+80H 
+					SYMBOL	<FDIVRP>
+ 0DF8                        1	$FDIVRP: 
+ 0DF8  46                    2				db	lastch 
+ 0DF9  44                    2				db	lastch 
+ 0DFA  49                    2				db	lastch 
+ 0DFB  56                    2				db	lastch 
+ 0DFC  52                    2				db	lastch 
+ 0DFD  D0                    1		db	lastch+80H 
+					SYMBOL	<FENI>
+ 0DFE                        1	$FENI: 
+ 0DFE  46                    2				db	lastch 
+ 0DFF  45                    2				db	lastch 
+ 0E00  4E                    2				db	lastch 
+ 0E01  C9                    1		db	lastch+80H 
+					SYMBOL	<FFREE>
+ 0E02                        1	$FFREE: 
+ 0E02  46                    2				db	lastch 
+ 0E03  46                    2				db	lastch 
+ 0E04  52                    2				db	lastch 
+ 0E05  45                    2				db	lastch 
+ 0E06  C5                    1		db	lastch+80H 
+					SYMBOL	<FIADD>
+ 0E07                        1	$FIADD: 
+ 0E07  46                    2				db	lastch 
+ 0E08  49                    2				db	lastch 
+ 0E09  41                    2				db	lastch 
+ 0E0A  44                    2				db	lastch 
+ 0E0B  C4                    1		db	lastch+80H 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-36
+
+
+					SYMBOL	<FICOM>
+ 0E0C                        1	$FICOM: 
+ 0E0C  46                    2				db	lastch 
+ 0E0D  49                    2				db	lastch 
+ 0E0E  43                    2				db	lastch 
+ 0E0F  4F                    2				db	lastch 
+ 0E10  CD                    1		db	lastch+80H 
+					SYMBOL	<FICOMP>
+ 0E11                        1	$FICOMP: 
+ 0E11  46                    2				db	lastch 
+ 0E12  49                    2				db	lastch 
+ 0E13  43                    2				db	lastch 
+ 0E14  4F                    2				db	lastch 
+ 0E15  4D                    2				db	lastch 
+ 0E16  D0                    1		db	lastch+80H 
+					SYMBOL	<FIDIV>
+ 0E17                        1	$FIDIV: 
+ 0E17  46                    2				db	lastch 
+ 0E18  49                    2				db	lastch 
+ 0E19  44                    2				db	lastch 
+ 0E1A  49                    2				db	lastch 
+ 0E1B  D6                    1		db	lastch+80H 
+					SYMBOL	<FIDIVR>
+ 0E1C                        1	$FIDIVR: 
+ 0E1C  46                    2				db	lastch 
+ 0E1D  49                    2				db	lastch 
+ 0E1E  44                    2				db	lastch 
+ 0E1F  49                    2				db	lastch 
+ 0E20  56                    2				db	lastch 
+ 0E21  D2                    1		db	lastch+80H 
+					SYMBOL	<FILD>
+ 0E22                        1	$FILD: 
+ 0E22  46                    2				db	lastch 
+ 0E23  49                    2				db	lastch 
+ 0E24  4C                    2				db	lastch 
+ 0E25  C4                    1		db	lastch+80H 
+					SYMBOL	<FIMUL>
+ 0E26                        1	$FIMUL: 
+ 0E26  46                    2				db	lastch 
+ 0E27  49                    2				db	lastch 
+ 0E28  4D                    2				db	lastch 
+ 0E29  55                    2				db	lastch 
+ 0E2A  CC                    1		db	lastch+80H 
+					SYMBOL	<FINCSTP>
+ 0E2B                        1	$FINCSTP: 
+ 0E2B  46                    2				db	lastch 
+ 0E2C  49                    2				db	lastch 
+ 0E2D  4E                    2				db	lastch 
+ 0E2E  43                    2				db	lastch 
+ 0E2F  53                    2				db	lastch 
+ 0E30  54                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-37
+
+
+ 0E31  D0                    1		db	lastch+80H 
+					SYMBOL	<FINIT>
+ 0E32                        1	$FINIT: 
+ 0E32  46                    2				db	lastch 
+ 0E33  49                    2				db	lastch 
+ 0E34  4E                    2				db	lastch 
+ 0E35  49                    2				db	lastch 
+ 0E36  D4                    1		db	lastch+80H 
+					SYMBOL	<FIST>
+ 0E37                        1	$FIST: 
+ 0E37  46                    2				db	lastch 
+ 0E38  49                    2				db	lastch 
+ 0E39  53                    2				db	lastch 
+ 0E3A  D4                    1		db	lastch+80H 
+					SYMBOL	<FISTP>
+ 0E3B                        1	$FISTP: 
+ 0E3B  46                    2				db	lastch 
+ 0E3C  49                    2				db	lastch 
+ 0E3D  53                    2				db	lastch 
+ 0E3E  54                    2				db	lastch 
+ 0E3F  D0                    1		db	lastch+80H 
+					SYMBOL	<FISUB>
+ 0E40                        1	$FISUB: 
+ 0E40  46                    2				db	lastch 
+ 0E41  49                    2				db	lastch 
+ 0E42  53                    2				db	lastch 
+ 0E43  55                    2				db	lastch 
+ 0E44  C2                    1		db	lastch+80H 
+					SYMBOL	<FISUBR>
+ 0E45                        1	$FISUBR: 
+ 0E45  46                    2				db	lastch 
+ 0E46  49                    2				db	lastch 
+ 0E47  53                    2				db	lastch 
+ 0E48  55                    2				db	lastch 
+ 0E49  42                    2				db	lastch 
+ 0E4A  D2                    1		db	lastch+80H 
+					SYMBOL	<FLD>
+ 0E4B                        1	$FLD: 
+ 0E4B  46                    2				db	lastch 
+ 0E4C  4C                    2				db	lastch 
+ 0E4D  C4                    1		db	lastch+80H 
+					SYMBOL	<FLDCW>
+ 0E4E                        1	$FLDCW: 
+ 0E4E  46                    2				db	lastch 
+ 0E4F  4C                    2				db	lastch 
+ 0E50  44                    2				db	lastch 
+ 0E51  43                    2				db	lastch 
+ 0E52  D7                    1		db	lastch+80H 
+					SYMBOL	<FLDENV>
+ 0E53                        1	$FLDENV: 
+ 0E53  46                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-38
+
+
+ 0E54  4C                    2				db	lastch 
+ 0E55  44                    2				db	lastch 
+ 0E56  45                    2				db	lastch 
+ 0E57  4E                    2				db	lastch 
+ 0E58  D6                    1		db	lastch+80H 
+					SYMBOL	<FLD1>
+ 0E59                        1	$FLD1: 
+ 0E59  46                    2				db	lastch 
+ 0E5A  4C                    2				db	lastch 
+ 0E5B  44                    2				db	lastch 
+ 0E5C  B1                    1		db	lastch+80H 
+					SYMBOL	<FLDLG2>
+ 0E5D                        1	$FLDLG2: 
+ 0E5D  46                    2				db	lastch 
+ 0E5E  4C                    2				db	lastch 
+ 0E5F  44                    2				db	lastch 
+ 0E60  4C                    2				db	lastch 
+ 0E61  47                    2				db	lastch 
+ 0E62  B2                    1		db	lastch+80H 
+					SYMBOL	<FLDLN2>
+ 0E63                        1	$FLDLN2: 
+ 0E63  46                    2				db	lastch 
+ 0E64  4C                    2				db	lastch 
+ 0E65  44                    2				db	lastch 
+ 0E66  4C                    2				db	lastch 
+ 0E67  4E                    2				db	lastch 
+ 0E68  B2                    1		db	lastch+80H 
+					SYMBOL	<FLDL2E>
+ 0E69                        1	$FLDL2E: 
+ 0E69  46                    2				db	lastch 
+ 0E6A  4C                    2				db	lastch 
+ 0E6B  44                    2				db	lastch 
+ 0E6C  4C                    2				db	lastch 
+ 0E6D  32                    2				db	lastch 
+ 0E6E  C5                    1		db	lastch+80H 
+					SYMBOL	<FLDL2T>
+ 0E6F                        1	$FLDL2T: 
+ 0E6F  46                    2				db	lastch 
+ 0E70  4C                    2				db	lastch 
+ 0E71  44                    2				db	lastch 
+ 0E72  4C                    2				db	lastch 
+ 0E73  32                    2				db	lastch 
+ 0E74  D4                    1		db	lastch+80H 
+					SYMBOL	<FLDPI>
+ 0E75                        1	$FLDPI: 
+ 0E75  46                    2				db	lastch 
+ 0E76  4C                    2				db	lastch 
+ 0E77  44                    2				db	lastch 
+ 0E78  50                    2				db	lastch 
+ 0E79  C9                    1		db	lastch+80H 
+					SYMBOL	<FLDZ>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-39
+
+
+ 0E7A                        1	$FLDZ: 
+ 0E7A  46                    2				db	lastch 
+ 0E7B  4C                    2				db	lastch 
+ 0E7C  44                    2				db	lastch 
+ 0E7D  DA                    1		db	lastch+80H 
+					SYMBOL	<FMUL>
+ 0E7E                        1	$FMUL: 
+ 0E7E  46                    2				db	lastch 
+ 0E7F  4D                    2				db	lastch 
+ 0E80  55                    2				db	lastch 
+ 0E81  CC                    1		db	lastch+80H 
+					SYMBOL	<FMULP>
+ 0E82                        1	$FMULP: 
+ 0E82  46                    2				db	lastch 
+ 0E83  4D                    2				db	lastch 
+ 0E84  55                    2				db	lastch 
+ 0E85  4C                    2				db	lastch 
+ 0E86  D0                    1		db	lastch+80H 
+					SYMBOL	<FNOP>
+ 0E87                        1	$FNOP: 
+ 0E87  46                    2				db	lastch 
+ 0E88  4E                    2				db	lastch 
+ 0E89  4F                    2				db	lastch 
+ 0E8A  D0                    1		db	lastch+80H 
+					SYMBOL	<FNCLEX>
+ 0E8B                        1	$FNCLEX: 
+ 0E8B  46                    2				db	lastch 
+ 0E8C  4E                    2				db	lastch 
+ 0E8D  43                    2				db	lastch 
+ 0E8E  4C                    2				db	lastch 
+ 0E8F  45                    2				db	lastch 
+ 0E90  D8                    1		db	lastch+80H 
+					SYMBOL	<FNDISI>
+ 0E91                        1	$FNDISI: 
+ 0E91  46                    2				db	lastch 
+ 0E92  4E                    2				db	lastch 
+ 0E93  44                    2				db	lastch 
+ 0E94  49                    2				db	lastch 
+ 0E95  53                    2				db	lastch 
+ 0E96  C9                    1		db	lastch+80H 
+					SYMBOL	<FNENI>
+ 0E97                        1	$FNENI: 
+ 0E97  46                    2				db	lastch 
+ 0E98  4E                    2				db	lastch 
+ 0E99  45                    2				db	lastch 
+ 0E9A  4E                    2				db	lastch 
+ 0E9B  C9                    1		db	lastch+80H 
+					SYMBOL	<FNINIT>
+ 0E9C                        1	$FNINIT: 
+ 0E9C  46                    2				db	lastch 
+ 0E9D  4E                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-40
+
+
+ 0E9E  49                    2				db	lastch 
+ 0E9F  4E                    2				db	lastch 
+ 0EA0  49                    2				db	lastch 
+ 0EA1  D4                    1		db	lastch+80H 
+					SYMBOL	<FNSAVE>
+ 0EA2                        1	$FNSAVE: 
+ 0EA2  46                    2				db	lastch 
+ 0EA3  4E                    2				db	lastch 
+ 0EA4  53                    2				db	lastch 
+ 0EA5  41                    2				db	lastch 
+ 0EA6  56                    2				db	lastch 
+ 0EA7  C5                    1		db	lastch+80H 
+					SYMBOL	<FNSTCW>
+ 0EA8                        1	$FNSTCW: 
+ 0EA8  46                    2				db	lastch 
+ 0EA9  4E                    2				db	lastch 
+ 0EAA  53                    2				db	lastch 
+ 0EAB  54                    2				db	lastch 
+ 0EAC  43                    2				db	lastch 
+ 0EAD  D7                    1		db	lastch+80H 
+					SYMBOL	<FNSTENV>
+ 0EAE                        1	$FNSTENV: 
+ 0EAE  46                    2				db	lastch 
+ 0EAF  4E                    2				db	lastch 
+ 0EB0  53                    2				db	lastch 
+ 0EB1  54                    2				db	lastch 
+ 0EB2  45                    2				db	lastch 
+ 0EB3  4E                    2				db	lastch 
+ 0EB4  D6                    1		db	lastch+80H 
+					SYMBOL	<FNSTSW>
+ 0EB5                        1	$FNSTSW: 
+ 0EB5  46                    2				db	lastch 
+ 0EB6  4E                    2				db	lastch 
+ 0EB7  53                    2				db	lastch 
+ 0EB8  54                    2				db	lastch 
+ 0EB9  53                    2				db	lastch 
+ 0EBA  D7                    1		db	lastch+80H 
+					SYMBOL	<FPATAN>
+ 0EBB                        1	$FPATAN: 
+ 0EBB  46                    2				db	lastch 
+ 0EBC  50                    2				db	lastch 
+ 0EBD  41                    2				db	lastch 
+ 0EBE  54                    2				db	lastch 
+ 0EBF  41                    2				db	lastch 
+ 0EC0  CE                    1		db	lastch+80H 
+					SYMBOL	<FPREM>
+ 0EC1                        1	$FPREM: 
+ 0EC1  46                    2				db	lastch 
+ 0EC2  50                    2				db	lastch 
+ 0EC3  52                    2				db	lastch 
+ 0EC4  45                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-41
+
+
+ 0EC5  CD                    1		db	lastch+80H 
+					SYMBOL	<FPREM1>
+ 0EC6                        1	$FPREM1: 
+ 0EC6  46                    2				db	lastch 
+ 0EC7  50                    2				db	lastch 
+ 0EC8  52                    2				db	lastch 
+ 0EC9  45                    2				db	lastch 
+ 0ECA  4D                    2				db	lastch 
+ 0ECB  B1                    1		db	lastch+80H 
+					SYMBOL	<FPTAN>
+ 0ECC                        1	$FPTAN: 
+ 0ECC  46                    2				db	lastch 
+ 0ECD  50                    2				db	lastch 
+ 0ECE  54                    2				db	lastch 
+ 0ECF  41                    2				db	lastch 
+ 0ED0  CE                    1		db	lastch+80H 
+					SYMBOL	<FRNDINT>
+ 0ED1                        1	$FRNDINT: 
+ 0ED1  46                    2				db	lastch 
+ 0ED2  52                    2				db	lastch 
+ 0ED3  4E                    2				db	lastch 
+ 0ED4  44                    2				db	lastch 
+ 0ED5  49                    2				db	lastch 
+ 0ED6  4E                    2				db	lastch 
+ 0ED7  D4                    1		db	lastch+80H 
+					SYMBOL	<FRSTOR>
+ 0ED8                        1	$FRSTOR: 
+ 0ED8  46                    2				db	lastch 
+ 0ED9  52                    2				db	lastch 
+ 0EDA  53                    2				db	lastch 
+ 0EDB  54                    2				db	lastch 
+ 0EDC  4F                    2				db	lastch 
+ 0EDD  D2                    1		db	lastch+80H 
+					SYMBOL	<FSAVE>
+ 0EDE                        1	$FSAVE: 
+ 0EDE  46                    2				db	lastch 
+ 0EDF  53                    2				db	lastch 
+ 0EE0  41                    2				db	lastch 
+ 0EE1  56                    2				db	lastch 
+ 0EE2  C5                    1		db	lastch+80H 
+					SYMBOL	<FSCALE>
+ 0EE3                        1	$FSCALE: 
+ 0EE3  46                    2				db	lastch 
+ 0EE4  53                    2				db	lastch 
+ 0EE5  43                    2				db	lastch 
+ 0EE6  41                    2				db	lastch 
+ 0EE7  4C                    2				db	lastch 
+ 0EE8  C5                    1		db	lastch+80H 
+					SYMBOL	<FSETPM>
+ 0EE9                        1	$FSETPM: 
+ 0EE9  46                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-42
+
+
+ 0EEA  53                    2				db	lastch 
+ 0EEB  45                    2				db	lastch 
+ 0EEC  54                    2				db	lastch 
+ 0EED  50                    2				db	lastch 
+ 0EEE  CD                    1		db	lastch+80H 
+					SYMBOL	<FSIN>
+ 0EEF                        1	$FSIN: 
+ 0EEF  46                    2				db	lastch 
+ 0EF0  53                    2				db	lastch 
+ 0EF1  49                    2				db	lastch 
+ 0EF2  CE                    1		db	lastch+80H 
+					SYMBOL	<FSINCOS>
+ 0EF3                        1	$FSINCOS: 
+ 0EF3  46                    2				db	lastch 
+ 0EF4  53                    2				db	lastch 
+ 0EF5  49                    2				db	lastch 
+ 0EF6  4E                    2				db	lastch 
+ 0EF7  43                    2				db	lastch 
+ 0EF8  4F                    2				db	lastch 
+ 0EF9  D3                    1		db	lastch+80H 
+					SYMBOL	<FSQRT>
+ 0EFA                        1	$FSQRT: 
+ 0EFA  46                    2				db	lastch 
+ 0EFB  53                    2				db	lastch 
+ 0EFC  51                    2				db	lastch 
+ 0EFD  52                    2				db	lastch 
+ 0EFE  D4                    1		db	lastch+80H 
+					SYMBOL	<FST>
+ 0EFF                        1	$FST: 
+ 0EFF  46                    2				db	lastch 
+ 0F00  53                    2				db	lastch 
+ 0F01  D4                    1		db	lastch+80H 
+					SYMBOL	<FSTCW>
+ 0F02                        1	$FSTCW: 
+ 0F02  46                    2				db	lastch 
+ 0F03  53                    2				db	lastch 
+ 0F04  54                    2				db	lastch 
+ 0F05  43                    2				db	lastch 
+ 0F06  D7                    1		db	lastch+80H 
+					SYMBOL	<FSTENV>
+ 0F07                        1	$FSTENV: 
+ 0F07  46                    2				db	lastch 
+ 0F08  53                    2				db	lastch 
+ 0F09  54                    2				db	lastch 
+ 0F0A  45                    2				db	lastch 
+ 0F0B  4E                    2				db	lastch 
+ 0F0C  D6                    1		db	lastch+80H 
+					SYMBOL	<FSTP>
+ 0F0D                        1	$FSTP: 
+ 0F0D  46                    2				db	lastch 
+ 0F0E  53                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-43
+
+
+ 0F0F  54                    2				db	lastch 
+ 0F10  D0                    1		db	lastch+80H 
+					SYMBOL	<FSTSW>
+ 0F11                        1	$FSTSW: 
+ 0F11  46                    2				db	lastch 
+ 0F12  53                    2				db	lastch 
+ 0F13  54                    2				db	lastch 
+ 0F14  53                    2				db	lastch 
+ 0F15  D7                    1		db	lastch+80H 
+					SYMBOL	<FSUB>
+ 0F16                        1	$FSUB: 
+ 0F16  46                    2				db	lastch 
+ 0F17  53                    2				db	lastch 
+ 0F18  55                    2				db	lastch 
+ 0F19  C2                    1		db	lastch+80H 
+					SYMBOL	<FSUBP>
+ 0F1A                        1	$FSUBP: 
+ 0F1A  46                    2				db	lastch 
+ 0F1B  53                    2				db	lastch 
+ 0F1C  55                    2				db	lastch 
+ 0F1D  42                    2				db	lastch 
+ 0F1E  D0                    1		db	lastch+80H 
+					SYMBOL	<FSUBR>
+ 0F1F                        1	$FSUBR: 
+ 0F1F  46                    2				db	lastch 
+ 0F20  53                    2				db	lastch 
+ 0F21  55                    2				db	lastch 
+ 0F22  42                    2				db	lastch 
+ 0F23  D2                    1		db	lastch+80H 
+					SYMBOL	<FSUBRP>
+ 0F24                        1	$FSUBRP: 
+ 0F24  46                    2				db	lastch 
+ 0F25  53                    2				db	lastch 
+ 0F26  55                    2				db	lastch 
+ 0F27  42                    2				db	lastch 
+ 0F28  52                    2				db	lastch 
+ 0F29  D0                    1		db	lastch+80H 
+					SYMBOL	<FTST>
+ 0F2A                        1	$FTST: 
+ 0F2A  46                    2				db	lastch 
+ 0F2B  54                    2				db	lastch 
+ 0F2C  53                    2				db	lastch 
+ 0F2D  D4                    1		db	lastch+80H 
+					SYMBOL	<FUCOM>
+ 0F2E                        1	$FUCOM: 
+ 0F2E  46                    2				db	lastch 
+ 0F2F  55                    2				db	lastch 
+ 0F30  43                    2				db	lastch 
+ 0F31  4F                    2				db	lastch 
+ 0F32  CD                    1		db	lastch+80H 
+					SYMBOL	<FUCOMP>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-44
+
+
+ 0F33                        1	$FUCOMP: 
+ 0F33  46                    2				db	lastch 
+ 0F34  55                    2				db	lastch 
+ 0F35  43                    2				db	lastch 
+ 0F36  4F                    2				db	lastch 
+ 0F37  4D                    2				db	lastch 
+ 0F38  D0                    1		db	lastch+80H 
+					SYMBOL	<FUCOMPP>
+ 0F39                        1	$FUCOMPP: 
+ 0F39  46                    2				db	lastch 
+ 0F3A  55                    2				db	lastch 
+ 0F3B  43                    2				db	lastch 
+ 0F3C  4F                    2				db	lastch 
+ 0F3D  4D                    2				db	lastch 
+ 0F3E  50                    2				db	lastch 
+ 0F3F  D0                    1		db	lastch+80H 
+					SYMBOL	<FWAIT>
+ 0F40                        1	$FWAIT: 
+ 0F40  46                    2				db	lastch 
+ 0F41  57                    2				db	lastch 
+ 0F42  41                    2				db	lastch 
+ 0F43  49                    2				db	lastch 
+ 0F44  D4                    1		db	lastch+80H 
+					SYMBOL	<FXAM>
+ 0F45                        1	$FXAM: 
+ 0F45  46                    2				db	lastch 
+ 0F46  58                    2				db	lastch 
+ 0F47  41                    2				db	lastch 
+ 0F48  CD                    1		db	lastch+80H 
+					SYMBOL	<FXCH>
+ 0F49                        1	$FXCH: 
+ 0F49  46                    2				db	lastch 
+ 0F4A  58                    2				db	lastch 
+ 0F4B  43                    2				db	lastch 
+ 0F4C  C8                    1		db	lastch+80H 
+					SYMBOL	<FXTRACT>
+ 0F4D                        1	$FXTRACT: 
+ 0F4D  46                    2				db	lastch 
+ 0F4E  58                    2				db	lastch 
+ 0F4F  54                    2				db	lastch 
+ 0F50  52                    2				db	lastch 
+ 0F51  41                    2				db	lastch 
+ 0F52  43                    2				db	lastch 
+ 0F53  D4                    1		db	lastch+80H 
+					SYMBOL	<FYL2X>
+ 0F54                        1	$FYL2X: 
+ 0F54  46                    2				db	lastch 
+ 0F55  59                    2				db	lastch 
+ 0F56  4C                    2				db	lastch 
+ 0F57  32                    2				db	lastch 
+ 0F58  D8                    1		db	lastch+80H 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-45
+
+
+					SYMBOL	<FYL2XP1>
+ 0F59                        1	$FYL2XP1: 
+ 0F59  46                    2				db	lastch 
+ 0F5A  59                    2				db	lastch 
+ 0F5B  4C                    2				db	lastch 
+ 0F5C  32                    2				db	lastch 
+ 0F5D  58                    2				db	lastch 
+ 0F5E  50                    2				db	lastch 
+ 0F5F  B1                    1		db	lastch+80H 
+					SYMBOL	<HLT>
+ 0F60                        1	$HLT: 
+ 0F60  48                    2				db	lastch 
+ 0F61  4C                    2				db	lastch 
+ 0F62  D4                    1		db	lastch+80H 
+					SYMBOL	<IDIV>
+ 0F63                        1	$IDIV: 
+ 0F63  49                    2				db	lastch 
+ 0F64  44                    2				db	lastch 
+ 0F65  49                    2				db	lastch 
+ 0F66  D6                    1		db	lastch+80H 
+					SYMBOL	<IMUL>
+ 0F67                        1	$IMUL: 
+ 0F67  49                    2				db	lastch 
+ 0F68  4D                    2				db	lastch 
+ 0F69  55                    2				db	lastch 
+ 0F6A  CC                    1		db	lastch+80H 
+					SYMBOL	<IN>
+ 0F6B                        1	$IN: 
+ 0F6B  49                    2				db	lastch 
+ 0F6C  CE                    1		db	lastch+80H 
+					SYMBOL	<INC>
+ 0F6D                        1	$INC: 
+ 0F6D  49                    2				db	lastch 
+ 0F6E  4E                    2				db	lastch 
+ 0F6F  C3                    1		db	lastch+80H 
+					SYMBOL	<INSB>
+ 0F70                        1	$INSB: 
+ 0F70  49                    2				db	lastch 
+ 0F71  4E                    2				db	lastch 
+ 0F72  53                    2				db	lastch 
+ 0F73  C2                    1		db	lastch+80H 
+					SYMBOL	<INSW>
+ 0F74                        1	$INSW: 
+ 0F74  49                    2				db	lastch 
+ 0F75  4E                    2				db	lastch 
+ 0F76  53                    2				db	lastch 
+ 0F77  D7                    1		db	lastch+80H 
+					SYMBOL	<INT>
+ 0F78                        1	$INT: 
+ 0F78  49                    2				db	lastch 
+ 0F79  4E                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-46
+
+
+ 0F7A  D4                    1		db	lastch+80H 
+					SYMBOL	<INT3>
+ 0F7B                        1	$INT3: 
+ 0F7B  49                    2				db	lastch 
+ 0F7C  4E                    2				db	lastch 
+ 0F7D  54                    2				db	lastch 
+ 0F7E  B3                    1		db	lastch+80H 
+					SYMBOL	<INTO>
+ 0F7F                        1	$INTO: 
+ 0F7F  49                    2				db	lastch 
+ 0F80  4E                    2				db	lastch 
+ 0F81  54                    2				db	lastch 
+ 0F82  CF                    1		db	lastch+80H 
+					SYMBOL	<IRET>
+ 0F83                        1	$IRET: 
+ 0F83  49                    2				db	lastch 
+ 0F84  52                    2				db	lastch 
+ 0F85  45                    2				db	lastch 
+ 0F86  D4                    1		db	lastch+80H 
+					SYMBOL	<JA>
+ 0F87                        1	$JA: 
+ 0F87  4A                    2				db	lastch 
+ 0F88  C1                    1		db	lastch+80H 
+					SYMBOL	<JB>
+ 0F89                        1	$JB: 
+ 0F89  4A                    2				db	lastch 
+ 0F8A  C2                    1		db	lastch+80H 
+					SYMBOL	<JBE>
+ 0F8B                        1	$JBE: 
+ 0F8B  4A                    2				db	lastch 
+ 0F8C  42                    2				db	lastch 
+ 0F8D  C5                    1		db	lastch+80H 
+					SYMBOL	<JC>
+ 0F8E                        1	$JC: 
+ 0F8E  4A                    2				db	lastch 
+ 0F8F  C3                    1		db	lastch+80H 
+					SYMBOL	<JCXZ>
+ 0F90                        1	$JCXZ: 
+ 0F90  4A                    2				db	lastch 
+ 0F91  43                    2				db	lastch 
+ 0F92  58                    2				db	lastch 
+ 0F93  DA                    1		db	lastch+80H 
+					SYMBOL	<JE>
+ 0F94                        1	$JE: 
+ 0F94  4A                    2				db	lastch 
+ 0F95  C5                    1		db	lastch+80H 
+					SYMBOL	<JG>
+ 0F96                        1	$JG: 
+ 0F96  4A                    2				db	lastch 
+ 0F97  C7                    1		db	lastch+80H 
+					SYMBOL	<JGE>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-47
+
+
+ 0F98                        1	$JGE: 
+ 0F98  4A                    2				db	lastch 
+ 0F99  47                    2				db	lastch 
+ 0F9A  C5                    1		db	lastch+80H 
+					SYMBOL	<JL>
+ 0F9B                        1	$JL: 
+ 0F9B  4A                    2				db	lastch 
+ 0F9C  CC                    1		db	lastch+80H 
+					SYMBOL	<JLE>
+ 0F9D                        1	$JLE: 
+ 0F9D  4A                    2				db	lastch 
+ 0F9E  4C                    2				db	lastch 
+ 0F9F  C5                    1		db	lastch+80H 
+					SYMBOL	<JMP>
+ 0FA0                        1	$JMP: 
+ 0FA0  4A                    2				db	lastch 
+ 0FA1  4D                    2				db	lastch 
+ 0FA2  D0                    1		db	lastch+80H 
+					SYMBOL	<JNB>
+ 0FA3                        1	$JNB: 
+ 0FA3  4A                    2				db	lastch 
+ 0FA4  4E                    2				db	lastch 
+ 0FA5  C2                    1		db	lastch+80H 
+					SYMBOL	<JNBE>
+ 0FA6                        1	$JNBE: 
+ 0FA6  4A                    2				db	lastch 
+ 0FA7  4E                    2				db	lastch 
+ 0FA8  42                    2				db	lastch 
+ 0FA9  C5                    1		db	lastch+80H 
+					SYMBOL	<JNC>
+ 0FAA                        1	$JNC: 
+ 0FAA  4A                    2				db	lastch 
+ 0FAB  4E                    2				db	lastch 
+ 0FAC  C3                    1		db	lastch+80H 
+					SYMBOL	<JNE>
+ 0FAD                        1	$JNE: 
+ 0FAD  4A                    2				db	lastch 
+ 0FAE  4E                    2				db	lastch 
+ 0FAF  C5                    1		db	lastch+80H 
+					SYMBOL	<JNO>
+ 0FB0                        1	$JNO: 
+ 0FB0  4A                    2				db	lastch 
+ 0FB1  4E                    2				db	lastch 
+ 0FB2  CF                    1		db	lastch+80H 
+					SYMBOL	<JPO>
+ 0FB3                        1	$JPO: 
+ 0FB3  4A                    2				db	lastch 
+ 0FB4  50                    2				db	lastch 
+ 0FB5  CF                    1		db	lastch+80H 
+					SYMBOL	<JNP>
+ 0FB6                        1	$JNP: 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-48
+
+
+ 0FB6  4A                    2				db	lastch 
+ 0FB7  4E                    2				db	lastch 
+ 0FB8  D0                    1		db	lastch+80H 
+					SYMBOL	<JNS>
+ 0FB9                        1	$JNS: 
+ 0FB9  4A                    2				db	lastch 
+ 0FBA  4E                    2				db	lastch 
+ 0FBB  D3                    1		db	lastch+80H 
+					SYMBOL	<JO>
+ 0FBC                        1	$JO: 
+ 0FBC  4A                    2				db	lastch 
+ 0FBD  CF                    1		db	lastch+80H 
+					SYMBOL	<JP>
+ 0FBE                        1	$JP: 
+ 0FBE  4A                    2				db	lastch 
+ 0FBF  D0                    1		db	lastch+80H 
+					SYMBOL	<JS>
+ 0FC0                        1	$JS: 
+ 0FC0  4A                    2				db	lastch 
+ 0FC1  D3                    1		db	lastch+80H 
+					SYMBOL	<LAHF>
+ 0FC2                        1	$LAHF: 
+ 0FC2  4C                    2				db	lastch 
+ 0FC3  41                    2				db	lastch 
+ 0FC4  48                    2				db	lastch 
+ 0FC5  C6                    1		db	lastch+80H 
+					SYMBOL	<LDS>
+ 0FC6                        1	$LDS: 
+ 0FC6  4C                    2				db	lastch 
+ 0FC7  44                    2				db	lastch 
+ 0FC8  D3                    1		db	lastch+80H 
+					SYMBOL	<LEA>
+ 0FC9                        1	$LEA: 
+ 0FC9  4C                    2				db	lastch 
+ 0FCA  45                    2				db	lastch 
+ 0FCB  C1                    1		db	lastch+80H 
+					SYMBOL	<LEAVE>
+ 0FCC                        1	$LEAVE: 
+ 0FCC  4C                    2				db	lastch 
+ 0FCD  45                    2				db	lastch 
+ 0FCE  41                    2				db	lastch 
+ 0FCF  56                    2				db	lastch 
+ 0FD0  C5                    1		db	lastch+80H 
+					SYMBOL	<LES>
+ 0FD1                        1	$LES: 
+ 0FD1  4C                    2				db	lastch 
+ 0FD2  45                    2				db	lastch 
+ 0FD3  D3                    1		db	lastch+80H 
+					SYMBOL	<LOCK>
+ 0FD4                        1	$LOCK: 
+ 0FD4  4C                    2				db	lastch 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-49
+
+
+ 0FD5  4F                    2				db	lastch 
+ 0FD6  43                    2				db	lastch 
+ 0FD7  CB                    1		db	lastch+80H 
+					SYMBOL	<LODSB>
+ 0FD8                        1	$LODSB: 
+ 0FD8  4C                    2				db	lastch 
+ 0FD9  4F                    2				db	lastch 
+ 0FDA  44                    2				db	lastch 
+ 0FDB  53                    2				db	lastch 
+ 0FDC  C2                    1		db	lastch+80H 
+					SYMBOL	<LODSW>
+ 0FDD                        1	$LODSW: 
+ 0FDD  4C                    2				db	lastch 
+ 0FDE  4F                    2				db	lastch 
+ 0FDF  44                    2				db	lastch 
+ 0FE0  53                    2				db	lastch 
+ 0FE1  D7                    1		db	lastch+80H 
+					SYMBOL	<LOOP>
+ 0FE2                        1	$LOOP: 
+ 0FE2  4C                    2				db	lastch 
+ 0FE3  4F                    2				db	lastch 
+ 0FE4  4F                    2				db	lastch 
+ 0FE5  D0                    1		db	lastch+80H 
+					SYMBOL	<LOOPZ>
+ 0FE6                        1	$LOOPZ: 
+ 0FE6  4C                    2				db	lastch 
+ 0FE7  4F                    2				db	lastch 
+ 0FE8  4F                    2				db	lastch 
+ 0FE9  50                    2				db	lastch 
+ 0FEA  DA                    1		db	lastch+80H 
+					SYMBOL	<LOOPNZ>
+ 0FEB                        1	$LOOPNZ: 
+ 0FEB  4C                    2				db	lastch 
+ 0FEC  4F                    2				db	lastch 
+ 0FED  4F                    2				db	lastch 
+ 0FEE  50                    2				db	lastch 
+ 0FEF  4E                    2				db	lastch 
+ 0FF0  DA                    1		db	lastch+80H 
+					SYMBOL	<MOV>
+ 0FF1                        1	$MOV: 
+ 0FF1  4D                    2				db	lastch 
+ 0FF2  4F                    2				db	lastch 
+ 0FF3  D6                    1		db	lastch+80H 
+					SYMBOL	<MOVSB>
+ 0FF4                        1	$MOVSB: 
+ 0FF4  4D                    2				db	lastch 
+ 0FF5  4F                    2				db	lastch 
+ 0FF6  56                    2				db	lastch 
+ 0FF7  53                    2				db	lastch 
+ 0FF8  C2                    1		db	lastch+80H 
+					SYMBOL	<MOVSW>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-50
+
+
+ 0FF9                        1	$MOVSW: 
+ 0FF9  4D                    2				db	lastch 
+ 0FFA  4F                    2				db	lastch 
+ 0FFB  56                    2				db	lastch 
+ 0FFC  53                    2				db	lastch 
+ 0FFD  D7                    1		db	lastch+80H 
+					SYMBOL	<MUL>
+ 0FFE                        1	$MUL: 
+ 0FFE  4D                    2				db	lastch 
+ 0FFF  55                    2				db	lastch 
+ 1000  CC                    1		db	lastch+80H 
+					SYMBOL	<NEG>
+ 1001                        1	$NEG: 
+ 1001  4E                    2				db	lastch 
+ 1002  45                    2				db	lastch 
+ 1003  C7                    1		db	lastch+80H 
+					SYMBOL	<NOP>
+ 1004                        1	$NOP: 
+ 1004  4E                    2				db	lastch 
+ 1005  4F                    2				db	lastch 
+ 1006  D0                    1		db	lastch+80H 
+					SYMBOL	<NOT>
+ 1007                        1	$NOT: 
+ 1007  4E                    2				db	lastch 
+ 1008  4F                    2				db	lastch 
+ 1009  D4                    1		db	lastch+80H 
+					SYMBOL	<OR>
+ 100A                        1	$OR: 
+ 100A  4F                    2				db	lastch 
+ 100B  D2                    1		db	lastch+80H 
+					SYMBOL	<OUT>
+ 100C                        1	$OUT: 
+ 100C  4F                    2				db	lastch 
+ 100D  55                    2				db	lastch 
+ 100E  D4                    1		db	lastch+80H 
+					SYMBOL	<OUTSB>
+ 100F                        1	$OUTSB: 
+ 100F  4F                    2				db	lastch 
+ 1010  55                    2				db	lastch 
+ 1011  54                    2				db	lastch 
+ 1012  53                    2				db	lastch 
+ 1013  C2                    1		db	lastch+80H 
+					SYMBOL	<OUTSW>
+ 1014                        1	$OUTSW: 
+ 1014  4F                    2				db	lastch 
+ 1015  55                    2				db	lastch 
+ 1016  54                    2				db	lastch 
+ 1017  53                    2				db	lastch 
+ 1018  D7                    1		db	lastch+80H 
+					SYMBOL	<POP>
+ 1019                        1	$POP: 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-51
+
+
+ 1019  50                    2				db	lastch 
+ 101A  4F                    2				db	lastch 
+ 101B  D0                    1		db	lastch+80H 
+					SYMBOL	<POPA>
+ 101C                        1	$POPA: 
+ 101C  50                    2				db	lastch 
+ 101D  4F                    2				db	lastch 
+ 101E  50                    2				db	lastch 
+ 101F  C1                    1		db	lastch+80H 
+					SYMBOL	<POPF>
+ 1020                        1	$POPF: 
+ 1020  50                    2				db	lastch 
+ 1021  4F                    2				db	lastch 
+ 1022  50                    2				db	lastch 
+ 1023  C6                    1		db	lastch+80H 
+					SYMBOL	<PUSH>
+ 1024                        1	$PUSH: 
+ 1024  50                    2				db	lastch 
+ 1025  55                    2				db	lastch 
+ 1026  53                    2				db	lastch 
+ 1027  C8                    1		db	lastch+80H 
+					SYMBOL	<PUSHA>
+ 1028                        1	$PUSHA: 
+ 1028  50                    2				db	lastch 
+ 1029  55                    2				db	lastch 
+ 102A  53                    2				db	lastch 
+ 102B  48                    2				db	lastch 
+ 102C  C1                    1		db	lastch+80H 
+					SYMBOL	<PUSHF>
+ 102D                        1	$PUSHF: 
+ 102D  50                    2				db	lastch 
+ 102E  55                    2				db	lastch 
+ 102F  53                    2				db	lastch 
+ 1030  48                    2				db	lastch 
+ 1031  C6                    1		db	lastch+80H 
+					SYMBOL	<RCL>
+ 1032                        1	$RCL: 
+ 1032  52                    2				db	lastch 
+ 1033  43                    2				db	lastch 
+ 1034  CC                    1		db	lastch+80H 
+					SYMBOL	<RCR>
+ 1035                        1	$RCR: 
+ 1035  52                    2				db	lastch 
+ 1036  43                    2				db	lastch 
+ 1037  D2                    1		db	lastch+80H 
+					SYMBOL	<REP>
+ 1038                        1	$REP: 
+ 1038  52                    2				db	lastch 
+ 1039  45                    2				db	lastch 
+ 103A  D0                    1		db	lastch+80H 
+					SYMBOL	<REPZ>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-52
+
+
+ 103B                        1	$REPZ: 
+ 103B  52                    2				db	lastch 
+ 103C  45                    2				db	lastch 
+ 103D  50                    2				db	lastch 
+ 103E  DA                    1		db	lastch+80H 
+					SYMBOL	<REPNZ>
+ 103F                        1	$REPNZ: 
+ 103F  52                    2				db	lastch 
+ 1040  45                    2				db	lastch 
+ 1041  50                    2				db	lastch 
+ 1042  4E                    2				db	lastch 
+ 1043  DA                    1		db	lastch+80H 
+					SYMBOL	<RETF>
+ 1044                        1	$RETF: 
+ 1044  52                    2				db	lastch 
+ 1045  45                    2				db	lastch 
+ 1046  54                    2				db	lastch 
+ 1047  C6                    1		db	lastch+80H 
+					SYMBOL	<RETN>
+ 1048                        1	$RETN: 
+ 1048  52                    2				db	lastch 
+ 1049  45                    2				db	lastch 
+ 104A  54                    2				db	lastch 
+ 104B  CE                    1		db	lastch+80H 
+					SYMBOL	<ROL>
+ 104C                        1	$ROL: 
+ 104C  52                    2				db	lastch 
+ 104D  4F                    2				db	lastch 
+ 104E  CC                    1		db	lastch+80H 
+					SYMBOL	<ROR>
+ 104F                        1	$ROR: 
+ 104F  52                    2				db	lastch 
+ 1050  4F                    2				db	lastch 
+ 1051  D2                    1		db	lastch+80H 
+					SYMBOL	<SAHF>
+ 1052                        1	$SAHF: 
+ 1052  53                    2				db	lastch 
+ 1053  41                    2				db	lastch 
+ 1054  48                    2				db	lastch 
+ 1055  C6                    1		db	lastch+80H 
+					SYMBOL	<SAR>
+ 1056                        1	$SAR: 
+ 1056  53                    2				db	lastch 
+ 1057  41                    2				db	lastch 
+ 1058  D2                    1		db	lastch+80H 
+					SYMBOL	<SBB>
+ 1059                        1	$SBB: 
+ 1059  53                    2				db	lastch 
+ 105A  42                    2				db	lastch 
+ 105B  C2                    1		db	lastch+80H 
+					SYMBOL	<SCASB>
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-53
+
+
+ 105C                        1	$SCASB: 
+ 105C  53                    2				db	lastch 
+ 105D  43                    2				db	lastch 
+ 105E  41                    2				db	lastch 
+ 105F  53                    2				db	lastch 
+ 1060  C2                    1		db	lastch+80H 
+					SYMBOL	<SCASW>
+ 1061                        1	$SCASW: 
+ 1061  53                    2				db	lastch 
+ 1062  43                    2				db	lastch 
+ 1063  41                    2				db	lastch 
+ 1064  53                    2				db	lastch 
+ 1065  D7                    1		db	lastch+80H 
+					SYMBOL	<SHL>
+ 1066                        1	$SHL: 
+ 1066  53                    2				db	lastch 
+ 1067  48                    2				db	lastch 
+ 1068  CC                    1		db	lastch+80H 
+					SYMBOL	<SHR>
+ 1069                        1	$SHR: 
+ 1069  53                    2				db	lastch 
+ 106A  48                    2				db	lastch 
+ 106B  D2                    1		db	lastch+80H 
+					SYMBOL	<SS>
+ 106C                        1	$SS: 
+ 106C  53                    2				db	lastch 
+ 106D  D3                    1		db	lastch+80H 
+					SYMBOL	<STC>
+ 106E                        1	$STC: 
+ 106E  53                    2				db	lastch 
+ 106F  54                    2				db	lastch 
+ 1070  C3                    1		db	lastch+80H 
+					SYMBOL	<STD>
+ 1071                        1	$STD: 
+ 1071  53                    2				db	lastch 
+ 1072  54                    2				db	lastch 
+ 1073  C4                    1		db	lastch+80H 
+					SYMBOL	<STI>
+ 1074                        1	$STI: 
+ 1074  53                    2				db	lastch 
+ 1075  54                    2				db	lastch 
+ 1076  C9                    1		db	lastch+80H 
+					SYMBOL	<STOSB>
+ 1077                        1	$STOSB: 
+ 1077  53                    2				db	lastch 
+ 1078  54                    2				db	lastch 
+ 1079  4F                    2				db	lastch 
+ 107A  53                    2				db	lastch 
+ 107B  C2                    1		db	lastch+80H 
+					SYMBOL	<STOSW>
+ 107C                        1	$STOSW: 
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Page     1-54
+
+
+ 107C  53                    2				db	lastch 
+ 107D  54                    2				db	lastch 
+ 107E  4F                    2				db	lastch 
+ 107F  53                    2				db	lastch 
+ 1080  D7                    1		db	lastch+80H 
+					SYMBOL	<SUB>
+ 1081                        1	$SUB: 
+ 1081  53                    2				db	lastch 
+ 1082  55                    2				db	lastch 
+ 1083  C2                    1		db	lastch+80H 
+					SYMBOL	<TEST>
+ 1084                        1	$TEST: 
+ 1084  54                    2				db	lastch 
+ 1085  45                    2				db	lastch 
+ 1086  53                    2				db	lastch 
+ 1087  D4                    1		db	lastch+80H 
+				;	SYMBOL	<WAIT>
+					SYMBOL	<XCHG>
+ 1088                        1	$XCHG: 
+ 1088  58                    2				db	lastch 
+ 1089  43                    2				db	lastch 
+ 108A  48                    2				db	lastch 
+ 108B  C7                    1		db	lastch+80H 
+					SYMBOL	<XLAT>
+ 108C                        1	$XLAT: 
+ 108C  58                    2				db	lastch 
+ 108D  4C                    2				db	lastch 
+ 108E  41                    2				db	lastch 
+ 108F  D4                    1		db	lastch+80H 
+					SYMBOL	<XOR>
+ 1090                        1	$XOR: 
+ 1090  58                    2				db	lastch 
+ 1091  4F                    2				db	lastch 
+ 1092  D2                    1		db	lastch+80H 
+					
+				;;UNASM_TEXT	ENDS
+ 1093				_TEXT   ENDS
+				
+					END
+
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-1
+
+
+Macros:
+
+		N a m e			Lines
+
+BLKMOV . . . . . . . . . . . . .  	  15
+CLR  . . . . . . . . . . . . . .  	   6
+FPOP . . . . . . . . . . . . . .  	   1
+IODELAY  . . . . . . . . . . . .  	   1
+ISREG  . . . . . . . . . . . . .  	   7
+ISREGB . . . . . . . . . . . . .  	   6
+ISREGW . . . . . . . . . . . . .  	   2
+JCLR . . . . . . . . . . . . . .  	  11
+JNCLR  . . . . . . . . . . . . .  	   7
+JRES . . . . . . . . . . . . . .  	   2
+JSET . . . . . . . . . . . . . .  	   2
+MMGLD  . . . . . . . . . . . . .  	   3
+MMIRGW . . . . . . . . . . . . .  	   5
+MOVB . . . . . . . . . . . . . .  	   2
+MOVW . . . . . . . . . . . . . .  	   2
+MSH  . . . . . . . . . . . . . .  	   7
+POPM . . . . . . . . . . . . . .  	  15
+PUSHM  . . . . . . . . . . . . .  	   8
+SYMBOL . . . . . . . . . . . . .  	   9
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+DGROUP . . . . . . . . . . . . .  	GROUP
+  _DATA  . . . . . . . . . . . .  	0000	PARA	PUBLIC	'DATA'
+  _BSS . . . . . . . . . . . . .  	0000	PARA	PUBLIC	'BSS'
+_TEXT  . . . . . . . . . . . . .  	1093	PARA	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+ARG1 . . . . . . . . . . . . . .  	NUMBER	0004	
+ARG2 . . . . . . . . . . . . . .  	NUMBER	0008	
+ARG3 . . . . . . . . . . . . . .  	NUMBER	000C	
+ARITHIMM . . . . . . . . . . . .  	L NEAR	00D1	_TEXT
+
+D8DONE . . . . . . . . . . . . .  	L NEAR	012D	_TEXT
+D8RR . . . . . . . . . . . . . .  	L NEAR	0118	_TEXT
+D9GO . . . . . . . . . . . . . .  	L NEAR	014B	_TEXT
+D9OP5  . . . . . . . . . . . . .  	L NEAR	0171	_TEXT
+D9SPC  . . . . . . . . . . . . .  	L NEAR	0158	_TEXT
+D9_DONE  . . . . . . . . . . . .  	L NEAR	016E	_TEXT
+DAERR  . . . . . . . . . . . . .  	L NEAR	01AC	_TEXT
+DASPC  . . . . . . . . . . . . .  	L NEAR	019E	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-2
+
+
+DB00 . . . . . . . . . . . . . .  	L NEAR	01C4	_TEXT
+DBSPC  . . . . . . . . . . . . .  	L NEAR	01D1	_TEXT
+DCRR . . . . . . . . . . . . . .  	L NEAR	01FE	_TEXT
+DD00 . . . . . . . . . . . . . .  	L NEAR	0232	_TEXT
+DDSPC  . . . . . . . . . . . . .  	L NEAR	023F	_TEXT
+DERR1  . . . . . . . . . . . . .  	L NEAR	0294	_TEXT
+DESPC  . . . . . . . . . . . . .  	L NEAR	0271	_TEXT
+DFERR  . . . . . . . . . . . . .  	L NEAR	02DE	_TEXT
+DFGO . . . . . . . . . . . . . .  	L NEAR	02BB	_TEXT
+DFSPC  . . . . . . . . . . . . .  	L NEAR	02C8	_TEXT
+DISOP  . . . . . . . . . . . . .  	L 0002	077A	_TEXT
+DROPARG  . . . . . . . . . . . .  	L NEAR	00DE	_TEXT
+
+ENTERARGS  . . . . . . . . . . .  	L NEAR	00E1	_TEXT
+ESC_D8 . . . . . . . . . . . . .  	L NEAR	00FB	_TEXT
+ESC_D9 . . . . . . . . . . . . .  	L NEAR	0130	_TEXT
+ESC_DA . . . . . . . . . . . . .  	L NEAR	0182	_TEXT
+ESC_DB . . . . . . . . . . . . .  	L NEAR	01AF	_TEXT
+ESC_DC . . . . . . . . . . . . .  	L NEAR	01E2	_TEXT
+ESC_DD . . . . . . . . . . . . .  	L NEAR	021C	_TEXT
+ESC_DE . . . . . . . . . . . . .  	L NEAR	0254	_TEXT
+ESC_DF . . . . . . . . . . . . .  	L NEAR	029E	_TEXT
+
+FARADR . . . . . . . . . . . . .  	L NEAR	02E1	_TEXT
+FFORMATS . . . . . . . . . . . .  	L WORD	0C0E	_TEXT
+FGETMODRM  . . . . . . . . . . .  	L NEAR	069B	_TEXT
+FGETPOINTERTYPE  . . . . . . . .  	L NEAR	071D	_TEXT
+FPAC . . . . . . . . . . . . . .  	L NEAR	072E	_TEXT
+FPAC1  . . . . . . . . . . . . .  	L NEAR	0743	_TEXT
+
+GETBYTEREGISTER  . . . . . . . .  	L NEAR	06FE	_TEXT
+GETMODADDRESS  . . . . . . . . .  	L NEAR	06D9	_TEXT
+GETMODD2 . . . . . . . . . . . .  	L NEAR	06CE	_TEXT
+GETMODD3 . . . . . . . . . . . .  	L NEAR	06D5	_TEXT
+GETMODDISPLACE . . . . . . . . .  	L NEAR	06C0	_TEXT
+GETMODREG  . . . . . . . . . . .  	L NEAR	06E7	_TEXT
+GETMODRM . . . . . . . . . . . .  	L NEAR	0671	_TEXT
+GETPOINTERTYPE . . . . . . . . .  	L NEAR	070C	_TEXT
+GETPTR1  . . . . . . . . . . . .  	L NEAR	0719	_TEXT
+GETREG1  . . . . . . . . . . . .  	L NEAR	0702	_TEXT
+GETREGISTER  . . . . . . . . . .  	L NEAR	06EB	_TEXT
+GETSEGREGISTER . . . . . . . . .  	L NEAR	06F2	_TEXT
+GETSUBNAME . . . . . . . . . . .  	L NEAR	065E	_TEXT
+GETWORDREGISTER  . . . . . . . .  	L NEAR	06F8	_TEXT
+GRP1 . . . . . . . . . . . . . .  	L NEAR	02FC	_TEXT
+GRP1A  . . . . . . . . . . . . .  	L NEAR	0329	_TEXT
+GRP1B  . . . . . . . . . . . . .  	L NEAR	0334	_TEXT
+GRP1C  . . . . . . . . . . . . .  	L NEAR	0333	_TEXT
+GRP2 . . . . . . . . . . . . . .  	L NEAR	0338	_TEXT
+GRP2A  . . . . . . . . . . . . .  	L NEAR	0355	_TEXT
+
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-3
+
+
+ILLBYTE  . . . . . . . . . . . .  	L NEAR	035E	_TEXT
+IMM16  . . . . . . . . . . . . .  	L NEAR	053F	_TEXT
+IMM8 . . . . . . . . . . . . . .  	L NEAR	0530	_TEXT
+IMMAX  . . . . . . . . . . . . .  	L NEAR	036B	_TEXT
+IMMAX_WORD . . . . . . . . . . .  	L NEAR	038A	_TEXT
+IMMREG . . . . . . . . . . . . .  	L NEAR	03D4	_TEXT
+IMMREG1  . . . . . . . . . . . .  	L NEAR	03F5	_TEXT
+IMMRM  . . . . . . . . . . . . .  	L NEAR	03A1	_TEXT
+IMMRM0 . . . . . . . . . . . . .  	L NEAR	03A7	_TEXT
+IMMRM1 . . . . . . . . . . . . .  	L NEAR	03C4	_TEXT
+IMMRM2 . . . . . . . . . . . . .  	L NEAR	03CA	_TEXT
+IMMRM2A  . . . . . . . . . . . .  	L NEAR	03CC	_TEXT
+IMMRM3 . . . . . . . . . . . . .  	L NEAR	03D0	_TEXT
+IMULIMM  . . . . . . . . . . . .  	L NEAR	054F	_TEXT
+INCREG . . . . . . . . . . . . .  	L NEAR	0408	_TEXT
+INDJMP . . . . . . . . . . . . .  	L NEAR	0418	_TEXT
+IODX . . . . . . . . . . . . . .  	L NEAR	0425	_TEXT
+IODX1  . . . . . . . . . . . . .  	L NEAR	0441	_TEXT
+IOIMM  . . . . . . . . . . . . .  	L NEAR	0451	_TEXT
+IOIMM1 . . . . . . . . . . . . .  	L NEAR	0470	_TEXT
+IS_FAR . . . . . . . . . . . . .  	NUMBER	0000	
+
+LASTCH . . . . . . . . . . . . .  	NUMBER	0052	
+LEAINS . . . . . . . . . . . . .  	L NEAR	04BB	_TEXT
+
+M186 . . . . . . . . . . . . . .  	NUMBER	0001	
+M187 . . . . . . . . . . . . . .  	NUMBER	0000	
+MEMAL  . . . . . . . . . . . . .  	L NEAR	0483	_TEXT
+MEMAL1 . . . . . . . . . . . . .  	L NEAR	04A3	_TEXT
+MEMAL2 . . . . . . . . . . . . .  	L NEAR	04B5	_TEXT
+MODRM  . . . . . . . . . . . . .  	L NEAR	04BF	_TEXT
+MODRM01  . . . . . . . . . . . .  	L NEAR	04C2	_TEXT
+MODRM2 . . . . . . . . . . . . .  	L NEAR	04F0	_TEXT
+MODRM3 . . . . . . . . . . . . .  	L NEAR	04FD	_TEXT
+MODRMTO  . . . . . . . . . . . .  	L NEAR	04E1	_TEXT
+MSG  . . . . . . . . . . . . . .  	L BYTE	0000	_TEXT	Length = 0050
+MSGARGS  . . . . . . . . . . . .  	BYTE	0016	_TEXT
+MSGDATA  . . . . . . . . . . . .  	BYTE	0000	_TEXT
+MSGINSTR . . . . . . . . . . . .  	BYTE	000E	_TEXT
+
+NOARGS . . . . . . . . . . . . .  	L NEAR	051A	_TEXT
+
+PPSEG  . . . . . . . . . . . . .  	L NEAR	051D	_TEXT
+PREFIX . . . . . . . . . . . . .  	L NEAR	0591	_TEXT
+PUSHIMM  . . . . . . . . . . . .  	L NEAR	0579	_TEXT
+PUSHIMM0 . . . . . . . . . . . .  	L NEAR	0581	_TEXT
+PUSHIMM1 . . . . . . . . . . . .  	L NEAR	058B	_TEXT
+
+REL16JMP . . . . . . . . . . . .  	L NEAR	05AD	_TEXT
+REL8JMP  . . . . . . . . . . . .  	L NEAR	0597	_TEXT
+
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-4
+
+
+SEGRM  . . . . . . . . . . . . .  	L NEAR	05C4	_TEXT
+SEGRMTO  . . . . . . . . . . . .  	L NEAR	05E9	_TEXT
+SHFT . . . . . . . . . . . . . .  	L NEAR	05F8	_TEXT
+SHFTCL . . . . . . . . . . . . .  	L NEAR	061A	_TEXT
+SHFTCNT  . . . . . . . . . . . .  	L NEAR	0621	_TEXT
+SS1  . . . . . . . . . . . . . .  	L NEAR	0769	_TEXT
+SSEND  . . . . . . . . . . . . .  	L NEAR	0773	_TEXT
+STORECOLON . . . . . . . . . . .  	L NEAR	0763	_TEXT
+STORECOMMA . . . . . . . . . . .  	L NEAR	075E	_TEXT
+STOREHEXBYTE . . . . . . . . . .  	L NEAR	074B	_TEXT
+STOREHEXNYB  . . . . . . . . . .  	L NEAR	0753	_TEXT
+STOREHEXWORD . . . . . . . . . .  	N PROC	0744	_TEXT	Length = 001A
+STORESTRING  . . . . . . . . . .  	N PROC	0768	_TEXT	Length = 0012
+
+UA_1 . . . . . . . . . . . . . .  	L NEAR	008E	_TEXT
+UA_10  . . . . . . . . . . . . .  	L NEAR	009B	_TEXT
+UNASM_DONE . . . . . . . . . . .  	L NEAR	00BC	_TEXT
+UNASM_END  . . . . . . . . . . .  	L NEAR	0091	_TEXT
+
+XCHGREG  . . . . . . . . . . . .  	L NEAR	0646	_TEXT
+
+ZAP_LOOP . . . . . . . . . . . .  	L NEAR	00B3	_TEXT
+
+$AAA . . . . . . . . . . . . . .  	L NEAR	0D4E	_TEXT
+$AAD . . . . . . . . . . . . . .  	L NEAR	0D51	_TEXT
+$AAM . . . . . . . . . . . . . .  	L NEAR	0D54	_TEXT
+$AAS . . . . . . . . . . . . . .  	L NEAR	0D57	_TEXT
+$ADC . . . . . . . . . . . . . .  	L NEAR	0D5A	_TEXT
+$ADD . . . . . . . . . . . . . .  	L NEAR	0D5D	_TEXT
+$AND . . . . . . . . . . . . . .  	L NEAR	0D60	_TEXT
+$ARITHGRP  . . . . . . . . . . .  	L 0002	0C1E	_TEXT
+$BOUND . . . . . . . . . . . . .  	L NEAR	0D63	_TEXT
+$BYTEPTR . . . . . . . . . . . .  	L BYTE	0BA2	_TEXT
+$CALL  . . . . . . . . . . . . .  	L NEAR	0D68	_TEXT
+$CBW . . . . . . . . . . . . . .  	L NEAR	0D6C	_TEXT
+$CLC . . . . . . . . . . . . . .  	L NEAR	0D6F	_TEXT
+$CLD . . . . . . . . . . . . . .  	L NEAR	0D72	_TEXT
+$CLI . . . . . . . . . . . . . .  	L NEAR	0D75	_TEXT
+$CMC . . . . . . . . . . . . . .  	L NEAR	0D78	_TEXT
+$CMP . . . . . . . . . . . . . .  	L NEAR	0D7B	_TEXT
+$CMPSB . . . . . . . . . . . . .  	L NEAR	0D7E	_TEXT
+$CMPSW . . . . . . . . . . . . .  	L NEAR	0D83	_TEXT
+$CS  . . . . . . . . . . . . . .  	L NEAR	0D88	_TEXT
+$CWD . . . . . . . . . . . . . .  	L NEAR	0D8A	_TEXT
+$DAA . . . . . . . . . . . . . .  	L NEAR	0D8D	_TEXT
+$DAS . . . . . . . . . . . . . .  	L NEAR	0D90	_TEXT
+$DB  . . . . . . . . . . . . . .  	L NEAR	0D93	_TEXT
+$DEC . . . . . . . . . . . . . .  	L NEAR	0D95	_TEXT
+$DIV . . . . . . . . . . . . . .  	L NEAR	0D98	_TEXT
+$DS  . . . . . . . . . . . . . .  	L NEAR	0D9B	_TEXT
+$DWORDPTR  . . . . . . . . . . .  	L BYTE	0BB4	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-5
+
+
+$ENTER . . . . . . . . . . . . .  	L NEAR	0D9D	_TEXT
+$ES  . . . . . . . . . . . . . .  	L NEAR	0DA2	_TEXT
+$ESC . . . . . . . . . . . . . .  	L NEAR	0DA4	_TEXT
+$F2XM1 . . . . . . . . . . . . .  	L NEAR	0DA7	_TEXT
+$FABS  . . . . . . . . . . . . .  	L NEAR	0DAC	_TEXT
+$FADD  . . . . . . . . . . . . .  	L NEAR	0DB0	_TEXT
+$FADDP . . . . . . . . . . . . .  	L NEAR	0DB4	_TEXT
+$FARITH  . . . . . . . . . . . .  	L 0002	0C5E	_TEXT
+$FARITH1 . . . . . . . . . . . .  	L 0002	0C9E	_TEXT
+$FARITH2 . . . . . . . . . . . .  	L 0002	0CAE	_TEXT
+$FARITH3 . . . . . . . . . . . .  	L 0002	0D0E	_TEXT
+$FARITHP . . . . . . . . . . . .  	L 0002	0C7E	_TEXT
+$FARITHR . . . . . . . . . . . .  	L 0002	0C6E	_TEXT
+$FBLD  . . . . . . . . . . . . .  	L NEAR	0DB9	_TEXT
+$FBSTP . . . . . . . . . . . . .  	L NEAR	0DBD	_TEXT
+$FCHS  . . . . . . . . . . . . .  	L NEAR	0DC2	_TEXT
+$FCLEX . . . . . . . . . . . . .  	L NEAR	0DC6	_TEXT
+$FCOM  . . . . . . . . . . . . .  	L NEAR	0DCB	_TEXT
+$FCOMP . . . . . . . . . . . . .  	L NEAR	0DCF	_TEXT
+$FCOMPP  . . . . . . . . . . . .  	L NEAR	0DD4	_TEXT
+$FCONST  . . . . . . . . . . . .  	L 0002	0D1E	_TEXT
+$FCOS  . . . . . . . . . . . . .  	L NEAR	0DDA	_TEXT
+$FCTRL . . . . . . . . . . . . .  	L 0002	0CDE	_TEXT
+$FDECSTP . . . . . . . . . . . .  	L NEAR	0DDE	_TEXT
+$FDISI . . . . . . . . . . . . .  	L NEAR	0DE5	_TEXT
+$FDIV  . . . . . . . . . . . . .  	L NEAR	0DEA	_TEXT
+$FDIVP . . . . . . . . . . . . .  	L NEAR	0DEE	_TEXT
+$FDIVR . . . . . . . . . . . . .  	L NEAR	0DF3	_TEXT
+$FDIVRP  . . . . . . . . . . . .  	L NEAR	0DF8	_TEXT
+$FENI  . . . . . . . . . . . . .  	L NEAR	0DFE	_TEXT
+$FFREE . . . . . . . . . . . . .  	L NEAR	0E02	_TEXT
+$FIADD . . . . . . . . . . . . .  	L NEAR	0E07	_TEXT
+$FIARITH . . . . . . . . . . . .  	L 0002	0C8E	_TEXT
+$FIARITH1  . . . . . . . . . . .  	L 0002	0CBE	_TEXT
+$FIARITH2  . . . . . . . . . . .  	L 0002	0CCE	_TEXT
+$FICOM . . . . . . . . . . . . .  	L NEAR	0E0C	_TEXT
+$FICOMP  . . . . . . . . . . . .  	L NEAR	0E11	_TEXT
+$FIDIV . . . . . . . . . . . . .  	L NEAR	0E17	_TEXT
+$FIDIVR  . . . . . . . . . . . .  	L NEAR	0E1C	_TEXT
+$FILD  . . . . . . . . . . . . .  	L NEAR	0E22	_TEXT
+$FIMUL . . . . . . . . . . . . .  	L NEAR	0E26	_TEXT
+$FINCSTP . . . . . . . . . . . .  	L NEAR	0E2B	_TEXT
+$FINIT . . . . . . . . . . . . .  	L NEAR	0E32	_TEXT
+$FIST  . . . . . . . . . . . . .  	L NEAR	0E37	_TEXT
+$FISTP . . . . . . . . . . . . .  	L NEAR	0E3B	_TEXT
+$FISUB . . . . . . . . . . . . .  	L NEAR	0E40	_TEXT
+$FISUBR  . . . . . . . . . . . .  	L NEAR	0E45	_TEXT
+$FLD . . . . . . . . . . . . . .  	L NEAR	0E4B	_TEXT
+$FLD1  . . . . . . . . . . . . .  	L NEAR	0E59	_TEXT
+$FLDCW . . . . . . . . . . . . .  	L NEAR	0E4E	_TEXT
+$FLDENV  . . . . . . . . . . . .  	L NEAR	0E53	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-6
+
+
+$FLDL2E  . . . . . . . . . . . .  	L NEAR	0E69	_TEXT
+$FLDL2T  . . . . . . . . . . . .  	L NEAR	0E6F	_TEXT
+$FLDLG2  . . . . . . . . . . . .  	L NEAR	0E5D	_TEXT
+$FLDLN2  . . . . . . . . . . . .  	L NEAR	0E63	_TEXT
+$FLDPI . . . . . . . . . . . . .  	L NEAR	0E75	_TEXT
+$FLDRR1  . . . . . . . . . . . .  	L 0002	0CEE	_TEXT
+$FLDRR2  . . . . . . . . . . . .  	L 0002	0CFE	_TEXT
+$FLDZ  . . . . . . . . . . . . .  	L NEAR	0E7A	_TEXT
+$FMUL  . . . . . . . . . . . . .  	L NEAR	0E7E	_TEXT
+$FMULP . . . . . . . . . . . . .  	L NEAR	0E82	_TEXT
+$FNCLEX  . . . . . . . . . . . .  	L NEAR	0E8B	_TEXT
+$FNDISI  . . . . . . . . . . . .  	L NEAR	0E91	_TEXT
+$FNENI . . . . . . . . . . . . .  	L NEAR	0E97	_TEXT
+$FNINIT  . . . . . . . . . . . .  	L NEAR	0E9C	_TEXT
+$FNOP  . . . . . . . . . . . . .  	L NEAR	0E87	_TEXT
+$FNSAVE  . . . . . . . . . . . .  	L NEAR	0EA2	_TEXT
+$FNSTCW  . . . . . . . . . . . .  	L NEAR	0EA8	_TEXT
+$FNSTENV . . . . . . . . . . . .  	L NEAR	0EAE	_TEXT
+$FNSTSW  . . . . . . . . . . . .  	L NEAR	0EB5	_TEXT
+$FPATAN  . . . . . . . . . . . .  	L NEAR	0EBB	_TEXT
+$FPREM . . . . . . . . . . . . .  	L NEAR	0EC1	_TEXT
+$FPREM1  . . . . . . . . . . . .  	L NEAR	0EC6	_TEXT
+$FPTAN . . . . . . . . . . . . .  	L NEAR	0ECC	_TEXT
+$FRNDINT . . . . . . . . . . . .  	L NEAR	0ED1	_TEXT
+$FRSTOR  . . . . . . . . . . . .  	L NEAR	0ED8	_TEXT
+$FSAVE . . . . . . . . . . . . .  	L NEAR	0EDE	_TEXT
+$FSCALE  . . . . . . . . . . . .  	L NEAR	0EE3	_TEXT
+$FSETPM  . . . . . . . . . . . .  	L NEAR	0EE9	_TEXT
+$FSIN  . . . . . . . . . . . . .  	L NEAR	0EEF	_TEXT
+$FSINCOS . . . . . . . . . . . .  	L NEAR	0EF3	_TEXT
+$FSQRT . . . . . . . . . . . . .  	L NEAR	0EFA	_TEXT
+$FST . . . . . . . . . . . . . .  	L NEAR	0EFF	_TEXT
+$FSTCW . . . . . . . . . . . . .  	L NEAR	0F02	_TEXT
+$FSTENV  . . . . . . . . . . . .  	L NEAR	0F07	_TEXT
+$FSTP  . . . . . . . . . . . . .  	L NEAR	0F0D	_TEXT
+$FSTSW . . . . . . . . . . . . .  	L NEAR	0F11	_TEXT
+$FSUB  . . . . . . . . . . . . .  	L NEAR	0F16	_TEXT
+$FSUBP . . . . . . . . . . . . .  	L NEAR	0F1A	_TEXT
+$FSUBR . . . . . . . . . . . . .  	L NEAR	0F1F	_TEXT
+$FSUBRP  . . . . . . . . . . . .  	L NEAR	0F24	_TEXT
+$FTRANS  . . . . . . . . . . . .  	L 0002	0D2E	_TEXT
+$FTST  . . . . . . . . . . . . .  	L NEAR	0F2A	_TEXT
+$FUCOM . . . . . . . . . . . . .  	L NEAR	0F2E	_TEXT
+$FUCOMP  . . . . . . . . . . . .  	L NEAR	0F33	_TEXT
+$FUCOMPP . . . . . . . . . . . .  	L NEAR	0F39	_TEXT
+$FWAIT . . . . . . . . . . . . .  	L NEAR	0F40	_TEXT
+$FXAM  . . . . . . . . . . . . .  	L NEAR	0F45	_TEXT
+$FXCH  . . . . . . . . . . . . .  	L NEAR	0F49	_TEXT
+$FXTRACT . . . . . . . . . . . .  	L NEAR	0F4D	_TEXT
+$FYL2X . . . . . . . . . . . . .  	L NEAR	0F54	_TEXT
+$FYL2XP1 . . . . . . . . . . . .  	L NEAR	0F59	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-7
+
+
+$GRP1  . . . . . . . . . . . . .  	L 0002	0C3E	_TEXT
+$GRP2  . . . . . . . . . . . . .  	L 0002	0C4E	_TEXT
+$HLT . . . . . . . . . . . . . .  	L NEAR	0F60	_TEXT
+$IDIV  . . . . . . . . . . . . .  	L NEAR	0F63	_TEXT
+$IMUL  . . . . . . . . . . . . .  	L NEAR	0F67	_TEXT
+$IN  . . . . . . . . . . . . . .  	L NEAR	0F6B	_TEXT
+$INC . . . . . . . . . . . . . .  	L NEAR	0F6D	_TEXT
+$INSB  . . . . . . . . . . . . .  	L NEAR	0F70	_TEXT
+$INSW  . . . . . . . . . . . . .  	L NEAR	0F74	_TEXT
+$INT . . . . . . . . . . . . . .  	L NEAR	0F78	_TEXT
+$INT3  . . . . . . . . . . . . .  	L NEAR	0F7B	_TEXT
+$INTO  . . . . . . . . . . . . .  	L NEAR	0F7F	_TEXT
+$IRET  . . . . . . . . . . . . .  	L NEAR	0F83	_TEXT
+$JA  . . . . . . . . . . . . . .  	L NEAR	0F87	_TEXT
+$JB  . . . . . . . . . . . . . .  	L NEAR	0F89	_TEXT
+$JBE . . . . . . . . . . . . . .  	L NEAR	0F8B	_TEXT
+$JC  . . . . . . . . . . . . . .  	L NEAR	0F8E	_TEXT
+$JCXZ  . . . . . . . . . . . . .  	L NEAR	0F90	_TEXT
+$JE  . . . . . . . . . . . . . .  	L NEAR	0F94	_TEXT
+$JG  . . . . . . . . . . . . . .  	L NEAR	0F96	_TEXT
+$JGE . . . . . . . . . . . . . .  	L NEAR	0F98	_TEXT
+$JL  . . . . . . . . . . . . . .  	L NEAR	0F9B	_TEXT
+$JLE . . . . . . . . . . . . . .  	L NEAR	0F9D	_TEXT
+$JMP . . . . . . . . . . . . . .  	L NEAR	0FA0	_TEXT
+$JNB . . . . . . . . . . . . . .  	L NEAR	0FA3	_TEXT
+$JNBE  . . . . . . . . . . . . .  	L NEAR	0FA6	_TEXT
+$JNC . . . . . . . . . . . . . .  	L NEAR	0FAA	_TEXT
+$JNE . . . . . . . . . . . . . .  	L NEAR	0FAD	_TEXT
+$JNO . . . . . . . . . . . . . .  	L NEAR	0FB0	_TEXT
+$JNP . . . . . . . . . . . . . .  	L NEAR	0FB6	_TEXT
+$JNS . . . . . . . . . . . . . .  	L NEAR	0FB9	_TEXT
+$JO  . . . . . . . . . . . . . .  	L NEAR	0FBC	_TEXT
+$JP  . . . . . . . . . . . . . .  	L NEAR	0FBE	_TEXT
+$JPO . . . . . . . . . . . . . .  	L NEAR	0FB3	_TEXT
+$JS  . . . . . . . . . . . . . .  	L NEAR	0FC0	_TEXT
+$LAHF  . . . . . . . . . . . . .  	L NEAR	0FC2	_TEXT
+$LDS . . . . . . . . . . . . . .  	L NEAR	0FC6	_TEXT
+$LEA . . . . . . . . . . . . . .  	L NEAR	0FC9	_TEXT
+$LEAVE . . . . . . . . . . . . .  	L NEAR	0FCC	_TEXT
+$LES . . . . . . . . . . . . . .  	L NEAR	0FD1	_TEXT
+$LOCK  . . . . . . . . . . . . .  	L NEAR	0FD4	_TEXT
+$LODSB . . . . . . . . . . . . .  	L NEAR	0FD8	_TEXT
+$LODSW . . . . . . . . . . . . .  	L NEAR	0FDD	_TEXT
+$LOOP  . . . . . . . . . . . . .  	L NEAR	0FE2	_TEXT
+$LOOPNZ  . . . . . . . . . . . .  	L NEAR	0FEB	_TEXT
+$LOOPZ . . . . . . . . . . . . .  	L NEAR	0FE6	_TEXT
+$MODADDRESS  . . . . . . . . . .  	L WORD	0BFE	_TEXT
+$MODBP . . . . . . . . . . . . .  	L BYTE	0BF6	_TEXT
+$MODBPDI . . . . . . . . . . . .  	L BYTE	0BE7	_TEXT
+$MODBPSI . . . . . . . . . . . .  	L BYTE	0BE0	_TEXT
+$MODBX . . . . . . . . . . . . .  	L BYTE	0BFA	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-8
+
+
+$MODBXDI . . . . . . . . . . . .  	L BYTE	0BD9	_TEXT
+$MODBXSI . . . . . . . . . . . .  	L BYTE	0BD2	_TEXT
+$MODDI . . . . . . . . . . . . .  	L BYTE	0BF2	_TEXT
+$MODSI . . . . . . . . . . . . .  	L BYTE	0BEE	_TEXT
+$MOV . . . . . . . . . . . . . .  	L NEAR	0FF1	_TEXT
+$MOVSB . . . . . . . . . . . . .  	L NEAR	0FF4	_TEXT
+$MOVSW . . . . . . . . . . . . .  	L NEAR	0FF9	_TEXT
+$MUL . . . . . . . . . . . . . .  	L NEAR	0FFE	_TEXT
+$NEG . . . . . . . . . . . . . .  	L NEAR	1001	_TEXT
+$NOP . . . . . . . . . . . . . .  	L NEAR	1004	_TEXT
+$NOT . . . . . . . . . . . . . .  	L NEAR	1007	_TEXT
+$OR  . . . . . . . . . . . . . .  	L NEAR	100A	_TEXT
+$OUT . . . . . . . . . . . . . .  	L NEAR	100C	_TEXT
+$OUTSB . . . . . . . . . . . . .  	L NEAR	100F	_TEXT
+$OUTSW . . . . . . . . . . . . .  	L NEAR	1014	_TEXT
+$POP . . . . . . . . . . . . . .  	L NEAR	1019	_TEXT
+$POPA  . . . . . . . . . . . . .  	L NEAR	101C	_TEXT
+$POPF  . . . . . . . . . . . . .  	L NEAR	1020	_TEXT
+$PUSH  . . . . . . . . . . . . .  	L NEAR	1024	_TEXT
+$PUSHA . . . . . . . . . . . . .  	L NEAR	1028	_TEXT
+$PUSHF . . . . . . . . . . . . .  	L NEAR	102D	_TEXT
+$QWORDPTR  . . . . . . . . . . .  	L BYTE	0BBE	_TEXT
+$RCL . . . . . . . . . . . . . .  	L NEAR	1032	_TEXT
+$RCR . . . . . . . . . . . . . .  	L NEAR	1035	_TEXT
+$REG16 . . . . . . . . . . . . .  	L BYTE	0B92	_TEXT
+$REG8  . . . . . . . . . . . . .  	L BYTE	0B82	_TEXT
+$REP . . . . . . . . . . . . . .  	L NEAR	1038	_TEXT
+$REPNZ . . . . . . . . . . . . .  	L NEAR	103F	_TEXT
+$REPZ  . . . . . . . . . . . . .  	L NEAR	103B	_TEXT
+$RETF  . . . . . . . . . . . . .  	L NEAR	1044	_TEXT
+$RETN  . . . . . . . . . . . . .  	L NEAR	1048	_TEXT
+$ROL . . . . . . . . . . . . . .  	L NEAR	104C	_TEXT
+$ROR . . . . . . . . . . . . . .  	L NEAR	104F	_TEXT
+$SAHF  . . . . . . . . . . . . .  	L NEAR	1052	_TEXT
+$SAR . . . . . . . . . . . . . .  	L NEAR	1056	_TEXT
+$SBB . . . . . . . . . . . . . .  	L NEAR	1059	_TEXT
+$SCASB . . . . . . . . . . . . .  	L NEAR	105C	_TEXT
+$SCASW . . . . . . . . . . . . .  	L NEAR	1061	_TEXT
+$SEGS  . . . . . . . . . . . . .  	L BYTE	0B7A	_TEXT
+$SHFTGRP . . . . . . . . . . . .  	L 0002	0C2E	_TEXT
+$SHL . . . . . . . . . . . . . .  	L NEAR	1066	_TEXT
+$SHR . . . . . . . . . . . . . .  	L NEAR	1069	_TEXT
+$SS  . . . . . . . . . . . . . .  	L NEAR	106C	_TEXT
+$STC . . . . . . . . . . . . . .  	L NEAR	106E	_TEXT
+$STD . . . . . . . . . . . . . .  	L NEAR	1071	_TEXT
+$STI . . . . . . . . . . . . . .  	L NEAR	1074	_TEXT
+$STOSB . . . . . . . . . . . . .  	L NEAR	1077	_TEXT
+$STOSW . . . . . . . . . . . . .  	L NEAR	107C	_TEXT
+$SUB . . . . . . . . . . . . . .  	L NEAR	1081	_TEXT
+$TBYTEPTR  . . . . . . . . . . .  	L BYTE	0BC8	_TEXT
+$TEST  . . . . . . . . . . . . .  	L NEAR	1084	_TEXT
+Microsoft (R) Macro Assembler Version 5.10                  11/2/14 13:35:08
+                                                             Symbols-9
+
+
+$WORDPTR . . . . . . . . . . . .  	L BYTE	0BAB	_TEXT
+$XCHG  . . . . . . . . . . . . .  	L NEAR	1088	_TEXT
+$XLAT  . . . . . . . . . . . . .  	L NEAR	108C	_TEXT
+$XOR . . . . . . . . . . . . . .  	L NEAR	1090	_TEXT
+@CPU . . . . . . . . . . . . . .  	TEXT  1287		
+@FILENAME  . . . . . . . . . . .  	TEXT  unasm		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+_unasm . . . . . . . . . . . . .  	N PROC	0050	_TEXT	Global	Length = 0081
+_unasm_msg . . . . . . . . . . .  	L NEAR	0000	_TEXT	Global
+
+
+   1904 Source  Lines
+   7254 Total   Lines
+    396 Symbols
+
+  45722 + 334606 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

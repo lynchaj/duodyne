@@ -1,0 +1,152 @@
+%SIGNAL
+PIN   5 =  A19 
+PIN   1 =  ALE 
+PIN  21 = !BDREQ 
+PIN  13 =  BUSAK 
+PIN  22 =  BUS_DREQ 
+PIN  14 = !CS0 
+PIN  15 = !CS1 
+PIN  20 = !G_DATA 
+PIN  18 =  HALT 
+PIN  19 = !IORQ 
+PIN  16 = !M1 
+PIN   7 = !MCS0 
+PIN   8 = !MCS1 
+PIN   9 = !MCS2 
+PIN  10 = !MCS3 
+PIN  17 = !MREQ_IO 
+PIN  11 = !PCS0 
+PIN  23 = !PCS1 
+PIN   4 =  ST0 
+PIN   3 =  ST1 
+PIN   2 =  ST2 
+PIN   6 = !UCS 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+BUS_DREQ =>
+    !BDREQ
+
+CS0 =>
+    !A19 & BUSAK & !MREQ_IO
+  # !A19 & !ALE & !BUSAK & !ST0 & ST2
+  # !A19 & !ALE & !BUSAK & !ST1 & ST2
+
+CS1 =>
+    A19 & BUSAK & MCS0 & MCS1 & MCS2 & MCS3 & !MREQ_IO & UCS
+  # A19 & !ALE & !BUSAK & MCS0 & MCS1 & MCS2 & MCS3 & !ST0 & ST2 & UCS
+  # A19 & !ALE & !BUSAK & MCS0 & MCS1 & MCS2 & MCS3 & !ST1 & ST2 & UCS
+
+CSMEM =>
+    !ALE & !BUSAK & !ST1 & ST2
+  # !ALE & !BUSAK & !ST0 & ST2
+  # BUSAK & MREQ_IO
+
+EXTIORQ =>
+    !ALE & !BUSAK & PCS1
+  # !ALE & !BUSAK & PCS0
+  # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
+
+EXTMREQ =>
+    !ALE & !BUSAK & MCS0 & !ST1 & ST2
+  # !ALE & !BUSAK & MCS1 & !ST1 & ST2
+  # !ALE & !BUSAK & MCS2 & !ST1 & ST2
+  # !ALE & !BUSAK & MCS3 & !ST1 & ST2
+  # !ALE & !BUSAK & MCS0 & !ST0 & ST2
+  # !ALE & !BUSAK & MCS1 & !ST0 & ST2
+  # !ALE & !BUSAK & MCS3 & !ST0 & ST2
+  # !ALE & !BUSAK & MCS2 & !ST0 & ST2
+
+G_DATA =>
+    BUSAK
+  # !ALE & !PCS0
+  # !ALE & !PCS1
+  # !ALE & !MCS0 & !ST0 & ST2
+  # !ALE & !MCS1 & !ST0 & ST2
+  # !ALE & !MCS2 & !ST0 & ST2
+  # !ALE & !MCS3 & !ST0 & ST2
+  # !ALE & !MCS0 & !ST1 & ST2
+  # !ALE & !MCS1 & !ST1 & ST2
+  # !ALE & !MCS2 & !ST1 & ST2
+  # !ALE & !MCS3 & !ST1 & ST2
+  # !ALE & !ST0 & !ST1 & !ST2
+
+HALT =>
+    ST0 & ST1 & !ST2
+
+IDLE =>
+    ST0 & ST1 & ST2
+
+INTA =>
+    !ST0 & !ST1 & !ST2
+
+IORQ =>
+    !ALE & !BUSAK & !PCS0
+  # !ALE & !BUSAK & !PCS1
+  # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
+
+IORQ.oe  =>
+    !BUSAK
+
+IO_OP =>
+    !ST1 & !ST2
+  # !ST0 & !ST2
+
+LCLMREQ =>
+    !ALE & !ST0 & ST2
+  # !ALE & !ST1 & ST2
+
+M1 =>
+    !ST0 & !ST1
+
+MCS =>
+    MCS0
+  # MCS1
+  # MCS2
+  # MCS3
+
+MEMOP =>
+    !ST1 & ST2
+  # !ST0 & ST2
+
+MREQ_IO =>
+    !ALE & !BUSAK & !MCS0 & !ST0 & ST2
+  # !ALE & !BUSAK & !MCS1 & !ST0 & ST2
+  # !ALE & !BUSAK & !MCS2 & !ST0 & ST2
+  # !ALE & !BUSAK & !MCS3 & !ST0 & ST2
+  # !ALE & !BUSAK & !MCS0 & !ST1 & ST2
+  # !ALE & !BUSAK & !MCS1 & !ST1 & ST2
+  # !ALE & !BUSAK & !MCS2 & !ST1 & ST2
+  # !ALE & !BUSAK & !MCS3 & !ST1 & ST2
+
+MREQ_IO.oe  =>
+    !BUSAK
+
+BDREQ.oe  =>
+    0 
+
+BUS_DREQ.oe  =>
+    1 
+
+CS0.oe  =>
+    1 
+
+CS1.oe  =>
+    1 
+
+G_DATA.oe  =>
+    1 
+
+HALT.oe  =>
+    1 
+
+M1.oe  =>
+    1 
+
+PCS1.oe  =>
+    0 
+
+%END

@@ -1,0 +1,2619 @@
+     1                                  ;========================================================================
+     2                                  ; int10ser.asm -- Video display services implementation using serial port
+     3                                  ;========================================================================
+     4                                  ;
+     5                                  ;    Compiles with NASM 2.07, might work with other versions
+     6                                  ;
+     7                                  ; Copyright (C) 2010 Sergey Kiselev.
+     8                                  ;     additions and modifications for ColorVDU:
+     9                                  ; Copyright (C) 2012 John R. Coffman.
+    10                                  ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    11                                  ;  
+    12                                  ; This program is free software: you can redistribute it and/or modify
+    13                                  ; it under the terms of the GNU General Public License as published by
+    14                                  ; the Free Software Foundation, either version 3 of the License, or
+    15                                  ; (at your option) any later version.
+    16                                  ;
+    17                                  ; This program is distributed in the hope that it will be useful,
+    18                                  ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    19                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    20                                  ; GNU General Public License for more details.
+    21                                  ;
+    22                                  ; You should have received a copy of the GNU General Public License
+    23                                  ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    24                                  ;
+    25                                  ; TODO:
+    26                                  ;       Complete the WYSE character attribute emulation -- JRC
+    27                                  ;========================================================================
+    28                                  
+    29                                  %include	"config.asm"
+     1                              <1> ;/*
+     2                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     3                              <1> ; VGA3.CFG
+     4                              <1> ;   Copied to CONFIG.ASM for general release.
+     5                              <1> ;
+     6                              <1> ;       Modify the parameters below to reflect your system
+     7                              <1> ;
+     8                              <1> ;
+     9                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    10                              <1> ;
+    11                              <1> ;   Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    12                              <1> ;   Provided for hobbyist use on the N8VEM SBC-188 board.
+    13                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    14                              <1> ;
+    15                              <1> ; Define the serial terminal that the Video BIOS must emulate
+    16                              <1> ; Set one of the following to 1
+    17                              <1> ; If you have no idea what to choose, set TTY to 1
+    18                              <1> TTY     equ     0       ; hardcopy -- cannot position the cursor
+    19                              <1> DUMB    equ     0       ; dumb CRT -- ^H, ^J, ^K, ^L can move the cursor
+    20                              <1> ANSI    equ     1       ; very smart, like a VT-100
+    21                              <1> WYSE    equ     0       ; very smart Wyse series (30, 50, ...)
+    22                              <1> ; others may get added in the future
+    23                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
+    24                              <1> ;
+    25                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
+    26                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
+    27                              <1> CVDU	equ	0	; system does not have the CVDU
+    28                              <1> ;
+    29                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
+    30                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
+    31                              <1> ; The default is VGA3=0
+    32                              <1> VGA3   equ     1       ; system has the VGA3
+    33                              <1> ;
+    34                              <1> ; Does the hardware configuration contain the front panel card?
+    35                              <1> ; The default is FRONT_PANEL=0
+    36                              <1> ;
+    37                              <1> FRONT_PANEL   equ     1       ; system has the VGA3
+    38                              <1> %if 0
+    39                              <1> 	*/
+    40                              <1> #define VGA3 1
+    41                              <1> /*
+    42                              <1> %endif
+    43                              <1> ;
+    44                              <1> ; Boot up keyboard mode:  20h for NumLock on
+    45                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
+    46                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
+    47                              <1> 
+    48                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    49                              <1> ;UART_RATE	equ	0		; 1200
+    50                              <1> ;UART_RATE	equ	1		; 2400
+    51                              <1> ;UART_RATE	equ	2		; 4800
+    52                              <1> ;UART_RATE	equ	3		; 9600
+    53                              <1> ;UART_RATE	equ	4		; 19200
+    54                              <1> UART_RATE	equ	5		; 38400
+    55                              <1> ;UART_RATE	equ	6		; 57600
+    56                              <1> ;UART_RATE	equ	7		; 115200
+    57                              <1> 
+    58                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    59                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    60                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    61                              <1> 						; but not ANSI
+    62                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    63                              <1> ; It may be smaller than the actual EPROM in use.
+    64                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    65                              <1> %ifndef ROM
+    66                              <1> ROM             equ     32              ; 64 is the default
+    67                              <1> %endif
+    68                              <1> 
+    69                              <1> ; Define the number of Wait States at which the ROM operates
+    70                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    71                              <1> 
+    72                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    73                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    74                              <1> RAM_DOS         equ     640
+    75                              <1> 
+    76                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    77                              <1> ; the default is 512 kilobytes
+    78                              <1> RAM             equ     512             ; (512 is the default)
+    79                              <1> 
+    80                              <1> ; Define the number of Wait States at which the RAM operates
+    81                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+    82                              <1> 
+    83                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+    84                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    85                              <1> 
+    86                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+    87                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+    88                              <1> 
+    89                              <1> ; Define the time zone in which we build the Relocatable BIOS
+    90                              <1> %ifndef TIMEZONE
+    91                              <1> %define TIMEZONE "CDT"
+    92                              <1> %endif
+    93                              <1> 
+    94                              <1> ; Has the REDBUG debugger been loaded?
+    95                              <1> %ifndef SOFT_DEBUG
+    96                              <1> %define SOFT_DEBUG 0
+    97                              <1> %endif
+    98                              <1> 
+    99                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   100                              <1> %ifndef TBASIC
+   101                              <1> TBASIC          equ     1		; default is 1
+   102                              <1> %endif
+   103                              <1> 
+   104                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   105                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   106                              <1> %ifndef FPEM
+   107                              <1> FPEM            equ     1               ; default is 1
+   108                              <1> %endif
+   109                              <1> 
+   110                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   111                              <1> EMM_BOARDS      equ     4
+   112                              <1> 
+   113                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   114                              <1> ; or at locations 0280h..3FFh in low memory?
+   115                              <1> %if SOFT_DEBUG
+   116                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   117                              <1> %else
+   118                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   119                              <1> %endif
+   120                              <1> 
+   121                              <1> ; Define the size of the EPROM that is to be installed on the system
+   122                              <1> ; It may be larger than the actual ROM image to be generated.
+   123                              <1> %ifndef CHIP
+   124                              <1> CHIP            equ     64
+   125                              <1> %endif
+   126                              <1> 
+   127                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   128                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   129                              <1> FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   130                              <1> ;FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   131                              <1> 
+   132                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   133                              <1> ; If the wiring update is installed, or you have a later board, then
+   134                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   135                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   136                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   137                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   138                              <1> 
+   139                              <1> ; Define the UART oscillator speed
+   140                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   141                              <1> 
+   142                              <1> 
+   143                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   144                              <1> ; end of the User configuration
+   145                              <1> ;       Do Not modify anything below this point
+   146                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   147                              <1> 
+   148                              <1> CVDU_8563	equ	CVDU		; separate inits
+   149                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
+   150                              <1> VGA3_6445       equ     VGA3            ; separate inits
+   151                              <1> ; Suppress all UART output in color video Mode 3
+   152                              <1> ;UART_MODE3_SUPPRESS	equ	0
+   153                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563 | VGA3_6445
+   154                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
+   155                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
+   156                              <1> 
+   157                              <1> ; Define existence of any uart chip
+   158                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   159                              <1> startuplength   equ     128                     ; may be up to 1024
+   160                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   161                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   162                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   163                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   164                              <1> 
+   165                              <1> 
+   166                              <1> %define ARG(n) [bp+2+(n)*2]
+   167                              <1> 
+   168                              <1> %macro  check   1.nolist
+   169                              <1>  %if (%1)
+   170                              <1>    %error Check Failure: %1
+   171                              <1>  %endif
+   172                              <1> %endm
+   173                              <1> %macro  range   3.nolist
+   174                              <1>  %if (%1)<(%2)
+   175                              <1>    %error Out of Range: %1
+   176                              <1>  %elif (%1)>(%3)
+   177                              <1>    %error Out of Range: %1
+   178                              <1>  %endif
+   179                              <1> %endm
+   180                              <1> _terminal equ UART+CVDU
+   181                              <1>  check   RAM_DOS&15
+   182                              <1>  check   RAM&(RAM-1)
+   183                              <1>  check   ROM&(ROM-1)
+   184                              <1>  range   RAM,32,512
+   185                              <1>  range   ROM,32,256
+   186                              <1>  range   RAM_WS,0,3
+   187                              <1>  range   ROM_WS,0,3
+   188                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   189                              <1>  range   LCL_IO_WS,0,3
+   190                              <1>  range   BUS_IO_WS,0,3
+   191                              <1>  range   UART_OSC,500000,16000000
+   192                              <1>  range   UART_RATE,0,7
+   193                              <1>  range	 UART,0,1
+   194                              <1>  range	 _terminal,1,2
+   195                              <1> 
+   196                              <1> %ifndef SOFT_DEBUG
+   197                              <1> %define SOFT_DEBUG 0
+   198                              <1> %endif
+   199                              <1> 
+   200                              <1> %ifndef TRACE
+   201                              <1> %define TRACE 0
+   202                              <1> %endif
+   203                              <1> 
+   204                              <1> %ifdef MAKE_OBJECT_FILE
+   205                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   206                              <1>         export _ROMsize
+   207                              <1>         export _CHIPsize
+   208                              <1> _ROMsize        dw      ROM
+   209                              <1> _CHIPsize       dw      CHIP
+   210                              <1> %endif
+   211                              <1> ; end of the Hardware configuration file
+   212                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   213                              <1> ;*/
+    30                                  ANY_VIDEO	equ	(CVDU_8563|VGA3_6445)
+    31                                  
+    32                                  %include	"cpuregs.asm"
+     1                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                              <1> ; CPUREGS.ASM
+     3                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     4                              <1> ;
+     5                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+     6                              <1> ;
+     7                              <1> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+     8                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+     9                              <1> ;
+    10                              <1> ; This program is free software: you can redistribute it and/or modify
+    11                              <1> ; it under the terms of the GNU General Public License as published by
+    12                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    13                              <1> ; (at your option) any later version.
+    14                              <1> ;
+    15                              <1> ; This program is distributed in the hope that it will be useful,
+    16                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    17                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    18                              <1> ; GNU General Public License for more details.
+    19                              <1> ;
+    20                              <1> ; You should have received a copy of the GNU General Public License
+    21                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    22                              <1> ;
+    23                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    24                              <1>         cpu     186
+    25                              <1> ;
+    26                              <1> ;
+    27                              <1> ; IBM model byte -- must be less than a 286
+    28                              <1> ;
+    29                              <1> ;MODEL_BYTE		equ	0FEh	; PC-XT
+    30                              <1> ;SUBMODEL_BYTE		equ	0FFh	; not used
+    31                              <1> 
+    32                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    33                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    34                              <1> 
+    35                              <1> 
+    36                              <1> ; 80188 peripheral control register block address
+    37                              <1> CPU_CSCR	        equ	0FF00h
+    38                              <1> 
+    39                              <1> ; Compatible Mode registers
+    40                              <1> 
+    41                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    42                              <1> 
+    43                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
+    44                              <1> 
+    45                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    46                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    47                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    48                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    49                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    50                              <1> 
+    51                              <1> ; Enhanced Mode registers
+    52                              <1> 
+    53                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    54                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    55                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+    56                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+    57                              <1> 
+    58                              <1> 
+    59                              <1> ; On-board internal peripheral equates
+    60                              <1> ; Programmable Interrupt Controller
+    61                              <1> PIC	        equ	CPU_CSCR+020H
+    62                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+    63                              <1> PIC_POLLR	equ	PIC+4
+    64                              <1> PIC_POLLSR	equ	PIC+6
+    65                              <1> PIC_IMASK	equ	PIC+8
+    66                              <1> PIC_PMREG	equ	PIC+0AH
+    67                              <1> PIC_SRVR	equ	PIC+0CH
+    68                              <1> PIC_IRQR	equ	PIC+0EH
+    69                              <1> PIC_IRQSR	equ	PIC+10H
+    70                              <1> PIC_TCR	        equ	PIC+12H
+    71                              <1> PIC_DMA0CR	equ	PIC+14H
+    72                              <1> PIC_DMA1CR	equ	PIC+16H
+    73                              <1> PIC_I0CON	equ	PIC+18H
+    74                              <1> PIC_I1CON	equ	PIC+1AH
+    75                              <1> PIC_I2CON	equ	PIC+1CH
+    76                              <1> PIC_I3CON	equ	PIC+1EH
+    77                              <1> 
+    78                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
+    79                              <1> 
+    80                              <1> ; Interrupt masks (Master Mode)
+    81                              <1> ;
+    82                              <1> mask_timer_all          equ     0001h
+    83                              <1> mask_dma0               equ     0004h
+    84                              <1> mask_dma1               equ     0008h
+    85                              <1> mask_int0               equ     0010h
+    86                              <1> mask_int1               equ     0020h
+    87                              <1> mask_int2               equ     0040h
+    88                              <1> mask_int3               equ     0080h
+    89                              <1> 
+    90                              <1> 
+    91                              <1> 
+    92                              <1> ; Timers
+    93                              <1> TIM0	        equ	CPU_CSCR+050H
+    94                              <1> TIM1	        equ	CPU_CSCR+058H
+    95                              <1> TIM2	        equ	CPU_CSCR+060H
+    96                              <1> 
+    97                              <1> TCNT	        equ	0	; count register
+    98                              <1> CMPA	        equ	2	; max count A
+    99                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   100                              <1> TCON	        equ	6	; mode/control word
+   101                              <1> 
+   102                              <1> ; Timer control bits:
+   103                              <1> tc_EN           equ     8000h   ; Enable bit
+   104                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   105                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   106                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   107                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   108                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   109                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   110                              <1> tc_EXT          equ     0004h   ; External clock
+   111                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   112                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   113                              <1> 
+   114                              <1> 
+   115                              <1> 
+   116                              <1> 
+   117                              <1> ; DMA
+   118                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   119                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   120                              <1> DMASPL	        equ	0	; source pointer low
+   121                              <1> DMASPU	        equ	2	; source pointer high
+   122                              <1> DMADPL	        equ	4	; destination pointer low
+   123                              <1> DMADPU	        equ	6	; destination pointer high
+   124                              <1> DMATC	        equ	8	; terminal count
+   125                              <1> DMACW	        equ	0AH	; control word
+   126                              <1> 
+   127                              <1> 
+   128                              <1> 
+   129                              <1> 
+   130                              <1> 
+   131                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   132                              <1> ;
+   133                              <1> ;       SBC-188 external devices
+   134                              <1> ;
+   135                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   136                              <1> 
+   137                              <1> IO_BASE			equ	0400h
+   138                              <1> 
+   139                              <1> 
+   140                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   141                              <1> ; The UART registers
+   142                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   143                              <1> uart_base               equ     IO_BASE+0280h
+   144                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   145                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   146                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   147                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   148                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   149                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   150                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   151                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   152                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   153                              <1> uart_sr			equ	uart_base+7	;Scratch
+   154                              <1> 
+   155                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   156                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   157                              <1> 
+   158                              <1> 
+   159                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   160                              <1> ; Floppy controller
+   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   162                              <1> FDC	        equ	IO_BASE+0200H
+   163                              <1> FDC_MSR         equ     FDC
+   164                              <1> FDC_DATA        equ     FDC_MSR+1
+   165                              <1> FDC_DACK        equ	FDC+10H
+   166                              <1> FDC_LDOR	equ	FDC+20H
+   167                              <1> FDC_LDCR	equ	FDC+30H
+   168                              <1> FDC_TC	        equ	FDC+40H
+   169                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+   170                              <1> 
+   171                              <1> 
+   172                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   173                              <1> ;DS1302 RTC
+   174                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   175                              <1> RTC	equ	IO_BASE+0300H
+   176                              <1> 
+   177                              <1> 
+   178                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   179                              <1> ; PIO 82C55 I/O 
+   180                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   181                              <1> PPI	        equ	IO_BASE+0260H
+   182                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   183                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   184                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)  
+   185                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   186                              <1> 
+   187                              <1> portA           equ     PPI+0   ;
+   188                              <1> portB           equ     PPI+1   ;     LITES uses this for output
+   189                              <1> portC           equ     PPI+2   ;
+   190                              <1> 
+   191                              <1> 
+   192                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   193                              <1> ; Dual [DMA] IDE devices
+   194                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   195                              <1> DIDE		equ	IO_BASE + 20H	; range 0x20..0x3F
+   196                              <1> 
+   197                              <1> DIDE0		equ	DIDE		; first interface (master & slave)
+   198                              <1> DIDE1		equ	DIDE+10h	; second interface (master & slave)
+   199                              <1> 
+   200                              <1> 
+   201                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   202                              <1> ; Cassette I/O
+   203                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   204                              <1> cuart_base	EQU 	IO_BASE+80H	; BASE IO ADDRESS OF CASSETTE UART
+   205                              <1> cuart_rbr	equ     cuart_base	;Rcvr Buffer / read only
+   206                              <1> cuart_thr	equ     cuart_base	;Transmit Holding / write only
+   207                              <1> cuart_ier	equ     cuart_base+1	;Interrupt Enable
+   208                              <1> cuart_iir	equ     cuart_base+2	;Interrupt Ident / read only
+   209                              <1> cuart_fcr	equ     cuart_base+2	;FIFO Control / write only
+   210                              <1> cuart_lcr	equ     cuart_base+3	;Line Control
+   211                              <1> cuart_mcr	equ     cuart_base+4	;Modem Control
+   212                              <1> cuart_lsr	equ     cuart_base+5	;Line Status
+   213                              <1> cuart_msr	equ     cuart_base+6	;Modem Status
+   214                              <1> cuart_sr	equ	cuart_base+7	;Scratch
+   215                              <1> 
+   216                              <1> cuart_dll	equ     cuart_base	;Divisor Latch LS Byte
+   217                              <1> cuart_dlm	equ	cuart_base+1	;Divisor Latch MS Byte
+   218                              <1> 
+   219                              <1> 
+   220                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   221                              <1> ;
+   222                              <1> ;       4MEM control registers
+   223                              <1> ;
+   224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   225                              <1> EMM_addr        equ     1               ; high 6 bits of 20-bit address
+   226                              <1> EMM_page        equ     0               ; 4MEM page in [0..254]
+   227                              <1> 
+   228                              <1> EMM_BASE        equ     IO_BASE + 000h          ; first EMM (4MEM) board
+   229                              <1> EMM_unmapped    equ     255             ; unmapped 4MEM page
+   230                              <1> 
+   231                              <1> EMM0            equ     EMM_BASE        ; first  EMM board
+   232                              <1> EMM1            equ     EMM0 + 2        ; second EMM board
+   233                              <1> EMM2            equ     EMM1 + 2        ; third  EMM board
+   234                              <1> EMM3            equ     EMM2 + 2        ; fourth EMM board
+   235                              <1> 
+   236                              <1> 
+   237                              <1> 
+   238                              <1> 
+   239                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   240                              <1> ;
+   241                              <1> ;	ColorVDU devices
+   242                              <1> ;
+   243                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   244                              <1> ;
+   245                              <1> ;	major select on the Z80 bus
+   246                              <1> ;
+   247                              <1> devCVDU_8bit	equ	0xE0		; this may change to 0x10
+   248                              <1> 
+   249                              <1> devCVDUbase 	equ	IO_BASE + devCVDU_8bit
+   250                              <1> 
+   251                              <1> M8563status	equ	devCVDUbase + 4		; 4 == bitrev(2)
+   252                              <1> M8563register	equ	devCVDUbase + 4
+   253                              <1> M8563data	equ	devCVDUbase + 12	; 12 == bitrev(3)
+   254                              <1> 
+   255                              <1> %if CVDU_8563
+   256                              <1> I8242status	equ	devCVDUbase + 10	; 10 == bitrev(5)
+   257                              <1> I8242command	equ	devCVDUbase + 10
+   258                              <1> I8242data	equ	devCVDUbase + 2		; 2 == bitrev(4)
+   259                              <1> %endif
+   260                              <1> 
+   261                              <1> 
+   262                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   263                              <1> ;
+   264                              <1> ;	VGA3 devices
+   265                              <1> ;
+   266                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   267                              <1> ;
+   268                              <1> ;	major select on the Z80 bus
+   269                              <1> ;
+   270                              <1> devVGA3_8bit    equ     0xE0                    ; same as CVDU
+   271                              <1> 
+   272                              <1> devVGA3base       equ     IO_BASE + devVGA3_8bit
+   273                              <1> 
+   274                              <1> %if VGA3_6445
+   275                              <1> I8242status	equ	devVGA3base + 1
+   276                              <1> I8242command	equ	devVGA3base + 1
+   277                              <1> I8242data	equ	devVGA3base + 0
+   278                              <1> %endif
+   279                              <1> HD6445addr	equ	devVGA3base + 2		; to address the HD6445 registers
+   280                              <1> HD6445reg	equ	devVGA3base + 3		; to r/w a register on the CRTC
+   281                              <1> 
+   282                              <1> vga3cfg		equ	devVGA3base + 4
+   283                              <1> ; the following are probably not used on the SBC-188, except for testing/checking
+   284                              <1> vga3adhi	equ	devVGA3base + 5
+   285                              <1> vga3adlo	equ	devVGA3base + 6
+   286                              <1> vga3data	equ	devVGA3base + 7
+   287                              <1> 
+   288                              <1> 
+   289                              <1> 
+   290                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   291                              <1> ;
+   292                              <1> ;	Front Panel devices
+   293                              <1> ;
+   294                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   295                              <1> ;
+   296                              <1> ; Front Panel 82C55 I/O 
+   297                              <1> FPPPI	        equ	IO_BASE+0A0H
+   298                              <1> FPPORTA         equ     FPPPI+0   	;
+   299                              <1> FPPORTB         equ     FPPPI+1   	;    
+   300                              <1> FPPORTC         equ     FPPPI+2   	;
+   301                              <1> FPPIOCONT       equ     FPPPI+3   	;
+   302                              <1> 
+   303                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   304                              <1> ; debug port -- JRC only
+   305                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   306                              <1> portD		equ	IO_BASE + 0FFh		; 0x04FF
+   307                              <1> ;portD		equ	portB		     ; older 8255 output on PPI
+   308                              <1> 
+   309                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   310                              <1> ;
+   311                              <1> ; some useful macros:
+   312                              <1> ;
+   313                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   314                              <1> ;
+   315                              <1> 
+   316                              <1> %imacro setloc  1.nolist
+   317                              <1>  times   (%1-($-$$)) db 0FFh
+   318                              <1> %endm
+   319                              <1> 
+   320                              <1> %imacro db_lo   1
+   321                              <1>  db (%1)&255
+   322                              <1> %endm
+   323                              <1> 
+   324                              <1> %imacro cnop    0.nolist
+   325                              <1> %if SOFT_DEBUG
+   326                              <1>         nop
+   327                              <1> %endif
+   328                              <1> %endm
+   329                              <1> 
+   330                              <1> %imacro popm 1-*.nolist
+   331                              <1> %rep %0
+   332                              <1> %ifidni %1,ALL
+   333                              <1>  popa
+   334                              <1> %elifidni %1,F
+   335                              <1>  popf
+   336                              <1> %else
+   337                              <1>  pop %1
+   338                              <1> %ifidni %1,DS
+   339                              <1>  cnop
+   340                              <1> %elifidni %1,ES
+   341                              <1>  cnop
+   342                              <1> %endif
+   343                              <1> %endif
+   344                              <1> %rotate 1
+   345                              <1> %endrep
+   346                              <1> %endm
+   347                              <1> 
+   348                              <1> %imacro pushm 1-*.nolist
+   349                              <1> %rep %0
+   350                              <1> %rotate -1
+   351                              <1> %ifidni %1,ALL
+   352                              <1>  pusha
+   353                              <1> %elifidni %1,F
+   354                              <1>  pushf
+   355                              <1> %else
+   356                              <1>  push %1
+   357                              <1> %endif
+   358                              <1> %endrep
+   359                              <1> %endm
+   360                              <1> 
+   361                              <1> ; end CPUREGS.ASM
+   362                              <1> 
+    33                                  %include	"equates.asm"
+     1                              <1> ;========================================================================
+     2                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
+     3                              <1> ;========================================================================
+     4                              <1> ;   for the N8VEM SBC-188 v.00.4 and 00.5
+     5                              <1> ;
+     6                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+     7                              <1> ;
+     8                              <1> ; Copyright (C) 2010 John R. Coffman.  All rights reserved.
+     9                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    10                              <1> ;
+    11                              <1> ; This program is free software: you can redistribute it and/or modify
+    12                              <1> ; it under the terms of the GNU General Public License as published by
+    13                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    14                              <1> ; (at your option) any later version.
+    15                              <1> ;
+    16                              <1> ; This program is distributed in the hope that it will be useful,
+    17                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    18                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    19                              <1> ; GNU General Public License for more details.
+    20                              <1> ;
+    21                              <1> ; You should have received a copy of the GNU General Public License
+    22                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    23                              <1> ;
+    24                              <1> ;========================================================================
+    25                              <1> 
+    26                              <1> %if 1
+    27                              <1> 	SEGMENT  _TEXT ALIGN=16 PUBLIC CLASS=CODE
+    28                              <1>         SEGMENT  CONST ALIGN=2 PUBLIC CLASS=DATA
+    29                              <1> 	SEGMENT  _DATA ALIGN=2 PUBLIC CLASS=DATA
+    30                              <1>         SEGMENT  CONST2 ALIGN=2 PUBLIC CLASS=DATA
+    31                              <1> 	SEGMENT  _BSS  ALIGN=2 PUBLIC CLASS=BSS
+    32                              <1> ;;;        SEGMENT  _BASIC ALIGN=16 PUBLIC CLASS=BASIC
+    33                              <1> 
+    34                              <1> 	GROUP	DGROUP CONST _DATA CONST2 _BSS
+    35                              <1> 
+    36                              <1>         global  FPEM_segment
+    37                              <1> %endif
+    38                              <1> 
+    39                              <1> %include "ascii.asm"
+     1                              <2> ; ascii.asm
+     2                              <2> ;
+     3                              <2> CTRL            equ     1Fh     ; masks a character to CTRL-x
+     4                              <2> 
+     5                              <2> NUL     equ     00h
+     6                              <2> BEL     equ     (CTRL & 'G')
+     7                              <2> BS      equ     08h
+     8                              <2> HT      equ     09h
+     9                              <2> LF	equ	0Ah
+    10                              <2> NL      equ     LF
+    11                              <2> CR	equ	0Dh
+    12                              <2> XON     equ     (CTRL & 'Q')
+    13                              <2> XOFF    equ     (CTRL & 'S')
+    14                              <2> DC1     equ     XON
+    15                              <2> DC3     equ     XOFF
+    16                              <2> ESC     equ	1Bh
+    17                              <2> 
+    18                              <2> 
+    40                              <1> 
+    41                              <1> 
+    42                              <1> ; POST error codes. Presently one byte but can expand to word.
+    43                              <1> ER_BIOS equ	01h		; Bad ROM bios checksum, patch last byte
+    44                              <1> ER_RAM	equ	02h		; Bad RAM in main memory, replace
+    45                              <1> ER_CRT	equ	04h		; Bad RAM in video card, replace
+    46                              <1> ER_FDC	equ	08h		; Bad FDC
+    47                              <1> ER_UNK1	equ	10h		; {unassigned}
+    48                              <1> ER_MEM	equ	20h		; Bad RAM in vector area, replace
+    49                              <1> ER_ROM	equ	40h		; Bad ROM in expansion area, bad checksum
+    50                              <1> ER_UNK2	equ	80h		; {unassigned}
+    51                              <1> 
+    52                              <1> 
+    53                              <1> 
+    54                              <1> ;; ************************ BIOS Data Segment ******************************
+    55                              <1> ;; BIOS data segment - not all will  be used
+    56                              <1> ;                struc   BIOS_DATA_AREA  ; at 0040:0000
+    57                              <1> %include "bda.inc"
+     1                              <2> ;/*======================================================================
+     2                              <2> ; bda.inc -- BIOS data area definitions
+     3                              <2> ;========================================================================
+     4                              <2> ;   for the N8VEM SBC-188
+     5                              <2> ;
+     6                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+     7                              <2> ;
+     8                              <2> ; Copyright (C) 2013 John R. Coffman.  All rights reserved.
+     9                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    10                              <2> ;
+    11                              <2> ; This program is free software: you can redistribute it and/or modify
+    12                              <2> ; it under the terms of the GNU General Public License as published by
+    13                              <2> ; the Free Software Foundation, either version 3 of the License, or
+    14                              <2> ; (at your option) any later version.
+    15                              <2> ;
+    16                              <2> ; This program is distributed in the hope that it will be useful,
+    17                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    18                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    19                              <2> ; GNU General Public License for more details.
+    20                              <2> ;
+    21                              <2> ; You should have received a copy of the GNU General Public License
+    22                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    23                              <2> ;
+    24                              <2> ;========================================================================
+    25                              <2> 
+    26                              <2> 			;*/ extern				/*
+    27                              <2> 	ABSOLUTE  0	;*/ struct BDA {			/*
+    28 00000000 <res 00000008>      <2> serial_ports    resw    4	;*/	word	serial_ports[4];	/*
+    29 00000008 <res 00000008>      <2> parallel_ports  resw    4	;*/	word	parallel_ports[4];	/*
+    30 00000010 <res 00000002>      <2> equipment_flag  resw    1	;*/	EQFL	equipment_flag;		/*
+    31                              <2> ;	dw	?		; 40:10 	; Equipment present word
+    32                              <2> ;  						;  = (1 iff floppies) *     1.
+    33                              <2> ;                                               ;  + (1 iff 187     ) *     2.
+    34                              <2> ;  						;  + (#+1 64K sys ram) *    4.
+    35                              <2> ;  						;  + (init crt mode ) *    16.
+    36                              <2> ;  						;  + (# of floppies ) *    64.
+    37                              <2> ;  						;  + (# serial ports) *   512.
+    38                              <2> ;  						;  + (1 iff toy port) *  4096.
+    39                              <2> ;                                               ;  + (1 iff modem   ) *  8192.
+    40                              <2> ;  						;  + (# parallel LPT) * 16384.
+    41 00000012 <res 00000001>      <2> mfg_test_flags  resb    1	;*/	byte	mfg_test_flags;	/* 40:12 unused by us
+    42 00000013 <res 00000002>      <2> memory_size     resw    1	;*/	word	memory_size;	/* 40:13 kilobytes
+    43                              <2> uart_kbd_ctrl_R	equ	$	;*/				/*** JRC: count of ctrl-R's for reboot
+    44 00000015 <res 00000001>      <2> IPL_errors      resb    1	;*/	byte	IPL_errors;	/* 40:15 IPL errors<-table/scratchpad
+    45 00000016 <res 00000001>      <2> unused_01       resb    1	;*/	byte	unused_01;	/*
+    46                              <2> ;;---------------[Keyboard data area]------------;
+    47 00000017 <res 00000002>      <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
+    48                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+    49 00000019 <res 00000001>      <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
+    50 0000001A <res 00000002>      <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
+    51 0000001C <res 00000002>      <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
+    52 0000001E <res 00000020>      <2> kbd_buffer      resw    16	;*/	word	kbd_buffer[16];	/* 40:1E Keyboard Buffer (Scan,Value)
+    53                              <2> kbd_buffer_last	equ	$	;*/				/*
+    54                              <2> ;;---------------[Diskette data area]------------;
+    55 0000003E <res 00000001>      <2> fdc_drv_calib   resb    1	;*/	byte	fdc_drive_calib;   /* 40:3E
+    56 0000003F <res 00000001>      <2> fdc_motor_LDOR  resb    1	;*/	byte	fdc_motor_LDOR;	   /* 40:3F Motor, DMA, select control
+    57 00000040 <res 00000001>      <2> fdc_motor_ticks resb    1	;*/	byte	fdc_motor_ticks;   /* 40:40 ticks til motor off
+    58 00000041 <res 00000001>      <2> fdc_status      resb    1	;*/	byte	fdc_status;	   /* 40:41
+    59                              <2> ;				Floppy return code stat byte
+    60                              <2> ;				;  1 = bad ic 765 command req.
+    61                              <2> ;				;  2 = address mark not found
+    62                              <2> ;				;  3 = write to protected disk
+    63                              <2> ;				;  4 = sector not found
+    64                              <2> ;				;  8 = data late (DMA overrun)
+    65                              <2> ;				;  9 = DMA failed 64K page end
+    66                              <2> ;				; 16 = bad CRC on floppy read
+    67                              <2> ;				; 32 = bad NEC 765 controller
+    68                              <2> ;				; 64 = seek operation failed
+    69                              <2> ;				;128 = disk drive timed out
+    70 00000042 <res 00000007>      <2> fdc_ctrl_status resb    7	;*/	byte	fdc_ctrl_status[7];  /* 40:42 Status bytes from NEC 765
+    71                              <2> ;;---------------[Video display area]------------;
+    72 00000049 <res 00000001>      <2> video_mode      resb    1	;*/	byte	video_mode;	/* 40:49
+    73                              <2> ;			 	; Current CRT mode  (software)
+    74                              <2> ;				;  0 = 40 x 25 text (no color)
+    75                              <2> ;				;  1 = 40 x 25 text (16 color)
+    76                              <2> ;				;  2 = 80 x 25 text (no color)
+    77                              <2> ;				;  3 = 80 x 25 text (16 color)
+    78                              <2> ;				;  4 = 320 x 200 grafix 4 color
+    79                              <2> ;				;  5 = 320 x 200 grafix 0 color
+    80                              <2> ;				;  6 = 640 x 200 grafix 0 color
+    81                              <2> ;				;  7 = 80 x 25 text (mono card)
+    82 0000004A <res 00000002>      <2> video_columns   resw    1	;*/	word video_columns;	/* 40:4A Columns on CRT screen
+    83 0000004C <res 00000002>      <2> video_regen_bytes  resw 1	;*/	word video_regen_bytes;	/* 40:4C Bytes in the regen region
+    84 0000004E <res 00000002>      <2> video_regen_offset resw 1	;*/	word video_regen_offset;/* 40:4E Byte offset in regen region
+    85 00000050 <res 00000010>      <2> video_cursor_pos  resw  8	;*/	word video_cursor_pos[8];  /* 40:50 Cursor pos for up to 8 pages
+    86 00000060 <res 00000002>      <2> video_cursor_mode resw  1	;*/	word video_cursor_mode;	/* 40:60 Current cursor mode setting
+    87 00000062 <res 00000001>      <2> video_page      resb    1	;*/	byte video_page;	/* 40:62 Current page on display
+    88 00000063 <res 00000002>      <2> video_base_seg  resw    1	;*/	word video_base_seg;	/* 40:63 Base address (B000h or B800h)
+    89 00000065 <res 00000001>      <2> video_hw_mode   resb    1	;*/	byte video_hw_mode;	/* 40:65 ic 6845 mode reg. (hardware)
+    90 00000066 <res 00000001>      <2> video_cga_palette resb  1	;*/	byte video_cga_palette;	/* 40:66 Current CGA palette
+    91                              <2> ;;---------------[Used to setup ROM]-------------;
+    92 00000067 <res 00000004>      <2> eprom_address   resd    1	;*/	dword eprom_address;	/* 40:67 Eprom base Offset,Segment
+    93 0000006B <res 00000001>      <2> spurious_irq    resb    1	;*/	byte spurious_irq;	/* 40:6B Last spurious interrupt IRQ
+    94                              <2> ;;---------------[Timer data area]---------------;
+    95 0000006C <res 00000004>      <2> timer_ticks     resd    1	;*/	dword timer_ticks;	/* 40:6C Ticks since midnight (lo,hi)
+    96 00000070 <res 00000001>      <2> timer_new_day   resb    1	;*/	byte timer_new_day;	/* 40:70 Non-zero if new day
+    97                              <2> ;;---------------[System data area]--------------;
+    98 00000071 <res 00000001>      <2> break_flag      resb    1	;*/	byte break_flag;	/* 40:71 Sign bit set iff break
+    99 00000072 <res 00000002>      <2> warm_boot       resw    1	;*/	word warm_boot;		/* 40:72 Warm boot iff==1234h
+   100                              <2> ;;---------------[Hard disk scratchpad]----------;
+   101 00000074 <res 00000004>      <2> hdd_scratch     resd    1	;*/	word hdd_scratch[2];	/* 40:74
+   102                              <2> ;;---------------[Timout areas/PRT/LPT]----------;
+   103 00000078 <res 00000004>      <2> lpt_timeout     resb    4	;*/	byte lpt_timeout[4];	/* 40:78 Ticks for LPT 1-4 timeouts
+   104 0000007C <res 00000004>      <2> com_timeout     resb    4	;*/	byte com_timeout[4];	/* 40:7C Ticks for COM 1-4 timeouts
+   105                              <2> ;;---obsolete----[Keyboard buf start/end]---jrc--;
+   106 00000080 <res 00000002>      <2> kbd_buffer_start resw   1	;*/	word kbd_buffer_start;	/* 40:80 KBD buffer head (PC/AT)
+   107 00000082 <res 00000002>      <2> kbd_buffer_end  resw    1	;*/	word kbd_buffer_end;	/* 40:82 KBD buffer tail (PC/AT)
+   108                              <2> ;;---------------[EGA stuff]---------------------;
+   109 00000084 <res 00000007>      <2> EGA_stuff	resb	7	;*/	byte EGA_stuff[7];	/* 40:84 Unspecified EGA data
+   110                              <2> ;;---------------[Floppy/Fixed Media Info]-------------;
+   111 0000008B <res 00000001>      <2> fdc_last_rate	resb	1	;*/	byte fdc_last_rate;	/* 40:8B Last floppy step rate/data rate?
+   112 0000008C <res 00000004>      <2> fx_misc_unused	resb	4	;*/	byte fx_misc_unused[4];	/* 40:8C Fixed disk miscellaneous ???
+   113 00000090 <res 00000002>      <2> fdc_disk_state	resb	2	;*/	byte fdc_disk_state[2];	/* 40:90 Floppy disk state
+   114 00000092 <res 00000002>      <2> fdc_op_start	resb	2	;*/	byte fdc_op_start[2];	/* 40:92 Floppy operation start state machine
+   115 00000094 <res 00000002>      <2> fdc_cylinder	resb	2	;*/	byte fdc_cylinder[2];	/* 40:94 Floppy present cylinder
+   116                              <2> ;;---------------[Additional KBD flags]----------------;
+   117 00000096 <res 00000001>      <2> kbd_flag_3	resb	1	;*/	byte kbd_flag_3;	/* 40:96 kbd ???
+   118 00000097 <res 00000001>      <2> kbd_flag_2	resb	1	;*/	byte kbd_flag_2;	/* 40:97 kbd ???
+   119                              <2> ;;---------------[RTC/timer1 data]---------------------;
+   120 00000098 <res 00000004>      <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
+   121 0000009C <res 00000004>      <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
+   122 000000A0 <res 00000001>      <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   123                              <2> ;;---------------[Cassette I/O stuff]------------------;
+   124 000000A1 <res 00000001>      <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
+   125 000000A2 <res 00000002>      <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
+   126                              <2> ;									Post Acknowleged=00;
+   127 000000A4 <res 00000001>      <2> EGA_data	resb	1	;*/	byte EGA_data;		/* 40:A4 Various usage
+   128 000000A5 <res 00000002>      <2> SDstatus	resb	2	;*/	byte SDstatus[2];	/* 40:A5 Status byte from command
+   129 000000A7 <res 00000002>      <2> SDcardtype	resb	2	;*/	byte SDcardtype[2];	/* 40:A7 SDcard type SDSC=2, HC=3, ...
+   130                              <2> ;
+   131 000000A9 <res 00000004>      <2> fixed_disk_tab	resb	4	;*/	byte fixed_disk_tab[4];	/* dispatch table to fixed disk drivers
+   132 000000AD <res 00000001>      <2> wait12_count	resb	1	;*/	byte wait12_count;	/* 40:AD 12usec CX count
+   133 000000AE <res 00000001>      <2> lock_count	resb	1	;*/	byte lock_count;	/* 40:AE lock level counter
+   134 000000AF <res 00000001>      <2> EMS_start       resb    1	;*/	byte EMS_start;		/* start EMS allocation from here
+   135                              <2> fx80		equ	$	;*/	struct EDD_disk fx80;	/* fixed disk parameter area 0
+   136 000000B0 <res 00000002>      <2> fx_log_cylinders resw   1	;	word fx_log_cylinders;	 logical number of cylinders
+   137 000000B2 <res 00000001>      <2> fx_log_heads    resb    1	;	byte fx_log_heads;	 logical number of heads
+   138 000000B3 <res 00000001>      <2> fx_signature	resb	1	;	byte fx_signature;	 A0h signature = translated geom
+   139 000000B4 <res 00000001>      <2> fx_phys_sectors	resb    1       ;	byte fx_phys_sectors;	 physical number of sectors per track
+   140 000000B5 <res 00000002>      <2> fx_LBA_high     resw    1       ;	word fx_LBA_high;	 high word of LBA28 number of sectors
+   141 000000B7 <res 00000001>      <2> fx_reserved7    resb	1	;	byte fx_reserved;	 MBZ
+   142 000000B8 <res 00000001>      <2> fx_drive_control resb   1       ;	byte fx_drive_control;	 flag bits for IDE head register
+   143 000000B9 <res 00000002>      <2> fx_phys_cylinders resw	1	;	word fx_phys_cylinders;	 physical number of cylinders
+   144 000000BB <res 00000001>      <2> fx_phys_heads	resb	1	;	byte fx_phys_heads;	 physical number of heads
+   145 000000BC <res 00000002>      <2> fx_LBA_low	resw	1	;	word fx_LBA_low;	 low word of LBA28 number of sectors
+   146 000000BE <res 00000001>      <2> fx_log_sectors	resb	1	;	byte fx_log_sectors;	 logical number of sectors per track
+   147 000000BF <res 00000001>      <2> fx_checksum	resb	1	;	byte fx_checksum;	 checksum, dunno how to compute
+   148 000000C0 <res 00000010>      <2> fx81            resb    16	;*/	struct EDD_disk fx81;	/* fixed disk parameter area 1
+   149 000000D0 <res 00000010>      <2> fx82            resb    16	;*/	struct EDD_disk fx82;	/* fixed disk parameter area 2
+   150 000000E0 <res 00000010>      <2> fx83            resb    16	;*/	struct EDD_disk fx83;	/* fixed disk parameter area 3
+   151                              <2> ;
+   152                              <2> ;
+   153                              <2> 
+   154 000000F0 <res 00000002>      <2> FPEM_segment    resw    1       ;*/	word FPEM_segment;	/* FPEM data segment
+   155                              <2> 
+   156 000000F2 <res 00000002>      <2> EBDA_paragraph  resw    1       ;*/	word EBDA_paragraph;	/* lowest EBDA paragraph
+   157                              <2> 
+   158 000000F4 <res 00000002>      <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
+   159 000000F6 <res 00000002>      <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
+   160                              <2> 
+   161 000000F8 <res 00000002>      <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   162                              <2> 
+   163 000000FA <res 00000004>      <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
+   164                              <2> 
+   165 000000FE <res 00000001>      <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
+   166                              <2> 
+   167 000000FF <res 00000001>      <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   168                              <2> ;								   CPU clock is half of this
+   169                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   170                              <2> ;
+   171                              <2> ;  System configuration stuff below
+   172                              <2> ;	c.f., CONFIG.ASM (ANSI.CFG, CVDU.CFG, etc.), User configuration stuff
+   173                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   174                              <2> %if 0				;*/
+   175                              <2> #define FIXED_DISK_MAX 4		/*
+   176                              <2> %else
+   177                              <2> %define FIXED_DISK_MAX 4
+   178                              <2> %endif
+   179                              <2> %if 0				;*/
+   180                              <2> #define PPIDE_driver 1		/*
+   181                              <2> %else
+   182                              <2> %define PPIDE_driver 1
+   183                              <2> %endif
+   184                              <2> %if 0				;*/
+   185                              <2> #define DIDE_driver 1		/*
+   186                              <2> %else
+   187                              <2> %define DIDE_driver 1
+   188                              <2> %endif
+   189                              <2> %if 0				;*/
+   190                              <2> #define DSD_driver 1		/*
+   191                              <2> %else
+   192                              <2> %define DSD_driver 1
+   193                              <2> %endif
+   194                              <2> 				;*/
+    58                              <1> 
+    59                              <1> ;  this must be the same in EQUATES.H */
+    60                              <1> %if SOFT_DEBUG
+    61                              <1> %define NBREAK  8
+    62                              <1> %endif
+    63                              <1> 
+    64                              <1> 
+    65                              <1> %if 0
+    66                              <1>         segment _TEXT
+    67                              <1> ;; *************************************************************************
+    68                              <1> 
+    69                              <1> 
+    70                              <1> 
+    71                              <1> 
+    72                              <1> ;; ************************ DOS Data Segment *******************************
+    73                              <1> ;dosdir	SEGMENT at 50h				; Boot disk directory from IPL
+    74                              <1> ;xerox	label	byte				;  0 if Print Screen idle
+    75                              <1> ;						;  1 if PrtSc xeroxing screen
+    76                              <1> ;						;255 if PrtSc error in xerox
+    77                              <1> ;						;  ...non-grafix PrtSc in bios
+    78                              <1> ;	db	200h dup(?)			; PC-DOS bootstrap procedure
+    79                              <1> ;						;  ...IBMBIO.COM buffers the
+    80                              <1> ;						;  ...directory of the boot
+    81                              <1> ;						;  ...device here at IPL time
+    82                              <1> ;						;  ...when locating the guts
+    83                              <1> ;						;  ...of the operating system
+    84                              <1> ;						;  ...filename "IBMDOS.COM"
+    85                              <1> ;dosdir	ends
+    86                              <1> ;; *************************************************************************
+    87                              <1> ;; ************************ DOS IPL Segment ********************************
+    88                              <1> ;dosseg	SEGMENT at 70h				; "Kernel" of PC-DOS op sys
+    89                              <1> ;;IBMBIO.COM file loaded by boot block. Device Drivers/Bootstrap. CONTIGUOUS<---
+    90                              <1> ;;IBMDOS.COM operating system nucleus immediately follows IBMBIO.COM and       !
+    91                              <1> ;;     doesn`t have to be contiguous.  The IBMDOS operating system nucleus     !
+    92                              <1> ;;     binary image is loaded by transient code in IBMBIO binary image	      !
+    93                              <1> ;dosseg	ends					;			      !
+    94                              <1> ;iplseg	SEGMENT at 0h				; Segment for boot block      !
+    95                              <1> ;;The following boot block is loaded with 512 bytes on the first sector of     !
+    96                              <1> ;;the bootable device by code resident in the ROM-resident bios.  Control is   !
+    97                              <1> ;;then transferred to the first word 0000:7C00 of the disk-resident bootstrap  !
+    98                              <1> ;	ORG	07C00h				;  ..offset for boot block    !
+    99                              <1> ;boot	db	200h dup(?)			;  ..start disk resident boot--
+   100                              <1> ;iplseg	ends
+   101                              <1> 
+   102                              <1> %endif
+    34                                  %if CVDU_8563
+    35                                  %include	"ega9a.asm"
+    36                                  %endif
+    37                                  
+    38                                  %if VGA3_6445
+    39                                  %define Init8563_ Init_vga3_
+    40                                  %define Scroll8563_ Scroll_vga3_
+    41                                  %define get_char_and_attribute_ vga3_get_char_and_attribute_
+    42                                  %define blast_characters_ vga3_blast_characters_
+    43                                  %define @cvdu_tty_out @vga3_tty_out
+    44                                  %define	set_cursor_pos_ vga3_set_cursor_pos_
+    45                                  %endif
+    46                                  
+    47                                  
+    48                                  offset_BP	equ	0
+    49                                  offset_BX	equ	offset_BP+2
+    50                                  offset_DS	equ	offset_BX+2
+    51                                  offset_IP	equ	offset_DS+2
+    52                                  offset_CS	equ	offset_IP+2
+    53                                  offset_FLAGS	equ	offset_CS+2
+    54                                  
+    55                                  EOS             equ     0FFh    ; End of String
+    56                                  
+    57                                  %if  WYSE
+    58                                  MAX_ROWS	equ	24	; Wyse terminals have 24 rows
+    59                                  %else
+    60                                  MAX_ROWS	equ	24	; terminals usually have 24 rows...
+    61                                  %endif
+    62                                  
+    63                                  
+    64                                  	SEGMENT _TEXT
+    65                                  ;========================================================================
+    66                                  ; BIOS call entry for video service functions
+    67                                  ;	int  10h
+    68                                  ;========================================================================
+    69                                  	global  BIOS_call_10h
+    70                                  BIOS_call_10h:			; Video service entry
+    71                                  
+    72 00000000 FB                      	sti			; Enable interrupts
+    73 00000001 1E5355                  	pushm   bp,bx,ds	; Standard register save
+    74 00000004 89E5                    	mov	bp,sp		; establish stack addressing
+    75                                  
+    76 00000006 FC                              cld                     ; do this for all functions below
+    77 00000007 6A40                    	push	bios_data_seg
+    78 00000009 1F                      	popm	ds		; establish addressability
+    79                                  
+    80 0000000A 88E3                    	mov     bl,ah		; set to index into dispatch table
+    81 0000000C 80FC14                  	cmp     ah,.max/2
+    82 0000000F 7331                    	jae     exit
+    83 00000011 B700                    	mov     bh,0
+    84 00000013 D1E3                    	shl     bx,1		; index words
+    85                                  
+    86 00000015 2EFFA7[1A00]                cs	jmp     near [.dispatch+bx]
+    87                                  .dispatch:
+    88 0000001A [4600]                  	dw      fn00		; Set video mode
+    89 0000001C [F600]                  	dw      fn01		; Set cursor shape
+    90 0000001E [1301]                  	dw      fn02		; Set cursor position
+    91 00000020 [2401]                  	dw	fn03		; Get cursor position and size
+    92 00000022 [4200]                  	dw	fn04		; Read light pen position
+    93 00000024 [3701]                  	dw	fn05		; Select active display page
+    94 00000026 [4101]                  	dw	fn06		; Scroll up window
+    95 00000028 [4101]                  	dw	fn07		; Scroll down window
+    96 0000002A [CC01]                  	dw	fn08		; Read character and attribute at cursor position
+    97 0000002C [DD01]                  	dw	fn09		; Write character and attribute at cursor position
+    98 0000002E [DD01]                  	dw	fn0A		; Write character only at cursor position
+    99 00000030 [4200]                  	dw	fn0B		; Set background color/Set palete
+   100 00000032 [4200]                  	dw	fn0C		; Write graphics pixel
+   101 00000034 [4200]                  	dw	fn0D		; Read graphics pixel
+   102 00000036 [4102]                  	dw	fn0E		; Teletype output
+   103 00000038 [BB02]                  	dw	fn0F		; Get current video mode
+   104 0000003A [4200]                  	dw	fn10		; N/A
+   105 0000003C [4200]                  	dw	fn11		; N/A
+   106 0000003E [4200]                  	dw	fn12		; N/A
+   107 00000040 [CB02]                  	dw	fn13		; Write string
+   108                                  .max	equ     $-.dispatch
+   109                                  fn04:				; nobody uses a light pen
+   110                                  fn0B:				; no overscan color emulation
+   111                                  fn0C:				; no graphics
+   112                                  fn0D:				; no graphics
+   113                                  fn10:				; not implemented for CGA and MDA
+   114                                  fn11:				; -//-
+   115                                  fn12:				; -//-
+   116                                  exit:
+   117 00000042 5D5B1F                  	popm	bp,bx,ds
+   118 00000045 CF                      	iret
+   119                                  
+   120                                  ;------------------------------------------------------------------------
+   121                                  ;----------------[Video display area]------------;
+   122                                  ;video_mode      resb    1
+   123                                  ;       db      ?               ; 40:49         ; Current CRT mode  (software)
+   124                                  ;                                               ;  0 = 40 x 25 text (no color)
+   125                                  ;                                               ;  1 = 40 x 25 text (16 color)
+   126                                  ;                                               ;  2 = 80 x 25 text (no color)
+   127                                  ;                                               ;  3 = 80 x 25 text (16 color)
+   128                                  ;                                               ;  4 = 320 x 200 grafix 4 color
+   129                                  ;                                               ;  5 = 320 x 200 grafix 0 color
+   130                                  ;                                               ;  6 = 640 x 200 grafix 0 color
+   131                                  ;                                               ;  7 = 80 x 25 text (mono card)
+   132                                  ;video_columns   resw    1
+   133                                  ;       dw      ?               ; 40:4A         ; Columns on CRT screen
+   134                                  ;video_regen_bytes  resw 1
+   135                                  ;       dw      ?               ; 40:4C         ; Bytes in the regen region
+   136                                  ;video_regen_offset resw 1
+   137                                  ;       dw      ?               ; 40:4E         ; Byte offset in regen region
+   138                                  ;video_cursor_pos  resw  8
+   139                                  ;       dw      8 dup(?)        ; 40:50         ; Cursor pos for up to 8 pages
+   140                                  ;video_cursor_mode resw  1
+   141                                  ;       dw      ?               ; 40:60         ; Current cursor mode setting
+   142                                  ;video_page      resb    1
+   143                                  ;       db      ?               ; 40:62         ; Current page on display
+   144                                  ;video_base_seg  resw    1
+   145                                  ;       dw      ?               ; 40:63         ; Base addres (B000h or B800h)
+   146                                  ;video_hw_mode   resb    1
+   147                                  ;       db      ?               ; 40:65         ; ic 6845 mode reg. (hardware)
+   148                                  ;video_cga_palette resb  1
+   149                                  
+   150                                  
+   151                                  ;========================================================================
+   152                                  ; Function 00h - Set video mode
+   153                                  ; Input:
+   154                                  ;	AH = 00h
+   155                                  ;	AL = desired video mode
+   156                                  ; Output:
+   157                                  ;	none
+   158                                  ; XXX:
+   159                                  ;	reimplement using a table?
+   160                                  ;========================================================================
+   161                                  fn00:
+   162 00000046 065756525150            	pushm	ax,cx,dx,si,di,es
+   163 0000004C 88C4                    	mov	ah,al		; save AL to AH
+   164                                  ;;	and	al,7Fh
+   165 0000004E 241F                    	and	al,1Fh		; limit modes to 0..1F
+   166 00000050 3C00                    	cmp	al,0		; 0 = 40 x 25 text (no color)
+   167 00000052 750C                    	jne	.1
+   168 00000054 B328                    	mov	bl,40		; 40 columns
+   169 00000056 B72C                    	mov	bh,2Ch		; hw mode - 40 columns, monochrome
+   170 00000058 BE0008                  	mov	si,0800h	; page size = 2048 bytes
+   171 0000005B BAD403                  	mov	dx,03D4h	; color CRT base address
+   172 0000005E EB3E                    	jmp	.set_mode
+   173                                  .1:
+   174 00000060 3C01                    	cmp	al,01		; 1 = 40 x 25 text (16 color)
+   175 00000062 750C                    	jne	.2
+   176 00000064 B328                    	mov	bl,40		; 40 columns
+   177 00000066 B728                    	mov	bh,28h		; hw mode - 40 columns, color
+   178 00000068 BE0008                  	mov	si,0800h	; page size = 2048 bytes
+   179 0000006B BAD403                  	mov	dx,03D4h	; color CRT base address
+   180 0000006E EB2E                    	jmp	.set_mode
+   181                                  .2:
+   182 00000070 3C02                    	cmp	al,02		; 2 = 80 x 25 text (no color)
+   183 00000072 750C                    	jne	.3
+   184 00000074 B350                    	mov	bl,80		; 80 columns
+   185 00000076 B72D                    	mov	bh,2Dh		; hw mode - 80 columns, monochrome
+   186 00000078 BE0010                  	mov	si,1000h	; page size = 4096 bytes
+   187 0000007B BAD403                  	mov	dx,03D4h	; color CRT base address
+   188 0000007E EB1E                    	jmp	.set_mode
+   189                                  .3:
+   190 00000080 3C03                    	cmp	al,03		; 3 = 80 x 25 text (16 color)
+   191 00000082 750C                    	jne	.4
+   192 00000084 B350                    	mov	bl,80		; 80 columns
+   193 00000086 B729                    	mov	bh,29h		; hw mode - 80 columns, color
+   194 00000088 BE0010                  	mov	si,1000h	; page size = 4096 bytes
+   195 0000008B BAD403                  	mov	dx,03D4h	; color CRT base address
+   196 0000008E EB0E                    	jmp	.set_mode
+   197                                  .4:
+   198 00000090 3C07                    	cmp	al,07		; 7 = 80 x 25 text (mono card)
+   199 00000092 7559                    	jne	.exit
+   200 00000094 B350                    	mov	bl,80		; 80 columns
+   201 00000096 B72D                    	mov	bh,2Dh		; hw mode - 80 columns, monochrome
+   202 00000098 BE0010                  	mov	si,1000h	; page size = 4096 bytes
+   203 0000009B BAB403                  	mov	dx,03B4h	; monochrome CRT base address
+   204                                  
+   205                                  .set_mode:
+   206 0000009E A24900                  	mov	byte [video_mode],al
+   207                                  %if ANY_VIDEO
+   208 000000A1 1E                      	pushm	ds
+   209 000000A2 68[0000]                	push	DGROUP
+   210 000000A5 1F                      	popm	ds
+   211                                  	extern	Init8563_	; or Init_vga3_
+   212 000000A6 E8(0000)                	call	Init8563_
+   213 000000A9 1F                      	popm	ds
+   214 000000AA BE0008                  	mov	si,0800h	; page size = 2048 bytes
+   215 000000AD A26600                  	mov	[video_cga_palette],al		; set memory size
+   216 000000B0 B000                    	mov	al,0
+   217                                  %else
+   218                                  	mov	al,0
+   219                                  	mov	[video_cga_palette],al		; clear location
+   220                                  				; video_cga_palette = 0
+   221                                  %endif
+   222                                  ;;	cld			; clear video part of BIOS data area
+   223 000000B2 BF4A00                  	mov	di,video_mode+1
+   224 000000B5 B91C00                  	mov	cx,video_cga_palette-video_mode-1
+   225 000000B8 1E                      	pushm	ds
+   226 000000B9 07                      	popm	es
+   227 000000BA F3AA                        rep	stosb
+   228                                  				; video_page = 0
+   229                                  				; video_regen_offset = 0
+   230                                  				; video_cursor_pos[0..7] = 0
+   231                                  
+   232 000000BC 883E6500                	mov	byte [video_hw_mode],bh
+   233 000000C0 B700                    	mov	bh,0
+   234 000000C2 891E4A00                	mov	word [video_columns],bx
+   235 000000C6 89364C00                	mov	word [video_regen_bytes],si
+   236 000000CA 89166300                	mov	word [video_base_seg],dx
+   237 000000CE B90706                  	mov	cx,0607h	; cursor start line 6, cursor end line - 7
+   238 000000D1 890E6000                	mov	word [video_cursor_mode],cx
+   239                                  
+   240 000000D5 B307                    	mov	bl,07h		; set default attributes to 07h
+   241 000000D7 E8C103                  	call	set_attributes
+   242                                  
+   243 000000DA F6C480                  	test	ah,80h		; if bit 7 of original AL set, don't clear
+   244 000000DD 7503                    	jnz	.dont_clear
+   245 000000DF E8A403                  	call	clear_screen
+   246                                  
+   247                                  .dont_clear:
+   248 000000E2 31D2                    	xor	dx,dx		; set cursor to 1,1
+   249 000000E4 E81D03                  	call	cursor_set_pos
+   250 000000E7 E87B03                  	call	cursor_show
+   251 000000EA E83B03                  	call	auto_wrap_off
+   252                                  
+   253                                  .exit:
+   254 000000ED 58595A5E5F07            	popm	ax,cx,dx,si,di,es
+   255 000000F3 E94CFF                  	jmp	exit
+   256                                  
+   257                                  ;========================================================================
+   258                                  ; Function 01h - Set cursor shape
+   259                                  ; Input:
+   260                                  ;	AH = 01h
+   261                                  ;	CH = cursor start and options
+   262                                  ;		bit 7    = 0
+   263                                  ;		bits 6,5 = 00 normal, other invisible
+   264                                  ;		bits 4-0 = topmost scan line
+   265                                  ;	CL = (bits 4-0) bottom scan line containing cursor
+   266                                  ; Output:
+   267                                  ;	none
+   268                                  ;========================================================================
+   269                                  fn01:
+   270 000000F6 51                      	push	cx
+   271 000000F7 890E6000                	mov	word [video_cursor_mode],cx
+   272 000000FB F6C560                  	test	ch,60h
+   273 000000FE 750C                    	jnz	.hide		; hide cursor
+   274 00000100 80E5E0                  	and	ch,0E0h
+   275 00000103 38CD                    	cmp	ch,cl
+   276 00000105 7705                    	ja	.hide		; hide cursor
+   277 00000107 E85B03                  	call	cursor_show	; show cursor
+   278 0000010A EB03                    	jmp	.exit
+   279                                  
+   280                                  .hide:
+   281 0000010C E83503                  	call	cursor_hide
+   282                                  	
+   283                                  .exit:
+   284 0000010F 59                      	pop	cx
+   285 00000110 E92FFF                  	jmp	exit
+   286                                  
+   287                                  ;========================================================================
+   288                                  ; Function 02h - Set cursor position
+   289                                  ; Input:
+   290                                  ;	AH = 02h
+   291                                  ;	BH = page number (0-based)
+   292                                  ;	DH = row (0-based)
+   293                                  ;	DL = column (0-based)
+   294                                  ; Output:
+   295                                  ;	none
+   296                                  ;========================================================================
+   297                                  fn02:
+   298 00000113 52                      	push	dx
+   299 00000114 88FB                    	mov	bl,bh
+   300 00000116 B700                    	mov	bh,0
+   301 00000118 D1E3                    	shl	bx,1
+   302 0000011A 895750                  	mov	word [video_cursor_pos+bx],dx
+   303 0000011D E8E402                  	call	cursor_set_pos
+   304 00000120 5A                      	pop	dx
+   305 00000121 E91EFF                  	jmp	exit
+   306                                  
+   307                                  ;========================================================================
+   308                                  ; Function 03h - Get cursor position and size
+   309                                  ; Input:
+   310                                  ;	AH = 03h
+   311                                  ;	BH = page number (0-based)
+   312                                  ; Output:
+   313                                  ;	CH = cursor starting scan-line
+   314                                  ;	CL = cursor ending scan-line
+   315                                  ;	DH = current row (0-based)
+   316                                  ;	DL = current column (0-based)
+   317                                  ;========================================================================
+   318                                  fn03:
+   319 00000124 8B5E02                  	mov	bx,word [offset_BX+bp]
+   320 00000127 88FB                    	mov	bl,bh
+   321 00000129 B700                    	mov	bh,0
+   322 0000012B D1E3                    	shl	bx,1
+   323 0000012D 8B5750                  	mov	dx,word [video_cursor_pos+bx]
+   324 00000130 8B0E6000                	mov	cx,word [video_cursor_mode]
+   325 00000134 E90BFF                  	jmp	exit
+   326                                  
+   327                                  ;========================================================================
+   328                                  ; Function 05h - Select active display page
+   329                                  ; Input:
+   330                                  ;	AH = 05h
+   331                                  ;	AL = page number (0-based)	
+   332                                  ; Output:
+   333                                  ;	none
+   334                                  ;========================================================================
+   335                                  fn05:
+   336 00000137 50                      	push	ax
+   337 00000138 2407                    	and	al,7			; allow 8 pages
+   338 0000013A A26200                  	mov	byte [video_page],al
+   339 0000013D 58                      	pop	ax
+   340 0000013E E901FF                  	jmp	exit
+   341                                  
+   342                                  ;========================================================================
+   343                                  ; Function 06h - Scroll up window
+   344                                  ; Function 07h - Scroll down window
+   345                                  ; Input:
+   346                                  ;	AH = 06h/07h
+   347                                  ;	AL = number of lines to scroll in (0=blank entire rectangle)
+   348                                  ;	BH = video attribute to be used on blank line(s)
+   349                                  ;	CH,CL = row,column of upper-left corner of rectangle to scroll
+   350                                  ;	DH,DL = row,column of lower-right corner of rectangle to scroll
+   351                                  ; Notes:
+   352                                  ;	Due to ANSI limitations column values are ignored
+   353                                  ;========================================================================
+   354                                  fn06:
+   355                                  fn07:
+   356                                  %if	ANY_VIDEO
+   357 00000141 8A1E6200                	mov	bl,[video_page]
+   358 00000145 86DF                    	xchg	bl,bh
+   359 00000147 061E52515053            	pushm	bx,ax,cx,dx,ds,es
+   360                                  
+   361 0000014D 68[0000]                	push	DGROUP
+   362 00000150 1F                      	popm	ds
+   363                                  	extern	Scroll8563_	;or Scroll_vga3_ 
+   364 00000151 E8(0000)                	call	Scroll8563_	;
+   365                                  
+   366 00000154 5B58595A1F07            	popm	bx,ax,cx,dx,ds,es
+   367                                  %endif	; ANY_VIDEO
+   368                                  
+   369                                  %if	ANSI
+   370 0000015A 525150                  	pushm	ax,cx,dx
+   371 0000015D 8B5E02                  	mov	bx,word [offset_BX+bp]
+   372 00000160 88FB                    	mov	bl,bh
+   373 00000162 E83603                  	call	set_attributes
+   374                                  
+   375 00000165 08C0                    	or	al,al
+   376 00000167 7506                    	jnz	.scroll
+   377 00000169 88F0                    	mov	al,dh	; AL = 0 - blank rectangle
+   378 0000016B 28E8                    	sub	al,ch
+   379 0000016D FEC0                    	inc	al
+   380                                  
+   381                                  .scroll:
+   382 0000016F 88F2                    	mov	dl,dh		; DL = lower row
+   383 00000171 88EE                    	mov	dh,ch		; DH = upper row
+   384 00000173 89C1                    	mov	cx,ax		; save AX in CX
+   385 00000175 B01B                    	mov	al,ESC		; set scroll region ESC[<row_up>;<row_down]r
+   386 00000177 E80704                  	call	uart_out
+   387 0000017A B05B                    	mov	al,'['
+   388 0000017C E80204                  	call	uart_out
+   389 0000017F E84D02                  	call	coords_out
+   390 00000182 B072                    	mov	al,'r'
+   391 00000184 E8FA03                  	call	uart_out
+   392                                  
+   393 00000187 B01B                    	mov	al,ESC		; use ESC[<num_rows>S or ESC[<num_rows>T
+   394 00000189 E8F503                  	call	uart_out	; to scroll the region up or down
+   395 0000018C B05B                    	mov	al,'['
+   396 0000018E E8F003                  	call	uart_out
+   397                                  	
+   398 00000191 BA0A30                  	mov	dx,300Ah	; '0' to DH - used for ASCII conversion
+   399                                  				; 10 to DL for 10-base conversion
+   400 00000194 88C8                    	mov	al,cl		; convert to ASCII and output row number
+   401 00000196 B400                    	mov	ah,0
+   402 00000198 F6F2                    	div	dl
+   403 0000019A 00F0                    	add	al,dh		; al + '0' - convert to ASCII
+   404 0000019C E8E203                  	call	uart_out
+   405 0000019F 88E0                    	mov	al,ah
+   406 000001A1 00F0                    	add	al,dh		; al + '0' - convert to ASCII
+   407 000001A3 E8DB03                  	call	uart_out
+   408                                  
+   409 000001A6 80FD07                  	cmp	ch,07h
+   410 000001A9 7407                    	je	.scroll_down
+   411 000001AB B053                    	mov	al,'S'
+   412 000001AD E8D103                  	call	uart_out	; scroll up
+   413 000001B0 EB05                    	jmp	.reset_scroll
+   414                                  
+   415                                  .scroll_down:
+   416 000001B2 B054                    	mov	al,'T'
+   417 000001B4 E8CA03                  	call	uart_out	; scroll down
+   418                                  
+   419                                  .reset_scroll:
+   420 000001B7 B01B                    	mov	al,ESC
+   421 000001B9 E8C503                  	call	uart_out
+   422 000001BC B05B                    	mov	al,'['
+   423 000001BE E8C003                  	call	uart_out
+   424 000001C1 B072                    	mov	al,'r'
+   425 000001C3 E8BB03                  	call	uart_out
+   426                                  
+   427                                  .exit:
+   428 000001C6 58595A                  	popm	ax,cx,dx
+   429                                  %elif  WYSE
+   430                                  	pushm	ax,cx,dx
+   431                                          cmp     dh,MAX_ROWS
+   432                                          jb      .0
+   433                                          mov     dh,MAX_ROWS-1
+   434                                  .0:
+   435                                  %if 0
+   436                                          mov	bx,word [offset_BX+bp]
+   437                                  	mov	bl,bh
+   438                                  	call	set_attributes
+   439                                  %endif
+   440                                          or      al,al
+   441                                          jnz     .1
+   442                                          mov     al,dh
+   443                                          sub     al,ch
+   444                                          inc     al
+   445                                  .1:     mov     dx,cx
+   446                                          xchg    ax,cx
+   447                                          call    cursor_set_pos
+   448                                  .4:     test    ch,1            ; former AH
+   449                                          jnz     .down
+   450                                          call    uart_send
+   451                                          db      ESC, 'R', EOS
+   452                                          jmp     .5
+   453                                  .down:  call    uart_send
+   454                                          db      ESC, 'E', EOS
+   455                                  .5      dec     cl
+   456                                          jnz     .4
+   457                                          popm    ax,cx,dx        
+   458                                  %endif	; ANSI | WYSE
+   459 000001C9 E976FE                  	jmp	exit
+   460                                  
+   461                                  ;========================================================================
+   462                                  ; Function 08h - Read character and attribute at cursor position
+   463                                  ; Input:
+   464                                  ;	AH = 08h
+   465                                  ;	BH = page number (0-based)
+   466                                  ; Output:
+   467                                  ;	AL = character read
+   468                                  ;	BH = video attribute
+   469                                  ; Notes:
+   470                                  ;	Impossible to emulate, returns AL = 20h, BH = 07h
+   471                                  ;========================================================================
+   472                                  fn08:
+   473                                  %if ANY_VIDEO
+   474 000001CC 06                      	pushm	es		; BP,BX,DS already saved
+   475                                  
+   476 000001CD 1E                      	pushm	ds
+   477 000001CE 68[0000]                	push	DGROUP
+   478 000001D1 1F                      	popm	ds
+   479 000001D2 8B4602                  	mov	ax,word [offset_BX+bp]
+   480                                  	extern	get_char_and_attribute_		; or vga3_get_char_and_attribute_
+   481 000001D5 E8(0000)                	call	get_char_and_attribute_		; saves BX,CX,DX (SI,DI not used)
+   482 000001D8 1F                      	popm	ds
+   483                                  	
+   484 000001D9 07                      	popm	es
+   485                                  %else
+   486                                  	mov	al,20h
+   487                                  	mov	bx,word [offset_BX+bp]
+   488                                  	mov	bh,07h
+   489                                  	mov	word [offset_BX+bp],bx
+   490                                  %endif
+   491 000001DA E965FE                  	jmp	exit
+   492                                  
+   493                                  ;========================================================================
+   494                                  ; Function 09h - Write character and attribute at cursor position
+   495                                  ; Function 0Ah - Write character only at cursor position
+   496                                  ; Input:
+   497                                  ;	AH = 09h/0Ah
+   498                                  ;	AL = character to write
+   499                                  ;	BH = page number (0-based)
+   500                                  ;	BL = video attribute (AH = 09h only)
+   501                                  ;	CX = repeat count
+   502                                  ; Output:
+   503                                  ;	none
+   504                                  ;========================================================================
+   505                                  fn09:
+   506                                  fn0A:
+   507                                  %if ANY_VIDEO
+   508 000001DD 061E5250                	pushm	ax,dx,ds,es
+   509                                  
+   510 000001E1 68[0000]                	push	DGROUP
+   511 000001E4 1F                      	popm	ds
+   512 000001E5 8B5602                      	mov	dx,word [offset_BX+bp]
+   513 000001E8 89CB                    	mov	bx,cx
+   514                                  	extern	blast_characters_	; or vga3_blast_characters_
+   515 000001EA E8(0000)                	call	blast_characters_
+   516                                  
+   517 000001ED 585A1F07                	popm	ax,dx,ds,es
+   518                                  %endif
+   519                                  %if UART
+   520 000001F1 525150                  	pushm	ax,cx,dx
+   521 000001F4 3C20                    	cmp	al,20h
+   522 000001F6 7243                    	jb	.exit		; non-printable character
+   523 000001F8 3C7F                    	cmp	al,7Fh
+   524 000001FA 743F                    	je	.exit		; non-printable character
+   525 000001FC 8B5E02                      	mov	bx,word [offset_BX+bp]
+   526 000001FF 80FC0A                  	cmp	ah,0Ah
+   527 00000202 7403                    	je	.no_attributes
+   528 00000204 E89402                  	call	set_attributes
+   529                                  .no_attributes:
+   530 00000207 88FB                    	mov	bl,bh
+   531 00000209 B700                    	mov	bh,0
+   532 0000020B D1E3                    	shl	bx,1
+   533 0000020D 8B5750                  	mov	dx,word [video_cursor_pos+bx]
+   534                                  
+   535                                  .loop:
+   536 00000210 E86E03                  	call	uart_out
+   537                                  
+   538 00000213 FEC2                    	inc	dl		; increment column
+   539 00000215 3A164A00                	cmp	dl,byte [video_columns]
+   540 00000219 7304                    	jae	.next_line
+   541 0000021B E2F3                    	loop	.loop
+   542 0000021D EB0E                    	jmp	.exit_loop
+   543                                  
+   544                                  .next_line:
+   545 0000021F B200                    	mov	dl,0
+   546 00000221 FEC6                    	inc	dh		; increment row
+   547 00000223 80FE18                  	cmp	dh,MAX_ROWS	; on the last row? (assume 25 rows)
+   548 00000226 7305                    	jae	.exit_loop
+   549 00000228 E8D901                  	call	cursor_set_pos
+   550 0000022B E2E3                    	loop	.loop
+   551                                  
+   552                                  .exit_loop:
+   553 0000022D 8A1E6200                	mov	bl,byte [video_page]
+   554 00000231 B700                    	mov	bh,0
+   555 00000233 D1E3                    	shl	bx,1
+   556 00000235 8B5750                  	mov	dx,word [video_cursor_pos+bx]
+   557 00000238 E8C901                  	call	cursor_set_pos
+   558                                  .exit:
+   559 0000023B 58595A                  	popm	ax,cx,dx
+   560                                  %endif
+   561 0000023E E901FE                  	jmp	exit
+   562                                  
+   563                                  ;========================================================================
+   564                                  ; Function 0Eh - Teletype output
+   565                                  ; Input:
+   566                                  ;	AH = 0Eh
+   567                                  ;	AL = character to write
+   568                                  ;	BH = page number (0-based)
+   569                                  ;	BL = foreground color (graphics modes only, ignored)
+   570                                  ; Output:
+   571                                  ;	none
+   572                                  ;========================================================================
+   573                                  fn0E:
+   574 00000241 52                      	push	dx
+   575                                  
+   576                                  %if ANY_VIDEO
+   577 00000242 061E51                  	pushm	cx,ds,es
+   578 00000245 8B5602                  	mov	dx,word [offset_BX+bp]
+   579 00000248 68[0000]                	push	DGROUP
+   580 0000024B 1F                      	popm	ds
+   581                                  	extern	@cvdu_tty_out	; or @vga3_tty_out
+   582 0000024C E8(0000)                	call	@cvdu_tty_out	; AX set, DX set, BX set
+   583                                  ; cvdu/vga3_tty_out is responsible for updating the cursor position
+   584 0000024F 591F07                  	popm	cx,ds,es
+   585                                  %endif
+   586                                  
+   587 00000252 8B5E02                  	mov	bx,word [offset_BX+bp]
+   588 00000255 88FB                    	mov	bl,bh
+   589 00000257 B700                    	mov	bh,0
+   590 00000259 D1E3                    	shl	bx,1
+   591 0000025B 8B5750                  	mov	dx,word [video_cursor_pos+bx]
+   592                                  %if UART
+   593 0000025E 3C07                    	cmp	al,07h
+   594 00000260 7434                    	je	.bell		; BEL code
+   595 00000262 3C08                    	cmp	al,08h
+   596 00000264 7435                    	je	.bs		; BS code
+   597 00000266 3C0A                    	cmp	al,0Ah
+   598 00000268 743C                    	je	.lf		; Line feed code
+   599 0000026A 3C0D                    	cmp	al,0Dh
+   600 0000026C 7444                    	je	.cr		; Carriage return
+   601 0000026E 3C20                    	cmp	al,20h
+   602 00000270 7245                    	jb	.exit		; some other control character - ignore
+   603 00000272 3C7F                    	cmp	al,7Fh
+   604 00000274 7441                    	je	.exit		; DEL code - ignore
+   605                                  
+   606 00000276 E80803                  	call	uart_out	; we've got a regular character
+   607 00000279 FEC2                    	inc	dl		; move cursor to the next column
+   608 0000027B 3A164A00                	cmp	dl,byte [video_columns]
+   609 0000027F 7236                    	jb	.exit
+   610                                  
+   611 00000281 B00D                    	mov	al,0Dh
+   612 00000283 E8FB02                  	call	uart_out
+   613 00000286 B00A                    	mov	al,0Ah
+   614 00000288 E8F602                  	call	uart_out
+   615 0000028B B200                    	mov	dl,0		; set cursor to the beggining of the next line
+   616 0000028D 80FE18                  	cmp	dh,MAX_ROWS
+   617 00000290 7325                    	jae	.exit		; already on 25th row, no need to move further
+   618 00000292 FEC6                    	inc	dh		; move cursor to the next line
+   619 00000294 EB21                    	jmp	.exit
+   620                                  
+   621                                  .bell:
+   622 00000296 E8E802                  	call	uart_out	; just output it
+   623 00000299 EB1C                    	jmp 	.exit		; no need to change cursor position
+   624                                  
+   625                                  .bs:
+   626 0000029B 08D2                    	or	dl,dl		; already on the first column?
+   627 0000029D 7418                    	jz	.exit
+   628 0000029F E8DF02                  	call	uart_out
+   629 000002A2 FECA                    	dec	dl		; move cursor to the previous column
+   630 000002A4 EB11                    	jmp	.exit
+   631                                  
+   632                                  .lf:
+   633 000002A6 E8D802                  	call	uart_out
+   634 000002A9 80FE18                  	cmp	dh,24		; assume 25 rows
+   635 000002AC 7309                    	jae	.exit
+   636 000002AE FEC6                    	inc	dh
+   637 000002B0 EB05                    	jmp	.exit
+   638                                  
+   639                                  .cr:
+   640 000002B2 E8CC02                  	call	uart_out
+   641 000002B5 B200                    	mov	dl,0		; set cursor to the first column
+   642                                  
+   643                                  .exit:
+   644                                  %if ANY_VIDEO==0
+   645                                  	mov	word [video_cursor_pos+bx],dx
+   646                                  %endif
+   647                                  %endif
+   648 000002B7 5A                      	pop	dx
+   649 000002B8 E987FD                  	jmp	exit
+   650                                  
+   651                                  ;========================================================================
+   652                                  ; Function 0Fh - Get current video mode
+   653                                  ; Input:
+   654                                  ;	AH = 0Fh
+   655                                  ; Output:
+   656                                  ;	AH = number of character columns
+   657                                  ;	AL = video mode
+   658                                  ;	BH = active page
+   659                                  ;========================================================================
+   660                                  fn0F:
+   661 000002BB A06200                  	mov	al,byte [video_page]
+   662 000002BE 884603                  	mov	byte [bp+offset_BX+1],al	; set BH for return
+   663 000002C1 8A264A00                	mov	ah,byte [video_columns]		; set AH
+   664 000002C5 A04900                  	mov	al,byte [video_mode]		; set AL
+   665 000002C8 E977FD                  	jmp	exit
+   666                                  
+   667                                  ;========================================================================
+   668                                  ; Function 13h - Write string
+   669                                  ; Input:
+   670                                  ;	AH = 13h
+   671                                  ;	AL = 00h - use video attribute in BL, don't move cursor
+   672                                  ;	AL = 01h - use video attribute in BL, update cursor
+   673                                  ;		BL = video attribute
+   674                                  ;	AL = 02h - use video attribute from string, don't move cursor
+   675                                  ;	AL = 03h - use video attribute from string, update cursor
+   676                                  ;	BH = page number (0-based)
+   677                                  ;	CX = length of the string
+   678                                  ;	DH = row (0-based)
+   679                                  ;	DL = column (0-based)
+   680                                  ;	ES:BP = pointer to the string
+   681                                  ; Output:
+   682                                  ;	none
+   683                                  ; XXX:
+   684                                  ;	When printing the last character on the screen cursor will be moved
+   685                                  ;	to the first column of the last line
+   686                                  ;========================================================================
+   687                                  fn13:
+   688 000002CB 5251                    	pushm	cx,dx
+   689 000002CD 5550                    	pushm	ax,bp
+   690 000002CF 8B6E00                  	mov	bp,word [offset_BP+bp]
+   691 000002D2 E82F01                  	call	cursor_set_pos
+   692 000002D5 A802                    	test	al,02h
+   693 000002D7 756D                    	jnz	fn13_2		; read attribute from the string implementation
+   694 000002D9 E8BF01                  	call	set_attributes
+   695                                  .loop:
+   696 000002DC 268A4600                    es	mov	al,byte [bp]
+   697 000002E0 45                      	inc	bp
+   698 000002E1 3C07                    	cmp	al,07h
+   699 000002E3 743B                    	je	.bell
+   700 000002E5 3C0A                    	cmp	al,0Ah
+   701 000002E7 743F                    	je	.lf
+   702 000002E9 3C0D                    	cmp	al,0Dh
+   703 000002EB 744C                    	je	.cr
+   704 000002ED 3C20                    	cmp	al,20h
+   705 000002EF 7251                    	jb	.next		; control character
+   706 000002F1 3C7F                    	cmp	al,7Fh	
+   707 000002F3 744D                    	je	.next		; DEL
+   708                                  
+   709 000002F5 E88902                  	call	uart_out
+   710                                  
+   711 000002F8 FEC2                    	inc	dl		; increment column
+   712 000002FA 3A164A00                	cmp	dl,byte [video_columns]
+   713 000002FE 7305                    	jae	.next_line
+   714 00000300 E2DA                    	loop	.loop
+   715 00000302 E9AB00                  	jmp	fn13_exit
+   716                                  
+   717                                  .next_line:
+   718 00000305 B200                    	mov	dl,0
+   719 00000307 FEC6                    	inc	dh		; increment row
+   720 00000309 80FE18                  	cmp	dh,MAX_ROWS
+   721 0000030C 7203E99F00              	jae	fn13_exit
+   722 00000311 B00D                    	mov	al,0Dh
+   723 00000313 E86B02                  	call	uart_out
+   724 00000316 B00A                    	mov	al,0Ah
+   725 00000318 E86602                  	call	uart_out
+   726 0000031B E2BF                    	loop	.loop
+   727 0000031D E99000                  	jmp	fn13_exit
+   728                                  
+   729                                  .bell:
+   730 00000320 E85E02                  	call	uart_out
+   731 00000323 E2B7                    	loop	.loop
+   732 00000325 E98800                  	jmp	fn13_exit
+   733                                  
+   734                                  .lf:
+   735 00000328 80FE18                  	cmp	dh,24
+   736 0000032B 7203E98000              	jae	fn13_exit
+   737 00000330 FEC6                    	inc	dh
+   738 00000332 E84C02                  	call	uart_out
+   739 00000335 E2A5                    	loop	.loop
+   740 00000337 EB77                    	jmp	fn13_exit
+   741                                  
+   742                                  .cr:
+   743 00000339 B200                    	mov	dl,0
+   744 0000033B E84302                  	call	uart_out
+   745 0000033E E29C                    	loop	.loop
+   746 00000340 EB6E                    	jmp	fn13_exit
+   747                                  
+   748                                  .next:
+   749 00000342 E298                    	loop	.loop
+   750 00000344 EB6A                    	jmp	fn13_exit
+   751                                  
+   752                                  fn13_2:
+   753 00000346 8A3E4A00                	mov	bh,byte [video_columns]
+   754                                  .loop:
+   755 0000034A 268A4600                    es	mov	al,byte [bp]
+   756 0000034E 45                      	inc	bp
+   757 0000034F 3C07                    	cmp	al,07h
+   758 00000351 743C                    	je	.bell
+   759 00000353 3C0A                    	cmp	al,0Ah
+   760 00000355 743F                    	je	.lf
+   761 00000357 3C0D                    	cmp	al,0Dh
+   762 00000359 7449                    	je	.cr
+   763 0000035B 3C20                    	cmp	al,20h
+   764 0000035D 724E                    	jb	.next		; control character
+   765 0000035F 3C7F                    	cmp	al,7Fh	
+   766 00000361 744A                    	je	.next		; DEL
+   767                                  
+   768 00000363 268A5E00                    es	mov	bl,byte [bp]
+   769 00000367 45                      	inc	bp
+   770 00000368 E83001                  	call	set_attributes
+   771                                  
+   772 0000036B E81302                  	call	uart_out
+   773                                  
+   774 0000036E FEC2                    	inc	dl		; increment column
+   775 00000370 38FA                    	cmp	dl,bh		; bh = video columns
+   776 00000372 7304                    	jae	.next_line
+   777 00000374 E2D4                    	loop	.loop
+   778 00000376 EB38                    	jmp	fn13_exit
+   779                                  
+   780                                  .next_line:
+   781 00000378 B200                    	mov	dl,0
+   782 0000037A FEC6                    	inc	dh		; increment row
+   783 0000037C 80FE18                  	cmp	dh,MAX_ROWS
+   784 0000037F 732F                    	jae	fn13_exit
+   785                                  ;	call	cursor_set_pos
+   786 00000381 B00D                    	mov	al,0Dh
+   787 00000383 E8FB01                  	call	uart_out
+   788 00000386 B00A                    	mov	al,0Ah
+   789 00000388 E8F601                  	call	uart_out
+   790 0000038B E2BD                    	loop	.loop
+   791 0000038D EB21                    	jmp	fn13_exit
+   792                                  
+   793                                  .bell:
+   794 0000038F E8EF01                  	call	uart_out
+   795 00000392 E2B6                    	loop	.loop
+   796 00000394 EB1A                    	jmp	fn13_exit
+   797                                  
+   798                                  .lf:
+   799 00000396 80FE18                  	cmp	dh,24
+   800 00000399 7315                    	jae	fn13_exit
+   801 0000039B FEC6                    	inc	dh
+   802 0000039D E8E101                  	call	uart_out
+   803 000003A0 E2A8                    	loop	.loop
+   804 000003A2 EB0C                    	jmp	fn13_exit
+   805                                  
+   806                                  .cr:
+   807 000003A4 B200                    	mov	dl,0
+   808 000003A6 E8D801                  	call	uart_out
+   809 000003A9 E29F                    	loop	.loop
+   810 000003AB EB03                    	jmp	fn13_exit
+   811                                  
+   812                                  .next:
+   813 000003AD 45                      	inc	bp		; skip the attribute
+   814 000003AE E29A                    	loop	.loop
+   815                                  
+   816                                  fn13_exit:
+   817 000003B0 585D                    	popm	ax,bp
+   818 000003B2 8B5E02                  	mov	bx,word [offset_BX+bp]
+   819 000003B5 88FB                    	mov	bl,bh
+   820 000003B7 B700                    	mov	bh,0
+   821 000003B9 D1E3                    	shl	bx,1		; bx = page number * 2
+   822 000003BB A801                    	test	al,01h		; AL, bit 0 = 1 - update cursor
+   823 000003BD 7508                    	jne	.update_cursor
+   824 000003BF 8B5750                  	mov	dx,word [video_cursor_pos+bx]
+   825 000003C2 E83F00                  	call	cursor_set_pos
+   826 000003C5 EB03                    	jmp	.exit
+   827                                  
+   828                                  .update_cursor:
+   829 000003C7 895750                  	mov	word [video_cursor_pos+bx],dx
+   830                                  
+   831                                  .exit:
+   832 000003CA 595A                    	popm	cx,dx
+   833 000003CC E973FC                  	jmp	exit
+   834                                  
+   835                                  ;========================================================================
+   836                                  ; coords_out - Output coordinates in ANSI format X;Y
+   837                                  ;              Output coordinates in WYSE format:  SP+row SP+col
+   838                                  ; Input:
+   839                                  ;	DH = X coordinate
+   840                                  ;	DL = Y coordinate
+   841                                  ; Output:
+   842                                  ;	AX is trashed
+   843                                  ;	none
+   844                                  ;========================================================================
+   845                                  coords_out:
+   846                                  %if	ANSI
+   847 000003CF 5251                    	pushm	cx,dx
+   848 000003D1 81C20101                	add	dx,0101h
+   849 000003D5 B90A30                  	mov	cx,300Ah	; '0' to CH - used for ASCII conversion
+   850                                  				; 10 to CL for 10-base conversion
+   851 000003D8 88F0                    	mov	al,dh		; convert to ASCII and output row number
+   852 000003DA B400                    	mov	ah,0
+   853 000003DC F6F1                    	div	cl
+   854 000003DE 00E8                    	add	al,ch		; al + '0' - convert to ASCII
+   855 000003E0 E89E01                  	call	uart_out
+   856 000003E3 88E0                    	mov	al,ah
+   857 000003E5 00E8                    	add	al,ch		; al + '0' - convert to ASCII
+   858 000003E7 E89701                  	call	uart_out
+   859                                  
+   860 000003EA B03B                    	mov	al,';'		; output ';' delimiter
+   861 000003EC E89201                  	call	uart_out
+   862                                  
+   863 000003EF 88D0                    	mov	al,dl		; convert to ASCII and output column number
+   864 000003F1 B400                    	mov	ah,0
+   865 000003F3 F6F1                    	div	cl
+   866 000003F5 00E8                    	add	al,ch		; al + '0' - convert to ASCII
+   867 000003F7 E88701                  	call	uart_out
+   868 000003FA 88E0                    	mov	al,ah
+   869 000003FC 00E8                    	add	al,ch		; al + '0' - convert to ASCII
+   870 000003FE E88001                  	call	uart_out
+   871 00000401 595A                    	popm	cx,dx
+   872                                  %elif WYSE
+   873                                          pushm   dx
+   874                                          add     dx,2020h        ; SPACE || SPACE
+   875                                          mov     al,dh           ; row
+   876                                  	call	uart_out
+   877                                          mov     al,dl           ; column
+   878                                  	call	uart_out
+   879                                          popm    dx
+   880                                  %endif	; ANSI | WYSE
+   881 00000403 C3                      	ret
+   882                                  
+   883                                  ;========================================================================
+   884                                  ; cursor_set_pos - move cursor to specified position
+   885                                  ; Input:
+   886                                  ;	DH = row (0-based)
+   887                                  ;	DL = column (0-based)
+   888                                  ; Output:
+   889                                  ;	none
+   890                                  ; Notes:
+   891                                  ;	Uses ESC[<row>;<column>H ANSI sequence, row and column are 0-based
+   892                                  ;========================================================================
+   893                                  cursor_set_pos:
+   894                                  %if ANY_VIDEO
+   895 00000404 5250                    	pushm	ax,dx
+   896 00000406 89D0                    	mov	ax,dx
+   897 00000408 1E                      	pushm	ds
+   898 00000409 68[0000]                	pushm	DGROUP
+   899 0000040C 1F                      	popm	ds
+   900                                  	extern	set_cursor_pos_		; or vga3_set_cursor_pos_
+   901 0000040D E8(0000)                	call	set_cursor_pos_
+   902 00000410 1F                      	popm	ds
+   903 00000411 585A                    	popm	ax,dx
+   904                                  %endif
+   905                                  %if	ANSI
+   906 00000413 50                      	push	ax
+   907 00000414 B01B                    	mov	al,ESC		; output CSI sequence
+   908 00000416 E86801                  	call	uart_out
+   909 00000419 B05B                    	mov	al,'['
+   910 0000041B E86301                  	call	uart_out
+   911 0000041E E8AEFF                  	call	coords_out
+   912 00000421 B048                    	mov	al,'H'		; output 'H' command
+   913 00000423 E85B01                  	call	uart_out
+   914 00000426 58                      	pop	ax
+   915                                  %elif  WYSE
+   916                                          pushm   ax
+   917                                          mov     al,ESC
+   918                                  	call	uart_out
+   919                                          mov     al,'='          ; ESC '=' r  c
+   920                                  	call	uart_out
+   921                                          call	coords_out
+   922                                          popm    ax
+   923                                  %endif	; ANSI | WYSE
+   924 00000427 C3                      	ret
+   925                                  
+   926                                  ;========================================================================
+   927                                  ; auto_wrap_off - disable auto wraparound mode
+   928                                  ; Input:
+   929                                  ;	none
+   930                                  ; Output:
+   931                                  ;	none
+   932                                  ; Notes:
+   933                                  ;	Uses ESC[?7l ANSI sequence
+   934                                  ;========================================================================
+   935                                  auto_wrap_off:
+   936                                  %if	ANSI
+   937 00000428 50                      	push	ax
+   938 00000429 B01B                    	mov	al,ESC
+   939 0000042B E85301                  	call	uart_out
+   940 0000042E B05B                    	mov	al,'['
+   941 00000430 E84E01                  	call	uart_out
+   942 00000433 B03F                    	mov	al,'?'
+   943 00000435 E84901                  	call	uart_out
+   944 00000438 B037                    	mov	al,'7'
+   945 0000043A E84401                  	call	uart_out
+   946 0000043D B06C                    	mov	al,'l'
+   947 0000043F E83F01                  	call	uart_out
+   948 00000442 58                      	pop	ax
+   949                                  %elif  WYSE
+   950                                  ;   Function is not available
+   951                                  %endif	; ANSI | WYSE
+   952 00000443 C3                      	ret
+   953                                  
+   954                                  ;========================================================================
+   955                                  ; cursor_hide - hide cursor
+   956                                  ; Input:
+   957                                  ;	none
+   958                                  ; Output:
+   959                                  ;	none
+   960                                  ; Notes:
+   961                                  ;	Uses ESC[?25l ANSI sequence
+   962                                  ;========================================================================
+   963                                  cursor_hide:
+   964                                  %if	ANSI
+   965 00000444 50                      	push	ax
+   966 00000445 B01B                    	mov	al,ESC
+   967 00000447 E83701                  	call	uart_out
+   968 0000044A B05B                    	mov	al,'['
+   969 0000044C E83201                  	call	uart_out
+   970 0000044F B03F                    	mov	al,'?'
+   971 00000451 E82D01                  	call	uart_out
+   972 00000454 B032                    	mov	al,'2'
+   973 00000456 E82801                  	call	uart_out
+   974 00000459 B035                    	mov	al,'5'
+   975 0000045B E82301                  	call	uart_out
+   976 0000045E B06C                    	mov	al,'l'
+   977 00000460 E81E01                  	call	uart_out
+   978 00000463 58                      	pop	ax
+   979                                  %elif  WYSE
+   980                                          pushm   ax
+   981                                  	mov	al,ESC
+   982                                  	call	uart_out
+   983                                          mov     al, '`'
+   984                                  	call	uart_out
+   985                                          mov     al,'0'
+   986                                  	call	uart_out
+   987                                          popm    ax
+   988                                  %endif	; ANSI | WYSE
+   989 00000464 C3                      	ret
+   990                                  
+   991                                  ;========================================================================
+   992                                  ; cursor_show - show cursor
+   993                                  ; Input:
+   994                                  ;	none
+   995                                  ; Output:
+   996                                  ;	none
+   997                                  ; Notes:
+   998                                  ;	Uses ESC[?25h ANSI sequence
+   999                                  ;========================================================================
+  1000                                  cursor_show:
+  1001                                  %if	ANSI
+  1002 00000465 50                      	push	ax
+  1003 00000466 B01B                    	mov	al,ESC
+  1004 00000468 E81601                  	call	uart_out
+  1005 0000046B B05B                    	mov	al,'['
+  1006 0000046D E81101                  	call	uart_out
+  1007 00000470 B03F                    	mov	al,'?'
+  1008 00000472 E80C01                  	call	uart_out
+  1009 00000475 B032                    	mov	al,'2'
+  1010 00000477 E80701                  	call	uart_out
+  1011 0000047A B035                    	mov	al,'5'
+  1012 0000047C E80201                  	call	uart_out
+  1013 0000047F B068                    	mov	al,'h'
+  1014 00000481 E8FD00                  	call	uart_out
+  1015 00000484 58                      	pop	ax
+  1016                                  %elif  WYSE
+  1017                                          pushm   ax
+  1018                                  	mov	al,ESC
+  1019                                  	call	uart_out
+  1020                                          mov     al, '`'
+  1021                                  	call	uart_out
+  1022                                          mov     ax,[video_cursor_mode]
+  1023                                          and     ax,1F1Fh
+  1024                                          sub     al,ah
+  1025                                          cmp     al,3
+  1026                                          jb      .line
+  1027                                  ; blinking block cursor
+  1028                                          mov     al,'5'
+  1029                                          jmp     .3
+  1030                                  .line:  ; blinking line cursor
+  1031                                          mov     al,'3'
+  1032                                  .3:     call    uart_out
+  1033                                  
+  1034                                  	mov	al,ESC
+  1035                                  	call	uart_out
+  1036                                          mov     al, '`'
+  1037                                  	call	uart_out
+  1038                                          mov     al,'1'
+  1039                                  	call	uart_out
+  1040                                          popm    ax
+  1041                                  %endif	; ANSI | WYSE
+  1042 00000485 C3                      	ret
+  1043                                  
+  1044                                  ;========================================================================
+  1045                                  ; clear_screen
+  1046                                  ; Input:
+  1047                                  ;	none
+  1048                                  ; Output:
+  1049                                  ;	AL is trashed
+  1050                                  ;========================================================================
+  1051                                  clear_screen:
+  1052                                  %if   ANSI
+  1053 00000486 B01B                    	mov	al,ESC		; clear screen - ESC[2J
+  1054 00000488 E8F600                  	call	uart_out
+  1055 0000048B B05B                    	mov	al,'['
+  1056 0000048D E8F100                  	call	uart_out
+  1057 00000490 B032                    	mov	al,'2'
+  1058 00000492 E8EC00                  	call	uart_out
+  1059 00000495 B04A                    	mov	al,'J'
+  1060 00000497 E8E700                  	call	uart_out
+  1061                                  %elif WYSE
+  1062                                          call    uart_send
+  1063                                          db      ESC, '+'        ; home cursor; clr to spaces; turn off
+  1064                                                                  ; protect and write protect modes
+  1065                                          db      ESC, "A00"      ; data area attribute NORMAL
+  1066                                          db      ESC, "A1p"      ; label area DIM (bottom line)
+  1067                                          db      ESC, "A3x"      ; terminal message field dim underline
+  1068                                          db      ESC, "A2t"      ; computer message field dim reverse
+  1069                                          db      ESC, '"'        ; unlock keyboard
+  1070                                          db      EOS
+  1071                                  %endif  ; ANSI | WYSE
+  1072 0000049A C3                      	ret
+  1073                                  
+  1074                                  ;========================================================================
+  1075                                  ; set_attributes - set specified background/foreground color
+  1076                                  ; Input:
+  1077                                  ;	BL = attributes
+  1078                                  ;		color mode:
+  1079                                  ;			bit 7 	 = 1 - blinking
+  1080                                  ;			bits 6-4 = background color
+  1081                                  ;			bits 3-0 = foreground color
+  1082                                  ;		color mode with high intensity background
+  1083                                  ;			bits 7-4 = background color
+  1084                                  ;			bits 3-0 = foreground color
+  1085                                  ;		monochrome mode
+  1086                                  ;			01h = underline
+  1087                                  ;			07h = normal
+  1088                                  ;			09h = bright underline
+  1089                                  ;			0Fh = bold
+  1090                                  ;			70h = reverse (black on white)
+  1091                                  ;			81h = blinking underline
+  1092                                  ;			87h = blinking normal
+  1093                                  ;			89h = blinking bright underline
+  1094                                  ;			8Fh = blinking bold
+  1095                                  ; Output:
+  1096                                  ;	none
+  1097                                  ; XXX:
+  1098                                  ;	Add attribute cache, so we won't spend time setting the same attribute again
+  1099                                  ;========================================================================
+  1100                                  set_attributes:
+  1101                                  %if	ANSI
+  1102 0000049B 50                      	push	ax
+  1103                                  
+  1104 0000049C B01B                    	mov	al,ESC
+  1105 0000049E E8E000                  	call	uart_out
+  1106 000004A1 B05B                    	mov	al,'['
+  1107 000004A3 E8DB00                  	call	uart_out
+  1108                                  
+  1109 000004A6 F6C308                  	test	bl,08h	; bold?
+  1110 000004A9 750A                    	jnz	.bold
+  1111 000004AB B032                    	mov	al,'2'		; set normal mode - ESC[22m
+  1112 000004AD E8D100                  	call	uart_out
+  1113 000004B0 E8CE00                  	call	uart_out
+  1114 000004B3 EB05                    	jmp	.check_mode
+  1115                                  
+  1116                                  .bold:
+  1117 000004B5 B031                    	mov	al,'1'		; set bold attribute - ESC[1m
+  1118 000004B7 E8C700                  	call	uart_out
+  1119                                  
+  1120                                  .check_mode:
+  1121 000004BA A04900                  	mov	al,byte [video_mode]
+  1122 000004BD 3C07                    	cmp	al,7
+  1123 000004BF 7530                    	jne	.color
+  1124                                  
+  1125 000004C1 B03B                    	mov	al,';'
+  1126 000004C3 E8BB00                  	call	uart_out
+  1127                                  				; monochrome - set underline attribute
+  1128 000004C6 88D8                    	mov	al,bl
+  1129 000004C8 2407                    	and	al,7		; get foreground attribute part
+  1130 000004CA 3C01                    	cmp	al,1		; underlined
+  1131 000004CC 740C                    	je	.underline
+  1132 000004CE B032                    	mov	al,'2'		; set not underlined attribute - ESC[24m
+  1133 000004D0 E8AE00                  	call	uart_out
+  1134 000004D3 B034                    	mov	al,'4'
+  1135 000004D5 E8A900                  	call	uart_out
+  1136 000004D8 EB05                    	jmp	.mono_to_color
+  1137                                  
+  1138                                  .underline:
+  1139 000004DA B034                    	mov	al,'4'		; set underlined attribute - ESC[4m
+  1140 000004DC E8A200                  	call	uart_out
+  1141                                  
+  1142                                  .mono_to_color:
+  1143 000004DF 88D8                    	mov	al,bl
+  1144 000004E1 2407                    	and	al,07h
+  1145 000004E3 7403                    	jz	.mono_bg	; black foreground
+  1146 000004E5 80CB07                  	or	bl,07h		; anything else is white
+  1147                                  .mono_bg:
+  1148 000004E8 88D8                    	mov	al,bl
+  1149 000004EA 2470                    	and	al,70h
+  1150 000004EC 7403                    	jz	.color		; black background
+  1151 000004EE 80CB70                  	or	bl,70h		; anything else is white
+  1152                                  .color:
+  1153 000004F1 B03B                    	mov	al,';'
+  1154 000004F3 E88B00                  	call	uart_out
+  1155                                  
+  1156 000004F6 88D8                    	mov	al,bl		; need to exchange bit 0 with 2
+  1157 000004F8 80E3AA                  	and	bl,0AAh		; and bit 4 with bit 6
+  1158 000004FB A801                    	test	al,01h
+  1159 000004FD 7403                    	jz	.no_blue_fg
+  1160 000004FF 80CB04                  	or	bl,04h
+  1161                                  .no_blue_fg:
+  1162 00000502 A804                    	test	al,04h
+  1163 00000504 7403                    	jz	.no_red_fg
+  1164 00000506 80CB01                  	or	bl,01h
+  1165                                  .no_red_fg:
+  1166 00000509 A810                    	test	al,10h
+  1167 0000050B 7403                    	jz	.no_blue_bg
+  1168 0000050D 80CB40                  	or	bl,40h
+  1169                                  .no_blue_bg:
+  1170 00000510 A840                    	test	al,40h
+  1171 00000512 7403                    	jz	.no_red_bg
+  1172 00000514 80CB10                  	or	bl,10h
+  1173                                  .no_red_bg:
+  1174 00000517 B033                    	mov	al,'3'		; set foreground color - ESC[3<0..7>m
+  1175 00000519 E86500                  	call	uart_out
+  1176 0000051C 88D8                    	mov	al,bl
+  1177 0000051E 2407                    	and	al,07h
+  1178 00000520 0430                    	add	al,'0'
+  1179 00000522 E85C00                  	call	uart_out
+  1180                                  
+  1181 00000525 B03B                    	mov	al,';'
+  1182 00000527 E85700                  	call	uart_out
+  1183                                  
+  1184 0000052A F6C380                  	test	bl,80h
+  1185 0000052D 741F                    	jz	.normal_bg	; normal background
+  1186 0000052F A06500                  	mov	al,byte [video_hw_mode]
+  1187 00000532 A820                    	test	al,20h		; intense colors 
+  1188 00000534 7518                    	jnz	.normal_bg	; normal background, blinking
+  1189                                  
+  1190 00000536 B031                    	mov	al,'1'		; set intense background color - ESC[10<0..7>m
+  1191 00000538 E84600                  	call	uart_out	; note - this is not supported everywhere
+  1192 0000053B B030                    	mov	al,'0'
+  1193 0000053D E84100                  	call	uart_out
+  1194 00000540 88D8                    	mov	al,bl
+  1195 00000542 2470                    	and	al,70h
+  1196 00000544 C0E804                  	shr	al,4
+  1197 00000547 0430                    	add	al,'0'
+  1198 00000549 E83500                  	call	uart_out
+  1199 0000054C EB2C                    	jmp	.exit
+  1200                                  
+  1201                                  .normal_bg:
+  1202 0000054E B034                    	mov	al,'4'		; set background color - ESC[4<0..7>m
+  1203 00000550 E82E00                  	call	uart_out
+  1204 00000553 88D8                    	mov	al,bl
+  1205 00000555 2470                    	and	al,70h
+  1206 00000557 C0E804                  	shr	al,4
+  1207 0000055A 0430                    	add	al,'0'
+  1208 0000055C E82200                  	call	uart_out
+  1209                                  
+  1210 0000055F B03B                    	mov	al,';'
+  1211 00000561 E81D00                  	call	uart_out
+  1212                                  
+  1213 00000564 F6C380                  	test	bl,80h
+  1214 00000567 750C                    	jnz	.blink
+  1215 00000569 B032                    	mov	al,'2'		; set not blinking attribute - ESC[25m
+  1216 0000056B E81300                  	call	uart_out
+  1217 0000056E B035                    	mov	al,'5'
+  1218 00000570 E80E00                  	call	uart_out
+  1219 00000573 EB05                    	jmp	.exit
+  1220                                  
+  1221                                  .blink:
+  1222 00000575 B035                    	mov	al,'5'		; set blinking attribute - ESC[5m
+  1223 00000577 E80700                  	call	uart_out
+  1224                                  
+  1225                                  .exit:
+  1226 0000057A B06D                    	mov	al,'m'
+  1227 0000057C E80200                  	call	uart_out
+  1228                                  
+  1229 0000057F 58                      	pop	ax
+  1230                                  %elif WYSE & 0
+  1231                                  	push	ax
+  1232                                  
+  1233                                  	mov	al,ESC
+  1234                                  	call	uart_out
+  1235                                  	mov	al,'['
+  1236                                  	call	uart_out
+  1237                                  
+  1238                                  	test	bl,08h	; bold?
+  1239                                  	jnz	.bold
+  1240                                  	mov	al,'2'		; set normal mode - ESC[22m
+  1241                                  	call	uart_out
+  1242                                  	call	uart_out
+  1243                                  	jmp	.check_mode
+  1244                                  
+  1245                                  .bold:
+  1246                                  	mov	al,'1'		; set bold attribute - ESC[1m
+  1247                                  	call	uart_out
+  1248                                  
+  1249                                  .check_mode:
+  1250                                  	mov	al,byte [video_mode]
+  1251                                  	cmp	al,7
+  1252                                  	jne	.color
+  1253                                  
+  1254                                  	mov	al,';'
+  1255                                  	call	uart_out
+  1256                                  				; monochrome - set underline attribute
+  1257                                  	mov	al,bl
+  1258                                  	and	al,7		; get foreground attribute part
+  1259                                  	cmp	al,1		; underlined
+  1260                                  	je	.underline
+  1261                                  	mov	al,'2'		; set not underlined attribute - ESC[24m
+  1262                                  	call	uart_out
+  1263                                  	mov	al,'4'
+  1264                                  	call	uart_out
+  1265                                  	jmp	.mono_to_color
+  1266                                  
+  1267                                  .underline:
+  1268                                  	mov	al,'4'		; set underlined attribute - ESC[4m
+  1269                                  	call	uart_out
+  1270                                  
+  1271                                  .mono_to_color:
+  1272                                  	mov	al,bl
+  1273                                  	and	al,07h
+  1274                                  	jz	.mono_bg	; black foreground
+  1275                                  	or	bl,07h		; anything else is white
+  1276                                  .mono_bg:
+  1277                                  	mov	al,bl
+  1278                                  	and	al,70h
+  1279                                  	jz	.color		; black background
+  1280                                  	or	bl,70h		; anything else is white
+  1281                                  .color:
+  1282                                  	mov	al,';'
+  1283                                  	call	uart_out
+  1284                                  
+  1285                                  	mov	al,bl		; need to exchange bit 0 with 2
+  1286                                  	and	bl,0AAh		; and bit 4 with bit 6
+  1287                                  	test	al,01h
+  1288                                  	jz	.no_blue_fg
+  1289                                  	or	bl,04h
+  1290                                  .no_blue_fg:
+  1291                                  	test	al,04h
+  1292                                  	jz	.no_red_fg
+  1293                                  	or	bl,01h
+  1294                                  .no_red_fg:
+  1295                                  	test	al,10h
+  1296                                  	jz	.no_blue_bg
+  1297                                  	or	bl,40h
+  1298                                  .no_blue_bg:
+  1299                                  	test	al,40h
+  1300                                  	jz	.no_red_bg
+  1301                                  	or	bl,10h
+  1302                                  .no_red_bg:
+  1303                                  	mov	al,'3'		; set foreground color - ESC[3<0..7>m
+  1304                                  	call	uart_out
+  1305                                  	mov	al,bl
+  1306                                  	and	al,07h
+  1307                                  	add	al,'0'
+  1308                                  	call	uart_out
+  1309                                  
+  1310                                  	mov	al,';'
+  1311                                  	call	uart_out
+  1312                                  
+  1313                                  	test	bl,80h
+  1314                                  	jz	.normal_bg	; normal background
+  1315                                  	mov	al,byte [video_hw_mode]
+  1316                                  	test	al,20h		; intense colors 
+  1317                                  	jnz	.normal_bg	; normal background, blinking
+  1318                                  
+  1319                                  	mov	al,'1'		; set intense background color - ESC[10<0..7>m
+  1320                                  	call	uart_out	; note - this is not supported everywhere
+  1321                                  	mov	al,'0'
+  1322                                  	call	uart_out
+  1323                                  	mov	al,bl
+  1324                                  	and	al,70h
+  1325                                  	shr	al,4
+  1326                                  	add	al,'0'
+  1327                                  	call	uart_out
+  1328                                  	jmp	.exit
+  1329                                  
+  1330                                  .normal_bg:
+  1331                                  	mov	al,'4'		; set background color - ESC[4<0..7>m
+  1332                                  	call	uart_out
+  1333                                  	mov	al,bl
+  1334                                  	and	al,70h
+  1335                                          shr     al,4
+  1336                                  	add	al,'0'
+  1337                                  	call	uart_out
+  1338                                  
+  1339                                  	mov	al,';'
+  1340                                  	call	uart_out
+  1341                                  
+  1342                                  	test	bl,80h
+  1343                                  	jnz	.blink
+  1344                                  	mov	al,'2'		; set not blinking attribute - ESC[25m
+  1345                                  	call	uart_out
+  1346                                  	mov	al,'5'
+  1347                                  	call	uart_out
+  1348                                  	jmp	.exit
+  1349                                  
+  1350                                  .blink:
+  1351                                  	mov	al,'5'		; set blinking attribute - ESC[5m
+  1352                                  	call	uart_out
+  1353                                  
+  1354                                  .exit:
+  1355                                  	mov	al,'m'
+  1356                                  	call	uart_out
+  1357                                  
+  1358                                  	pop	ax
+  1359                                  %endif	; ANSI | WYSE
+  1360 00000580 C3                      	ret
+  1361                                  
+  1362                                  ;========================================================================
+  1363                                  ; uart_out - write character to serial port
+  1364                                  ; Input:
+  1365                                  ;	AL = character to write
+  1366                                  ; Output:
+  1367                                  ;	none
+  1368                                  ;========================================================================
+  1369                                  uart_out:
+  1370                                  %if UART_MODE3_SUPPRESS
+  1371 00000581 1E                      	push	ds
+  1372 00000582 6A40                    	push	bios_data_seg
+  1373 00000584 1F                      	popm	ds
+  1374 00000585 803E490003              	cmp	byte [video_mode],3
+  1375 0000058A 1F                      	popm	ds
+  1376 0000058B 7410                    	je	.9		; skip output in mode 3 (color)
+  1377                                  %endif
+  1378                                  ;;;	global	uart_out_	; used in debugging mode (C-callable)
+  1379                                  ;;;uart_out_:			; **** label .9 cannot reach if un-commented
+  1380 0000058D 52                      	push	dx
+  1381 0000058E 50                      	push	ax
+  1382                                  %if UART_DSR_PROTOCOL
+  1383                                          extern  microsecond
+  1384                                  .wait_dsr:
+  1385                                          mov     dx,uart_msr
+  1386                                  BIT_DSR         equ     1<<5
+  1387                                          in      al,dx           ; read the Modem Status Register
+  1388                                          test    al,BIT_DSR      ; Data Set Ready
+  1389                                          jnz     .nowait
+  1390                                          push    cx
+  1391                                          mov     cx,100
+  1392                                          call    microsecond
+  1393                                          pop     cx
+  1394                                          jmp     .wait_dsr
+  1395                                  .nowait:
+  1396                                  %endif
+  1397                                  .1:
+  1398 0000058F BA8506                  	mov	dx,uart_lsr
+  1399 00000592 EC                      	in	al,dx
+  1400 00000593 A820                    	test	al,20h		; THRE is empty
+  1401 00000595 74F8                    	jz	.1
+  1402 00000597 58                      	pop	ax
+  1403 00000598 BA8006                  	mov	dx,uart_thr
+  1404 0000059B EE                      	out	dx,al		; write character
+  1405 0000059C 5A                      	pop	dx
+  1406                                  .9:
+  1407 0000059D C3                      	ret
+  1408                                  
+  1409                                  %if  WYSE
+  1410                                  ;========================================================================
+  1411                                  ; uart_send - write an in-line EOS terminated string to serial port
+  1412                                  ; Input:
+  1413                                  ;	in the instruction stream
+  1414                                  ; Output:
+  1415                                  ;	destroys AX
+  1416                                  ;========================================================================
+  1417                                  uart_send:
+  1418                                          pop     ax              ; pointer to character string
+  1419                                          xchg    ax,si
+  1420                                  	pushm	ax		; save SI
+  1421                                  
+  1422                                  .next:
+  1423                                      cs	lodsb			; load byte at CS:SI
+  1424                                          inc     al
+  1425                                          jz      .done           ; EOS is 0FFh, so this is easy test
+  1426                                          dec     al
+  1427                                          call    uart_out
+  1428                                          jmp     .next
+  1429                                  .done:
+  1430                                  	popm	ax		; restore SI
+  1431                                          xchg    ax,si		; **
+  1432                                          jmp     ax		; RETURN
+  1433                                  %endif ; WYSE
+  1434                                  
+  1435                                  ;========================================================================
+  1436                                  ; video_init - initialize video service
+  1437                                  ; Input:
+  1438                                  ;	AL = baud rate
+  1439                                  ;	DS = DGROUP
+  1440                                  ; Output:
+  1441                                  ;	none
+  1442                                  ;========================================================================
+  1443                                  	global	video_init
+  1444                                  video_init:
+  1445                                  		; XXX - move interrupt registration code here
+  1446 0000059E 50                      	push	ax
+  1447 0000059F E8F500                  	call	uart_init
+  1448 000005A2 E83C01                  	call	uart_detect
+  1449 000005A5 50                      	push	ax
+  1450                                  %if CVDU|VGA3
+  1451 000005A6 B80300                  	mov	ax,0003h
+  1452                                  %else
+  1453                                  	mov	ax,0007h
+  1454                                  %endif
+  1455 000005A9 CD10                    	int	10h
+  1456 000005AB 58                      	pop	ax
+  1457 000005AC 0E                      	push	cs
+  1458 000005AD 3C04                    	cmp	al,UART_16550A
+  1459 000005AF 7205                    	jb	.no_fifo
+  1460 000005B1 68[9006]                	push	.enabled
+  1461 000005B4 EB03                    	jmp	.print_uart
+  1462                                  .no_fifo:
+  1463 000005B6 68[9306]                	push	.disabled
+  1464                                  .print_uart:
+  1465 000005B9 0E                      	push	cs
+  1466 000005BA 3C01                    	cmp	al,UART_8250
+  1467 000005BC 7505                    	jne	.check_16450
+  1468 000005BE 68[6A06]                	push	.uart_8250
+  1469 000005C1 EB27                    	jmp	.print_hi
+  1470                                  .check_16450:
+  1471 000005C3 3C02                    	cmp	al,UART_16450
+  1472 000005C5 7505                    	jne	.check_16550
+  1473 000005C7 68[6F06]                	push	.uart_16450
+  1474 000005CA EB1E                    	jmp	.print_hi
+  1475                                  .check_16550:
+  1476 000005CC 3C03                    	cmp	al,UART_16550
+  1477 000005CE 7505                    	jne	.check_16550A
+  1478 000005D0 68[7506]                	push	.uart_16550
+  1479 000005D3 EB15                    	jmp	.print_hi
+  1480                                  .check_16550A:
+  1481 000005D5 3C04                    	cmp	al,UART_16550A
+  1482 000005D7 7505                    	jne	.check_16750
+  1483 000005D9 68[7B06]                	push	.uart_16550A
+  1484 000005DC EB0C                    	jmp	.print_hi
+  1485                                  .check_16750:
+  1486 000005DE 3C05                    	cmp	al,UART_16750
+  1487 000005E0 7505                    	jne	.unknown
+  1488 000005E2 68[8206]                	push	.uart_16750
+  1489 000005E5 EB03                    	jmp	.print_hi
+  1490                                  .unknown:
+  1491 000005E7 68[8806]                	push	.uart_unknown
+  1492                                  .print_hi:
+  1493 000005EA 0E                      	push	cs
+  1494 000005EB 68[F605]                	push	.hi
+  1495                                  	extern	_cprintf
+  1496 000005EE E8(0000)                	call	_cprintf	; _cprintf uses int10 0Eh
+  1497 000005F1 83C40C                  	add	sp,12
+  1498                                  
+  1499 000005F4 58                      	pop	ax
+  1500 000005F5 C3                      	ret
+  1501                                  
+  1502                                  .hi:
+  1503                                  %if ANY_VIDEO
+  1504                                  %if CVDU_8563
+  1505                                  	db	'ColorVDU BIOS (c) 2013 John R. Coffman', NL
+  1506                                  %endif
+  1507                                  %if VGA3_6445
+  1508 000005F6 564741332056696465-     	db	'VGA3 Video BIOS (c) 2017 John R. Coffman', NL
+  1508 000005FF 6F2042494F53202863-
+  1508 00000608 292032303137204A6F-
+  1508 00000611 686E20522E20436F66-
+  1508 0000061A 666D616E0A         
+  1509                                  %endif
+  1510                                  
+  1511                                  %if UART
+  1512 0000061F 53657269616C20492F-     	db	'Serial I/O BIOS (c) 2010 Sergey Kiselev', NL
+  1512 00000628 4F2042494F53202863-
+  1512 00000631 292032303130205365-
+  1512 0000063A 72676579204B697365-
+  1512 00000643 6C65760A           
+  1513 00000647 446574656374656420-     	db	'Detected %s UART, FIFO is %sabled', NL
+  1513 00000650 257320554152542C20-
+  1513 00000659 4649464F2069732025-
+  1513 00000662 7361626C65640A     
+  1514                                  %endif
+  1515                                  %else
+  1516                                  	db	'Video BIOS (C) 2010 Sergey Kiselev', NL
+  1517                                  	db	'Detected %s UART, FIFO is %sabled', NL
+  1518                                  %endif
+  1519 00000669 00                      	db	0
+  1520                                  
+  1521                                  .uart_8250:
+  1522 0000066A 3832353000              	db	'8250', 0
+  1523                                  .uart_16450:
+  1524 0000066F 313634353000            	db	'16450', 0
+  1525                                  .uart_16550:
+  1526 00000675 313635353000            	db	'16550', 0
+  1527                                  .uart_16550A:
+  1528 0000067B 31363535304100          	db	'16550A', 0
+  1529                                  .uart_16750:
+  1530 00000682 313637353000            	db	'16750', 0
+  1531                                  .uart_unknown:
+  1532 00000688 756E6B6E6F776E00        	db	'unknown', 0
+  1533                                  .enabled:
+  1534 00000690 656E00                  	db	'en', 0
+  1535                                  .disabled:
+  1536 00000693 64697300                	db	'dis', 0
+  1537                                  
+  1538                                  ;========================================================================
+  1539                                  ; uart_init - initialize UART
+  1540                                  ; Input:
+  1541                                  ;	AL = baud rate
+  1542                                  ; Output:
+  1543                                  ;	none
+  1544                                  ;========================================================================
+  1545                                  uart_init:
+  1546 00000697 525350                  	pushm	ax,bx,dx
+  1547 0000069A B400                    	mov	ah,0
+  1548 0000069C D0E0                    	shl	al,1
+  1549 0000069E 89C3                    	mov	bx,ax		; Index in the .divisors table
+  1550 000006A0 2E8B9F[D106]               cs	mov	bx,word[.divisors+bx]
+  1551                                  	; Divisor Latch Access bit set, no parity, one stop bit, 8 data bits
+  1552 000006A5 B083                    	mov	al,83h
+  1553 000006A7 BA8306                  	mov	dx,uart_lcr
+  1554 000006AA EE                      	out	dx,al
+  1555                                  	; Lookup table for baud rates
+  1556 000006AB 88D8                    	mov	al,bl		; low byte
+  1557 000006AD BA8006                  	mov	dx,uart_dll
+  1558 000006B0 EE                      	out	dx,al
+  1559 000006B1 88F8                    	mov	al,bh		; high byte
+  1560 000006B3 BA8106                  	mov	dx,uart_dlm
+  1561 000006B6 EE                      	out	dx,al
+  1562                                  	; no parity, one stop bit, 8 data bits
+  1563 000006B7 B003                    	mov	al,03h
+  1564 000006B9 BA8306                  	mov	dx,uart_lcr
+  1565 000006BC EE                      	out	dx,al
+  1566                                  	; XXX?
+  1567 000006BD B007                    	mov	al,7
+  1568 000006BF BA8406                  	mov	dx,uart_mcr
+  1569 000006C2 EE                      	out	dx,al
+  1570                                  	; disable interrupts for now
+  1571 000006C3 B000                    	mov	al,0		; AL = 0
+  1572 000006C5 BA8106                  	mov	dx,uart_ier
+  1573 000006C8 EE                      	out	dx,al
+  1574                                  	; disable FIFO for now
+  1575                                  	; note - AL = 0
+  1576 000006C9 BA8206                  	mov	dx,uart_fcr
+  1577 000006CC EE                      	out	dx,al
+  1578 000006CD 585B5A                  	popm	ax,bx,dx
+  1579 000006D0 C3                      	ret
+  1580                                  
+  1581                                  .divisors:
+  1582 000006D1 6000                    	dw	UART_OSC/16/1200	; 1200 Kbit/sec
+  1583 000006D3 3000                    	dw	UART_OSC/16/2400	; 2400 Kbit/sec
+  1584 000006D5 1800                    	dw	UART_OSC/16/4800	; 4800 Kbit/sec
+  1585 000006D7 0C00                    	dw	UART_OSC/16/9600	; 9600 Kbit/sec
+  1586 000006D9 0600                    	dw	UART_OSC/16/19200	; 19200 Kbit/sec
+  1587 000006DB 0300                    	dw	UART_OSC/16/38400	; 38400 Kbit/sec
+  1588 000006DD 0200                    	dw	UART_OSC/16/57600	; 57600 Kbit/sec
+  1589 000006DF 0100                    	dw	UART_OSC/16/115200	; 115200 Kbit/sec
+  1590                                  
+  1591                                  ;========================================================================
+  1592                                  ; uart_detect - detect UART type, enable FIFO if present
+  1593                                  ; Input:
+  1594                                  ;	none
+  1595                                  ; Output:
+  1596                                  ;	AL = UART type
+  1597                                  ;
+  1598                                  ; UART detection code from
+  1599                                  ; http://en.wikibooks.org/wiki/Serial_Programming/8250_UART_Programming
+  1600                                  ;========================================================================
+  1601                                  UART_8250	equ	1
+  1602                                  UART_16450	equ	2
+  1603                                  UART_16550	equ	3
+  1604                                  UART_16550A	equ	4
+  1605                                  UART_16750	equ	5
+  1606                                  
+  1607                                  uart_detect:
+  1608 000006E1 52                      	push	dx
+  1609                                  	; Set the value "0xE7" to the FCR to test the status of the FIFO flags
+  1610 000006E2 B0E7                    	mov	al,0E7h
+  1611 000006E4 BA8206                  	mov	dx,uart_fcr
+  1612 000006E7 EE                      	out	dx,al
+  1613                                  	; Read the value of the IIR to test for what flags actually got set
+  1614 000006E8 BA8206                  	mov	dx,uart_iir
+  1615 000006EB EC                      	in	al,dx
+  1616 000006EC A840                    	test	al,40h
+  1617 000006EE 741A                    	jz	.no_fifo
+  1618 000006F0 A880                    	test	al,80h
+  1619 000006F2 740C                    	jz	.uart_16550
+  1620 000006F4 A820                    	test	al,20h
+  1621 000006F6 7404                    	jz	.uart_16550A
+  1622 000006F8 B005                    	mov	al,UART_16750
+  1623 000006FA EB1F                    	jmp	.exit
+  1624                                  .uart_16550A:
+  1625 000006FC B004                    	mov	al,UART_16550A
+  1626 000006FE EB1B                    	jmp	.exit
+  1627                                  .uart_16550:
+  1628                                  	; Disable FIFO on 16550 (FIFO is broken)
+  1629 00000700 B000                    	mov	al,0
+  1630 00000702 BA8206                  	mov	dx,uart_fcr
+  1631 00000705 EE                      	out	dx,al
+  1632 00000706 B003                    	mov	al,UART_16550
+  1633 00000708 EB11                    	jmp	.exit
+  1634                                  .no_fifo:
+  1635                                  	; Chip doesn't use FIFO, so we need to check the scratch register
+  1636                                  	; Set some arbitrary value like 0x2A to the Scratch Register
+  1637 0000070A B02A                    	mov	al,2Ah
+  1638 0000070C BA8706                  	mov	dx,uart_sr
+  1639 0000070F EE                      	out	dx,al
+  1640                                  	; Read the value of the Scratch Register
+  1641 00000710 EC                      	in	al,dx
+  1642 00000711 3C2A                    	cmp	al,2Ah
+  1643 00000713 7504                    	jnz	.uart_8250
+  1644                                  	; If the arbitrary value comes back identical
+  1645 00000715 B002                    	mov	al,UART_16450
+  1646 00000717 EB02                    	jmp	.exit
+  1647                                  .uart_8250:
+  1648 00000719 B001                    	mov	al,UART_8250
+  1649                                  .exit:
+  1650 0000071B 5A                      	pop	dx
+  1651 0000071C C3                      	ret
+  1652                                  ;========================================================================
+  1653                                  ; uart_putchar - write the character in teletype mode
+  1654                                  ; Input:
+  1655                                  ;	AL = character
+  1656                                  ;========================================================================
+  1657                                          global  @uart_putchar
+  1658                                  @uart_putchar:
+  1659 0000071D 50                              push    ax
+  1660 0000071E 53                              push    bx
+  1661 0000071F B40E                            mov     ah,0Eh
+  1662 00000721 BB0700                          mov     bx,0007h        ; page 0, normal attributes
+  1663 00000724 CD10                            int     10h
+  1664 00000726 5B                              pop     bx
+  1665 00000727 58                              pop     ax
+  1666 00000728 C3                              ret
+  1667                                  
+  1668                                  ;========================================================================
+  1669                                  ; CVDU_putchar - write the character in teletype mode
+  1670                                  ; Input:
+  1671                                  ;	AL = character
+  1672                                  ;	DL = attribute (IBM-PC)
+  1673                                  ;  C-declaration:
+  1674                                  ;	void __fastcall CVDU_putchar(int char, int attribute);
+  1675                                  ;========================================================================
+  1676                                          global  @VIDEO_putchar
+  1677                                  @VIDEO_putchar:
+  1678 00000729 50                      	push	ax
+  1679 0000072A B40F                    	mov	ah,0Fh		; get page in BH
+  1680 0000072C CD10                    	int	10h
+  1681 0000072E 88D3                    	mov	bl,dl		; get attribute in BL
+  1682 00000730 58                      	pop	ax
+  1683 00000731 B40E                    	mov	ah,0Eh		; write char
+  1684 00000733 CD10                    	int	10h
+  1685 00000735 C3                      	ret
+  1686                                  
+  1687                                  %if VGA3_6445 
+  1688                                  ;========================================================================
+  1689                                  ; mv_word - move words using video index
+  1690                                  ; Input:
+  1691                                  ;	AX = destination character index
+  1692                                  ;	DX = source character index
+  1693                                  ;	BX = count of words to move
+  1694                                  ;========================================================================
+  1695                                  	global mv_word_
+  1696                                  mv_word_:
+  1697 00000736 1E515756                	pushm	si,di,cx,ds
+  1698 0000073A 89C7                    	mov	di,ax			; destination
+  1699 0000073C D1E7                    	shl	di,1			; it is a word pointer
+  1700 0000073E 89D6                    	mov	si,dx			; source
+  1701 00000740 D1E6                    	shl	si,1			; word pointer
+  1702 00000742 89D9                    	mov	cx,bx			; count to CX
+  1703                                  	extern	video_buffer_ptr_
+  1704 00000744 E8(0000)                	call	video_buffer_ptr_	; DX:AX is set
+  1705 00000747 8EC2                    	mov	es,dx			; set up segment registers
+  1706 00000749 8EDA                    	mov	ds,dx			;  **
+  1707 0000074B 01C7                    	add	di,ax			; AX is 0 for page 0
+  1708 0000074D 01C6                    	add	si,ax			;  **
+  1709                                  
+  1710 0000074F F3A5                    	rep	movsw			; do the fast move
+  1711                                  
+  1712 00000751 5E5F591F                	popm	si,di,cx,ds	
+  1713 00000755 C3                      	ret
+  1714                                  %endif
+  1715                                  
+  1716                                  
+  1717                                  
+  1718                                  
+  1719                                  ;========================================================================
