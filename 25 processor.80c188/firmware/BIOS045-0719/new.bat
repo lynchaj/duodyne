@@ -1,0 +1,3 @@
+wmake clean
+wmake all
+

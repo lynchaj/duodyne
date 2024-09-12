@@ -1,0 +1,115 @@
+%SIGNAL
+PIN  23 =  A3 
+PIN   7 =  A4 
+PIN   6 =  A5 
+PIN   5 =  A6 
+PIN   1 =  ALE 
+PIN  22 = !DELAY 
+PIN  11 =  DELAYIN 
+PIN  20 = !FP_LATCH_RD 
+PIN  19 = !FP_LATCH_WR 
+PIN  16 = !I2C_CS 
+PIN  15 = !I2C_CS_WR 
+PIN   2 = !PCS4 
+PIN   3 = !PCS5 
+PIN   4 = !PCS6 
+PIN  21 = !PIC_CS 
+PIN   9 = !RD 
+PIN  18 = !RESET_OUT 
+PIN  17 = !UART_CS 
+PIN   8 = !WR 
+PIN  14 = !WR_LS259 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+AD0 =>
+    !A3 & !A4 & !A5 & !A6
+
+AD1 =>
+    A3 & !A4 & !A5 & !A6
+
+AD2 =>
+    !A3 & A4 & !A5 & !A6
+
+AD3 =>
+    A3 & A4 & !A5 & !A6
+
+AD4 =>
+    !A3 & !A4 & A5 & !A6
+
+AD5 =>
+    A3 & !A4 & A5 & !A6
+
+AD6 =>
+    !A3 & A4 & A5 & !A6
+
+AD7 =>
+    A3 & A4 & A5 & !A6
+
+AD8 =>
+    !A3 & !A4 & !A5 & A6
+
+AD9 =>
+    A3 & !A4 & !A5 & A6
+
+DELAY =>
+    !A3 & !A4 & A5 & !A6 & !ALE & !PCS4 & !WR
+
+FP_LATCH_RD =>
+    !A3 & A4 & A5 & !A6 & !ALE & !PCS4 & !RD
+
+FP_LATCH_WR =>
+    !A3 & A4 & A5 & !A6 & !ALE & !PCS4 & !WR
+
+I2C_CS =>
+    !A3 & !A4 & A5 & !A6 & !ALE & !PCS4
+
+I2C_CS_WR =>
+    DELAYIN
+
+PIC_CS =>
+    A3 & A4 & !A5 & !A6 & !ALE & !PCS4
+
+RESET_OUT =>
+    A3 & !A4 & A5 & !A6 & !ALE & !PCS4 & !WR
+
+UART_CS =>
+    !A3 & !A4 & !A5 & !A6 & !ALE & !PCS5
+
+WR_LS259 =>
+    A3 & A4 & A5 & !A6 & !ALE & !PCS4 & !WR
+
+A3.oe  =>
+    0 
+
+DELAY.oe  =>
+    1 
+
+FP_LATCH_RD.oe  =>
+    1 
+
+FP_LATCH_WR.oe  =>
+    1 
+
+I2C_CS.oe  =>
+    1 
+
+I2C_CS_WR.oe  =>
+    1 
+
+PIC_CS.oe  =>
+    1 
+
+RESET_OUT.oe  =>
+    1 
+
+UART_CS.oe  =>
+    1 
+
+WR_LS259.oe  =>
+    1 
+
+%END

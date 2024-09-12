@@ -1,0 +1,1533 @@
+     1                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                                  ; timers.asm
+     3                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     4                                  ;
+     5                                  ;   This version is for assembly by  NASM 0.98.39 or later
+     6                                  ;
+     7                                  ; Copyright (C) 2010 John R. Coffman.  All rights reserved.
+     8                                  ; Provided for hobbyist use on the N8VEM SBC-188 board.
+     9                                  ;
+    10                                  ; This program is free software: you can redistribute it and/or modify
+    11                                  ; it under the terms of the GNU General Public License as published by
+    12                                  ; the Free Software Foundation, either version 3 of the License, or
+    13                                  ; (at your option) any later version.
+    14                                  ;
+    15                                  ; This program is distributed in the hope that it will be useful,
+    16                                  ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    17                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    18                                  ; GNU General Public License for more details.
+    19                                  ;
+    20                                  ; You should have received a copy of the GNU General Public License
+    21                                  ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    22                                  ;
+    23                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    24                                  
+    25                                  %include        "config.asm"
+     1                              <1> ;/*
+     2                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     3                              <1> ; VGA3.CFG
+     4                              <1> ;   Copied to CONFIG.ASM for general release.
+     5                              <1> ;
+     6                              <1> ;       Modify the parameters below to reflect your system
+     7                              <1> ;
+     8                              <1> ;
+     9                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    10                              <1> ;
+    11                              <1> ;   Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    12                              <1> ;   Provided for hobbyist use on the N8VEM SBC-188 board.
+    13                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    14                              <1> ;
+    15                              <1> ; Define the serial terminal that the Video BIOS must emulate
+    16                              <1> ; Set one of the following to 1
+    17                              <1> ; If you have no idea what to choose, set TTY to 1
+    18                              <1> TTY     equ     0       ; hardcopy -- cannot position the cursor
+    19                              <1> DUMB    equ     0       ; dumb CRT -- ^H, ^J, ^K, ^L can move the cursor
+    20                              <1> ANSI    equ     1       ; very smart, like a VT-100
+    21                              <1> WYSE    equ     0       ; very smart Wyse series (30, 50, ...)
+    22                              <1> ; others may get added in the future
+    23                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
+    24                              <1> ;
+    25                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
+    26                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
+    27                              <1> CVDU	equ	0	; system does not have the CVDU
+    28                              <1> ;
+    29                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
+    30                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
+    31                              <1> ; The default is VGA3=0
+    32                              <1> VGA3   equ     1       ; system has the VGA3
+    33                              <1> ;
+    34                              <1> ; Does the hardware configuration contain the front panel card?
+    35                              <1> ; The default is FRONT_PANEL=0
+    36                              <1> ;
+    37                              <1> FRONT_PANEL   equ     1       ; system has the VGA3
+    38                              <1> %if 0
+    39                              <1> 	*/
+    40                              <1> #define VGA3 1
+    41                              <1> /*
+    42                              <1> %endif
+    43                              <1> ;
+    44                              <1> ; Boot up keyboard mode:  20h for NumLock on
+    45                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
+    46                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
+    47                              <1> 
+    48                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    49                              <1> ;UART_RATE	equ	0		; 1200
+    50                              <1> ;UART_RATE	equ	1		; 2400
+    51                              <1> ;UART_RATE	equ	2		; 4800
+    52                              <1> ;UART_RATE	equ	3		; 9600
+    53                              <1> ;UART_RATE	equ	4		; 19200
+    54                              <1> UART_RATE	equ	5		; 38400
+    55                              <1> ;UART_RATE	equ	6		; 57600
+    56                              <1> ;UART_RATE	equ	7		; 115200
+    57                              <1> 
+    58                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    59                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    60                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    61                              <1> 						; but not ANSI
+    62                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    63                              <1> ; It may be smaller than the actual EPROM in use.
+    64                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    65                              <1> %ifndef ROM
+    66                              <1> ROM             equ     32              ; 64 is the default
+    67                              <1> %endif
+    68                              <1> 
+    69                              <1> ; Define the number of Wait States at which the ROM operates
+    70                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    71                              <1> 
+    72                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    73                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    74                              <1> RAM_DOS         equ     640
+    75                              <1> 
+    76                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    77                              <1> ; the default is 512 kilobytes
+    78                              <1> RAM             equ     512             ; (512 is the default)
+    79                              <1> 
+    80                              <1> ; Define the number of Wait States at which the RAM operates
+    81                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+    82                              <1> 
+    83                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+    84                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    85                              <1> 
+    86                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+    87                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+    88                              <1> 
+    89                              <1> ; Define the time zone in which we build the Relocatable BIOS
+    90                              <1> %ifndef TIMEZONE
+    91                              <1> %define TIMEZONE "CDT"
+    92                              <1> %endif
+    93                              <1> 
+    94                              <1> ; Has the REDBUG debugger been loaded?
+    95                              <1> %ifndef SOFT_DEBUG
+    96                              <1> %define SOFT_DEBUG 0
+    97                              <1> %endif
+    98                              <1> 
+    99                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   100                              <1> %ifndef TBASIC
+   101                              <1> TBASIC          equ     1		; default is 1
+   102                              <1> %endif
+   103                              <1> 
+   104                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   105                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   106                              <1> %ifndef FPEM
+   107                              <1> FPEM            equ     1               ; default is 1
+   108                              <1> %endif
+   109                              <1> 
+   110                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   111                              <1> EMM_BOARDS      equ     4
+   112                              <1> 
+   113                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   114                              <1> ; or at locations 0280h..3FFh in low memory?
+   115                              <1> %if SOFT_DEBUG
+   116                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   117                              <1> %else
+   118                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   119                              <1> %endif
+   120                              <1> 
+   121                              <1> ; Define the size of the EPROM that is to be installed on the system
+   122                              <1> ; It may be larger than the actual ROM image to be generated.
+   123                              <1> %ifndef CHIP
+   124                              <1> CHIP            equ     64
+   125                              <1> %endif
+   126                              <1> 
+   127                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   128                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   129                              <1> FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   130                              <1> ;FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   131                              <1> 
+   132                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   133                              <1> ; If the wiring update is installed, or you have a later board, then
+   134                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   135                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   136                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   137                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   138                              <1> 
+   139                              <1> ; Define the UART oscillator speed
+   140                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   141                              <1> 
+   142                              <1> 
+   143                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   144                              <1> ; end of the User configuration
+   145                              <1> ;       Do Not modify anything below this point
+   146                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   147                              <1> 
+   148                              <1> CVDU_8563	equ	CVDU		; separate inits
+   149                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
+   150                              <1> VGA3_6445       equ     VGA3            ; separate inits
+   151                              <1> ; Suppress all UART output in color video Mode 3
+   152                              <1> ;UART_MODE3_SUPPRESS	equ	0
+   153                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563 | VGA3_6445
+   154                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
+   155                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
+   156                              <1> 
+   157                              <1> ; Define existence of any uart chip
+   158                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   159                              <1> startuplength   equ     128                     ; may be up to 1024
+   160                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   161                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   162                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   163                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   164                              <1> 
+   165                              <1> 
+   166                              <1> %define ARG(n) [bp+2+(n)*2]
+   167                              <1> 
+   168                              <1> %macro  check   1.nolist
+   169                              <1>  %if (%1)
+   170                              <1>    %error Check Failure: %1
+   171                              <1>  %endif
+   172                              <1> %endm
+   173                              <1> %macro  range   3.nolist
+   174                              <1>  %if (%1)<(%2)
+   175                              <1>    %error Out of Range: %1
+   176                              <1>  %elif (%1)>(%3)
+   177                              <1>    %error Out of Range: %1
+   178                              <1>  %endif
+   179                              <1> %endm
+   180                              <1> _terminal equ UART+CVDU
+   181                              <1>  check   RAM_DOS&15
+   182                              <1>  check   RAM&(RAM-1)
+   183                              <1>  check   ROM&(ROM-1)
+   184                              <1>  range   RAM,32,512
+   185                              <1>  range   ROM,32,256
+   186                              <1>  range   RAM_WS,0,3
+   187                              <1>  range   ROM_WS,0,3
+   188                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   189                              <1>  range   LCL_IO_WS,0,3
+   190                              <1>  range   BUS_IO_WS,0,3
+   191                              <1>  range   UART_OSC,500000,16000000
+   192                              <1>  range   UART_RATE,0,7
+   193                              <1>  range	 UART,0,1
+   194                              <1>  range	 _terminal,1,2
+   195                              <1> 
+   196                              <1> %ifndef SOFT_DEBUG
+   197                              <1> %define SOFT_DEBUG 0
+   198                              <1> %endif
+   199                              <1> 
+   200                              <1> %ifndef TRACE
+   201                              <1> %define TRACE 0
+   202                              <1> %endif
+   203                              <1> 
+   204                              <1> %ifdef MAKE_OBJECT_FILE
+   205                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   206                              <1>         export _ROMsize
+   207                              <1>         export _CHIPsize
+   208                              <1> _ROMsize        dw      ROM
+   209                              <1> _CHIPsize       dw      CHIP
+   210                              <1> %endif
+   211                              <1> ; end of the Hardware configuration file
+   212                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   213                              <1> ;*/
+    26                                  %include        "cpuregs.asm"
+     1                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                              <1> ; CPUREGS.ASM
+     3                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     4                              <1> ;
+     5                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+     6                              <1> ;
+     7                              <1> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+     8                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+     9                              <1> ;
+    10                              <1> ; This program is free software: you can redistribute it and/or modify
+    11                              <1> ; it under the terms of the GNU General Public License as published by
+    12                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    13                              <1> ; (at your option) any later version.
+    14                              <1> ;
+    15                              <1> ; This program is distributed in the hope that it will be useful,
+    16                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    17                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    18                              <1> ; GNU General Public License for more details.
+    19                              <1> ;
+    20                              <1> ; You should have received a copy of the GNU General Public License
+    21                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    22                              <1> ;
+    23                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    24                              <1>         cpu     186
+    25                              <1> ;
+    26                              <1> ;
+    27                              <1> ; IBM model byte -- must be less than a 286
+    28                              <1> ;
+    29                              <1> ;MODEL_BYTE		equ	0FEh	; PC-XT
+    30                              <1> ;SUBMODEL_BYTE		equ	0FFh	; not used
+    31                              <1> 
+    32                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    33                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    34                              <1> 
+    35                              <1> 
+    36                              <1> ; 80188 peripheral control register block address
+    37                              <1> CPU_CSCR	        equ	0FF00h
+    38                              <1> 
+    39                              <1> ; Compatible Mode registers
+    40                              <1> 
+    41                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    42                              <1> 
+    43                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
+    44                              <1> 
+    45                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    46                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    47                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    48                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    49                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    50                              <1> 
+    51                              <1> ; Enhanced Mode registers
+    52                              <1> 
+    53                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    54                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    55                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+    56                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+    57                              <1> 
+    58                              <1> 
+    59                              <1> ; On-board internal peripheral equates
+    60                              <1> ; Programmable Interrupt Controller
+    61                              <1> PIC	        equ	CPU_CSCR+020H
+    62                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+    63                              <1> PIC_POLLR	equ	PIC+4
+    64                              <1> PIC_POLLSR	equ	PIC+6
+    65                              <1> PIC_IMASK	equ	PIC+8
+    66                              <1> PIC_PMREG	equ	PIC+0AH
+    67                              <1> PIC_SRVR	equ	PIC+0CH
+    68                              <1> PIC_IRQR	equ	PIC+0EH
+    69                              <1> PIC_IRQSR	equ	PIC+10H
+    70                              <1> PIC_TCR	        equ	PIC+12H
+    71                              <1> PIC_DMA0CR	equ	PIC+14H
+    72                              <1> PIC_DMA1CR	equ	PIC+16H
+    73                              <1> PIC_I0CON	equ	PIC+18H
+    74                              <1> PIC_I1CON	equ	PIC+1AH
+    75                              <1> PIC_I2CON	equ	PIC+1CH
+    76                              <1> PIC_I3CON	equ	PIC+1EH
+    77                              <1> 
+    78                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
+    79                              <1> 
+    80                              <1> ; Interrupt masks (Master Mode)
+    81                              <1> ;
+    82                              <1> mask_timer_all          equ     0001h
+    83                              <1> mask_dma0               equ     0004h
+    84                              <1> mask_dma1               equ     0008h
+    85                              <1> mask_int0               equ     0010h
+    86                              <1> mask_int1               equ     0020h
+    87                              <1> mask_int2               equ     0040h
+    88                              <1> mask_int3               equ     0080h
+    89                              <1> 
+    90                              <1> 
+    91                              <1> 
+    92                              <1> ; Timers
+    93                              <1> TIM0	        equ	CPU_CSCR+050H
+    94                              <1> TIM1	        equ	CPU_CSCR+058H
+    95                              <1> TIM2	        equ	CPU_CSCR+060H
+    96                              <1> 
+    97                              <1> TCNT	        equ	0	; count register
+    98                              <1> CMPA	        equ	2	; max count A
+    99                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   100                              <1> TCON	        equ	6	; mode/control word
+   101                              <1> 
+   102                              <1> ; Timer control bits:
+   103                              <1> tc_EN           equ     8000h   ; Enable bit
+   104                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   105                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   106                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   107                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   108                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   109                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   110                              <1> tc_EXT          equ     0004h   ; External clock
+   111                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   112                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   113                              <1> 
+   114                              <1> 
+   115                              <1> 
+   116                              <1> 
+   117                              <1> ; DMA
+   118                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   119                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   120                              <1> DMASPL	        equ	0	; source pointer low
+   121                              <1> DMASPU	        equ	2	; source pointer high
+   122                              <1> DMADPL	        equ	4	; destination pointer low
+   123                              <1> DMADPU	        equ	6	; destination pointer high
+   124                              <1> DMATC	        equ	8	; terminal count
+   125                              <1> DMACW	        equ	0AH	; control word
+   126                              <1> 
+   127                              <1> 
+   128                              <1> 
+   129                              <1> 
+   130                              <1> 
+   131                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   132                              <1> ;
+   133                              <1> ;       SBC-188 external devices
+   134                              <1> ;
+   135                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   136                              <1> 
+   137                              <1> IO_BASE			equ	0400h
+   138                              <1> 
+   139                              <1> 
+   140                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   141                              <1> ; The UART registers
+   142                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   143                              <1> uart_base               equ     IO_BASE+0280h
+   144                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   145                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   146                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   147                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   148                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   149                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   150                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   151                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   152                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   153                              <1> uart_sr			equ	uart_base+7	;Scratch
+   154                              <1> 
+   155                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   156                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   157                              <1> 
+   158                              <1> 
+   159                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   160                              <1> ; Floppy controller
+   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   162                              <1> FDC	        equ	IO_BASE+0200H
+   163                              <1> FDC_MSR         equ     FDC
+   164                              <1> FDC_DATA        equ     FDC_MSR+1
+   165                              <1> FDC_DACK        equ	FDC+10H
+   166                              <1> FDC_LDOR	equ	FDC+20H
+   167                              <1> FDC_LDCR	equ	FDC+30H
+   168                              <1> FDC_TC	        equ	FDC+40H
+   169                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+   170                              <1> 
+   171                              <1> 
+   172                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   173                              <1> ;DS1302 RTC
+   174                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   175                              <1> RTC	equ	IO_BASE+0300H
+   176                              <1> 
+   177                              <1> 
+   178                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   179                              <1> ; PIO 82C55 I/O 
+   180                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   181                              <1> PPI	        equ	IO_BASE+0260H
+   182                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   183                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   184                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)  
+   185                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   186                              <1> 
+   187                              <1> portA           equ     PPI+0   ;
+   188                              <1> portB           equ     PPI+1   ;     LITES uses this for output
+   189                              <1> portC           equ     PPI+2   ;
+   190                              <1> 
+   191                              <1> 
+   192                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   193                              <1> ; Dual [DMA] IDE devices
+   194                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   195                              <1> DIDE		equ	IO_BASE + 20H	; range 0x20..0x3F
+   196                              <1> 
+   197                              <1> DIDE0		equ	DIDE		; first interface (master & slave)
+   198                              <1> DIDE1		equ	DIDE+10h	; second interface (master & slave)
+   199                              <1> 
+   200                              <1> 
+   201                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   202                              <1> ; Cassette I/O
+   203                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   204                              <1> cuart_base	EQU 	IO_BASE+80H	; BASE IO ADDRESS OF CASSETTE UART
+   205                              <1> cuart_rbr	equ     cuart_base	;Rcvr Buffer / read only
+   206                              <1> cuart_thr	equ     cuart_base	;Transmit Holding / write only
+   207                              <1> cuart_ier	equ     cuart_base+1	;Interrupt Enable
+   208                              <1> cuart_iir	equ     cuart_base+2	;Interrupt Ident / read only
+   209                              <1> cuart_fcr	equ     cuart_base+2	;FIFO Control / write only
+   210                              <1> cuart_lcr	equ     cuart_base+3	;Line Control
+   211                              <1> cuart_mcr	equ     cuart_base+4	;Modem Control
+   212                              <1> cuart_lsr	equ     cuart_base+5	;Line Status
+   213                              <1> cuart_msr	equ     cuart_base+6	;Modem Status
+   214                              <1> cuart_sr	equ	cuart_base+7	;Scratch
+   215                              <1> 
+   216                              <1> cuart_dll	equ     cuart_base	;Divisor Latch LS Byte
+   217                              <1> cuart_dlm	equ	cuart_base+1	;Divisor Latch MS Byte
+   218                              <1> 
+   219                              <1> 
+   220                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   221                              <1> ;
+   222                              <1> ;       4MEM control registers
+   223                              <1> ;
+   224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   225                              <1> EMM_addr        equ     1               ; high 6 bits of 20-bit address
+   226                              <1> EMM_page        equ     0               ; 4MEM page in [0..254]
+   227                              <1> 
+   228                              <1> EMM_BASE        equ     IO_BASE + 000h          ; first EMM (4MEM) board
+   229                              <1> EMM_unmapped    equ     255             ; unmapped 4MEM page
+   230                              <1> 
+   231                              <1> EMM0            equ     EMM_BASE        ; first  EMM board
+   232                              <1> EMM1            equ     EMM0 + 2        ; second EMM board
+   233                              <1> EMM2            equ     EMM1 + 2        ; third  EMM board
+   234                              <1> EMM3            equ     EMM2 + 2        ; fourth EMM board
+   235                              <1> 
+   236                              <1> 
+   237                              <1> 
+   238                              <1> 
+   239                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   240                              <1> ;
+   241                              <1> ;	ColorVDU devices
+   242                              <1> ;
+   243                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   244                              <1> ;
+   245                              <1> ;	major select on the Z80 bus
+   246                              <1> ;
+   247                              <1> devCVDU_8bit	equ	0xE0		; this may change to 0x10
+   248                              <1> 
+   249                              <1> devCVDUbase 	equ	IO_BASE + devCVDU_8bit
+   250                              <1> 
+   251                              <1> M8563status	equ	devCVDUbase + 4		; 4 == bitrev(2)
+   252                              <1> M8563register	equ	devCVDUbase + 4
+   253                              <1> M8563data	equ	devCVDUbase + 12	; 12 == bitrev(3)
+   254                              <1> 
+   255                              <1> %if CVDU_8563
+   256                              <1> I8242status	equ	devCVDUbase + 10	; 10 == bitrev(5)
+   257                              <1> I8242command	equ	devCVDUbase + 10
+   258                              <1> I8242data	equ	devCVDUbase + 2		; 2 == bitrev(4)
+   259                              <1> %endif
+   260                              <1> 
+   261                              <1> 
+   262                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   263                              <1> ;
+   264                              <1> ;	VGA3 devices
+   265                              <1> ;
+   266                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   267                              <1> ;
+   268                              <1> ;	major select on the Z80 bus
+   269                              <1> ;
+   270                              <1> devVGA3_8bit    equ     0xE0                    ; same as CVDU
+   271                              <1> 
+   272                              <1> devVGA3base       equ     IO_BASE + devVGA3_8bit
+   273                              <1> 
+   274                              <1> %if VGA3_6445
+   275                              <1> I8242status	equ	devVGA3base + 1
+   276                              <1> I8242command	equ	devVGA3base + 1
+   277                              <1> I8242data	equ	devVGA3base + 0
+   278                              <1> %endif
+   279                              <1> HD6445addr	equ	devVGA3base + 2		; to address the HD6445 registers
+   280                              <1> HD6445reg	equ	devVGA3base + 3		; to r/w a register on the CRTC
+   281                              <1> 
+   282                              <1> vga3cfg		equ	devVGA3base + 4
+   283                              <1> ; the following are probably not used on the SBC-188, except for testing/checking
+   284                              <1> vga3adhi	equ	devVGA3base + 5
+   285                              <1> vga3adlo	equ	devVGA3base + 6
+   286                              <1> vga3data	equ	devVGA3base + 7
+   287                              <1> 
+   288                              <1> 
+   289                              <1> 
+   290                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   291                              <1> ;
+   292                              <1> ;	Front Panel devices
+   293                              <1> ;
+   294                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   295                              <1> ;
+   296                              <1> ; Front Panel 82C55 I/O 
+   297                              <1> FPPPI	        equ	IO_BASE+0A0H
+   298                              <1> FPPORTA         equ     FPPPI+0   	;
+   299                              <1> FPPORTB         equ     FPPPI+1   	;    
+   300                              <1> FPPORTC         equ     FPPPI+2   	;
+   301                              <1> FPPIOCONT       equ     FPPPI+3   	;
+   302                              <1> 
+   303                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   304                              <1> ; debug port -- JRC only
+   305                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   306                              <1> portD		equ	IO_BASE + 0FFh		; 0x04FF
+   307                              <1> ;portD		equ	portB		     ; older 8255 output on PPI
+   308                              <1> 
+   309                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   310                              <1> ;
+   311                              <1> ; some useful macros:
+   312                              <1> ;
+   313                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   314                              <1> ;
+   315                              <1> 
+   316                              <1> %imacro setloc  1.nolist
+   317                              <1>  times   (%1-($-$$)) db 0FFh
+   318                              <1> %endm
+   319                              <1> 
+   320                              <1> %imacro db_lo   1
+   321                              <1>  db (%1)&255
+   322                              <1> %endm
+   323                              <1> 
+   324                              <1> %imacro cnop    0.nolist
+   325                              <1> %if SOFT_DEBUG
+   326                              <1>         nop
+   327                              <1> %endif
+   328                              <1> %endm
+   329                              <1> 
+   330                              <1> %imacro popm 1-*.nolist
+   331                              <1> %rep %0
+   332                              <1> %ifidni %1,ALL
+   333                              <1>  popa
+   334                              <1> %elifidni %1,F
+   335                              <1>  popf
+   336                              <1> %else
+   337                              <1>  pop %1
+   338                              <1> %ifidni %1,DS
+   339                              <1>  cnop
+   340                              <1> %elifidni %1,ES
+   341                              <1>  cnop
+   342                              <1> %endif
+   343                              <1> %endif
+   344                              <1> %rotate 1
+   345                              <1> %endrep
+   346                              <1> %endm
+   347                              <1> 
+   348                              <1> %imacro pushm 1-*.nolist
+   349                              <1> %rep %0
+   350                              <1> %rotate -1
+   351                              <1> %ifidni %1,ALL
+   352                              <1>  pusha
+   353                              <1> %elifidni %1,F
+   354                              <1>  pushf
+   355                              <1> %else
+   356                              <1>  push %1
+   357                              <1> %endif
+   358                              <1> %endrep
+   359                              <1> %endm
+   360                              <1> 
+   361                              <1> ; end CPUREGS.ASM
+   362                              <1> 
+    27                                  %include        "equates.asm"
+     1                              <1> ;========================================================================
+     2                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
+     3                              <1> ;========================================================================
+     4                              <1> ;   for the N8VEM SBC-188 v.00.4 and 00.5
+     5                              <1> ;
+     6                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+     7                              <1> ;
+     8                              <1> ; Copyright (C) 2010 John R. Coffman.  All rights reserved.
+     9                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    10                              <1> ;
+    11                              <1> ; This program is free software: you can redistribute it and/or modify
+    12                              <1> ; it under the terms of the GNU General Public License as published by
+    13                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    14                              <1> ; (at your option) any later version.
+    15                              <1> ;
+    16                              <1> ; This program is distributed in the hope that it will be useful,
+    17                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    18                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    19                              <1> ; GNU General Public License for more details.
+    20                              <1> ;
+    21                              <1> ; You should have received a copy of the GNU General Public License
+    22                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    23                              <1> ;
+    24                              <1> ;========================================================================
+    25                              <1> 
+    26                              <1> %if 1
+    27                              <1> 	SEGMENT  _TEXT ALIGN=16 PUBLIC CLASS=CODE
+    28                              <1>         SEGMENT  CONST ALIGN=2 PUBLIC CLASS=DATA
+    29                              <1> 	SEGMENT  _DATA ALIGN=2 PUBLIC CLASS=DATA
+    30                              <1>         SEGMENT  CONST2 ALIGN=2 PUBLIC CLASS=DATA
+    31                              <1> 	SEGMENT  _BSS  ALIGN=2 PUBLIC CLASS=BSS
+    32                              <1> ;;;        SEGMENT  _BASIC ALIGN=16 PUBLIC CLASS=BASIC
+    33                              <1> 
+    34                              <1> 	GROUP	DGROUP CONST _DATA CONST2 _BSS
+    35                              <1> 
+    36                              <1>         global  FPEM_segment
+    37                              <1> %endif
+    38                              <1> 
+    39                              <1> %include "ascii.asm"
+     1                              <2> ; ascii.asm
+     2                              <2> ;
+     3                              <2> CTRL            equ     1Fh     ; masks a character to CTRL-x
+     4                              <2> 
+     5                              <2> NUL     equ     00h
+     6                              <2> BEL     equ     (CTRL & 'G')
+     7                              <2> BS      equ     08h
+     8                              <2> HT      equ     09h
+     9                              <2> LF	equ	0Ah
+    10                              <2> NL      equ     LF
+    11                              <2> CR	equ	0Dh
+    12                              <2> XON     equ     (CTRL & 'Q')
+    13                              <2> XOFF    equ     (CTRL & 'S')
+    14                              <2> DC1     equ     XON
+    15                              <2> DC3     equ     XOFF
+    16                              <2> ESC     equ	1Bh
+    17                              <2> 
+    18                              <2> 
+    40                              <1> 
+    41                              <1> 
+    42                              <1> ; POST error codes. Presently one byte but can expand to word.
+    43                              <1> ER_BIOS equ	01h		; Bad ROM bios checksum, patch last byte
+    44                              <1> ER_RAM	equ	02h		; Bad RAM in main memory, replace
+    45                              <1> ER_CRT	equ	04h		; Bad RAM in video card, replace
+    46                              <1> ER_FDC	equ	08h		; Bad FDC
+    47                              <1> ER_UNK1	equ	10h		; {unassigned}
+    48                              <1> ER_MEM	equ	20h		; Bad RAM in vector area, replace
+    49                              <1> ER_ROM	equ	40h		; Bad ROM in expansion area, bad checksum
+    50                              <1> ER_UNK2	equ	80h		; {unassigned}
+    51                              <1> 
+    52                              <1> 
+    53                              <1> 
+    54                              <1> ;; ************************ BIOS Data Segment ******************************
+    55                              <1> ;; BIOS data segment - not all will  be used
+    56                              <1> ;                struc   BIOS_DATA_AREA  ; at 0040:0000
+    57                              <1> %include "bda.inc"
+     1                              <2> ;/*======================================================================
+     2                              <2> ; bda.inc -- BIOS data area definitions
+     3                              <2> ;========================================================================
+     4                              <2> ;   for the N8VEM SBC-188
+     5                              <2> ;
+     6                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+     7                              <2> ;
+     8                              <2> ; Copyright (C) 2013 John R. Coffman.  All rights reserved.
+     9                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    10                              <2> ;
+    11                              <2> ; This program is free software: you can redistribute it and/or modify
+    12                              <2> ; it under the terms of the GNU General Public License as published by
+    13                              <2> ; the Free Software Foundation, either version 3 of the License, or
+    14                              <2> ; (at your option) any later version.
+    15                              <2> ;
+    16                              <2> ; This program is distributed in the hope that it will be useful,
+    17                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    18                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    19                              <2> ; GNU General Public License for more details.
+    20                              <2> ;
+    21                              <2> ; You should have received a copy of the GNU General Public License
+    22                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    23                              <2> ;
+    24                              <2> ;========================================================================
+    25                              <2> 
+    26                              <2> 			;*/ extern				/*
+    27                              <2> 	ABSOLUTE  0	;*/ struct BDA {			/*
+    28 00000000 <res 00000008>      <2> serial_ports    resw    4	;*/	word	serial_ports[4];	/*
+    29 00000008 <res 00000008>      <2> parallel_ports  resw    4	;*/	word	parallel_ports[4];	/*
+    30 00000010 <res 00000002>      <2> equipment_flag  resw    1	;*/	EQFL	equipment_flag;		/*
+    31                              <2> ;	dw	?		; 40:10 	; Equipment present word
+    32                              <2> ;  						;  = (1 iff floppies) *     1.
+    33                              <2> ;                                               ;  + (1 iff 187     ) *     2.
+    34                              <2> ;  						;  + (#+1 64K sys ram) *    4.
+    35                              <2> ;  						;  + (init crt mode ) *    16.
+    36                              <2> ;  						;  + (# of floppies ) *    64.
+    37                              <2> ;  						;  + (# serial ports) *   512.
+    38                              <2> ;  						;  + (1 iff toy port) *  4096.
+    39                              <2> ;                                               ;  + (1 iff modem   ) *  8192.
+    40                              <2> ;  						;  + (# parallel LPT) * 16384.
+    41 00000012 <res 00000001>      <2> mfg_test_flags  resb    1	;*/	byte	mfg_test_flags;	/* 40:12 unused by us
+    42 00000013 <res 00000002>      <2> memory_size     resw    1	;*/	word	memory_size;	/* 40:13 kilobytes
+    43                              <2> uart_kbd_ctrl_R	equ	$	;*/				/*** JRC: count of ctrl-R's for reboot
+    44 00000015 <res 00000001>      <2> IPL_errors      resb    1	;*/	byte	IPL_errors;	/* 40:15 IPL errors<-table/scratchpad
+    45 00000016 <res 00000001>      <2> unused_01       resb    1	;*/	byte	unused_01;	/*
+    46                              <2> ;;---------------[Keyboard data area]------------;
+    47 00000017 <res 00000002>      <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
+    48                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+    49 00000019 <res 00000001>      <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
+    50 0000001A <res 00000002>      <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
+    51 0000001C <res 00000002>      <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
+    52 0000001E <res 00000020>      <2> kbd_buffer      resw    16	;*/	word	kbd_buffer[16];	/* 40:1E Keyboard Buffer (Scan,Value)
+    53                              <2> kbd_buffer_last	equ	$	;*/				/*
+    54                              <2> ;;---------------[Diskette data area]------------;
+    55 0000003E <res 00000001>      <2> fdc_drv_calib   resb    1	;*/	byte	fdc_drive_calib;   /* 40:3E
+    56 0000003F <res 00000001>      <2> fdc_motor_LDOR  resb    1	;*/	byte	fdc_motor_LDOR;	   /* 40:3F Motor, DMA, select control
+    57 00000040 <res 00000001>      <2> fdc_motor_ticks resb    1	;*/	byte	fdc_motor_ticks;   /* 40:40 ticks til motor off
+    58 00000041 <res 00000001>      <2> fdc_status      resb    1	;*/	byte	fdc_status;	   /* 40:41
+    59                              <2> ;				Floppy return code stat byte
+    60                              <2> ;				;  1 = bad ic 765 command req.
+    61                              <2> ;				;  2 = address mark not found
+    62                              <2> ;				;  3 = write to protected disk
+    63                              <2> ;				;  4 = sector not found
+    64                              <2> ;				;  8 = data late (DMA overrun)
+    65                              <2> ;				;  9 = DMA failed 64K page end
+    66                              <2> ;				; 16 = bad CRC on floppy read
+    67                              <2> ;				; 32 = bad NEC 765 controller
+    68                              <2> ;				; 64 = seek operation failed
+    69                              <2> ;				;128 = disk drive timed out
+    70 00000042 <res 00000007>      <2> fdc_ctrl_status resb    7	;*/	byte	fdc_ctrl_status[7];  /* 40:42 Status bytes from NEC 765
+    71                              <2> ;;---------------[Video display area]------------;
+    72 00000049 <res 00000001>      <2> video_mode      resb    1	;*/	byte	video_mode;	/* 40:49
+    73                              <2> ;			 	; Current CRT mode  (software)
+    74                              <2> ;				;  0 = 40 x 25 text (no color)
+    75                              <2> ;				;  1 = 40 x 25 text (16 color)
+    76                              <2> ;				;  2 = 80 x 25 text (no color)
+    77                              <2> ;				;  3 = 80 x 25 text (16 color)
+    78                              <2> ;				;  4 = 320 x 200 grafix 4 color
+    79                              <2> ;				;  5 = 320 x 200 grafix 0 color
+    80                              <2> ;				;  6 = 640 x 200 grafix 0 color
+    81                              <2> ;				;  7 = 80 x 25 text (mono card)
+    82 0000004A <res 00000002>      <2> video_columns   resw    1	;*/	word video_columns;	/* 40:4A Columns on CRT screen
+    83 0000004C <res 00000002>      <2> video_regen_bytes  resw 1	;*/	word video_regen_bytes;	/* 40:4C Bytes in the regen region
+    84 0000004E <res 00000002>      <2> video_regen_offset resw 1	;*/	word video_regen_offset;/* 40:4E Byte offset in regen region
+    85 00000050 <res 00000010>      <2> video_cursor_pos  resw  8	;*/	word video_cursor_pos[8];  /* 40:50 Cursor pos for up to 8 pages
+    86 00000060 <res 00000002>      <2> video_cursor_mode resw  1	;*/	word video_cursor_mode;	/* 40:60 Current cursor mode setting
+    87 00000062 <res 00000001>      <2> video_page      resb    1	;*/	byte video_page;	/* 40:62 Current page on display
+    88 00000063 <res 00000002>      <2> video_base_seg  resw    1	;*/	word video_base_seg;	/* 40:63 Base address (B000h or B800h)
+    89 00000065 <res 00000001>      <2> video_hw_mode   resb    1	;*/	byte video_hw_mode;	/* 40:65 ic 6845 mode reg. (hardware)
+    90 00000066 <res 00000001>      <2> video_cga_palette resb  1	;*/	byte video_cga_palette;	/* 40:66 Current CGA palette
+    91                              <2> ;;---------------[Used to setup ROM]-------------;
+    92 00000067 <res 00000004>      <2> eprom_address   resd    1	;*/	dword eprom_address;	/* 40:67 Eprom base Offset,Segment
+    93 0000006B <res 00000001>      <2> spurious_irq    resb    1	;*/	byte spurious_irq;	/* 40:6B Last spurious interrupt IRQ
+    94                              <2> ;;---------------[Timer data area]---------------;
+    95 0000006C <res 00000004>      <2> timer_ticks     resd    1	;*/	dword timer_ticks;	/* 40:6C Ticks since midnight (lo,hi)
+    96 00000070 <res 00000001>      <2> timer_new_day   resb    1	;*/	byte timer_new_day;	/* 40:70 Non-zero if new day
+    97                              <2> ;;---------------[System data area]--------------;
+    98 00000071 <res 00000001>      <2> break_flag      resb    1	;*/	byte break_flag;	/* 40:71 Sign bit set iff break
+    99 00000072 <res 00000002>      <2> warm_boot       resw    1	;*/	word warm_boot;		/* 40:72 Warm boot iff==1234h
+   100                              <2> ;;---------------[Hard disk scratchpad]----------;
+   101 00000074 <res 00000004>      <2> hdd_scratch     resd    1	;*/	word hdd_scratch[2];	/* 40:74
+   102                              <2> ;;---------------[Timout areas/PRT/LPT]----------;
+   103 00000078 <res 00000004>      <2> lpt_timeout     resb    4	;*/	byte lpt_timeout[4];	/* 40:78 Ticks for LPT 1-4 timeouts
+   104 0000007C <res 00000004>      <2> com_timeout     resb    4	;*/	byte com_timeout[4];	/* 40:7C Ticks for COM 1-4 timeouts
+   105                              <2> ;;---obsolete----[Keyboard buf start/end]---jrc--;
+   106 00000080 <res 00000002>      <2> kbd_buffer_start resw   1	;*/	word kbd_buffer_start;	/* 40:80 KBD buffer head (PC/AT)
+   107 00000082 <res 00000002>      <2> kbd_buffer_end  resw    1	;*/	word kbd_buffer_end;	/* 40:82 KBD buffer tail (PC/AT)
+   108                              <2> ;;---------------[EGA stuff]---------------------;
+   109 00000084 <res 00000007>      <2> EGA_stuff	resb	7	;*/	byte EGA_stuff[7];	/* 40:84 Unspecified EGA data
+   110                              <2> ;;---------------[Floppy/Fixed Media Info]-------------;
+   111 0000008B <res 00000001>      <2> fdc_last_rate	resb	1	;*/	byte fdc_last_rate;	/* 40:8B Last floppy step rate/data rate?
+   112 0000008C <res 00000004>      <2> fx_misc_unused	resb	4	;*/	byte fx_misc_unused[4];	/* 40:8C Fixed disk miscellaneous ???
+   113 00000090 <res 00000002>      <2> fdc_disk_state	resb	2	;*/	byte fdc_disk_state[2];	/* 40:90 Floppy disk state
+   114 00000092 <res 00000002>      <2> fdc_op_start	resb	2	;*/	byte fdc_op_start[2];	/* 40:92 Floppy operation start state machine
+   115 00000094 <res 00000002>      <2> fdc_cylinder	resb	2	;*/	byte fdc_cylinder[2];	/* 40:94 Floppy present cylinder
+   116                              <2> ;;---------------[Additional KBD flags]----------------;
+   117 00000096 <res 00000001>      <2> kbd_flag_3	resb	1	;*/	byte kbd_flag_3;	/* 40:96 kbd ???
+   118 00000097 <res 00000001>      <2> kbd_flag_2	resb	1	;*/	byte kbd_flag_2;	/* 40:97 kbd ???
+   119                              <2> ;;---------------[RTC/timer1 data]---------------------;
+   120 00000098 <res 00000004>      <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
+   121 0000009C <res 00000004>      <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
+   122 000000A0 <res 00000001>      <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   123                              <2> ;;---------------[Cassette I/O stuff]------------------;
+   124 000000A1 <res 00000001>      <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
+   125 000000A2 <res 00000002>      <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
+   126                              <2> ;									Post Acknowleged=00;
+   127 000000A4 <res 00000001>      <2> EGA_data	resb	1	;*/	byte EGA_data;		/* 40:A4 Various usage
+   128 000000A5 <res 00000002>      <2> SDstatus	resb	2	;*/	byte SDstatus[2];	/* 40:A5 Status byte from command
+   129 000000A7 <res 00000002>      <2> SDcardtype	resb	2	;*/	byte SDcardtype[2];	/* 40:A7 SDcard type SDSC=2, HC=3, ...
+   130                              <2> ;
+   131 000000A9 <res 00000004>      <2> fixed_disk_tab	resb	4	;*/	byte fixed_disk_tab[4];	/* dispatch table to fixed disk drivers
+   132 000000AD <res 00000001>      <2> wait12_count	resb	1	;*/	byte wait12_count;	/* 40:AD 12usec CX count
+   133 000000AE <res 00000001>      <2> lock_count	resb	1	;*/	byte lock_count;	/* 40:AE lock level counter
+   134 000000AF <res 00000001>      <2> EMS_start       resb    1	;*/	byte EMS_start;		/* start EMS allocation from here
+   135                              <2> fx80		equ	$	;*/	struct EDD_disk fx80;	/* fixed disk parameter area 0
+   136 000000B0 <res 00000002>      <2> fx_log_cylinders resw   1	;	word fx_log_cylinders;	 logical number of cylinders
+   137 000000B2 <res 00000001>      <2> fx_log_heads    resb    1	;	byte fx_log_heads;	 logical number of heads
+   138 000000B3 <res 00000001>      <2> fx_signature	resb	1	;	byte fx_signature;	 A0h signature = translated geom
+   139 000000B4 <res 00000001>      <2> fx_phys_sectors	resb    1       ;	byte fx_phys_sectors;	 physical number of sectors per track
+   140 000000B5 <res 00000002>      <2> fx_LBA_high     resw    1       ;	word fx_LBA_high;	 high word of LBA28 number of sectors
+   141 000000B7 <res 00000001>      <2> fx_reserved7    resb	1	;	byte fx_reserved;	 MBZ
+   142 000000B8 <res 00000001>      <2> fx_drive_control resb   1       ;	byte fx_drive_control;	 flag bits for IDE head register
+   143 000000B9 <res 00000002>      <2> fx_phys_cylinders resw	1	;	word fx_phys_cylinders;	 physical number of cylinders
+   144 000000BB <res 00000001>      <2> fx_phys_heads	resb	1	;	byte fx_phys_heads;	 physical number of heads
+   145 000000BC <res 00000002>      <2> fx_LBA_low	resw	1	;	word fx_LBA_low;	 low word of LBA28 number of sectors
+   146 000000BE <res 00000001>      <2> fx_log_sectors	resb	1	;	byte fx_log_sectors;	 logical number of sectors per track
+   147 000000BF <res 00000001>      <2> fx_checksum	resb	1	;	byte fx_checksum;	 checksum, dunno how to compute
+   148 000000C0 <res 00000010>      <2> fx81            resb    16	;*/	struct EDD_disk fx81;	/* fixed disk parameter area 1
+   149 000000D0 <res 00000010>      <2> fx82            resb    16	;*/	struct EDD_disk fx82;	/* fixed disk parameter area 2
+   150 000000E0 <res 00000010>      <2> fx83            resb    16	;*/	struct EDD_disk fx83;	/* fixed disk parameter area 3
+   151                              <2> ;
+   152                              <2> ;
+   153                              <2> 
+   154 000000F0 <res 00000002>      <2> FPEM_segment    resw    1       ;*/	word FPEM_segment;	/* FPEM data segment
+   155                              <2> 
+   156 000000F2 <res 00000002>      <2> EBDA_paragraph  resw    1       ;*/	word EBDA_paragraph;	/* lowest EBDA paragraph
+   157                              <2> 
+   158 000000F4 <res 00000002>      <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
+   159 000000F6 <res 00000002>      <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
+   160                              <2> 
+   161 000000F8 <res 00000002>      <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   162                              <2> 
+   163 000000FA <res 00000004>      <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
+   164                              <2> 
+   165 000000FE <res 00000001>      <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
+   166                              <2> 
+   167 000000FF <res 00000001>      <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   168                              <2> ;								   CPU clock is half of this
+   169                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   170                              <2> ;
+   171                              <2> ;  System configuration stuff below
+   172                              <2> ;	c.f., CONFIG.ASM (ANSI.CFG, CVDU.CFG, etc.), User configuration stuff
+   173                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   174                              <2> %if 0				;*/
+   175                              <2> #define FIXED_DISK_MAX 4		/*
+   176                              <2> %else
+   177                              <2> %define FIXED_DISK_MAX 4
+   178                              <2> %endif
+   179                              <2> %if 0				;*/
+   180                              <2> #define PPIDE_driver 1		/*
+   181                              <2> %else
+   182                              <2> %define PPIDE_driver 1
+   183                              <2> %endif
+   184                              <2> %if 0				;*/
+   185                              <2> #define DIDE_driver 1		/*
+   186                              <2> %else
+   187                              <2> %define DIDE_driver 1
+   188                              <2> %endif
+   189                              <2> %if 0				;*/
+   190                              <2> #define DSD_driver 1		/*
+   191                              <2> %else
+   192                              <2> %define DSD_driver 1
+   193                              <2> %endif
+   194                              <2> 				;*/
+    58                              <1> 
+    59                              <1> ;  this must be the same in EQUATES.H */
+    60                              <1> %if SOFT_DEBUG
+    61                              <1> %define NBREAK  8
+    62                              <1> %endif
+    63                              <1> 
+    64                              <1> 
+    65                              <1> %if 0
+    66                              <1>         segment _TEXT
+    67                              <1> ;; *************************************************************************
+    68                              <1> 
+    69                              <1> 
+    70                              <1> 
+    71                              <1> 
+    72                              <1> ;; ************************ DOS Data Segment *******************************
+    73                              <1> ;dosdir	SEGMENT at 50h				; Boot disk directory from IPL
+    74                              <1> ;xerox	label	byte				;  0 if Print Screen idle
+    75                              <1> ;						;  1 if PrtSc xeroxing screen
+    76                              <1> ;						;255 if PrtSc error in xerox
+    77                              <1> ;						;  ...non-grafix PrtSc in bios
+    78                              <1> ;	db	200h dup(?)			; PC-DOS bootstrap procedure
+    79                              <1> ;						;  ...IBMBIO.COM buffers the
+    80                              <1> ;						;  ...directory of the boot
+    81                              <1> ;						;  ...device here at IPL time
+    82                              <1> ;						;  ...when locating the guts
+    83                              <1> ;						;  ...of the operating system
+    84                              <1> ;						;  ...filename "IBMDOS.COM"
+    85                              <1> ;dosdir	ends
+    86                              <1> ;; *************************************************************************
+    87                              <1> ;; ************************ DOS IPL Segment ********************************
+    88                              <1> ;dosseg	SEGMENT at 70h				; "Kernel" of PC-DOS op sys
+    89                              <1> ;;IBMBIO.COM file loaded by boot block. Device Drivers/Bootstrap. CONTIGUOUS<---
+    90                              <1> ;;IBMDOS.COM operating system nucleus immediately follows IBMBIO.COM and       !
+    91                              <1> ;;     doesn`t have to be contiguous.  The IBMDOS operating system nucleus     !
+    92                              <1> ;;     binary image is loaded by transient code in IBMBIO binary image	      !
+    93                              <1> ;dosseg	ends					;			      !
+    94                              <1> ;iplseg	SEGMENT at 0h				; Segment for boot block      !
+    95                              <1> ;;The following boot block is loaded with 512 bytes on the first sector of     !
+    96                              <1> ;;the bootable device by code resident in the ROM-resident bios.  Control is   !
+    97                              <1> ;;then transferred to the first word 0000:7C00 of the disk-resident bootstrap  !
+    98                              <1> ;	ORG	07C00h				;  ..offset for boot block    !
+    99                              <1> ;boot	db	200h dup(?)			;  ..start disk resident boot--
+   100                              <1> ;iplseg	ends
+   101                              <1> 
+   102                              <1> %endif
+    28                                  
+    29                                          extern  cpu_table_init
+    30                                  
+    31                                          global  BIOS_call_1Ch
+    32                                          global  timer0_interrupt, timer1_interrupt, timer2_interrupt
+    33                                          extern  fdc_timer_hook
+    34                                          global  BIOS_call_1Ah   ; BIOS call
+    35                                          global  @timer_init
+    36                                          global  _cpu_speed
+    37                                          extern  rtc_get_loc, rtc_set_loc
+    38                                  
+    39                                  %if NEED_TIMER_FIX
+    40                                  ; swap the timers in the intiialization table
+    41                                  timer0          equ     TIM1
+    42                                  timer1          equ     TIM0
+    43                                  %else
+    44                                  ; timers are their true selves in the initialization table
+    45                                  timer0          equ     TIM0
+    46                                  timer1          equ     TIM1
+    47                                  %endif
+    48                                  
+    49                                  %if 1
+    50                                  ;/* definitions below are from "ds1302.h" */
+    51                                  
+    52                                  ;/* definitions of the CMOS RAM locations */
+    53                                  %define RAM_trickle		0
+    54                                  %define RAM_century		1
+    55                                  %define RAM_floppy      2
+    56                                  %define RAM_floppy0     2
+    57                                  %define RAM_floppy1     3
+    58                                  %define RAM_bits        4
+    59                                  %define RAM_bits_DST    01h     ; DST flag
+    60                                  
+    61                                  %define RAM_checksum		30
+    62                                  %define RAM_length		31
+    63                                  
+    64                                  ;#define rtc_WP(on) rtc_set_loc(7|CLOCK,(on?0x80:0))
+    65                                  %endif
+    66                                  
+    67                                  
+    68                                  
+    69                                  
+    70                                  
+    71                                          SEGMENT _TEXT
+    72                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    73                                  ; _cpu_speed
+    74                                  ;
+    75                                  ;       Determine the CPU clock rate using the UART oscillator
+    76                                  ;       as the time standard.
+    77                                  ;
+    78                                  ;       Return the CPU speed in AX
+    79                                  ;
+    80                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    81                                  _cpu_speed:
+    82 00000000 E8(0000)                        call    cpu_table_init
+    83 00000003 [1500]                           dw       speed_setup           ; start the two timers
+    84                                  
+    85 00000005 BA5EFF                          mov     dx,timer1+TCON
+    86                                  .1:
+    87 00000008 ED                              in      ax,dx                   ; read status of timer1
+    88 00000009 A820                            test    al,tc_MC                ; max count reached ?
+    89 0000000B 74FB                            jz      .1
+    90                                  
+    91 0000000D BA60FF                          mov     dx,TIM2+TCNT          ; read the count
+    92 00000010 90                              nop
+    93 00000011 90                              nop
+    94 00000012 90                              nop
+    95 00000013 ED                              in      ax,dx
+    96 00000014 C3                              ret
+    97                                  
+    98                                  speed_setup:
+    99                                          db_lo   timer1+TCON
+    99 00000015 5E                  <1>  db (%1)&255
+   100 00000016 0040                            dw      tc_nINH                 ; disable
+   101                                  
+   102                                          db_lo   TIM2+TCON
+   102 00000018 66                  <1>  db (%1)&255
+   103 00000019 0040                            dw      tc_nINH                 ; disable
+   104                                  
+   105                                          db_lo   TIM2+CMPA             ; max. count
+   105 0000001B 62                  <1>  db (%1)&255
+   106 0000001C FFFF                            dw      0FFFFh
+   107                                  
+   108                                          db_lo   timer1+CMPA             ; max. count
+   108 0000001E 5A                  <1>  db (%1)&255
+   109 0000001F 0048                            dw      UART_OSC / 100          ; 10 ms interval
+   110                                  
+   111                                          db_lo   TIM2+TCNT             ; timer count = 0
+   111 00000021 60                  <1>  db (%1)&255
+   112 00000022 0000                            dw      0
+   113                                  
+   114                                          db_lo   timer1+TCNT             ; timer_count = 0
+   114 00000024 58                  <1>  db (%1)&255
+   115 00000025 0000                            dw      0
+   116                                  
+   117                                          db_lo   timer1+TCON             ; start timer 1
+   117 00000027 5E                  <1>  db (%1)&255
+   118 00000028 04C0                            dw      tc_EN+tc_nINH+tc_EXT    ; no Interrupts
+   119                                  
+   120                                          db_lo   TIM2+TCON             ; start timer 2
+   120 0000002A 66                  <1>  db (%1)&255
+   121 0000002B 00C0                            dw      tc_EN+tc_nINH
+   122                                  
+   123 0000002D 00                              db      0               ; end of the table
+   124                                  
+   125                                  
+   126                                  
+   127                                  
+   128                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   129                                  ; @timer_init
+   130                                  ;
+   131                                  ;       Start the 18.2 Hz clock ticks by initializing
+   132                                  ;       timers 0 & 2    
+   133                                  ;                               [1 & 2 on prototype boards]
+   134                                  ;   Call with Xtal frequency in AX
+   135                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   136                                  
+   137                                  @timer_init:
+   138 0000002E 56                              push    si
+   139 0000002F 57                              push    di
+   140                                  
+   141 00000030 50                              push    ax              ; protect AX
+   142                                  
+   143 00000031 E8(0000)                        call    cpu_table_init
+   144 00000034 [5900]                           dw      timer_table
+   145                                  
+   146 00000036 58                              pop     ax
+   147 00000037 BFA335                          mov     di,13731
+   148                                          
+   149 0000003A A801                            test    al,1            ; test for odd frequency
+   150 0000003C 7504                            jnz     .1
+   151                                  ; even frequency
+   152 0000003E D1E8                            shr     ax,1            ; halve the Xtal frequency
+   153 00000040 EB02                            jmp     .2
+   154                                  .1:     ; odd 
+   155 00000042 D1EF                            shr     di,1            ; halve the divisor
+   156                                  .2:
+   157 00000044 BA62FF                          mov     dx,TIM2+CMPA    ; set the timer 2 max count A
+   158 00000047 EF                              out     dx,ax
+   159 00000048 BA52FF                          mov     dx,timer0+CMPA  ; set the timer 0 max count A
+   160 0000004B 89F8                            mov     ax,di
+   161 0000004D EF                              out     dx,ax
+   162                                  
+   163 0000004E BA32FF                          mov     dx,PIC_TCR      ; timer control register
+   164 00000051 ED                              in      ax,dx
+   165 00000052 83E0F7                          and     ax,~08h         ; clear the mask bit
+   166 00000055 EF                              out     dx,ax
+   167                                  
+   168 00000056 5F                              pop     di
+   169 00000057 5E                              pop     si
+   170 00000058 C3                              ret
+   171                                  
+   172                                  timer_table:
+   173                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   174                                  ;
+   175                                  ;  Set up Timer 2 to provide the 250 kHz clock to Timer 0
+   176                                  ;
+   177                                  ;  By dividing CPU_CLK/4, the internal input to the timer, by the
+   178                                  ;  CPU clock rate, the 1/4 Mhz internal clock to the other
+   179                                  ;  timers is achieved.
+   180                                  
+   181                                          db_lo   TIM2+TCNT       ; zero the count register
+   181 00000059 60                  <1>  db (%1)&255
+   182 0000005A 0000                            dw      0
+   183                                  
+   184                                          db_lo   TIM2+TCON       ; wired: ALT=0, EXT=0, P=0, RTG=0
+   184 0000005C 66                  <1>  db (%1)&255
+   185 0000005D 01C0                            dw      tc_EN+tc_nINH+tc_CONT   ; EN=1, /INH=1, INT=0, CONT=1
+   186                                  
+   187                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   188                                  ;
+   189                                  ;  Set up Timer 0 to provide the 54.925 ms (18.2 Hz) PC timer tick
+   190                                  ;
+   191                                  
+   192                                          db_lo   timer0+TCNT       ; Timer 0 count register
+   192 0000005F 50                  <1>  db (%1)&255
+   193 00000060 0000                            dw      0
+   194                                  
+   195                                          db_lo   timer0+CMPB       ; count B register
+   195 00000062 54                  <1>  db (%1)&255
+   196 00000063 0000                            dw      0
+   197                                  
+   198                                  ;;        db_lo   timer0+CMPA       ; count A register
+   199                                  ;;        dw      13731             ; divisor:  250000/13731 -> 18.206..
+   200                                  
+   201                                          db_lo   timer0+TCON       ; control register
+   201 00000065 56                  <1>  db (%1)&255
+   202 00000066 09E0                            dw      tc_EN+tc_nINH+tc_INT+tc_P+tc_CONT
+   203                                                                  ; EN=1, /INH=1, INT=1, 
+   204                                                                  ; RTG=0, P=1, EXT=0, ALT=0, CONT=1
+   205                                  
+   206                                  
+   207                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   208                                  ;
+   209                                  ;  Set up Timer 1 as disabled at 1024Hz
+   210                                  ;
+   211                                  
+   212                                          db_lo   timer1+CMPA     ; max count A
+   212 00000068 5A                  <1>  db (%1)&255
+   213 00000069 0807                            dw      UART_OSC/1024   ; 1024Hz RTC counter for waits
+   214                                  
+   215                                          db_lo   timer1+TCNT     ; count
+   215 0000006B 58                  <1>  db (%1)&255
+   216 0000006C 0000                            dw      0
+   217                                  
+   218                                          db_lo   timer1+TCON       ; control register
+   218 0000006E 5E                  <1>  db (%1)&255
+   219 0000006F 0D60                            dw      tc_nINH+tc_P+tc_CONT+tc_EXT+tc_INT
+   220                                                                  ; EN=0, /INH=1, INT=1, 
+   221                                                                  ; RTG=0, P=1, EXT=1, ALT=0, CONT=1
+   222                                  
+   223 00000071 00                              db      0               ; end of the table
+   224                                  
+   225                                  
+   226                                  timer2_interrupt:       ; int 19 = 13h
+   227 00000072 CF                              iret
+   228                                  
+   229                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   230                                  ;  timer0_interrupt             (timer1, if NEED_TIMER_FIX)
+   231                                  ;
+   232                                  ;       This is the 18.2 Hz timer tick
+   233                                  ;
+   234                                  ;
+   235                                  ;ONE_DAY         equ     1573040         ; timer ticks in a day (IBM PC)
+   236                                  ONE_DAY         equ     1573080         ; timer ticks in a day (compromise)
+   237                                  ;ONE_DAY        equ     1573082         ; timer ticks in a day (our clock)
+   238                                  ;                                       ; ours is a little slow
+   239                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   240 00000073 D8001800                one_day:        dd      ONE_DAY
+   241                                  
+   242                                  %if NEED_TIMER_FIX
+   243                                  timer0_interrupt:
+   244                                  %else
+   245                                  timer1_interrupt:       ; int 18 = 12h 	Redirected from BIOS_call_12h
+   246                                  %endif
+   247 00000077 CD70                    	int	70h	; IRQ8 -- 1024Hz RTC timer (rtc_interrupt)
+   248 00000079 CF                      	iret
+   249                                  
+   250                                  
+   251                                  
+   252                                  %if NEED_TIMER_FIX
+   253                                  timer1_interrupt:
+   254                                  %else
+   255                                  timer0_interrupt:	; true timer 0 18.2Hz interrupt
+   256                                  %endif
+   257                                  ; service the timer tick interrupt
+   258 0000007A 1E5250                          pushm   ax,dx,ds
+   259                                  
+   260 0000007D 6A40                            push    bios_data_seg
+   261 0000007F 1F                              popm    ds              ; address the BIOS data area
+   262                                  
+   263                                  ;%if (ONE_DAY < 0FFFFFFh) && ( ONE_DAY & 255 )
+   264                                  %if 1
+   265                                                  
+   266 00000080 E8(0000)                        call    fdc_timer_hook
+   267                                  
+   268                                  ; the strategy below is that the most frequently travelled path
+   269                                  ; is the fewest branches and the fewest number of instructions
+   270 00000083 FE066C00                        inc     byte [timer_ticks]
+   271 00000087 7417                            jz      .2
+   272 00000089 803E6C00D8                      cmp     byte [timer_ticks], ONE_DAY & 0FFh
+   273 0000008E 7416                            je      .3
+   274                                  .9:
+   275 00000090 CD1C                    	int	1Ch			; User timer tick interrupt
+   276                                  
+   277                                  %if  CVDU_USE_MSDOS_KLUDGE
+   278                                  	extern	cvdu_kbd_int	; external reference
+   279                                  	xor	ax,ax
+   280                                  	mov	ds,ax		; patch the keyboard interrupt vector
+   281                                  				; on every timer tick!!!
+   282                                  	mov	word [0Ch*4],cvdu_kbd_int
+   283                                  	mov	word [0Ch*4+2],cs
+   284                                  %endif
+   285                                  
+   286                                  %if CVDU_USE_KBD_HOOK
+   287                                  	extern	cvdu_kbd_hook
+   288 00000092 E8(0000)                	call	cvdu_kbd_hook
+   289                                  %endif
+   290                                  
+   291                                  ; signal EOI (End of Interrupt)
+   292 00000095 BA22FF                          mov     dx,PIC_EOI              ; EOI register
+   293 00000098 B80080                          mov     ax,EOI_NSPEC            ; non-specific
+   294 0000009B EF                              out     dx,ax                   ; signal it
+   295                                  
+   296 0000009C 585A1F                          popm    ax,dx,ds
+   297 0000009F CF                      	iret
+   298                                  
+   299                                  ; the less frequent execution paths are below
+   300                                  .2:     ;  low byte == 0
+   301 000000A0 FF066D00                        inc     word [timer_ticks+1]
+   302 000000A4 EBEA                            jmp     .9
+   303                                  
+   304                                  .3:     ; AX = low word ONE_DAY
+   305 000000A6 813E6D000018                    cmp     word [timer_ticks+1], ONE_DAY >> 8
+   306 000000AC 75E2                            jne     .9
+   307                                  
+   308                                  ; a day has passed
+   309 000000AE C7066C000000                    mov     word [timer_ticks],0
+   310 000000B4 C7066E000000                    mov     word [timer_ticks+2],0  ; zero the high word
+   311 000000BA C606700001                      mov     byte [timer_new_day],1   ; set flag
+   312 000000BF EBCF                            jmp     .9
+   313                                  
+   314                                  
+   315                                  
+   316                                  %else
+   317                                          %error "Timer interrupt service."
+   318                                  %endif
+   319                                  
+   320                                  
+   321                                  
+   322                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   323                                  ;  BIOS_call_1Ah        software interrupt
+   324                                  ;
+   325                                  ;       Functions in AH:
+   326                                  ;               00      get tick count
+   327                                  ;               01      set tick count
+   328                                  ;               02      get time (from CMOS clock)
+   329                                  ;               03      set time (to CMOS clock)
+   330                                  ;               04      get date (from CMOS clock)
+   331                                  ;               05      set data (to CMOS clock)
+   332                                  ;               06      set alarm (we don't implement this one)
+   333                                  ;               07      reset alarm
+   334                                  ; we don't implement the following:
+   335                                  ;               0Ah     get day count [PS/2]
+   336                                  ;               0Bh     set day count [PS/2]
+   337                                  ;               80h     set sound source [PC only]
+   338                                  ;               
+   339                                  ;
+   340                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   341                                  offset_BP       equ     0
+   342                                  offset_BX       equ     offset_BP+2
+   343                                  offset_AX       equ     offset_BX+2
+   344                                  offset_DS       equ     offset_AX+2
+   345                                  offset_IP       equ     offset_DS+2
+   346                                  offset_CS       equ     offset_IP+2
+   347                                  offset_FLAGS    equ     offset_CS+2
+   348                                  
+   349                                  BIOS_call_1Ah:                  ; int 1Ah  call
+   350 000000C1 1E                              pushm   ds
+   351 000000C2 50                              push    ax
+   352 000000C3 53                              push    bx
+   353                                  
+   354 000000C4 55                              push    bp              ; set to address stack
+   355 000000C5 89E5                            mov     bp,sp
+   356                                  
+   357 000000C7 6A40                            push    bios_data_seg
+   358 000000C9 1F                              popm    ds              ; establish addressability
+   359                                  
+   360 000000CA 88E3                            mov     bl,ah           ; set to index into dispatch table
+   361 000000CC 80FC08                          cmp     ah,max/2
+   362 000000CF 7319                            jae     undefined
+   363 000000D1 30FF                            xor     bh,bh
+   364 000000D3 D1E3                            shl     bx,1            ; index words
+   365                                  
+   366 000000D5 2EFFA7[DA00]                cs  jmp     near [dispatch+bx]
+   367                                  
+   368                                  
+   369                                  
+   370                                  
+   371                                  dispatch:
+   372 000000DA [3A01]                          dw      fn0
+   373 000000DC [4D01]                          dw      fn1
+   374 000000DE [5701]                          dw      fn2
+   375 000000E0 [9101]                          dw      fn3
+   376 000000E2 [D401]                          dw      fn4
+   377 000000E4 [0102]                          dw      fn5
+   378 000000E6 [EA00]                          dw      fn6
+   379 000000E8 [EA00]                          dw      fn7
+   380                                  max     equ     $-dispatch
+   381                                  
+   382                                  fn6:
+   383                                  fn7:
+   384                                  undefined:
+   385 000000EA C64605FF                        mov     byte [bp+offset_AX+1],0FFh      ; error code?
+   386                                  set_carry:
+   387 000000EE 804E0C01                        or      byte [bp+offset_FLAGS],1        ; set the carry
+   388 000000F2 EB04                            jmp     popall
+   389                                  good_exit:
+   390 000000F4 80660CFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry
+   391 000000F8 5D                      popall: pop     bp              
+   392 000000F9 5B                              pop     bx              ; register restores
+   393 000000FA 58                              pop     ax
+   394 000000FB 1F                              popm    ds
+   395                                  BIOS_call_1Ch:
+   396 000000FC CF                              iret
+   397                                  
+   398                                  ; update CMOS 
+   399                                  ;       AL = ram address (0..29)
+   400                                  ;       DL = new contents of address
+   401                                  ;
+   402                                  ; the RAM location is updated with the new contents
+   403                                  ; and the checksum (location 30) is maintained at zero
+   404                                  ;
+   405                                  updateCMOS:
+   406 000000FD 5253                            pushm   bx,dx
+   407                                  
+   408 000000FF B480                            mov     ah,80h
+   409 00000101 50                              push    ax
+   410 00000102 E8(0000)                        call    rtc_get_loc
+   411 00000105 93                              xchg    ax,bx
+   412 00000106 28D3                            sub     bl,dl           ; difference between contents
+   413 00000108 58                              pop     ax
+   414 00000109 7412                            jz      .5              ; jump if no change
+   415 0000010B E8(0000)                        call    rtc_set_loc     ; set DL, the changed value
+   416 0000010E B81E80                          mov     ax,8000h+30     ; get checksum location
+   417 00000111 50                              push    ax              ; save address
+   418 00000112 E8(0000)                        call    rtc_get_loc
+   419 00000115 00D8                            add     al,bl           ; update checksum
+   420 00000117 88C2                            mov     dl,al
+   421 00000119 58                              pop     ax
+   422 0000011A E8(0000)                        call    rtc_set_loc
+   423                                  .5:
+   424 0000011D 5B5A                            popm    bx,dx
+   425 0000011F C3                              ret
+   426                                  
+   427                                  ; Write Enable the CMOS chip
+   428                                  ;
+   429                                  write_enable:
+   430 00000120 5250                            pushm   ax,dx
+   431 00000122 B80700                          mov     ax,7            ; 
+   432 00000125 B200                            mov     dl,0
+   433 00000127 E8(0000)                        call    rtc_set_loc
+   434 0000012A 585A                            popm    ax,dx
+   435 0000012C C3                              ret
+   436                                  
+   437                                  ; Write Protect the CMOS chip
+   438                                  ;
+   439                                  write_protect:
+   440 0000012D 5250                            pushm   ax,dx
+   441 0000012F B80700                          mov     ax,7            ; 
+   442 00000132 B280                            mov     dl,80h
+   443 00000134 E8(0000)                        call    rtc_set_loc
+   444 00000137 585A                            popm    ax,dx
+   445 00000139 C3                              ret
+   446                                  
+   447                                  
+   448                                  ;
+   449                                  ; Get Tick Count
+   450                                  ;       AL = rolled-over flag
+   451                                  ;       CX:DX = tick counter
+   452                                  ;
+   453                                  fn0:
+   454 0000013A 31C0                            xor     ax,ax
+   455 0000013C 86067000                        xchg    al,[timer_new_day]
+   456 00000140 894604                          mov     [bp+offset_AX],ax
+   457 00000143 8B166C00                        mov     dx,[timer_ticks]
+   458 00000147 8B0E6E00                        mov     cx,[timer_ticks+2]
+   459 0000014B EBA7                            jmp     good_exit
+   460                                  
+   461                                  ;
+   462                                  ; Set Tick Count
+   463                                  ;   returns:
+   464                                  ;       CX:DX = tick counter
+   465                                  ;
+   466                                  fn1:
+   467 0000014D 89166C00                        mov     [timer_ticks],dx
+   468 00000151 890E6E00                        mov     [timer_ticks+2],cx
+   469 00000155 EB9D                            jmp     good_exit
+   470                                  
+   471                                  
+   472                                  
+   473                                  ;
+   474                                  ; Get Time from CMOS clock
+   475                                  ;   returns:
+   476                                  ;       CH = hours in BCD
+   477                                  ;       CL = minutes in BCD
+   478                                  ;       DH = seconds in BCD
+   479                                  ;       DL = DST code (00=standard time, 01=daylight time)
+   480                                  ;
+   481                                  ;       Carry Clear if clock is running
+   482                                  ;
+   483                                  ;       Carry Set if clock is stopped
+   484                                  ;
+   485                                  fn2:
+   486 00000157 B80480                          mov     ax,8004h        ; RAM_bits
+   487 0000015A E8(0000)                        call    rtc_get_loc
+   488 0000015D 88C2                            mov     dl,al
+   489 0000015F 80E201                          and     dl,1            ; RAM_bits_DST flag
+   490                                  
+   491                                  .2:
+   492 00000162 B80000                          mov     ax,0
+   493 00000165 E8(0000)                        call    rtc_get_loc
+   494 00000168 88C6                            mov     dh,al           ; seconds
+   495                                  
+   496 0000016A B80200                          mov     ax,2            ; hours (AH=0)
+   497 0000016D E8(0000)                        call    rtc_get_loc
+   498 00000170 88C5                            mov     ch,al
+   499                                  
+   500 00000172 B80100                          mov     ax,1
+   501 00000175 E8(0000)                        call    rtc_get_loc
+   502 00000178 88C1                            mov     cl,al           ; minutes
+   503                                  
+   504 0000017A B80000                          mov     ax,0            ; seconds again
+   505 0000017D E8(0000)                        call    rtc_get_loc
+   506 00000180 38C6                            cmp     dh,al
+   507 00000182 75DE                            jne     .2
+   508                                  
+   509 00000184 80E67F                          and     dh,7Fh          ; clear the ClockHalt flag
+   510                                  
+   511 00000187 A880                            test    al,80h          ; test the ClockHalt flag
+   512 00000189 7503E966FF                      jz      good_exit
+   513 0000018E E95DFF                          jmp     set_carry
+   514                                  
+   515                                  
+   516                                  
+   517                                  
+   518                                  ;
+   519                                  ; Set Time into the CMOS clock
+   520                                  ;   enter with:
+   521                                  ;       CH = hours in BCD
+   522                                  ;       CL = minutes in BCD
+   523                                  ;       DH = seconds in BCD
+   524                                  ;       DL = DST flag (0=std time, 1=daylight time)
+   525                                  ;
+   526                                  fn3:
+   527 00000191 5251                            pushm   cx,dx
+   528 00000193 E88AFF                          call    write_enable
+   529                                  
+   530 00000196 88D3                            mov     bl,dl           ; BL = DST flag
+   531 00000198 B280                            mov     dl,80h          ; Clock Halt flag
+   532 0000019A B80000                          mov     ax,0
+   533 0000019D E8(0000)                        call    rtc_set_loc     ; stop the clock
+   534 000001A0 B80100                          mov     ax,1
+   535 000001A3 88CA                            mov     dl,cl           ; minutes to DL
+   536 000001A5 E8(0000)                        call    rtc_set_loc
+   537 000001A8 B80200                          mov     ax,2
+   538 000001AB 88EA                            mov     dl,ch           ; hours to DL
+   539 000001AD E8(0000)                        call    rtc_set_loc
+   540 000001B0 B80000                          mov     ax,0
+   541 000001B3 88F2                            mov     dl,dh           ; start the clock
+   542 000001B5 E8(0000)                        call    rtc_set_loc
+   543                                  
+   544                                         
+   545 000001B8 B80480                          mov     ax,8000h | RAM_bits        ; RAM_bits location (4)
+   546 000001BB E8(0000)                        call    rtc_get_loc
+   547 000001BE 24FE                            and     al,0FFh^RAM_bits_DST         ; RAM_bits_DST zeroed
+   548 000001C0 88DA                            mov     dl,bl           ; DST code to DL
+   549 000001C2 80E201                          and     dl,RAM_bits_DST ; mask to 1 bit
+   550 000001C5 08C2                            or      dl,al           ; preserve the other bits
+   551                                  
+   552 000001C7 B004                            mov     al,RAM_bits     ; DST flag is updated
+   553                                                                  ;   and the other flags are preserved
+   554 000001C9 E831FF                          call    updateCMOS      ; update loc. 4 & checksum
+   555                                  
+   556 000001CC E85EFF                          call    write_protect
+   557 000001CF 595A                            popm    cx,dx
+   558                                  good_exit2:
+   559 000001D1 E920FF                          jmp     good_exit
+   560                                  
+   561                                  
+   562                                  
+   563                                  ;
+   564                                  ; Get Date
+   565                                  ;   return with:
+   566                                  ;       CH = century in BCD (19h or 20h)
+   567                                  ;       CL = year in BCD
+   568                                  ;       DH = month in BCD
+   569                                  ;       DL = day in BCD
+   570                                  ;
+   571                                  ;       Carry clear if clock is running, set if clock is stopped
+   572                                  ;
+   573                                  fn4:
+   574 000001D4 B80180                          mov     ax,8001h        ; century byte
+   575 000001D7 E8(0000)                        call    rtc_get_loc
+   576 000001DA 88C5                            mov     ch,al
+   577                                  
+   578 000001DC B80600                          mov     ax,6            ; year
+   579 000001DF E8(0000)                        call    rtc_get_loc
+   580 000001E2 88C1                            mov     cl,al
+   581                                  
+   582 000001E4 B80400                          mov     ax,4            ; month
+   583 000001E7 E8(0000)                        call    rtc_get_loc
+   584 000001EA 88C6                            mov     dh,al
+   585                                  
+   586 000001EC B80300                          mov     ax,3            ; day (date)
+   587 000001EF E8(0000)                        call    rtc_get_loc
+   588 000001F2 88C2                            mov     dl,al
+   589                                  
+   590 000001F4 B80000                          mov     ax,0
+   591 000001F7 E8(0000)                        call    rtc_get_loc
+   592 000001FA A880                            test    al,80h
+   593 000001FC 74D3                            jz      good_exit2
+   594 000001FE E9EDFE                          jmp     set_carry
+   595                                  
+   596                                  
+   597                                  
+   598                                  
+   599                                  ;
+   600                                  ; Set Date in the CMOS clock chip
+   601                                  ;   enter with:
+   602                                  ;       CH = century in BCD
+   603                                  ;       CL = year in BCD
+   604                                  ;       DH = month in BCD
+   605                                  ;       DL = day in BCD
+   606                                  ;
+   607                                  fn5:
+   608 00000201 5251                            pushm   cx,dx
+   609 00000203 E81AFF                          call    write_enable
+   610                                  
+   611 00000206 B80300                          mov     ax,3            ; day
+   612 00000209 E8(0000)                        call    rtc_set_loc
+   613                                  
+   614 0000020C 88F2                            mov     dl,dh
+   615 0000020E B80400                          mov     ax,4            ; month
+   616 00000211 E8(0000)                        call    rtc_set_loc
+   617                                  
+   618 00000214 88CA                            mov     dl,cl
+   619 00000216 B80600                          mov     ax,6            ; year
+   620 00000219 E8(0000)                        call    rtc_set_loc
+   621                                  
+   622 0000021C 88EA                            mov     dl,ch           ; century
+   623 0000021E B001                            mov     al,1
+   624 00000220 E8DAFE                          call    updateCMOS      ; fix checksum, too
+   625                                  
+   626 00000223 E807FF                          call    write_protect
+   627 00000226 595A                            popm    cx,dx
+   628 00000228 E9C9FE                          jmp     good_exit

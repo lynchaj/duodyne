@@ -1,0 +1,20 @@
+# make the full Floating Point Emulator
+#
+LINK = c:\c51\bin\link.exe
+LOPT = /m
+EXE2ROM=..\tools\exe2rom.exe
+HEX2BIN=..\tools\hex2bin.exe
+BIN2HEX=..\tools\bin2hex.exe
+#NASM=nasm
+NASM=nasm208
+
+all:	em187.obj
+
+em187.obj:  em187.s em187a.s em187b.s em187c.s em187d.s em187e.s em187f.s em187g.s em187h.s
+    $(NASM) -s -DLONG -f obj -O6 -l em187.lst -o em187.obj  em187.s
+
+
+clean:		.SYMBOLIC
+        del *.lst
+        del *.obj
+

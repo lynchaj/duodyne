@@ -1,0 +1,207 @@
+Open Watcom Linker Version 1.9
+Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
+Created on:       17/07/03 13:09:05
+Executable Image: rbios.exe
+creating a DOS executable
+
+
+                        +------------+
+                        |   Groups   |
+                        +------------+
+
+Group                           Address              Size
+=====                           =======              ====
+
+DGROUP                          056c:0006            00000b66
+
+
+
+                        +--------------+
+                        |   Segments   |
+                        +--------------+
+
+Segment                Class          Group          Address         Size
+=======                =====          =====          =======         ====
+
+_TEXT                  CODE           AUTO           0000:0000       000056c5
+CONST                  DATA           DGROUP         056c:0006       000009a6
+_DATA                  DATA           DGROUP         0606:000c       00000000
+CONST2                 DATA           DGROUP         0606:000c       000001bf
+_BSS                   BSS            DGROUP         0622:000c       00000000
+
+
+                        +----------------+
+                        |   Memory Map   |
+                        +----------------+
+
+* = unreferenced symbol
++ = symbol only referenced locally
+
+Address        Symbol
+=======        ======
+
+Module: rbios.obj(rbios.asm)
+0000:0000*     begin_here
+0000:05d7*     get_vector
+0000:05ea*     set_vector
+0000:05ff      cpu_table_init
+0000:0619      @divLS
+0000:0630      @remLS
+0000:0643      @mulLS
+0000:0656*     @microsecond
+0000:0658      microsecond
+0000:065e*     wout
+0000:065f*     ticktime
+0000:0907      @rtc_get_loc
+0000:0907      rtc_get_loc
+0000:0938      @rtc_set_loc
+0000:0938      rtc_set_loc
+056c:013e      _Font
+056c:0142      _bios_data_area_ptr
+0000:00f0*     FPEM_segment
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\cprintf.c)
+0000:0970*     nstring_
+0000:09a2      _cprintf
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\nvram.c)
+056c:0a08+     _rates
+0000:0cb2+     set_battery_
+0000:0e53+     idow_
+0000:0f53+     Date_
+0000:11c7+     Time_
+0000:138d+     setup_serial_
+0000:144d+     floppy_ask_
+0000:14c8+     Floppy_
+0000:1524      @nvram_check
+0000:1551+     setup_fixed_
+0000:1592+     setup_dide_
+0000:15e2+     setup_SDcard_
+0000:161e+     setup_boot_sig_check_
+0000:169a+     putstring_
+0000:1716+     p_bda_fx_
+0000:1768+     @setup_fixed_disk
+0000:1a5f+     put_char_array_
+0000:1a86+     sd_info_
+0000:1d3b+     @setup_SD_card
+0000:1d67      @nvram_apply
+0000:208e      @nvram_setup
+0000:21c5      @nvram_get_video
+Module: abios.lib(int10ser.asm)
+0000:21f0      BIOS_call_10h
+0000:278e      video_init
+0000:290d      @uart_putchar
+0000:2919      @VIDEO_putchar
+0000:2926      mv_word_
+Module: abios.lib(int16ser.asm)
+0000:2950      BIOS_call_16h
+0000:2a12      cvdu_kbd_hook
+0000:2a4f      uart_int
+0000:2b18      keyboard_init
+0000:2b49      @uart_getchar
+0000:2b50      I8242CommandPut_
+0000:2b63      I8242GetValue_
+Module: abios.lib(timers.asm)
+0000:2b80      _cpu_speed
+0000:2bae      @timer_init
+0000:2bf2*     timer2_interrupt
+0000:2bf7      timer1_interrupt
+0000:2bfa      timer0_interrupt
+0000:2c41      BIOS_call_1Ah
+0000:2c7c      BIOS_call_1Ch
+Module: abios.lib(floppy.asm)
+0000:2db0      BIOS_call_13h
+0000:2eb5*     wait12
+0000:2ecf*     fdc_ready_for_command
+0000:2ef4*     fdc_ready_for_result
+0000:2f19*     output_byte_to_fdc
+0000:2f2b*     input_byte_from_fdc
+0000:2f3b*     output_cmd_to_fdc
+0000:2f56*     input_result_from_fdc
+0000:2f84      fdc_interrupt_level
+0000:2fd7      fdc_timer_hook
+0000:2ff5*     fdc_wait_seek_done
+0000:302e      @floppy_init
+0000:32a9      dma0_interrupt
+0000:33e6*     motor_on
+0000:35e3*     Check_RW_Status
+0000:362a*     @disable
+0000:3639*     @enable
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\kbd.c)
+0000:366c+     PurgeQueue_
+0000:368d      Init8242_
+0000:36c3+     I8242PutKeyboard_
+0000:36e2      I8242UpdateLites_
+0000:3720      @I8242process
+Module: abios.lib(ide.asm)
+0000:3a00      FIXED_BIOS_call_13h
+0000:3a33*     FIXED_error
+0000:3a3f*     _get_IDE_num
+0000:3a3f      get_IDE_num
+Module: abios.lib(misc15.asm)
+0000:3a60      BIOS_call_15h
+0000:3e5b*     set_count
+0000:3efb      rtc_interrupt
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\libc.c)
+0000:3f36      strlen_
+0000:3f49*     strchr_
+0000:3f70      atoi_
+0000:3f96      _small_code_
+0000:3f97      log2_
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\sio.c)
+0000:3fc2+     putchar_
+0000:3fe3+     putline_
+0000:3ff7+     getchar_
+0000:4029      getline_
+056c:0b44+     _uart_echo
+Module: abios.lib(ppide.asm)
+0000:40f0      _PPIDE_READ_ID
+0000:4126*     _PPIDE_READ_SECTOR
+0000:418f*     _PPIDE_WRITE_SECTOR
+0000:42cd*     PPIDE_BIOS_call_13h
+0000:42d7      PPIDE_entry
+Module: abios.lib(dide.asm)
+0000:4550*     DIDE_BIOS_call_13h
+0000:455a      DIDE0_entry
+0000:455a      DIDE1_entry
+0000:45e2      _DIDE_READ_ID
+0000:462c*     _DIDE_READ_SECTOR
+0000:46ba*     _DIDE_WRITE_SECTOR
+Module: abios.lib(sdcard.asm)
+0000:49b0*     SDcard_BIOS_call_13h
+0000:49ba      DSD_entry
+0000:4a5d*     SDputchar
+0000:4a72*     SDgetchar
+0000:4b14*     @SDinit
+0000:4b20      @SDinitcard
+0000:4c50      _DSDgetInfo
+0000:4cc4*     stepCRC7
+0000:4d3e*     verify_crc
+0000:4ec5*     crc16
+0000:5117      _SDcsd
+Module: cbios.lib(M:\Development\Vintage\8088 stuff\sbc-188\BIOS045\vga3lib.c)
+0000:533c      video_buffer_ptr_
+0000:5457      Init_vga3_
+0000:54c5      Scroll_vga3_
+0000:5605      vga3_get_char_and_attribute_
+0000:5609      vga3_blast_characters_
+0000:561f      @vga3_tty_out
+0000:569c      vga3_set_cursor_pos_
+056c:0b46+     _vga_params
+Warning! W1014: stack segment not found
+
+
+                        +--------------------+
+                        |   Libraries Used   |
+                        +--------------------+
+
+abios.lib
+cbios.lib
+
+
+                        +-----------------------+
+                        |   Linker Statistics   |
+                        +-----------------------+
+
+Stack size:  0400 (1024.)
+Memory size:  622c (25132.)
+Entry point address: 0000:0000
+Link time: 00:00.31
