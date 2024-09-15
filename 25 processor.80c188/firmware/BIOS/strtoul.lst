@@ -1,0 +1,227 @@
+Module: /mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/strtoul.c
+GROUP: 'DGROUP' CONST,CONST2,_DATA
+
+File contains no line numbers.
+Segment: _TEXT BYTE USE16 000001BD bytes
+0000                          ndigit_:
+0000    88 C4                     mov         ah,al 
+0002    3C 30                     cmp         al,0x30 
+0004    72 07                     jb          L$1 
+0006    3C 39                     cmp         al,0x39 
+0008    77 03                     ja          L$1 
+000A    2C 30                     sub         al,0x30 
+000C    C3                        ret         
+000D                          L$1:
+000D    3C 41                     cmp         al,0x41 
+000F    72 07                     jb          L$2 
+0011    3C 5A                     cmp         al,0x5a 
+0013    77 03                     ja          L$2 
+0015    2C 37                     sub         al,0x37 
+0017    C3                        ret         
+0018                          L$2:
+0018    3C 61                     cmp         al,0x61 
+001A    72 07                     jb          L$3 
+001C    3C 7A                     cmp         al,0x7a 
+001E    77 03                     ja          L$3 
+0020    2C 57                     sub         al,0x57 
+0022    C3                        ret         
+0023                          L$3:
+0023    B0 7F                     mov         al,0x7f 
+0025    C3                        ret         
+
+Routine Size: 38 bytes,    Routine Base: _TEXT + 0000
+
+0026                          strtoul_:
+0026    56                        push        si 
+0027    57                        push        di 
+0028    C8 10 00 00               enter       0x0010,0x00 
+002C    50                        push        ax 
+002D    52                        push        dx 
+002E    53                        push        bx 
+002F    51                        push        cx 
+0030    8B 7E 08                  mov         di,word ptr 0x8[bp] 
+0033    C6 46 FE 00               mov         byte ptr -0x2[bp],0x00 
+0037    31 C9                     xor         cx,cx 
+0039    31 D2                     xor         dx,dx 
+003B    89 C6                     mov         si,ax 
+003D    8B 46 EC                  mov         ax,word ptr -0x14[bp] 
+0040    89 46 F0                  mov         word ptr -0x10[bp],ax 
+0043    89 4E F6                  mov         word ptr -0xa[bp],cx 
+0046    8E 46 F0                  mov         es,word ptr -0x10[bp] 
+0049                          L$4:
+0049    26 8A 04                  mov         al,byte ptr es:[si] 
+004C    3C 20                     cmp         al,0x20 
+004E    74 04                     je          L$5 
+0050    3C 09                     cmp         al,0x09 
+0052    75 03                     jne         L$6 
+0054                          L$5:
+0054    46                        inc         si 
+0055    EB F2                     jmp         L$4 
+0057                          L$6:
+0057    8D 44 01                  lea         ax,0x1[si] 
+005A    26 80 3C 2D               cmp         byte ptr es:[si],0x2d 
+005E    75 06                     jne         L$7 
+0060    C6 46 FE FF               mov         byte ptr -0x2[bp],0xff 
+0064    EB 0A                     jmp         L$8 
+0066                          L$7:
+0066    26 80 3C 2B               cmp         byte ptr es:[si],0x2b 
+006A    75 06                     jne         L$9 
+006C    C6 46 FE 01               mov         byte ptr -0x2[bp],0x01 
+0070                          L$8:
+0070    89 C6                     mov         si,ax 
+0072                          L$9:
+0072    8E 46 F0                  mov         es,word ptr -0x10[bp] 
+0075    26 8A 04                  mov         al,byte ptr es:[si] 
+0078    30 E4                     xor         ah,ah 
+007A    E8 00 00                  call        ndigit_ 
+007D    88 46 FC                  mov         byte ptr -0x4[bp],al 
+0080    8E 46 F0                  mov         es,word ptr -0x10[bp] 
+0083    8D 5C 01                  lea         bx,0x1[si] 
+0086    85 FF                     test        di,di 
+0088    75 3B                     jne         L$12 
+008A    84 C0                     test        al,al 
+008C    75 32                     jne         L$11 
+008E    BF 08 00                  mov         di,0x0008 
+0091    26 8A 07                  mov         al,byte ptr es:[bx] 
+0094    88 46 F2                  mov         byte ptr -0xe[bp],al 
+0097    C6 46 F3 00               mov         byte ptr -0xd[bp],0x00 
+009B    8B 46 F2                  mov         ax,word ptr -0xe[bp] 
+009E    E8 00 00                  call        ndigit_ 
+00A1    3C 21                     cmp         al,0x21 
+00A3    75 16                     jne         L$10 
+00A5    BF 10 00                  mov         di,0x0010 
+00A8    8D 77 01                  lea         si,0x1[bx] 
+00AB    8E 46 F0                  mov         es,word ptr -0x10[bp] 
+00AE    26 8A 04                  mov         al,byte ptr es:[si] 
+00B1    30 E4                     xor         ah,ah 
+00B3    E8 00 00                  call        ndigit_ 
+00B6    88 46 FC                  mov         byte ptr -0x4[bp],al 
+00B9    EB 2A                     jmp         L$13 
+00BB                          L$10:
+00BB    8D 77 FF                  lea         si,-0x1[bx] 
+00BE    EB 25                     jmp         L$13 
+00C0                          L$11:
+00C0    BF 0A 00                  mov         di,0x000a 
+00C3    EB 20                     jmp         L$13 
+00C5                          L$12:
+00C5    83 FF 10                  cmp         di,0x0010 
+00C8    75 1B                     jne         L$13 
+00CA    84 C0                     test        al,al 
+00CC    75 17                     jne         L$13 
+00CE    26 8A 44 01               mov         al,byte ptr es:0x1[si] 
+00D2    88 46 F2                  mov         byte ptr -0xe[bp],al 
+00D5    C6 46 F3 00               mov         byte ptr -0xd[bp],0x00 
+00D9    8B 46 F2                  mov         ax,word ptr -0xe[bp] 
+00DC    E8 00 00                  call        ndigit_ 
+00DF    3C 21                     cmp         al,0x21 
+00E1    75 02                     jne         L$13 
+00E3    89 DE                     mov         si,bx 
+00E5                          L$13:
+00E5    8A 46 FC                  mov         al,byte ptr -0x4[bp] 
+00E8    30 E4                     xor         ah,ah 
+00EA    39 F8                     cmp         ax,di 
+00EC    7C 11                     jl          L$14 
+00EE    8B 76 EE                  mov         si,word ptr -0x12[bp] 
+00F1    8B 46 EC                  mov         ax,word ptr -0x14[bp] 
+00F4    89 46 F0                  mov         word ptr -0x10[bp],ax 
+00F7    C7 46 F6 01 00            mov         word ptr -0xa[bp],0x0001 
+00FC    E9 8E 00                  jmp         L$20 
+00FF                          L$14:
+00FF    89 FB                     mov         bx,di 
+0101    B8 FF FF                  mov         ax,0xffff 
+0104    89 C2                     mov         dx,ax 
+0106    E8 00 00                  call        @divLS 
+0109    89 46 F4                  mov         word ptr -0xc[bp],ax 
+010C    89 56 F8                  mov         word ptr -0x8[bp],dx 
+010F    89 FB                     mov         bx,di 
+0111    B8 FF FF                  mov         ax,0xffff 
+0114    89 C2                     mov         dx,ax 
+0116    E8 00 00                  call        @remLS 
+0119    88 46 FA                  mov         byte ptr -0x6[bp],al 
+011C    8A 4E FC                  mov         cl,byte ptr -0x4[bp] 
+011F    30 ED                     xor         ch,ch 
+0121    31 D2                     xor         dx,dx 
+0123                          L$15:
+0123    46                        inc         si 
+0124    8E 46 F0                  mov         es,word ptr -0x10[bp] 
+0127    26 8A 04                  mov         al,byte ptr es:[si] 
+012A    30 E4                     xor         ah,ah 
+012C    E8 00 00                  call        ndigit_ 
+012F    88 46 FC                  mov         byte ptr -0x4[bp],al 
+0132    3C 7F                     cmp         al,0x7f 
+0134    74 49                     je          L$19 
+0136    88 C3                     mov         bl,al 
+0138    30 FF                     xor         bh,bh 
+013A    39 FB                     cmp         bx,di 
+013C    7D 33                     jge         L$18 
+013E    3B 56 F8                  cmp         dx,word ptr -0x8[bp] 
+0141    72 16                     jb          L$17 
+0143    75 05                     jne         L$16 
+0145    3B 4E F4                  cmp         cx,word ptr -0xc[bp] 
+0148    72 0F                     jb          L$17 
+014A                          L$16:
+014A    3B 56 F8                  cmp         dx,word ptr -0x8[bp] 
+014D    75 22                     jne         L$18 
+014F    3B 4E F4                  cmp         cx,word ptr -0xc[bp] 
+0152    75 1D                     jne         L$18 
+0154    3A 46 FA                  cmp         al,byte ptr -0x6[bp] 
+0157    77 18                     ja          L$18 
+0159                          L$17:
+0159    89 FB                     mov         bx,di 
+015B    89 C8                     mov         ax,cx 
+015D    E8 00 00                  call        @mulLS 
+0160    8A 4E FC                  mov         cl,byte ptr -0x4[bp] 
+0163    30 ED                     xor         ch,ch 
+0165    C7 46 F2 00 00            mov         word ptr -0xe[bp],0x0000 
+016A    01 C1                     add         cx,ax 
+016C    13 56 F2                  adc         dx,word ptr -0xe[bp] 
+016F    EB B2                     jmp         L$15 
+0171                          L$18:
+0171    B8 01 00                  mov         ax,0x0001 
+0174    89 46 F6                  mov         word ptr -0xa[bp],ax 
+0177    31 C9                     xor         cx,cx 
+0179    31 D2                     xor         dx,dx 
+017B    01 C6                     add         si,ax 
+017D    EB A4                     jmp         L$15 
+017F                          L$19:
+017F    4E                        dec         si 
+0180    80 7E FE 00               cmp         byte ptr -0x2[bp],0x00 
+0184    7D 07                     jge         L$20 
+0186    89 C8                     mov         ax,cx 
+0188    F7 D8                     neg         ax 
+018A    99                        cwd         
+018B    89 C1                     mov         cx,ax 
+018D                          L$20:
+018D    83 7E E8 00               cmp         word ptr -0x18[bp],0x0000 
+0191    75 06                     jne         L$21 
+0193    83 7E EA 00               cmp         word ptr -0x16[bp],0x0000 
+0197    74 11                     je          L$22 
+0199                          L$21:
+0199    46                        inc         si 
+019A    8E 46 E8                  mov         es,word ptr -0x18[bp] 
+019D    8B 5E EA                  mov         bx,word ptr -0x16[bp] 
+01A0    26 89 37                  mov         word ptr es:[bx],si 
+01A3    8B 46 F0                  mov         ax,word ptr -0x10[bp] 
+01A6    26 89 47 02               mov         word ptr es:0x2[bx],ax 
+01AA                          L$22:
+01AA    83 7E F6 00               cmp         word ptr -0xa[bp],0x0000 
+01AE    74 05                     je          L$23 
+01B0    B9 FF FF                  mov         cx,0xffff 
+01B3    89 CA                     mov         dx,cx 
+01B5                          L$23:
+01B5    89 C8                     mov         ax,cx 
+01B7    C9                        leave       
+01B8    5F                        pop         di 
+01B9    5E                        pop         si 
+01BA    C2 02 00                  ret         0x0002 
+
+Routine Size: 407 bytes,    Routine Base: _TEXT + 0026
+
+No disassembly errors
+
+Segment: CONST WORD USE16 00000000 bytes
+
+Segment: CONST2 WORD USE16 00000000 bytes
+
+Segment: _DATA WORD USE16 00000000 bytes
+

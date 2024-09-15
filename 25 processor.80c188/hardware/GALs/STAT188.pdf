@@ -5,7 +5,7 @@
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Sat Sep 07 14:12:09 2024 "}
+  {DBtime "Sat Sep 14 18:12:00 2024 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -45,7 +45,7 @@
    {P MCS3' {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
    {P PCS0' {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
    {P BUSAK {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
-   {P BDREQ' {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P BDREQ {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
    {P PCS1' {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
    {P CS0' {Pt "I/O"}{Lq 0}{Ploc 330 20}}
    {P CS1' {Pt "I/O"}{Lq 0}{Ploc 330 40}}
@@ -54,7 +54,7 @@
    {P HALT {Pt "I/O"}{Lq 0}{Ploc 330 100}}
    {P IORQ' {Pt "I/O"}{Lq 0}{Ploc 330 120}}
    {P G_DATA' {Pt "I/O"}{Lq 0}{Ploc 330 140}}
-   {P BUS_DREQ {Pt "I/O"}{Lq 0}{Ploc 330 160}}
+   {P BUS_DREQ' {Pt "I/O"}{Lq 0}{Ploc 330 160}}
   }
 
   {PKG
@@ -115,8 +115,7 @@
    {L 120 80 100 80}
    {C 125 80 5}
    {L 130 60 100 60}
-   {L 120 40 100 40}
-   {C 125 40 5}
+   {L 130 40 100 40}
    {L 120 20 100 20}
    {C 125 20 5}
    {C 305 20 5}
@@ -132,7 +131,8 @@
    {L 310 120 330 120}
    {C 305 140 5}
    {L 310 140 330 140}
-   {L 300 160 330 160}
+   {C 305 160 5}
+   {L 310 160 330 160}
    [Ly "PINNAM"]
    [Tj "LC"]
    {T "ALE" 140 300}
@@ -147,7 +147,7 @@
    {T "MCS3'" 140 100}
    {T "PCS0'" 140 80}
    {T "BUSAK" 140 60}
-   {T "BDREQ'" 140 40}
+   {T "BDREQ" 140 40}
    {T "PCS1'" 140 20}
    [Tj "RC"]
    {T "CS0'" 290 20}
@@ -157,7 +157,7 @@
    {T "HALT" 290 100}
    {T "IORQ'" 290 120}
    {T "G_DATA'" 290 140}
-   {T "BUS_DREQ" 290 160}
+   {T "BUS_DREQ'" 290 160}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G22V10" 215 -10}
@@ -205,7 +205,7 @@
    }
    {N BUSAK
    }
-   {N BDREQ'
+   {N BDREQ
    }
    {N PCS1'
    }
@@ -223,7 +223,7 @@
    }
    {N G_DATA'
    }
-   {N BUS_DREQ
+   {N BUS_DREQ'
    }
   }
 
