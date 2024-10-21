@@ -4,8 +4,7 @@
 ;
 ; - Simple Monitor for 8088/86
 ; - Some bios calls
-; - Requires roughly 14K, default segment registers set to 0380h
-; - Assembled using A86 assembler
+; converted to NASM syntax and adapted for Duodyne 80c188 by D.Werner 10/2024
 ;
 ;----------------------------------------------------------------------
 ;
@@ -81,8 +80,8 @@ UDS             EQU 0410h
 UES             EQU 0412h
 USS             EQU 0414h
 UCS             EQU 0416h
-UIP             EQU 00418h
-UFL             EQU 0041ah
+UIP             EQU 0418h
+UFL             EQU 041ah
 ;----------------------------------------------------------------------
 ; memory dump working storage
 ;----------------------------------------------------------------------
@@ -100,7 +99,6 @@ DUMPMEMS        EQU 041ch
         CALL    TXCHAR
         %ENDM
 
-        ORG     0400h           ; First 1024 bytes used for int vectors
 
 INITMON:
 
@@ -127,7 +125,7 @@ INITMON:
         XOR     BX,BX           ; 256 vectors * 4 bytes
 NEXTINTS:
         MOV     WORD [ES:BX],   INTX; Spurious Interrupt Handler
-        MOV     WORD [ES:BX+2], 0
+        MOV     WORD [ES:BX+2], 0F000h; interrupts in segment 0F0000h (for now)
         ADD     BX,4
         CMP     BX,0400h
         JNE     NEXTINTS
@@ -290,7 +288,7 @@ CMPREG:
         MOV     CX,AX           ; CX=New reg value
 
         LEA     DI,UAX          ; Point to User Register Storage
-        MOV     BL,[CS:BX+2]       ; Get
+        MOV     BL,[CS:BX+2]    ; Get
         XOR     BH,BH
         MOV     [DI+BX],CX
         JMP     DISPREG         ; Display All registers
@@ -341,61 +339,31 @@ CHANGEBS:
 
 ;----------------------------------------------------------------------
 ; Execute program
-; 1) Enable all Breakpoints (replace opcode with INT3 CC)
-; 2) Restore User registers
-; 3) Jump to BASE_SEGMENT:USER_
+; 1) Restore User registers
+; 2) Jump to BASE_SEGMENT:USER_
 ;----------------------------------------------------------------------
 EXECPROG:
-;        MOV     BX,  BPTAB      ; Enable All breakpoints
-;        MOV     CX,8
+        MOV     AX,ES           ; Display Segment Address
+        CALL    PUTHEX4
+        MOV     AL,':'
+        CALL    TXCHAR
+        CALL    GETHEX4         ; Get new IP
+        MOV     [UIP],AX        ; Update User IP
+        MOV     AX,ES
+        MOV     [UCS],AX
 
-;NEXTENBP:
-;        MOV     AX,8
-;        SUB     AL,CL
-;        TEST    BYTE [BX+3],1   ; Check enable/disable flag
-;        JZ      NEXTEXBP
-;        MOV     DI,[BX]         ; Get Breakpoint Address
-;        MOV     BYTE [ES:DI],0CCh; Write INT3 instruction to address
+        MOV     AX,[UAX]        ; Restore User Registers
+        MOV     BX,[UBX]
+        MOV     CX,[UCX]
+        MOV     DX,[UDX]
+        MOV     BP,[UBP]
+        MOV     SI,[USI]
+        MOV     DI,[UDI]
 
-;NEXTEXBP:
-;        ADD     BX,4            ; Next entry
-;        LOOP    NEXTENBP
-
-;TRACENTRY:
-;        MOV     AX,ES           ; Display Segment Address
-;        CALL    PUTHEX4
-;        MOV     AL,':'
-;        CALL    TXCHAR
-;        CALL    GETHEX4         ; Get new IP
-;        MOV     [UIP],AX        ; Update User IP
-;        MOV     AX,ES
-;        MOV     [UCS],AX
-
-; Single Step Registers
-; bit3 bit2 bit1 bit0
-;  |    |    |     \--- '1' =Enable Single Step
-;  |    |     \-------- '1' =Select TXMON output for UARTx
-;  \-----\------------- '00'=No Step
-;                       '01'=Step
-;                       '10'=select step_sw input
-;                       '11'=select not(step_sw) input
-;           MOV     DX,HWM_CONFIG
-;           MOV     AL,07h                      ; xxxx-0111 step=1
-;           OUT     DX,AL                       ; Enable Trace
-
-;TRACNENTRY:
-;        MOV     AX,[UAX]        ; Restore User Registers
-;        MOV     BX,[UBX]
-;        MOV     CX,[UCX]
-;        MOV     DX,[UDX]
-;        MOV     BP,[UBP]
-;        MOV     SI,[USI]
-;        MOV     DI,[UDI]
-
-;        MOV     ES,[UES]
-;        CLI                     ; User User Stack!!
-;        MOV     SS,[USS]
-;        MOV     SP,[USP]
+        MOV     ES,[UES]
+        CLI                     ; User User Stack!!
+        MOV     SS,[USS]
+        MOV     SP,[USP]
 
         PUSH    word [UFL]
         PUSH    word [UCS]      ; Push CS (Base Segment)
