@@ -11,7 +11,7 @@
 ;     additions and modifications for ColorVDU:
 ; Copyright (C) 2012 John R. Coffman.
 ; Provided for hobbyist use on the N8VEM SBC-188 board.
-;  
+;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
 ; the Free Software Foundation, either version 3 of the License, or
@@ -295,7 +295,7 @@ fn01:
 
 .hide:
 	call	cursor_hide
-	
+
 .exit:
 	pop	cx
 	jmp	exit
@@ -346,7 +346,7 @@ fn03:
 ; Function 05h - Select active display page
 ; Input:
 ;	AH = 05h
-;	AL = page number (0-based)	
+;	AL = page number (0-based)
 ; Output:
 ;	none
 ;========================================================================
@@ -378,7 +378,7 @@ fn07:
 
 	push	DGROUP
 	popm	ds
-	extern	Scroll8563_	;or Scroll_vga3_ 
+	extern	Scroll8563_	;or Scroll_vga3_
 	call	Scroll8563_	;
 
 	popm	bx,ax,cx,dx,ds,es
@@ -412,7 +412,7 @@ fn07:
 	call	uart_out	; to scroll the region up or down
 	mov	al,'['
 	call	uart_out
-	
+
 	mov	dx,300Ah	; '0' to DH - used for ASCII conversion
 				; 10 to DL for 10-base conversion
 	mov	al,cl		; convert to ASCII and output row number
@@ -472,7 +472,7 @@ fn07:
         db      ESC, 'E', EOS
 .5      dec     cl
         jnz     .4
-        popm    ax,cx,dx        
+        popm    ax,cx,dx
 %endif	; ANSI | WYSE
 	jmp	exit
 
@@ -498,7 +498,7 @@ fn08:
 	extern	get_char_and_attribute_		; or vga3_get_char_and_attribute_
 	call	get_char_and_attribute_		; saves BX,CX,DX (SI,DI not used)
 	popm	ds
-	
+
 	popm	es
 %else
 	mov	al,20h
@@ -723,7 +723,7 @@ fn13:
 	je	.cr
 	cmp	al,20h
 	jb	.next		; control character
-	cmp	al,7Fh	
+	cmp	al,7Fh
 	je	.next		; DEL
 
 	call	uart_out
@@ -782,7 +782,7 @@ fn13_2:
 	je	.cr
 	cmp	al,20h
 	jb	.next		; control character
-	cmp	al,7Fh	
+	cmp	al,7Fh
 	je	.next		; DEL
 
     es	mov	bl,byte [bp]
@@ -948,7 +948,7 @@ cursor_set_pos:
 	jz	.5
 	mov	ax,0x0100+FWD		; forward space is ^L
 	js	.1
-	mov	ax,0xFF00+BS		; 
+	mov	ax,0xFF00+BS		;
 .1:	call	uart_out
 	add	dl,ah
 	jnz	.1
@@ -1226,7 +1226,7 @@ set_attributes:
 	test	bl,80h
 	jz	.normal_bg	; normal background
 	mov	al,byte [video_hw_mode]
-	test	al,20h		; intense colors 
+	test	al,20h		; intense colors
 	jnz	.normal_bg	; normal background, blinking
 
 	mov	al,'1'		; set intense background color - ESC[10<0..7>m
@@ -1357,7 +1357,7 @@ set_attributes:
 	test	bl,80h
 	jz	.normal_bg	; normal background
 	mov	al,byte [video_hw_mode]
-	test	al,20h		; intense colors 
+	test	al,20h		; intense colors
 	jnz	.normal_bg	; normal background, blinking
 
 	mov	al,'1'		; set intense background color - ESC[10<0..7>m
@@ -1790,7 +1790,7 @@ uart_detect:
 	int	10h
 	ret
 
-%if VGA3_6445 
+%if VGA3_6445
 ;========================================================================
 ; mv_word - move words using video index
 ; Input:
@@ -1815,7 +1815,7 @@ mv_word_:
 
 	rep	movsw			; do the fast move
 
-	popm	si,di,cx,ds	
+	popm	si,di,cx,ds
 	ret
 %endif
 

@@ -51,21 +51,15 @@ EXTIORQ =>
   # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
 
 EXTMREQ =>
-    !ALE & !BUSAK & MCS0 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS1 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS2 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS3 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS0 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS1 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS3 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS2 & !ST0 & ST2
+    !ALE & !BUSAK & !ST1 & ST2 & !UCS
+  # !ALE & !BUSAK & !ST0 & ST2 & !UCS
 
 G_DATA =>
-    BUSAK
-  # !MREQ_IO
-  # !ALE & !PCS0
-  # !ALE & !PCS1
-  # !ALE & !ST0 & !ST1 & !ST2
+    !ALE & !BUSAK & !PCS0
+  # !ALE & !BUSAK & !PCS1
+  # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
+  # !ALE & !BUSAK & !ST0 & ST2 & UCS
+  # !ALE & !BUSAK & !ST1 & ST2 & UCS
 
 HALT =>
     ST0 & ST1 & !ST2
@@ -106,16 +100,10 @@ MEMOP =>
   # !ST0 & ST2
 
 MREQ_IO =>
-    !CS0 & !UCS
-  # !CS1 & !UCS
-  # !ALE & !BUSAK & !MCS0 & !ST0 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS1 & !ST0 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS2 & !ST0 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS3 & !ST0 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS0 & !ST1 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS1 & !ST1 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS2 & !ST1 & ST2 & !UCS
-  # !ALE & !BUSAK & !MCS3 & !ST1 & ST2 & !UCS
+    !CS0
+  # !CS1
+  # !ALE & !BUSAK & !ST0 & ST2 & UCS
+  # !ALE & !BUSAK & !ST1 & ST2 & UCS
 
 MREQ_IO.oe  =>
     !BUSAK

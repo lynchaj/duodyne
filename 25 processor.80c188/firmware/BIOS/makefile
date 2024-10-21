@@ -17,8 +17,8 @@
 # Makefile for the N8VEM 4MEM // SBC-188  expanded memory driver
 #
 SBC188 = 3
-#ROM = 64
-ROM = 32
+ROM = 64
+#ROM = 32
 ETC = tbasic.hex -d26K font.hex -d18k em187.hex
 CHIP = 64
 #CHIP = 128

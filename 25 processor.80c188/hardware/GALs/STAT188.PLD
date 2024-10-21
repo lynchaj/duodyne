@@ -1,7 +1,7 @@
 Name     STAT188 ;
 PartNo   18801 ;
-Date     12/02/2019 ;
-Revision 01 ;
+Date     10/05/2024 ;
+Revision 02 ;
 Designer JRCoffman ;
 Company  Coffman Consulting ;
 Assembly SBC188b ;
@@ -51,7 +51,7 @@ INTA	=	!ST2 & !ST1 & !ST0 ;
 
 MCS	=	MCS0 # MCS1 # MCS2 # MCS3 ;
 LCLMREQ =	!ALE & MEMOP ;
-EXTMREQ =	!ALE &  MCS & MEMOP & !BUSAK ;
+EXTMREQ =	!ALE & MEMOP & !BUSAK & !UCS;	/* !ALE &  MCS & MEMOP & !BUSAK & !UCS;*/
 EXTIORQ =	!ALE & (PCS0 # PCS1) & !BUSAK  #
 		!ALE & INTA & !BUSAK ;
 
@@ -62,11 +62,11 @@ BUS_DREQ =	BDREQ ;	/* SIMPLY INVERT */
 
 CS0	=	!A19 & CSMEM ;
 CS1	=	 A19 & CSMEM & !UCS & !MCS ;
-G_DATA =	 BUSAK # MREQ_IO # EXTIORQ  ;
+G_DATA =	 EXTMREQ # EXTIORQ  ;
 
 IORQ 		= EXTIORQ ;
 IORQ.OE		= !BUSAK ;
-MREQ_IO		= (EXTMREQ # CS0 # CS1) & UCS  ;
+MREQ_IO		= (EXTMREQ # CS0 # CS1) ;   /*& UCS  ;*/
 MREQ_IO.OE	= !BUSAK ;
 
 M1	=	!ST1 & !ST0 ;		/* INTA AND INSTR. FETCH */

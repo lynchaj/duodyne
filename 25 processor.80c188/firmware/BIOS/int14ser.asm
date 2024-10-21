@@ -8,7 +8,7 @@
 ; "Generic XT BIOS" from Anonymous (1988)
 ;
 ; Provided for hobbyist use on the N8VEM SBC-188 board.
-;  
+;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
 ; the Free Software Foundation, either version 3 of the License, or
@@ -52,7 +52,7 @@
 ;			AH = 1		Send character in AL
 ;			AH = 2		Receive character in AL
 ;			AH = 3		Get serial port status
-;			
+;
 ;			AL = 		character to send or receive
 ;			DX =		0-based port number
 ;			All registers preserved except AX
@@ -86,7 +86,7 @@ BIOS_call_14h:
 %if TRACE
 	call	int_trace
 %endif	; TRACE
-	
+
 	STI                                     ; Serial com. RS232 services
         PUSH    DS                              ;  ...thru IC 8250 uart (ugh)
         PUSH    DX                              ;  ...DX = COM device (0 - 3)
@@ -137,8 +137,8 @@ divisors:				; expanded to higher bit rates for SBC-188
 	dw	0002h
 ;	dw	UART_OSC/16/115200	; 115200 Kbit/sec
 	dw	0001h
-	
-	
+
+
 COMINI: PUSH    AX                              ; Init COM port.  AL has data
                                                 ; = (Word Length in Bits - 5)
                                                 ;  +(1 iff two stop bits) *  4

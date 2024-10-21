@@ -23,7 +23,7 @@
     23                                  %include "../config.asm"
     24                              <1> ;/*
     25                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    26                              <1> ; VGA3.CFG
+    26                              <1> ; ANSI.CFG
     27                              <1> ;   Copied to CONFIG.ASM for general release.
     28                              <1> ;
     29                              <1> ;       Modify the parameters below to reflect your system
@@ -52,188 +52,182 @@
     52                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
     53                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
     54                              <1> ; The default is VGA3=0
-    55                              <1> VGA3   equ     1       ; system has the VGA3
-    56                              <1> ;
-    57                              <1> ; Does the hardware configuration contain the front panel card?
-    58                              <1> ; The default is FRONT_PANEL=0
-    59                              <1> ;
-    60                              <1> FRONT_PANEL   equ     1       ; system has the VGA3
-    61                              <1> %if 0
-    62                              <1> 	*/
-    63                              <1> #define VGA3 1
-    64                              <1> /*
-    65                              <1> %endif
-    66                              <1> ;
-    67                              <1> ; Boot up keyboard mode:  20h for NumLock on
-    68                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
-    69                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
-    70                              <1> 
-    71                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
-    72                              <1> ;UART_RATE	equ	0		; 1200
-    73                              <1> ;UART_RATE	equ	1		; 2400
-    74                              <1> ;UART_RATE	equ	2		; 4800
-    75                              <1> ;UART_RATE	equ	3		; 9600
-    76                              <1> ;UART_RATE	equ	4		; 19200
-    77                              <1> UART_RATE	equ	5		; 38400
-    78                              <1> ;UART_RATE	equ	6		; 57600
-    79                              <1> ;UART_RATE	equ	7		; 115200
-    80                              <1> 
-    81                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
-    82                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
-    83                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
-    84                              <1> 						; but not ANSI
-    85                              <1> ; Define the size of the ROM image on the system in Kilobytes
-    86                              <1> ; It may be smaller than the actual EPROM in use.
-    87                              <1> ; The following sizes are supported:  32, 64, 128, and 256
-    88                              <1> %ifndef ROM
-    89                              <1> ROM             equ     32              ; 64 is the default
-    90                              <1> %endif
-    91                              <1> 
-    92                              <1> ; Define the number of Wait States at which the ROM operates
-    93                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
-    94                              <1> 
-    95                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
-    96                              <1> ; This is a desired size and will only be present if a 4MEM board is added
-    97                              <1> RAM_DOS         equ     640
-    98                              <1> 
-    99                              <1> ; Define the size of the low SRAM on the system in Kilobytes
-   100                              <1> ; the default is 512 kilobytes
-   101                              <1> RAM             equ     512             ; (512 is the default)
-   102                              <1> 
-   103                              <1> ; Define the number of Wait States at which the RAM operates
-   104                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
-   105                              <1> 
-   106                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
-   107                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
-   108                              <1> 
-   109                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
-   110                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+    55                              <1> VGA3    equ     0       ; system does not have the VGA3
+    56                              <1> %if 0
+    57                              <1> 	*/
+    58                              <1> #define VGA3 0
+    59                              <1> /*
+    60                              <1> %endif
+    61                              <1> ;
+    62                              <1> ; Boot up keyboard mode:  20h for NumLock on
+    63                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
+    64                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
+    65                              <1> 
+    66                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    67                              <1> ;UART_RATE	equ	0		; 1200
+    68                              <1> ;UART_RATE	equ	1		; 2400
+    69                              <1> ;UART_RATE	equ	2		; 4800
+    70                              <1> UART_RATE	equ	3		; 9600
+    71                              <1> ;UART_RATE	equ	4		; 19200
+    72                              <1> ;UART_RATE	equ	5		; 38400
+    73                              <1> ;UART_RATE	equ	6		; 57600
+    74                              <1> ;UART_RATE	equ	7		; 115200
+    75                              <1> 
+    76                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    77                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    78                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    79                              <1> 						; but not ANSI
+    80                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    81                              <1> ; It may be smaller than the actual EPROM in use.
+    82                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    83                              <1> %ifndef ROM
+    84                              <1> ROM             equ     64              ; 64 is the default
+    85                              <1> %endif
+    86                              <1> 
+    87                              <1> ; Define the number of Wait States at which the ROM operates
+    88                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    89                              <1> 
+    90                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    91                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    92                              <1> RAM_DOS         equ     640
+    93                              <1> 
+    94                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    95                              <1> ; the default is 512 kilobytes
+    96                              <1> RAM             equ     512             ; (512 is the default)
+    97                              <1> 
+    98                              <1> ; Define the number of Wait States at which the RAM operates
+    99                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+   100                              <1> 
+   101                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+   102                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+   103                              <1> 
+   104                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+   105                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+   106                              <1> 
+   107                              <1> ; Define the time zone in which we build the Relocatable BIOS
+   108                              <1> %ifndef TIMEZONE
+   109                              <1> %define TIMEZONE "CDT"
+   110                              <1> %endif
    111                              <1> 
-   112                              <1> ; Define the time zone in which we build the Relocatable BIOS
-   113                              <1> %ifndef TIMEZONE
-   114                              <1> %define TIMEZONE "CDT"
+   112                              <1> ; Has the REDBUG debugger been loaded?
+   113                              <1> %ifndef SOFT_DEBUG
+   114                              <1> %define SOFT_DEBUG 1
    115                              <1> %endif
    116                              <1> 
-   117                              <1> ; Has the REDBUG debugger been loaded?
-   118                              <1> %ifndef SOFT_DEBUG
-   119                              <1> %define SOFT_DEBUG 0
+   117                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   118                              <1> %ifndef TBASIC
+   119                              <1> TBASIC          equ     1		; default is 1
    120                              <1> %endif
    121                              <1> 
-   122                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
-   123                              <1> %ifndef TBASIC
-   124                              <1> TBASIC          equ     1		; default is 1
-   125                              <1> %endif
-   126                              <1> 
-   127                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
-   128                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
-   129                              <1> %ifndef FPEM
-   130                              <1> FPEM            equ     1               ; default is 1
-   131                              <1> %endif
-   132                              <1> 
-   133                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   134                              <1> EMM_BOARDS      equ     4
-   135                              <1> 
-   136                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   137                              <1> ; or at locations 0280h..3FFh in low memory?
-   138                              <1> %if SOFT_DEBUG
-   139                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   140                              <1> %else
-   141                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   142                              <1> %endif
-   143                              <1> 
-   144                              <1> ; Define the size of the EPROM that is to be installed on the system
-   145                              <1> ; It may be larger than the actual ROM image to be generated.
-   146                              <1> %ifndef CHIP
-   147                              <1> CHIP            equ     64
-   148                              <1> %endif
+   122                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   123                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   124                              <1> %ifndef FPEM
+   125                              <1> FPEM            equ     1               ; default is 1
+   126                              <1> %endif
+   127                              <1> 
+   128                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   129                              <1> EMM_BOARDS      equ     0
+   130                              <1> 
+   131                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   132                              <1> ; or at locations 0280h..3FFh in low memory?
+   133                              <1> %if SOFT_DEBUG
+   134                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   135                              <1> %else
+   136                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   137                              <1> %endif
+   138                              <1> 
+   139                              <1> ; Define the size of the EPROM that is to be installed on the system
+   140                              <1> ; It may be larger than the actual ROM image to be generated.
+   141                              <1> %ifndef CHIP
+   142                              <1> CHIP            equ     64
+   143                              <1> %endif
+   144                              <1> 
+   145                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   146                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   147                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   148                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
    149                              <1> 
-   150                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   151                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   152                              <1> FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   153                              <1> ;FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   154                              <1> 
-   155                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   156                              <1> ; If the wiring update is installed, or you have a later board, then
-   157                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   158                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   159                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   160                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
-   161                              <1> 
-   162                              <1> ; Define the UART oscillator speed
-   163                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
-   164                              <1> 
+   150                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   151                              <1> ; If the wiring update is installed, or you have a later board, then
+   152                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   153                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   154                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   155                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   156                              <1> 
+   157                              <1> ; Define the UART oscillator speed
+   158                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   159                              <1> 
+   160                              <1> 
+   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   162                              <1> ; end of the User configuration
+   163                              <1> ;       Do Not modify anything below this point
+   164                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    165                              <1> 
-   166                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   167                              <1> ; end of the User configuration
-   168                              <1> ;       Do Not modify anything below this point
-   169                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   170                              <1> 
-   171                              <1> CVDU_8563	equ	CVDU		; separate inits
-   172                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
-   173                              <1> VGA3_6445       equ     VGA3            ; separate inits
-   174                              <1> ; Suppress all UART output in color video Mode 3
-   175                              <1> ;UART_MODE3_SUPPRESS	equ	0
-   176                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563 | VGA3_6445
-   177                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
-   178                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
-   179                              <1> 
-   180                              <1> ; Define existence of any uart chip
-   181                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   182                              <1> startuplength   equ     128                     ; may be up to 1024
-   183                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   184                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   185                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   186                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   187                              <1> 
-   188                              <1> 
-   189                              <1> %define ARG(n) [bp+2+(n)*2]
-   190                              <1> 
-   191                              <1> %macro  check   1.nolist
-   192                              <1>  %if (%1)
-   193                              <1>    %error Check Failure: %1
-   194                              <1>  %endif
-   195                              <1> %endm
-   196                              <1> %macro  range   3.nolist
-   197                              <1>  %if (%1)<(%2)
-   198                              <1>    %error Out of Range: %1
-   199                              <1>  %elif (%1)>(%3)
-   200                              <1>    %error Out of Range: %1
-   201                              <1>  %endif
-   202                              <1> %endm
-   203                              <1> _terminal equ UART+CVDU
-   204                              <1>  check   RAM_DOS&15
-   205                              <1>  check   RAM&(RAM-1)
-   206                              <1>  check   ROM&(ROM-1)
-   207                              <1>  range   RAM,32,512
-   208                              <1>  range   ROM,32,256
-   209                              <1>  range   RAM_WS,0,3
-   210                              <1>  range   ROM_WS,0,3
-   211                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   212                              <1>  range   LCL_IO_WS,0,3
-   213                              <1>  range   BUS_IO_WS,0,3
-   214                              <1>  range   UART_OSC,500000,16000000
-   215                              <1>  range   UART_RATE,0,7
-   216                              <1>  range	 UART,0,1
-   217                              <1>  range	 _terminal,1,2
-   218                              <1> 
-   219                              <1> %ifndef SOFT_DEBUG
-   220                              <1> %define SOFT_DEBUG 0
-   221                              <1> %endif
-   222                              <1> 
-   223                              <1> %ifndef TRACE
-   224                              <1> %define TRACE 0
-   225                              <1> %endif
-   226                              <1> 
-   227                              <1> %ifdef MAKE_OBJECT_FILE
-   228                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   229                              <1>         export _ROMsize
-   230                              <1>         export _CHIPsize
-   231                              <1> _ROMsize        dw      ROM
-   232                              <1> _CHIPsize       dw      CHIP
-   233                              <1> %endif
-   234                              <1> ; end of the Hardware configuration file
-   235                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   236                              <1> ;*/
+   166                              <1> CVDU_8563	equ	CVDU		; separate inits
+   167                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
+   168                              <1> VGA3_6445       equ     VGA3            ; separate inits
+   169                              <1> ; Suppress all UART output in color video Mode 3
+   170                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563
+   171                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
+   172                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
+   173                              <1> 
+   174                              <1> ; Define existence of any uart chip
+   175                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   176                              <1> startuplength   equ     512                     ; may be up to 1024
+   177                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   178                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   179                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   180                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   181                              <1> 
+   182                              <1> 
+   183                              <1> %define ARG(n) [bp+2+(n)*2]
+   184                              <1> 
+   185                              <1> %macro  check   1.nolist
+   186                              <1>  %if (%1)
+   187                              <1>    %error Check Failure: %1
+   188                              <1>  %endif
+   189                              <1> %endm
+   190                              <1> %macro  range   3.nolist
+   191                              <1>  %if (%1)<(%2)
+   192                              <1>    %error Out of Range: %1
+   193                              <1>  %elif (%1)>(%3)
+   194                              <1>    %error Out of Range: %1
+   195                              <1>  %endif
+   196                              <1> %endm
+   197                              <1> _terminal equ UART+CVDU
+   198                              <1>  check   RAM_DOS&15
+   199                              <1>  check   RAM&(RAM-1)
+   200                              <1>  check   ROM&(ROM-1)
+   201                              <1>  range   RAM,32,512
+   202                              <1>  range   ROM,32,256
+   203                              <1>  range   RAM_WS,0,3
+   204                              <1>  range   ROM_WS,0,3
+   205                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   206                              <1>  range   LCL_IO_WS,0,3
+   207                              <1>  range   BUS_IO_WS,0,3
+   208                              <1>  range   UART_OSC,500000,16000000
+   209                              <1>  range   UART_RATE,0,7
+   210                              <1>  range	 UART,0,1
+   211                              <1>  range	 _terminal,1,2
+   212                              <1> 
+   213                              <1> %ifndef SOFT_DEBUG
+   214                              <1> %define SOFT_DEBUG 0
+   215                              <1> %endif
+   216                              <1> 
+   217                              <1> %ifndef TRACE
+   218                              <1> %define TRACE 0
+   219                              <1> %endif
+   220                              <1> 
+   221                              <1> %ifdef MAKE_OBJECT_FILE
+   222                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   223                              <1>         export _ROMsize
+   224                              <1>         export _CHIPsize
+   225                              <1> _ROMsize        dw      ROM
+   226                              <1> _CHIPsize       dw      CHIP
+   227                              <1> %endif
+   228                              <1> ; end of the Hardware configuration file
+   229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   230                              <1> ;*/
     24                                  %include "../bda.inc"
     25                              <1> ;/*======================================================================
     26                              <1> ; bda.inc -- BIOS data area definitions
@@ -279,7 +273,7 @@
     66 00000013 ????                <1> memory_size     resw    1	;*/	word	memory_size;	/* 40:13 kilobytes
     67                              <1> uart_kbd_ctrl_R	equ	$	;*/				/*** JRC: count of ctrl-R's for reboot
     68 00000015 ??                  <1> IPL_errors      resb    1	;*/	byte	IPL_errors;	/* 40:15 IPL errors<-table/scratchpad
-    69 00000016 ??                  <1> unused_01       resb    1	;*/	byte	unused_01;	/*
+    69 00000016 ??                  <1> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
     70                              <1> ;;---------------[Keyboard data area]------------;
     71 00000017 ????                <1> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
     72                              <1> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
@@ -375,7 +369,7 @@
    162 000000B3 ??                  <1> fx_signature	resb	1	;	byte fx_signature;	 A0h signature = translated geom
    163 000000B4 ??                  <1> fx_phys_sectors	resb    1       ;	byte fx_phys_sectors;	 physical number of sectors per track
    164 000000B5 ????                <1> fx_LBA_high     resw    1       ;	word fx_LBA_high;	 high word of LBA28 number of sectors
-   165 000000B7 ??                  <1> fx_reserved7    resb	1	;	byte fx_reserved;	 MBZ
+   165 000000B7 ??                  <1> fx_reserved	resb	1	;	byte fx_reserved;	 reserved for future use
    166 000000B8 ??                  <1> fx_drive_control resb   1       ;	byte fx_drive_control;	 flag bits for IDE head register
    167 000000B9 ????                <1> fx_phys_cylinders resw	1	;	word fx_phys_cylinders;	 physical number of cylinders
    168 000000BB ??                  <1> fx_phys_heads	resb	1	;	byte fx_phys_heads;	 physical number of heads
@@ -419,16 +413,31 @@
    206                              <1> %define PPIDE_driver 1
    207                              <1> %endif
    208                              <1> %if 0				;*/
-   209                              <1> #define DIDE_driver 1		/*
+   209                              <1> #define DIDE_driver 0		/*
    210                              <1> %else
-   211                              <1> %define DIDE_driver 1
+   211                              <1> %define DIDE_driver 0
    212                              <1> %endif
    213                              <1> %if 0				;*/
-   214                              <1> #define DSD_driver 1		/*
+   214                              <1> #define DISKIO_driver 1		/*
    215                              <1> %else
-   216                              <1> %define DSD_driver 1
+   216                              <1> %define DISKIO_driver 1
    217                              <1> %endif
-   218                              <1> 				;*/
+   218                              <1> %if 0				;*/
+   219                              <1> #define MFPIC_driver 1		/*
+   220                              <1> %else
+   221                              <1> %define MFPIC_driver 1
+   222                              <1> %endif
+   223                              <1> %if 0				;*/
+   224                              <1> #define DSD_driver 1		/*
+   225                              <1> %else
+   226                              <1> %define DSD_driver 1
+   227                              <1> %endif
+   228                              <1> %if 0				;*/
+   229                              <1> #define V3IDE8_driver (SBC188==3)		/*
+   230                              <1> %else
+   231                              <1> %define V3IDE8_driver (SBC188==3)
+   232                              <1> %endif
+   233                              <1> 				;*/
     25                                  %include  "em187d.asm"
     26                              <1> ; em187d.asm -- definitions for em187.asm
     27                              <1> 
@@ -958,14 +967,14 @@
    450                                  gFSAVE:
    451                                  unimplemented:
    452 00000184 680001                          push    errUnemulated
-   453 00000187 E8671A                          call    exception
+   453 00000187 E8701A                          call    exception
    454 0000018A EB2A                            jmp     short restore_segs
    455                                  
    456                                  underflow:
    457                                  ;;;        and     codes,NOT C1                ;indicate underflow
    458 0000018C 80260300FD                      and     byte [codes],~C1                ;indicate underflow
    459 00000191 684110                          push    errStkUnderflow+Sflag+Iexcept
-   460 00000194 E85A1A                          call    exception
+   460 00000194 E8631A                          call    exception
    461 00000197 EB11                            jmp     short pop001
    462                                  
    463                                  test_pop:
@@ -1288,7 +1297,7 @@
    769 00000393 5E                  <1>         pop     si                  ; clean up the stack for now
    770 00000394 C60406              <1>         mov     byte [si+tag], tag_invalid
    771 00000397 6A01                <1>         push    Iexcept             ;signal exception
-   772 00000399 E85518              <1>         call    exception
+   772 00000399 E85E18              <1>         call    exception
    773 0000039C E99400              <1>         jmp     FA100
    774                              <1> 
    775                              <1> 
@@ -1958,7 +1967,7 @@
    963                              <1> alloc9:
    964 00000652 800E030002          <1>         or      byte [codes],C1        ;flag overflow
    965 00000657 684108              <1>         push    errStkOverflow+Sflag+Iexcept
-   966 0000065A E89415              <1>         call    exception
+   966 0000065A E89D15              <1>         call    exception
    967 0000065D C3                  <1>         ret
    968                              <1> 
    969                              <1> ;alloc   endp
@@ -2037,7 +2046,7 @@
   1042                              <1> ; not a real zero -- actually a denormal
   1043                              <1> lr3202:
   1044 000006C8 6A02                <1>         push    Dexcept
-  1045 000006CA E82415              <1>         call    exception
+  1045 000006CA E82D15              <1>         call    exception
   1046                              <1> 
   1047 000006CD 268B05              <1>   es    mov     ax,word [di]     ; get second word
   1048 000006D0 D1E0                <1>         shl     ax,1
@@ -2082,7 +2091,7 @@
   1087                              <1> lr3215:
   1088 00000712 C60406              <1>         mov     byte [si+tag], tag_invalid
   1089 00000715 6A01                <1>         push    Iexcept
-  1090 00000717 E8D714              <1>         call    exception
+  1090 00000717 E8E014              <1>         call    exception
   1091                              <1> 
   1092 0000071A EBEF                <1>         jmp     lr3213
   1093                              <1> 
@@ -2111,7 +2120,7 @@
    537                              <1> 
    538                              <1> LDindef:
    539 00000727 6A01                <1>         push    Iexcept
-   540 00000729 E8C514              <1>         call    exception
+   540 00000729 E8CE14              <1>         call    exception
    541 0000072C EB2C                <1>         jmp     short L3204
    542                              <1> 
    543                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2269,7 +2278,7 @@
    695 000007EE 7905                <1>         jns     L6404
    696                              <1> ; loading integer indefinite
    697 000007F0 6A01                <1>         push    Iexcept
-   698 000007F2 E8FC13              <1>         call    exception
+   698 000007F2 E80514              <1>         call    exception
    699                              <1> L6404:
    700 000007F5 89C5                <1>         mov     bp,ax               ;test for zero result first
    701 000007F7 09DD                <1>         or      bp,bx               ;
@@ -2380,7 +2389,7 @@
    806                              <1> ; store absolute zero
    807                              <1> str3279:
    808 000008A0 6A10                <1>         push    Uexcept             ;underflow
-   809 000008A2 E84C13              <1>         call    exception
+   809 000008A2 E85513              <1>         call    exception
    810                              <1> 
    811 000008A5 31C0                <1>         xor     ax,ax               ;zap hi-word
    812 000008A7 EBEC                <1>         jmp     str3277
@@ -2393,7 +2402,7 @@
    819                              <1> ; store signed infinity
    820                              <1> str3285:
    821 000008B0 6A08                <1>         push    Oexcept             ;overflow
-   822 000008B2 E83C13              <1>         call    exception
+   822 000008B2 E84513              <1>         call    exception
    823                              <1> str3286:
    824 000008B5 B800FF              <1>         mov     ax,0FF00h           ;following code will store sign
    825 000008B8 EBD4                <1>         jmp     str3276             ;go put on sign
@@ -2402,7 +2411,7 @@
    828                              <1> str3290:
    829 000008BA B8C0FF              <1>         mov     ax,0FFC0h           ;get indefinite code
    830 000008BD 6A01                <1>         push    Iexcept             ;invalid operation
-   831 000008BF E82F13              <1>         call    exception
+   831 000008BF E83813              <1>         call    exception
    832 000008C2 EBD1                <1>         jmp     str3277             ;go store it
    833                              <1> ;store_R32   endp
    834                              <1> 
@@ -2647,7 +2656,7 @@
   1064 00000A1A C60706              <1>         mov     byte [bx+tag], tag_invalid
   1065                              <1> 
   1066 00000A1D 6A01                <1>         push    Iexcept
-  1067 00000A1F E8CF11              <1>         call    exception
+  1067 00000A1F E8D811              <1>         call    exception
   1068 00000A22 EBED                <1>         jmp     PT099
   1069                              <1> 
   1070                              <1> 
@@ -2752,7 +2761,7 @@
   1158                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1159                              <1> FX100:
   1160 00000AA8 6A01                <1>         push    Iexcept
-  1161 00000AAA E84411              <1>         call    exception
+  1161 00000AAA E84D11              <1>         call    exception
   1162 00000AAD E99400              <1>         jmp     FX099
   1163                              <1> 
   1164                              <1> gF2XM1:
@@ -3011,7 +3020,7 @@
   1388                              <1> %if BIG
   1389                              <1> FYexception:
   1390                              <1> %endif
-  1391 00000CB0 E83E0F              <1>         call    exception
+  1391 00000CB0 E8470F              <1>         call    exception
   1392 00000CB3 8B1E1800            <1> 	mov	bx,[trptr2]
   1393 00000CB7 E94201              <1> 	jmp	FY999
   1394                              <1> 
@@ -3284,7 +3293,7 @@
    618                              <1> 
    619                              <1> lr6415:
    620 00000EA0 6A01                <1>         push    Iexcept             ;Invalid operation
-   621 00000EA2 E84C0D              <1>         call    exception           ;   exception
+   621 00000EA2 E8550D              <1>         call    exception           ;   exception
    622 00000EA5 C60406              <1>         mov     byte [si+tag], tag_invalid
    623 00000EA8 EBEF                <1>         jmp     lr6413
    624                              <1> 
@@ -3292,7 +3301,7 @@
    626                              <1> ; not a real zero -- actually a denormal
    627                              <1> lr6402:
    628 00000EAA 6A02                <1>         push    Dexcept             ;Denormalized operand
-   629 00000EAC E8420D              <1>         call    exception           ;  exception
+   629 00000EAC E84B0D              <1>         call    exception           ;  exception
    630                              <1> 
    631 00000EAF 268B4505            <1>   es    mov     ax,[di+5]            ;AH gets 4 highest bits of mantissa
    632 00000EB3 268B5D03            <1>   es    mov     bx,[di+3]
@@ -3429,7 +3438,7 @@
    763                              <1> ; store plus zero
    764                              <1> sr64190:
    765 00000F6F 6A10                <1>         push    Uexcept                 ;underflow
-   766 00000F71 E87D0C              <1>         call    exception
+   766 00000F71 E8860C              <1>         call    exception
    767                              <1> 
    768 00000F74 31C0                <1>         xor     ax,ax                   ;get +0.0
    769 00000F76 EBE4                <1>         jmp     sr64150
@@ -3442,14 +3451,14 @@
    776                              <1> ; return signed infinity
    777                              <1> sr64210:
    778 00000F7F 6A08                <1>         push    Oexcept                 ;overflow 
-   779 00000F81 E86D0C              <1>         call    exception
+   779 00000F81 E8760C              <1>         call    exception
    780                              <1> sr64220:
    781 00000F84 B8E0FF              <1>         mov     ax,7FF0h << 1          ;following code will put in sign
    782 00000F87 EBCC                <1>         jmp     sr64120
    783                              <1> ; return signed indefinite
    784                              <1> sr64250:
    785 00000F89 6A01                <1>         push    Iexcept                 ;invalid operation
-   786 00000F8B E8630C              <1>         call    exception
+   786 00000F8B E86C0C              <1>         call    exception
    787                              <1> 
    788 00000F8E B8F8FF              <1>         mov     ax,0FFF8h               ;following code will store value
    789 00000F91 EBC9                <1>         jmp     sr64150
@@ -3494,7 +3503,7 @@
    828                              <1> s16150:
    829 00000FC3 6A08                <1>         push    Oexcept             ;overflow
    830                              <1> s16160:
-   831 00000FC5 E8290C              <1>         call    exception
+   831 00000FC5 E8320C              <1>         call    exception
    832 00000FC8 BA0080              <1>         mov     dx,08000h           ;indefinite result
    833 00000FCB EBE8                <1>         jmp     s16050
    834                              <1> 
@@ -3542,7 +3551,7 @@
    876                              <1> s32150:
    877 00001009 6A08                <1>         push    Oexcept             ;overflow
    878                              <1> s32160:
-   879 0000100B E8E30B              <1>         call    exception
+   879 0000100B E8EC0B              <1>         call    exception
    880 0000100E 31D2                <1>         xor     dx,dx               ;zero low order
    881 00001010 B90080              <1>         mov     cx,8000h           ;indefinite result
    882 00001013 EBE0                <1>         jmp     s32050
@@ -3613,7 +3622,7 @@
    947 00001053 5E                  <1>         pop     si                  ; clean up the stack for now
    948 00001054 C60406              <1>         mov     byte [si+tag], tag_invalid
    949 00001057 6A01                <1>         push    Iexcept             ;signal exception
-   950 00001059 E8950B              <1>         call    exception
+   950 00001059 E89E0B              <1>         call    exception
    951 0000105C E9B200              <1>         jmp     FM090
    952                              <1> 
    953                              <1> ; overflow occurred in adding the exponents
@@ -3622,7 +3631,7 @@
    956 00001060 C60402              <1>         mov     byte [si+tag], tag_infin
    957 00001063 C74402FF7F          <1>         mov     word [si+expon], exp_of_FPinf
    958 00001068 6A08                <1>         push    Oexcept             ;signal exception
-   959 0000106A E8840B              <1>         call    exception
+   959 0000106A E88D0B              <1>         call    exception
    960 0000106D E9A100              <1>         jmp     FM090
    961                              <1> 
    962                              <1> 
@@ -3913,7 +3922,7 @@
    676 000011DE 5E                  <1>         pop     si                  ; clean up the stack for now
    677 000011DF C60406              <1>         mov     byte [si+tag], tag_invalid
    678 000011E2 6A01                <1>         push    Iexcept             ;signal exception
-   679 000011E4 E80A0A              <1>         call    exception
+   679 000011E4 E8130A              <1>         call    exception
    680 000011E7 E93801              <1>         jmp     FD099
    681                              <1> 
    682                              <1> 
@@ -3923,7 +3932,7 @@
    686 000011EE 7417                <1>         je      FD230           ;jump if zero divided by zero
    687                              <1> ; have  tag_valid  divided by zero
    688 000011F0 6A04                <1>         push    Zexcept         ;zero divide exception
-   689 000011F2 E8FC09              <1>         call    exception
+   689 000011F2 E8050A              <1>         call    exception
    690 000011F5 8A4501              <1>         mov     al,byte [di+sign]    ;get sign of numerator
    691 000011F8 884401              <1>         mov     byte [si+sign],al    ;store it
    692 000011FB C60402              <1>         mov     byte [si+tag], tag_infin ;set infinity
@@ -3933,7 +3942,7 @@
    696 00001205 EB22                <1>         jmp     short FD250           ;clear mantissa
    697                              <1> FD230:
    698 00001207 6A01                <1>         push    Iexcept         ; 0/0 -- invalid operation
-   699 00001209 E8E509              <1>         call    exception
+   699 00001209 E8EE09              <1>         call    exception
    700 0000120C C60406              <1>         mov     byte [si+tag], tag_invalid
    701 0000120F EBED                <1>         jmp     FD225
    702                              <1> 
@@ -3968,7 +3977,7 @@
    731 00001240 C744020180          <1>         mov     word [si+expon],exp_of_FPzero
    732                              <1> 
    733 00001245 6A10                <1>         push    Uexcept             ;signal exception
-   734 00001247 E8A709              <1>         call    exception
+   734 00001247 E8B009              <1>         call    exception
    735 0000124A E9D500              <1>         jmp     FD099
    736                              <1> 
    737                              <1> 
@@ -4364,7 +4373,7 @@
   1127                              <1> under2:
   1128 00001422 80260300FD          <1>         and     byte [codes],~ C1                ;indicate underflow
   1129 00001427 684110              <1>         push    errStkUnderflow+Sflag+Iexcept
-  1130 0000142A E8C407              <1>         call    exception
+  1130 0000142A E8CD07              <1>         call    exception
   1131 0000142D EBE4                <1>         jmp     short pop002
   1132                              <1> 
   1133                              <1> 
@@ -4377,7 +4386,7 @@
    528                              <1> ;
    529                              <1> BL190:
    530 0000142F 6A01                <1>         push    Iexcept                 ;invalid operation
-   531 00001431 E8BD07              <1>         call    exception               ;   exception
+   531 00001431 E8C607              <1>         call    exception               ;   exception
    532 00001434 C60406              <1>         mov     byte [si+tag], tag_invalid   ;flag as invalid input
    533 00001437 2401                <1>         and     al,01h                  ;mask to low bit
    534 00001439 884401              <1>         mov     byte [si+sign],al            ;store the sign as put in
@@ -4553,7 +4562,7 @@
    704                              <1> BS006:
    705 00001519 6A09                <1>         push    Iexcept+Oexcept     ;overflow & invalid
    706                              <1> BS008:
-   707 0000151B E8D306              <1>         call    exception
+   707 0000151B E8DC06              <1>         call    exception
    708 0000151E 26C74508FFFF        <1>   es    mov     word [di+8],0FFFFh   ;store indefinite
    709 00001524 EB76                <1>         jmp     short BS090         ;go do the proper pops
    710                              <1> 
@@ -4940,7 +4949,7 @@
   1089 00001728 6A01                <1>         push    Iexcept                 ;invalid operation
   1090                              <1> 
   1091                              <1> STI64170:   ;general problem exit, signal exception & store indefinite
-  1092 0000172A E8C404              <1>         call    exception
+  1092 0000172A E8CD04              <1>         call    exception
   1093 0000172D 26C745060080        <1>   es    mov     word [di+6],8000h         ;integer indefinite
   1094 00001733 31C0                <1>         xor     ax,ax
   1095 00001735 26894504            <1>   es    mov     [di+4],ax
@@ -5004,7 +5013,7 @@
    574 0000179C EBC5                <1>         jmp     LT010               ;copy rest of mantissa
    575 0000179E C60706              <1> LT120:  mov     byte [bx+tag], tag_invalid
    576 000017A1 6A01                <1>         push    Iexcept             ;invalid operation
-   577 000017A3 E84B04              <1>         call    exception
+   577 000017A3 E85404              <1>         call    exception
    578 000017A6 B8FF7F              <1>         mov     ax,exp_of_FPinf
    579 000017A9 EBB8                <1>         jmp     LT010               ;copy rest of mantissa        
    580                              <1> 
@@ -5018,7 +5027,7 @@
    588 000017C0 74A1                <1>         jz      LT010
    589                              <1> 
    590 000017C2 6A02                <1>         push    Dexcept             ;we don't try to normalize it
-   591 000017C4 E82A04              <1>         call    exception
+   591 000017C4 E83304              <1>         call    exception
    592 000017C7 EBD5                <1>         jmp     LT120
    593                              <1> 
    594                              <1> 
@@ -5063,11 +5072,11 @@
    633                              <1> 
    634                              <1> STP095:
    635 00001809 6A10                <1>         push    Uexcept             ;underflow
-   636 0000180B E8E303              <1>         call    exception           ;
+   636 0000180B E8EC03              <1>         call    exception           ;
    637 0000180E EB0C                <1>         jmp     short STP105        ;store zero
    638                              <1> STP097:
    639 00001810 6A08                <1>         push    Oexcept             ;overflow
-   640 00001812 E8DC03              <1>         call    exception
+   640 00001812 E8E503              <1>         call    exception
    641 00001815 B8FF7F              <1>         mov     ax,7FFFh            ;get largest exponent
    642 00001818 EB25                <1>         jmp     short STP160
    643                              <1> 
@@ -5100,7 +5109,7 @@
    670 0000184D EBDB                <1>         jmp     STP130                  ;store rest of mantissa
    671                              <1> STP180:
    672 0000184F 6A01                <1>         push    Iexcept                 ;tag is empty, or invalid
-   673 00001851 E89D03              <1>         call    exception
+   673 00001851 E8A603              <1>         call    exception
    674 00001854 26C74508FFFF        <1>   es    mov     word [di+8],0FFFFh        ;store indefinite
    675 0000185A 26C7450600C0        <1>   es    mov     word [di+6],0C000h        ; **
    676 00001860 EBE9                <1>         jmp     STP175
@@ -5179,7 +5188,7 @@
    748 000018AF 74F8                <1>         je      RND100
    749                              <1> 
    750 000018B1 6A01                <1>         push    Iexcept                 ;invalid operation
-   751 000018B3 E83B03              <1>         call    exception
+   751 000018B3 E84403              <1>         call    exception
    752 000018B6 EBF1                <1>         jmp     RND100
    753                              <1> 
    754                              <1> 
@@ -5258,7 +5267,7 @@
    827                              <1> SQ110:
    828 0000193B C60706              <1>         mov     byte [bx+tag], tag_invalid ;
    829 0000193E 680102              <1>         push    errSqrt+Iexcept
-   830 00001941 E8AD02              <1>         call    exception
+   830 00001941 E8B602              <1>         call    exception
    831 00001944 EBE3                <1>         jmp     SQ099
    832                              <1> 
    833                              <1> 
@@ -5269,10 +5278,10 @@
    838                              <1> ;
    839                              <1> FR200:      ;divisor is zero or otherwise bad
    840 00001946 6A04                <1>         push    Zexcept
-   841 00001948 E8A602              <1>         call    exception
+   841 00001948 E8AF02              <1>         call    exception
    842                              <1> FR300:      ;dividend is infin, empty, or invalid
    843 0000194B 6A01                <1>         push    Iexcept
-   844 0000194D E8A102              <1>         call    exception
+   844 0000194D E8AA02              <1>         call    exception
    845 00001950 C60406              <1>         mov     byte [si+tag], tag_invalid
    846                              <1> FR085:
    847 00001953 80260300B8          <1>         and     byte [codes], ~(C3+C2+C1+C0) ;clear condition codes
@@ -5725,18 +5734,18 @@
    762                                  ; Allocate space for the Floating Point Emulator
    763                                  .allocate:
    764                                  %if FPEM_USE_EBDA
-   765                                  	mov     ax,[EBDA_paragraph]
-   766                                          sub     ax,word EM187_DATA_PARAS
-   767                                  	mov     [EBDA_paragraph],ax
-   768                                  	mov     [FPEM_segment],ax
-   769                                  	shr     ax,6
-   770                                  	mov     [memory_size],ax
-   771                                  	jmp	.out0
+   765 00001BE6 A1F200                  	mov     ax,[EBDA_paragraph]
+   766 00001BE9 83E819                          sub     ax,word EM187_DATA_PARAS
+   767 00001BEC A3F200                  	mov     [EBDA_paragraph],ax
+   768 00001BEF A3F000                  	mov     [FPEM_segment],ax
+   769 00001BF2 C1E806                  	shr     ax,6
+   770 00001BF5 A31300                  	mov     [memory_size],ax
+   771 00001BF8 EBE2                    	jmp	.out0
    772                                  %else
-   773 00001BE6 B84000                          mov     ax,bios_data_seg
-   774 00001BE9 83E819                          sub     ax,word EM187_DATA_PARAS
-   775 00001BEC A3F000                  	mov     [FPEM_segment],ax
-   776 00001BEF EBF2                    	jmp	.done
+   773                                          mov     ax,bios_data_seg
+   774                                          sub     ax,word EM187_DATA_PARAS
+   775                                  	mov     [FPEM_segment],ax
+   776                                  	jmp	.done
    777                                  %endif
    778                                  ;get_data_segment	endp
    779                                  
@@ -5759,54 +5768,54 @@
    796                                  ;
    797                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    798                                  exception:		;    proc    near
-   799 00001BF1 55                              push    bp          ;create standard stack frame
-   800 00001BF2 89E5                            mov     bp,sp
+   799 00001BFA 55                              push    bp          ;create standard stack frame
+   800 00001BFB 89E5                            mov     bp,sp
    801                                  
-   802 00001BF4 50                              push    ax          ;save AX
-   803 00001BF5 1E                              push    ds          ;save DS
+   802 00001BFD 50                              push    ax          ;save AX
+   803 00001BFE 1E                              push    ds          ;save DS
    804                                  ;;;        mov     ax,seg EM187_DATA   ;get data segment
-   805 00001BF6 E8E0FF                  	call	get_data_segment	; to AX and DS
+   805 00001BFF E8D7FF                  	call	get_data_segment	; to AX and DS
    806                                  ;;;        mov     ds,ax       ;set up DS
    807                                  
-   808 00001BF9 8B4604                          mov     ax,[bp+4]   ;get bits to AX
-   809 00001BFC 08060200                        or      [flags],al    ;combine to flag word
+   808 00001C02 8B4604                          mov     ax,[bp+4]   ;get bits to AX
+   809 00001C05 08060200                        or      [flags],al    ;combine to flag word
    810                                  
    811                                  ;;;;;;;;;;;  JMP  EXC010
    812                                  
-   813 00001C00 84061100                        test    al,[enables]  ;test for unmasked exceptions
-   814 00001C04 7506                            jnz     EXC010      ;there are unmasked exceptions
+   813 00001C09 84061100                        test    al,[enables]  ;test for unmasked exceptions
+   814 00001C0D 7506                            jnz     EXC010      ;there are unmasked exceptions
    815                                  EXC005:
-   816 00001C06 1F                              pop     ds          ;restore DS
-   817 00001C07 58                              pop     ax          ;restore AX
-   818 00001C08 C9                              leave               ;done
-   819 00001C09 C20200                          ret     2           ;return, popping the stack
+   816 00001C0F 1F                              pop     ds          ;restore DS
+   817 00001C10 58                              pop     ax          ;restore AX
+   818 00001C11 C9                              leave               ;done
+   819 00001C12 C20200                          ret     2           ;return, popping the stack
    820                                  
    821                                  
    822                                  ;   handle simple setting of unmasked error flags
    823                                  EXC010:
-   824 00001C0C 08E4                            or      ah,ah       ;test for specific hi-bits
-   825 00001C0E 7510                            jnz     EXC020      ;specific error flagged
+   824 00001C15 08E4                            or      ah,ah       ;test for specific hi-bits
+   825 00001C17 7510                            jnz     EXC020      ;specific error flagged
    826                                  
-   827 00001C10 D0C0                            rol     al,1
-   828 00001C12 D0C0                            rol     al,1        ;discard hi-2 bits
-   829 00001C14 B407                            mov     ah,7        ;max error code + 1 to AH
+   827 00001C19 D0C0                            rol     al,1
+   828 00001C1B D0C0                            rol     al,1        ;discard hi-2 bits
+   829 00001C1D B407                            mov     ah,7        ;max error code + 1 to AH
    830                                  EXC011:
-   831 00001C16 FECC                            dec     ah          ;count down
-   832 00001C18 D0E0                            shl     al,1        ;move bit to carry
-   833 00001C1A 73FA                            jnc     EXC011      ;
+   831 00001C1F FECC                            dec     ah          ;count down
+   832 00001C21 D0E0                            shl     al,1        ;move bit to carry
+   833 00001C23 73FA                            jnc     EXC011      ;
    834                                  
-   835 00001C1C 88E0                            mov     al,ah       ;error code to AL
-   836 00001C1E EB08                            jmp     EXC030      ;go call signal routine
+   835 00001C25 88E0                            mov     al,ah       ;error code to AL
+   836 00001C27 EB08                            jmp     EXC030      ;go call signal routine
    837                                  
    838                                  EXC020:     ;specific high error flag
-   839 00001C20 B006                            mov     al,6        ;min error code -1 to AL
+   839 00001C29 B006                            mov     al,6        ;min error code -1 to AL
    840                                  EXC021:
-   841 00001C22 FEC0                            inc     al
-   842 00001C24 D0EC                            shr     ah,1        ;flag bit to carry
-   843 00001C26 73FA                            jnc     EXC021
+   841 00001C2B FEC0                            inc     al
+   842 00001C2D D0EC                            shr     ah,1        ;flag bit to carry
+   843 00001C2F 73FA                            jnc     EXC021
    844                                  EXC030:
-   845 00001C28 E80200                          call    _FPSIGNAL   ;signal error
-   846 00001C2B EBD9                            jmp     EXC005      ;say nothing for now
+   845 00001C31 E80200                          call    _FPSIGNAL   ;signal error
+   846 00001C34 EBD9                            jmp     EXC005      ;say nothing for now
    847                                  
    848                                  ;;;exception   endp
    849                                  
@@ -5817,20 +5826,20 @@
    854                              <1> ;  Enter with error number in AL
    855                              <1> ;
    856                              <1> _FPSIGNAL:	;	proc	near
-   857 00001C2D 53                  <1> 	push	bx
+   857 00001C36 53                  <1> 	push	bx
    858                              <1> ;;;	mov	bx,offset err0
-   859 00001C2E BB[4A1C]            <1> 	mov	bx, err0
-   860 00001C31 E8CD00              <1> 	call	strout
-   861 00001C34 88C3                <1> 	mov	bl,al
-   862 00001C36 30FF                <1> 	xor	bh,bh
-   863 00001C38 D1E3                <1> 	shl	bx,1
-   864 00001C3A 2E8B9F[E51C]        <1>   cs	mov	bx,word [FPUerrtab+bx]
-   865 00001C3F E8BF00              <1> 	call	strout
+   859 00001C37 BB[531C]            <1> 	mov	bx, err0
+   860 00001C3A E8CD00              <1> 	call	strout
+   861 00001C3D 88C3                <1> 	mov	bl,al
+   862 00001C3F 30FF                <1> 	xor	bh,bh
+   863 00001C41 D1E3                <1> 	shl	bx,1
+   864 00001C43 2E8B9F[EE1C]        <1>   cs	mov	bx,word [FPUerrtab+bx]
+   865 00001C48 E8BF00              <1> 	call	strout
    866                              <1> ;;;	mov	bx,offset errNL
-   867 00001C42 BB[E21C]            <1> 	mov	bx, errNL
-   868 00001C45 E8B900              <1> 	call	strout
-   869 00001C48 5B                  <1> 	pop	bx
-   870 00001C49 C3                  <1> 	ret
+   867 00001C4B BB[EB1C]            <1> 	mov	bx, errNL
+   868 00001C4E E8B900              <1> 	call	strout
+   869 00001C51 5B                  <1> 	pop	bx
+   870 00001C52 C3                  <1> 	ret
    871                              <1> ;_FPSIGNAL	endp
    872                              <1> 
    873                              <1> ;define the exception bits
@@ -5851,73 +5860,73 @@
    888                              <1> ; errStkOverflow  equ     0800h   ;
    889                              <1> ; errStkUnderflow equ     1000h   ;
    890                              <1> 
-   891 00001C4A 0D0A46505520657272- <1> err0	db	CR,LF,"FPU error:  ",0
-   891 00001C53 6F723A202000        <1>
+   891 00001C53 0D0A46505520657272- <1> err0	db	CR,LF,"FPU error:  ",0
+   891 00001C5C 6F723A202000        <1>
    892                              <1> 
-   893 00001C59 496E76616C6964204F- <1> err1	db	"Invalid Operation",0
-   893 00001C62 7065726174696F6E00  <1>
-   894 00001C6B 44656E6F726D616C00  <1> err2	db	"Denormal",0
-   895 00001C74 5A65726F2044697669- <1> err3	db	"Zero Divide",0
-   895 00001C7D 646500              <1>
-   896 00001C80 4F766572666C6F7700  <1> err4	db	"Overflow",0
-   897 00001C89 556E646572666C6F77- <1> err5	db	"Underflow",0
-   897 00001C92 00                  <1>
-   898 00001C93 507265636973696F6E- <1> err6	db	"Precision",0
-   898 00001C9C 00                  <1>
+   893 00001C62 496E76616C6964204F- <1> err1	db	"Invalid Operation",0
+   893 00001C6B 7065726174696F6E00  <1>
+   894 00001C74 44656E6F726D616C00  <1> err2	db	"Denormal",0
+   895 00001C7D 5A65726F2044697669- <1> err3	db	"Zero Divide",0
+   895 00001C86 646500              <1>
+   896 00001C89 4F766572666C6F7700  <1> err4	db	"Overflow",0
+   897 00001C92 556E646572666C6F77- <1> err5	db	"Underflow",0
+   897 00001C9B 00                  <1>
+   898 00001C9C 507265636973696F6E- <1> err6	db	"Precision",0
+   898 00001CA5 00                  <1>
    899                              <1> 
-   900 00001C9D 556E656D756C617465- <1> err7	db	"Unemulated Instruction",0
-   900 00001CA6 6420496E7374727563- <1>
-   900 00001CAF 74696F6E00          <1>
-   901 00001CB4 53515254206572726F- <1> err8	db	"SQRT error",0
-   901 00001CBD 7200                <1>
-   902 00001CBF 00                  <1> err9	db	0
-   903 00001CC0 537461636B204F7665- <1> errA	db	"Stack Overflow",0
-   903 00001CC9 72666C6F7700        <1>
-   904 00001CCF 537461636B20556E64- <1> errB	db	"Stack Underflow",0
-   904 00001CD8 6572666C6F7700      <1>
-   905 00001CDF 00                  <1> errC	db	0
-   906 00001CE0 00                  <1> errD	db	0
-   907 00001CE1 00                  <1> errE	db	0
+   900 00001CA6 556E656D756C617465- <1> err7	db	"Unemulated Instruction",0
+   900 00001CAF 6420496E7374727563- <1>
+   900 00001CB8 74696F6E00          <1>
+   901 00001CBD 53515254206572726F- <1> err8	db	"SQRT error",0
+   901 00001CC6 7200                <1>
+   902 00001CC8 00                  <1> err9	db	0
+   903 00001CC9 537461636B204F7665- <1> errA	db	"Stack Overflow",0
+   903 00001CD2 72666C6F7700        <1>
+   904 00001CD8 537461636B20556E64- <1> errB	db	"Stack Underflow",0
+   904 00001CE1 6572666C6F7700      <1>
+   905 00001CE8 00                  <1> errC	db	0
+   906 00001CE9 00                  <1> errD	db	0
+   907 00001CEA 00                  <1> errE	db	0
    908                              <1> 
-   909 00001CE2 0D0A00              <1> errNL	db	CR,LF,0
+   909 00001CEB 0D0A00              <1> errNL	db	CR,LF,0
    910                              <1> 
    911                              <1> FPUerrtab:
-   912 00001CE5 [591C][6B1C][741C]- <1> 	dw	err1,err2,err3,err4
-   912 00001CEB [801C]              <1>
-   913 00001CED [891C][931C][9D1C]- <1> 	dw	err5,err6,err7,err8
-   913 00001CF3 [B41C]              <1>
-   914 00001CF5 [BF1C][C01C][CF1C]- <1> 	dw	err9,errA,errB,errC
-   914 00001CFB [DF1C]              <1>
-   915 00001CFD [E01C][E11C]        <1> 	dw	errD,errE
+   912 00001CEE [621C][741C][7D1C]- <1> 	dw	err1,err2,err3,err4
+   912 00001CF4 [891C]              <1>
+   913 00001CF6 [921C][9C1C][A61C]- <1> 	dw	err5,err6,err7,err8
+   913 00001CFC [BD1C]              <1>
+   914 00001CFE [C81C][C91C][D81C]- <1> 	dw	err9,errA,errB,errC
+   914 00001D04 [E81C]              <1>
+   915 00001D06 [E91C][EA1C]        <1> 	dw	errD,errE
    916                              <1> 
    917                              <1> ; output the string pointed to by BX
    918                              <1> ;
    919                              <1> strout:		;	proc	near
-   920 00001D01 50                  <1> 	push	ax
+   920 00001D0A 50                  <1> 	push	ax
    921                              <1> strout1:
-   922 00001D02 2E8A07              <1>   cs	mov	al,byte [bx]
-   923 00001D05 08C0                <1> 	or	al,al
-   924 00001D07 7406                <1> 	jz	strout9
-   925 00001D09 E80500              <1> 	call	charout
-   926 00001D0C 43                  <1> 	inc	bx
-   927 00001D0D EBF3                <1> 	jmp	strout1
+   922 00001D0B 2E8A07              <1>   cs	mov	al,byte [bx]
+   923 00001D0E 08C0                <1> 	or	al,al
+   924 00001D10 7406                <1> 	jz	strout9
+   925 00001D12 E80500              <1> 	call	charout
+   926 00001D15 43                  <1> 	inc	bx
+   927 00001D16 EBF3                <1> 	jmp	strout1
    928                              <1> strout9:
-   929 00001D0F 58                  <1> 	pop	ax
-   930 00001D10 C3                  <1> 	ret
+   929 00001D18 58                  <1> 	pop	ax
+   930 00001D19 C3                  <1> 	ret
    931                              <1> ;strout	endp
    932                              <1> ; output the character in AL
    933                              <1> ;
    934                              <1> charout:	;	proc	near
-   935 00001D11 50                  <1> 	push	ax
-   936 00001D12 53                  <1> 	push	bx
+   935 00001D1A 50                  <1> 	push	ax
+   936 00001D1B 53                  <1> 	push	bx
    937                              <1> 
-   938 00001D13 BB0700              <1> 	mov	bx,0007h
-   939 00001D16 B40E                <1> 	mov	ah,0Eh
-   940 00001D18 CD10                <1> 	int	10h
+   938 00001D1C BB0700              <1> 	mov	bx,0007h
+   939 00001D1F B40E                <1> 	mov	ah,0Eh
+   940 00001D21 CD10                <1> 	int	10h
    941                              <1> 
-   942 00001D1A 5B                  <1> 	pop	bx
-   943 00001D1B 58                  <1> 	pop	ax
-   944 00001D1C C3                  <1> 	ret
+   942 00001D23 5B                  <1> 	pop	bx
+   943 00001D24 58                  <1> 	pop	ax
+   944 00001D25 C3                  <1> 	ret
    945                              <1> ;charout	endp
    946                              <1> 
    947                              <1> ; end em187i.asm
@@ -5929,7 +5938,7 @@
    857                                  %endif
    858                                  
    859                                  ; number of paragraphs needed by the DATA area
-   860 00001D1D 19                      	db	EM187_DATA_PARAS	; easy to see in the listing file
+   860 00001D26 19                      	db	EM187_DATA_PARAS	; easy to see in the listing file
    861                                  
    862                                  ;;;_TEXT   ENDS
    863                                  ;;;        END

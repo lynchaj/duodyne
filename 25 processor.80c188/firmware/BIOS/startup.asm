@@ -100,7 +100,7 @@ init1_loop:
 	mov	ss,ax		; only register not trashed by the memory test
 
 ; now let us test low memory
-len_test0	equ	8192*4		; 32K words 
+len_test0	equ	8192*4		; 32K words
 
 	mov	ax,401h			; rotating 1-bit
 	mov	si,0x18
@@ -270,7 +270,7 @@ table1:
 
 		db_lo	LED2
 		db	0	; Reset state
-		
+
 		db_lo	LED3
 		db	1	; off (LED state is acrive low)
 
@@ -407,5 +407,3 @@ start:
 
 
 ; At power up or reset, execution starts at label 'start'.
-
-

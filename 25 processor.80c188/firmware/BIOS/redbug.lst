@@ -82,7 +82,7 @@
     82                              <1> ; It may be smaller than the actual EPROM in use.
     83                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     84                              <1> %ifndef ROM
-    85                              <1> ROM             equ     32              ; 64 is the default
+    85                              <1> ROM             equ     64              ; 64 is the default
     86                              <1> %endif
     87                              <1> 
     88                              <1> ; Define the number of Wait States at which the ROM operates
@@ -107,12 +107,12 @@
    107                              <1> 
    108                              <1> ; Define the time zone in which we build the Relocatable BIOS
    109                              <1> %ifndef TIMEZONE
-   110                              <1> %define TIMEZONE "PST"
+   110                              <1> %define TIMEZONE "CDT"
    111                              <1> %endif
    112                              <1> 
    113                              <1> ; Has the REDBUG debugger been loaded?
    114                              <1> %ifndef SOFT_DEBUG
-   115                              <1> %define SOFT_DEBUG 0
+   115                              <1> %define SOFT_DEBUG 1
    116                              <1> %endif
    117                              <1> 
    118                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -127,7 +127,7 @@
    127                              <1> %endif
    128                              <1> 
    129                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   130                              <1> EMM_BOARDS      equ     4
+   130                              <1> EMM_BOARDS      equ     0
    131                              <1> 
    132                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    133                              <1> ; or at locations 0280h..3FFh in low memory?
@@ -1159,7 +1159,7 @@
     86                                  
     87                                  
     88                                  single_step:
-    89 00000000 2EFF0E[9100]               cs   dec     word [trace_count]
+    89 00000000 2EFF0E[9200]               cs   dec     word [trace_count]
     90 00000005 7409                            jz      .1
     91 00000007 55                              push    bp              ; address into the stack
     92 00000008 89E5                            mov     bp,sp
@@ -1212,19 +1212,19 @@
    139 0000004E 7503                            jnz     .5
    140 00000050 FF4E16                          dec     word [bp+regIP] ; move IP back 1 to the INT3 instruction
    141 00000053 68[ssss]                .5:     push    DGROUP
-   142 00000056 1F                              popm    ds
-   143 00000057 F6C301                          test    bl,1            ; odd one is trace trap
-   144 0000005A 750E                            jnz     .3
-   145 0000005C 1E                              push    ds
-   146 0000005D FFB7[6700]                      push    word [m_table+bx]
-   147 00000061 E8(0000)                        call    _cprintf
-   148 00000064 83C404                          add     sp,4
-   149 00000067 E82900                          call    crlf
+   142 00000056 1F90                            popm    ds
+   143 00000058 F6C301                          test    bl,1            ; odd one is trace trap
+   144 0000005B 750E                            jnz     .3
+   145 0000005D 1E                              push    ds
+   146 0000005E FFB7[6700]                      push    word [m_table+bx]
+   147 00000062 E8(0000)                        call    _cprintf
+   148 00000065 83C404                          add     sp,4
+   149 00000068 E82900                          call    crlf
    150                                  .3:
-   151 0000006A 16                              push    ss
-   152 0000006B 55                              push    bp
-   153 0000006C E8(0000)                        call    _command
-   154 0000006F 83C404                          add     sp,4
+   151 0000006B 16                              push    ss
+   152 0000006C 55                              push    bp
+   153 0000006D E8(0000)                        call    _command
+   154 00000070 83C404                          add     sp,4
    155                                  ;***************************************************************************
    156                                  ; the command dispatch goes here    based on DX:AX
    157                                  ;       AX == code
@@ -1234,34 +1234,34 @@
    161                                  ;       AX==0 && DX     means TRACE (DX is trace count)
    162                                  ;       AX    && DX==0  means STEP OVER, AX is length of present instr.
    163                                  ;***************************************************************************
-   164 00000072 89C3                            mov     bx,ax           ; copy the Code
-   165 00000074 09D0                            or      ax,dx           ; destroy AX
-   166 00000076 7414                            jz      common_exit     ; both zero, we got the GO
+   164 00000073 89C3                            mov     bx,ax           ; copy the Code
+   165 00000075 09D0                            or      ax,dx           ; destroy AX
+   166 00000077 7414                            jz      common_exit     ; both zero, we got the GO
    167                                  ; distinguish Step & Trace
-   168 00000078 09DB                            or      bx,bx           ; check length
-   169 0000007A 750B                            jnz     Step
+   168 00000079 09DB                            or      bx,bx           ; check length
+   169 0000007B 750B                            jnz     Step
    170                                  ; Trace operation (single_step)
    171                                  Trace:
-   172 0000007C 2E8916[9100]               cs   mov     [trace_count],dx        ; set the trace count
-   173 00000081 804E1B01                        or      byte [bp+regFLAGS+1],1  ; set the trace bit
-   174 00000085 EB05                            jmp     common_exit
+   172 0000007D 2E8916[9200]               cs   mov     [trace_count],dx        ; set the trace count
+   173 00000082 804E1B01                        or      byte [bp+regFLAGS+1],1  ; set the trace bit
+   174 00000086 EB05                            jmp     common_exit
    175                                  Step:
-   176 00000087 BA0100                          mov     dx,1
-   177 0000008A EBF0                            jmp     Trace           ; for now
+   176 00000088 BA0100                          mov     dx,1
+   177 0000008B EBF0                            jmp     Trace           ; for now
    178                                  
    179                                  ;***************************************************************************
    180                                  ; **** This debugger does not allow the modification of the SS or SP ****
    181                                  ;***************************************************************************
    182                                  
    183                                  common_exit:
-   184 0000008C 58                              pop     ax      ; was SS
-   185 0000008D 1F                              pop     ds
-   186 0000008E 07                              pop     es
-   187 0000008F 61                              popa            ;restore all but the SP
-   188 00000090 CF                              iret            ; restore IP, CS, FLAGS
+   184 0000008D 58                              pop     ax      ; was SS
+   185 0000008E 1F                              pop     ds
+   186 0000008F 07                              pop     es
+   187 00000090 61                              popa            ;restore all but the SP
+   188 00000091 CF                              iret            ; restore IP, CS, FLAGS
    189                                  
    190                                  
-   191 00000091 0100                    trace_count:    dw      1       ; Note variable in SOFT code segment
+   191 00000092 0100                    trace_count:    dw      1       ; Note variable in SOFT code segment
    192                                  
    193                                  %if 0
    194                                  ;***************************************************************************
@@ -1348,11 +1348,11 @@
    275                                          ret
    276                                  %endif
    277                                  
-   278 00000093 B00D                    crlf:   mov     al,CR
-   279 00000095 E8(0000)                        call    @uart_putchar
-   280 00000098 B00A                            mov     al,LF
-   281 0000009A E8(0000)                        call    @uart_putchar
-   282 0000009D C3                              ret
+   278 00000094 B00D                    crlf:   mov     al,CR
+   279 00000096 E8(0000)                        call    @uart_putchar
+   280 00000099 B00A                            mov     al,LF
+   281 0000009B E8(0000)                        call    @uart_putchar
+   282 0000009E C3                              ret
    283                                  
    284                                  
    285                                          SEGMENT CONST

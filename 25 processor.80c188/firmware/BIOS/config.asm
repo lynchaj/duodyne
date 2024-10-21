@@ -58,7 +58,7 @@ UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
 ; It may be smaller than the actual EPROM in use.
 ; The following sizes are supported:  32, 64, 128, and 256
 %ifndef ROM
-ROM             equ     32              ; 64 is the default
+ROM             equ     64              ; 64 is the default
 %endif
 
 ; Define the number of Wait States at which the ROM operates
@@ -83,12 +83,12 @@ BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
 
 ; Define the time zone in which we build the Relocatable BIOS
 %ifndef TIMEZONE
-%define TIMEZONE "PST"
+%define TIMEZONE "CDT"
 %endif
 
 ; Has the REDBUG debugger been loaded?
 %ifndef SOFT_DEBUG
-%define SOFT_DEBUG 0
+%define SOFT_DEBUG 1
 %endif
 
 ; Should the BIOS include "Tiny BASIC" in the image?
@@ -103,7 +103,7 @@ FPEM            equ     1               ; default is 1
 %endif
 
 ; Define the maximum number of EMM (4MEM) boards supported
-EMM_BOARDS      equ     4
+EMM_BOARDS      equ     0
 
 ; Should the Floating Point Emulator use temporary storage in the EBDA
 ; or at locations 0280h..3FFh in low memory?

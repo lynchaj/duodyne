@@ -83,7 +83,7 @@
     83                              <1> ; It may be smaller than the actual EPROM in use.
     84                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     85                              <1> %ifndef ROM
-    86                              <1> ROM             equ     32              ; 64 is the default
+    86                              <1> ROM             equ     64              ; 64 is the default
     87                              <1> %endif
     88                              <1> 
     89                              <1> ; Define the number of Wait States at which the ROM operates
@@ -108,12 +108,12 @@
    108                              <1> 
    109                              <1> ; Define the time zone in which we build the Relocatable BIOS
    110                              <1> %ifndef TIMEZONE
-   111                              <1> %define TIMEZONE "PST"
+   111                              <1> %define TIMEZONE "CDT"
    112                              <1> %endif
    113                              <1> 
    114                              <1> ; Has the REDBUG debugger been loaded?
    115                              <1> %ifndef SOFT_DEBUG
-   116                              <1> %define SOFT_DEBUG 0
+   116                              <1> %define SOFT_DEBUG 1
    117                              <1> %endif
    118                              <1> 
    119                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -128,7 +128,7 @@
    128                              <1> %endif
    129                              <1> 
    130                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   131                              <1> EMM_BOARDS      equ     4
+   131                              <1> EMM_BOARDS      equ     0
    132                              <1> 
    133                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    134                              <1> ; or at locations 0280h..3FFh in low memory?
@@ -1202,14 +1202,14 @@
     87 00000014 7307                            jae     try_fn80
     88                                  
     89 00000016 01DB                            add     bx,bx
-    90 00000018 2EFFA7[5800]                cs  jmp     near [int15fn00+bx]     ; dispatch
+    90 00000018 2EFFA7[5900]                cs  jmp     near [int15fn00+bx]     ; dispatch
     91                                  %endif
     92                                  
     93                                  try_fn80:
     94 0000001D 80FCC0                  	cmp     ah,0C0h
-    95 00000020 7503E9F501                      je      fnC0
+    95 00000020 7503E9F701                      je      fnC0
     96 00000025 80FCC1                          cmp     ah,0C1h
-    97 00000028 7503E9F901                      je      fnC1
+    97 00000028 7503E9FC01                      je      fnC1
     98                                  
     99 0000002D 88E3                            mov     bl,ah
    100 0000002F 30FF                            xor     bh,bh
@@ -1219,7 +1219,7 @@
    104 00000037 7307                            jae     unknown
    105                                  
    106 00000039 01DB                            add     bx,bx
-   107 0000003B 2EFFA7[6400]                cs  jmp     near [int15fn80+bx]     ; dispatch
+   107 0000003B 2EFFA7[6500]                cs  jmp     near [int15fn80+bx]     ; dispatch
    108                                  
    109                                           
    110                                  unknown:
@@ -1233,41 +1233,41 @@
    118                                  clear_carry:
    119 0000004E 80660EFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry flag
    120                                  bye_bye:
-   121 00000052 5D585B5A1F                      popm    bp,ax,bx,dx,ds
-   122 00000057 CF                              iret
+   121 00000052 5D585B5A1F90                    popm    bp,ax,bx,dx,ds
+   122 00000058 CF                              iret
    123                                  
    124                                  
    125                                  int15fn00:
-   126 00000058 [A100]                  	dw	fn00		; cassette motor on command
-   127 0000005A [B400]                  	dw	fn01		; cassette motor off
-   128 0000005C [C100]                  	dw	fn02		; cassette read block
-   129 0000005E [6D01]                  	dw	fn03		; cassette write block
-   130 00000060 [D301]                  	dw	fn04		; cassette GPIO2 on command
-   131 00000062 [E201]                  	dw	fn05		; cassette GPIO2 off command
+   126 00000059 [A300]                  	dw	fn00		; cassette motor on command
+   127 0000005B [B600]                  	dw	fn01		; cassette motor off
+   128 0000005D [C300]                  	dw	fn02		; cassette read block
+   129 0000005F [6F01]                  	dw	fn03		; cassette write block
+   130 00000061 [D501]                  	dw	fn04		; cassette GPIO2 on command
+   131 00000063 [E401]                  	dw	fn05		; cassette GPIO2 off command
    132                                  fn00max         equ     $-int15fn00
    133                                  
    134                                  int15fn80:
-   135 00000064 [4A00]                          dw      fn80            ; device open
-   136 00000066 [4A00]                          dw      fn81            ; device close
-   137 00000068 [4A00]                          dw      fn82            ; process termination
-   138 0000006A [6D02]                          dw      fn83            ; event wait
-   139 0000006C [4000]                          dw      fn84            ; read joystick
-   140 0000006E [4A00]                          dw      fn85            ; SysReq key
-   141 00000070 [B602]                          dw      fn86            ; delay
-   142 00000072 [4000]                          dw      fn87            ; move extended memory block
-   143 00000074 [8600]                          dw      fn88            ; get extended memory size
-   144 00000076 [4000]                          dw      fn89            ; enter protected mode
+   135 00000065 [4A00]                          dw      fn80            ; device open
+   136 00000067 [4A00]                          dw      fn81            ; device close
+   137 00000069 [4A00]                          dw      fn82            ; process termination
+   138 0000006B [7102]                          dw      fn83            ; event wait
+   139 0000006D [4000]                          dw      fn84            ; read joystick
+   140 0000006F [4A00]                          dw      fn85            ; SysReq key
+   141 00000071 [BB02]                          dw      fn86            ; delay
+   142 00000073 [4000]                          dw      fn87            ; move extended memory block
+   143 00000075 [8700]                          dw      fn88            ; get extended memory size
+   144 00000077 [4000]                          dw      fn89            ; enter protected mode
    145                                  %if TBASIC
-   146 00000078 [8D00]                          dw      fn8a            ; getline code
+   146 00000079 [8E00]                          dw      fn8a            ; getline code
    147                                  %else
    148                                  	dw	unknown		; no TBASIC, so no call
    149                                  %endif
-   150 0000007A [4000]                  	dw	fn8b
-   151 0000007C [4000]                  	dw	fn8c
-   152 0000007E [4000]                  	dw	fn8e
-   153 00000080 [4000]                  	dw	fn8f
-   154 00000082 [4A00]                  	dw	fn90		; Device Wait
-   155 00000084 [4A00]                  	dw	fn91		; Device Post
+   150 0000007B [4000]                  	dw	fn8b
+   151 0000007D [4000]                  	dw	fn8c
+   152 0000007F [4000]                  	dw	fn8e
+   153 00000081 [4000]                  	dw	fn8f
+   154 00000083 [4A00]                  	dw	fn90		; Device Wait
+   155 00000085 [4A00]                  	dw	fn91		; Device Post
    156                                  fn80max         equ     $-int15fn80
    157                                  
    158                                  
@@ -1298,8 +1298,8 @@
    183                                  ;       Always return 0
    184                                  ;
    185                                  fn88:
-   186 00000086 C746020000                      mov     word [bp+offset_AX],0
-   187 0000008B EBC1                            jmp     clear_carry
+   186 00000087 C746020000                      mov     word [bp+offset_AX],0
+   187 0000008C EBC0                            jmp     clear_carry
    188                                  
    189                                  
    190                                          
@@ -1314,20 +1314,20 @@
    199                                  ;       Buffer of length-1 characters (maximum), NUL terminated
    200                                  ;
    201                                  fn8a:
-   202 0000008D FB                              sti                             ; enable interrupts
-   203 0000008E 5251                            pushm   cx,dx
+   202 0000008E FB                              sti                             ; enable interrupts
+   203 0000008F 5251                            pushm   cx,dx
    204                                  
-   205 00000090 89D0                            mov     ax,dx                   ; DX:AX is pointer argument
-   206 00000092 8CDA                            mov     dx,ds                   ; **
-   207 00000094 89CB                            mov     bx,cx                   ; BX is second argument
+   205 00000091 89D0                            mov     ax,dx                   ; DX:AX is pointer argument
+   206 00000093 8CDA                            mov     dx,ds                   ; **
+   207 00000095 89CB                            mov     bx,cx                   ; BX is second argument
    208                                  
-   209 00000096 68[ssss]                        push    DGROUP                  ; for the C-code
-   210 00000099 1F                              popm    ds
+   209 00000097 68[ssss]                        push    DGROUP                  ; for the C-code
+   210 0000009A 1F90                            popm    ds
    211                                          extern  getline_                ; this is a __fastcall entry
-   212 0000009A E8(0000)                        call    getline_
+   212 0000009C E8(0000)                        call    getline_
    213                                  
-   214 0000009D 595A                            popm    cx,dx
-   215 0000009F EBAD                            jmp     clear_carry
+   214 0000009F 595A                            popm    cx,dx
+   215 000000A1 EBAB                            jmp     clear_carry
    216                                  %endif
    217                                  
    218                                  
@@ -1390,13 +1390,13 @@
    275                              <1> ;  bit2 of MCR.
    276                              <1> ;--------------------------------------------------------
    277                              <1> fn00:
-   278 000000A1 802671007F          <1> 	and	byte [break_flag],07FH		; turn off break flag   jrc
-   279 000000A6 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
-   280 000000A9 EC                  <1> 	in	al,dx				;read cassette uart mcr
-   281 000000AA 0C04                <1> 	or	al,04H				; SET BIT TO TURN ON
-   282 000000AC EE                  <1> W3:	out	dx,al				;WRITE IT OUT
-   283 000000AD C746020000          <1> 	mov	word [bp+offset_AX],0000h	; signal success to caller
-   284 000000B2 EB9A                <1> 	jmp	clear_carry
+   278 000000A3 802671007F          <1> 	and	byte [break_flag],07FH		; turn off break flag   jrc
+   279 000000A8 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
+   280 000000AB EC                  <1> 	in	al,dx				;read cassette uart mcr
+   281 000000AC 0C04                <1> 	or	al,04H				; SET BIT TO TURN ON
+   282 000000AE EE                  <1> W3:	out	dx,al				;WRITE IT OUT
+   283 000000AF C746020000          <1> 	mov	word [bp+offset_AX],0000h	; signal success to caller
+   284 000000B4 EB98                <1> 	jmp	clear_carry
    285                              <1> 
    286                              <1> 
    287                              <1> ;----------------------------------
@@ -1404,11 +1404,11 @@
    289                              <1> ;  TO TURN CASSETTE MOTOR OFF
    290                              <1> ;-----------------------------------
    291                              <1> fn01:
-   292 000000B4 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag    jrc
-   293 000000B9 BA8404              <1> 	mov	dx,cuart_mcr		; get device code
-   294 000000BC EC                  <1> 	in	al,dx			;read cassette uart mcr
-   295 000000BD 24FB                <1> 	and	al,~04h			; clear bit to turn off motor
-   296 000000BF EBEB                <1> 	jmp	W3			;write it, clear error, return
+   292 000000B6 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag    jrc
+   293 000000BB BA8404              <1> 	mov	dx,cuart_mcr		; get device code
+   294 000000BE EC                  <1> 	in	al,dx			;read cassette uart mcr
+   295 000000BF 24FB                <1> 	and	al,~04h			; clear bit to turn off motor
+   296 000000C1 EBEB                <1> 	jmp	W3			;write it, clear error, return
    297                              <1> 
    298                              <1> 
    299                              <1> ;--------------------------------------------
@@ -1429,122 +1429,122 @@
    314                              <1> ;--------------------------------------------
    315                              <1> fn02:
    316                              <1> READ_BLOCK:
-   317 000000C1 53                  <1> 	PUSH	BX
-   318 000000C2 51                  <1> 	PUSH	CX
-   319 000000C3 56                  <1> 	PUSH	SI
-   320 000000C4 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag    jrc
-   321 000000C9 BE0700              <1> 	MOV	SI,7		; retry count for leader
-   322 000000CC E83C01              <1> 	CALL	BEGIN_OP	; start the tape
+   317 000000C3 53                  <1> 	PUSH	BX
+   318 000000C4 51                  <1> 	PUSH	CX
+   319 000000C5 56                  <1> 	PUSH	SI
+   320 000000C6 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag    jrc
+   321 000000CB BE0700              <1> 	MOV	SI,7		; retry count for leader
+   322 000000CE E83C01              <1> 	CALL	BEGIN_OP	; start the tape
    323                              <1> 	
    324                              <1> W4:
-   325 000000CF E81901              <1> 	CALL	READ_BYTE	; get initial byte
-   326 000000D2 A2A100              <1> 	MOV	[last_val],AL
-   327 000000D5 BA1000              <1> 	MOV	DX,010H		; look for 16 leader bytes
+   325 000000D1 E81901              <1> 	CALL	READ_BYTE	; get initial byte
+   326 000000D4 A2A100              <1> 	MOV	[last_val],AL
+   327 000000D7 BA1000              <1> 	MOV	DX,010H		; look for 16 leader bytes
    328                              <1> 
    329                              <1> W5:
-   330 000000D8 F606710080          <1> 	TEST	byte [break_flag],80h		; jrc
-   331 000000DD 7402                <1> 	JZ	W6		; jump if no break key
-   332 000000DF EB72                <1> 	JMP	W17		; jump if break key hit
+   330 000000DA F606710080          <1> 	TEST	byte [break_flag],80h		; jrc
+   331 000000DF 7402                <1> 	JZ	W6		; jump if no break key
+   332 000000E1 EB72                <1> 	JMP	W17		; jump if break key hit
    333                              <1> 
    334                              <1> W6:
-   335 000000E1 3CFF                <1> 	CMP	AL,0FFH		; leader byte?
-   336 000000E3 7505                <1> 	JNE	W7		; try again if not found
+   335 000000E3 3CFF                <1> 	CMP	AL,0FFH		; leader byte?
+   336 000000E5 7505                <1> 	JNE	W7		; try again if not found
    337                              <1> 	
-   338 000000E5 4A                  <1> 	DEC	DX		; yes, a leader byte
-   339 000000E6 75E7                <1> 	JNZ	W4		; find another leader byte
-   340 000000E8 EB05                <1> 	JMP	W8		; jump if at least 16 found
+   338 000000E7 4A                  <1> 	DEC	DX		; yes, a leader byte
+   339 000000E8 75E7                <1> 	JNZ	W4		; find another leader byte
+   340 000000EA EB05                <1> 	JMP	W8		; jump if at least 16 found
    341                              <1> 
    342                              <1> W7:
-   343 000000EA 4E                  <1> 	DEC	SI		; no leader byte...try again
-   344 000000EB 7466                <1> 	JZ	W17		; ran out of retries
-   345 000000ED EBE0                <1> 	JMP	W4		; loop
+   343 000000EC 4E                  <1> 	DEC	SI		; no leader byte...try again
+   344 000000ED 7466                <1> 	JZ	W17		; ran out of retries
+   345 000000EF EBE0                <1> 	JMP	W4		; loop
    346                              <1> 		
    347                              <1> W8:				; 16 bytes of leader found
-   348 000000EF F606710080          <1> 	TEST	byte [break_flag],80h	; test for break key   jrc
-   349 000000F4 755D                <1> 	JNZ	W17		; jump if break key hit
+   348 000000F1 F606710080          <1> 	TEST	byte [break_flag],80h	; test for break key   jrc
+   349 000000F6 755D                <1> 	JNZ	W17		; jump if break key hit
    350                              <1> 
    351                              <1> W9:				; loop until start and sync byte
-   352 000000F6 E8F200              <1> 	CALL	READ_BYTE
-   353 000000F9 3C3C                <1> 	CMP	AL,03CH		; start byte
-   354 000000FB 75F9                <1> 	JNE	W9
+   352 000000F8 E8F200              <1> 	CALL	READ_BYTE
+   353 000000FB 3C3C                <1> 	CMP	AL,03CH		; start byte
+   354 000000FD 75F9                <1> 	JNE	W9
    355                              <1> 	
-   356 000000FD E8EB00              <1> 	CALL	READ_BYTE
-   357 00000100 3CE6                <1> 	CMP	AL,0E6H		; sync byte
-   358 00000102 754F                <1> 	JNE	W17		; error
+   356 000000FF E8EB00              <1> 	CALL	READ_BYTE
+   357 00000102 3CE6                <1> 	CMP	AL,0E6H		; sync byte
+   358 00000104 754F                <1> 	JNE	W17		; error
    359                              <1> 	
    360                              <1> ; start and sync found, start reading data blocks
-   361 00000104 5E                  <1> 	POP	SI
-   362 00000105 59                  <1> 	POP	CX
-   363 00000106 5B                  <1> 	POP	BX
+   361 00000106 5E                  <1> 	POP	SI
+   362 00000107 59                  <1> 	POP	CX
+   363 00000108 5B                  <1> 	POP	BX
    364                              <1> 
    365                              <1> ; read 1 or more 256-byte blocks
-   366 00000107 51                  <1> 	PUSH	CX		; save byte count
+   366 00000109 51                  <1> 	PUSH	CX		; save byte count
    367                              <1> 
    368                              <1> W10:
-   369 00000108 C706A200FFFF        <1> 	MOV	word [crc_reg],0FFFFH	; initialize CRC
-   370 0000010E BA0001              <1> 	MOV	DX,256		; for 256 byte blocks
+   369 0000010A C706A200FFFF        <1> 	MOV	word [crc_reg],0FFFFH	; initialize CRC
+   370 00000110 BA0001              <1> 	MOV	DX,256		; for 256 byte blocks
    371                              <1> 
    372                              <1> W11:
-   373 00000111 F606710080          <1> 	TEST	byte [break_flag],80h	; test for break key   jrc
-   374 00000116 7523                <1> 	JNZ	W13		; jump if break key hit
-   375 00000118 E8D000              <1> 	CALL	READ_BYTE	; get a byte from cassette
-   376 0000011B 721E                <1> 	JC	W13		; CY set indicates no data
-   377 0000011D E305                <1> 	JCXZ	W12		; reached end of buffer; skip block
+   373 00000113 F606710080          <1> 	TEST	byte [break_flag],80h	; test for break key   jrc
+   374 00000118 7523                <1> 	JNZ	W13		; jump if break key hit
+   375 0000011A E8D000              <1> 	CALL	READ_BYTE	; get a byte from cassette
+   376 0000011D 721E                <1> 	JC	W13		; CY set indicates no data
+   377 0000011F E305                <1> 	JCXZ	W12		; reached end of buffer; skip block
    378                              <1> 	
-   379 0000011F 268807              <1> 	MOV	[ES:BX],AL	; save to memory
-   380 00000122 43                  <1> 	INC	BX		; increment memory pointer
-   381 00000123 49                  <1> 	DEC	CX		; decrement count
+   379 00000121 268807              <1> 	MOV	[ES:BX],AL	; save to memory
+   380 00000124 43                  <1> 	INC	BX		; increment memory pointer
+   381 00000125 49                  <1> 	DEC	CX		; decrement count
    382                              <1> 
    383                              <1> W12:
-   384 00000124 4A                  <1> 	DEC	DX		; decrement block count
-   385 00000125 7FEA                <1> 	JG	W11		; read more
-   386 00000127 E8C100              <1> 	CALL	READ_BYTE	; read two CRC bytes
-   387 0000012A E8BE00              <1> 	CALL	READ_BYTE
-   388 0000012D 28E4                <1> 	SUB	AH,AH
-   389 0000012F 813EA2000F1D        <1> 	CMP	word [crc_reg],1d0fh	; correct CRC?		jrc
-   390 00000135 7506                <1> 	JNE	W14		; if not equal, CRC bad
-   391 00000137 E306                <1> 	JCXZ	W15		; if byte count is 0, we've read enough so exit
-   392 00000139 EBCD                <1> 	JMP	W10		; read more
+   384 00000126 4A                  <1> 	DEC	DX		; decrement block count
+   385 00000127 7FEA                <1> 	JG	W11		; read more
+   386 00000129 E8C100              <1> 	CALL	READ_BYTE	; read two CRC bytes
+   387 0000012C E8BE00              <1> 	CALL	READ_BYTE
+   388 0000012F 28E4                <1> 	SUB	AH,AH
+   389 00000131 813EA2000F1D        <1> 	CMP	word [crc_reg],1d0fh	; correct CRC?		jrc
+   390 00000137 7506                <1> 	JNE	W14		; if not equal, CRC bad
+   391 00000139 E306                <1> 	JCXZ	W15		; if byte count is 0, we've read enough so exit
+   392 0000013B EBCD                <1> 	JMP	W10		; read more
    393                              <1> 	
    394                              <1> W13:				; error 1 CRC
-   395 0000013B B401                <1> 	MOV	AH,01H		; 
+   395 0000013D B401                <1> 	MOV	AH,01H		; 
    396                              <1> 	
    397                              <1> W14:
-   398 0000013D FEC4                <1> 	INC	AH		; +1 error 2 
+   398 0000013F FEC4                <1> 	INC	AH		; +1 error 2 
    399                              <1> 
    400                              <1> W15:
-   401 0000013F 5A                  <1> 	POP	DX		; calculate count of bytes actually read
-   402 00000140 29CA                <1> 	SUB	DX,CX		; in DX
-   403 00000142 50                  <1> 	PUSH	AX		; save return code
-   404 00000143 F6C403              <1> 	TEST	AH,03H		; test for errors
-   405 00000146 7513                <1> 	JNZ	W18		; jump if error detected
-   406 00000148 E8A000              <1> 	CALL	READ_BYTE	; read trailer
-   407 0000014B EB0E                <1> 	JMP	W18		; skip to turn off motor
+   401 00000141 5A                  <1> 	POP	DX		; calculate count of bytes actually read
+   402 00000142 29CA                <1> 	SUB	DX,CX		; in DX
+   403 00000144 50                  <1> 	PUSH	AX		; save return code
+   404 00000145 F6C403              <1> 	TEST	AH,03H		; test for errors
+   405 00000148 7513                <1> 	JNZ	W18		; jump if error detected
+   406 0000014A E8A000              <1> 	CALL	READ_BYTE	; read trailer
+   407 0000014D EB0E                <1> 	JMP	W18		; skip to turn off motor
    408                              <1> 
    409                              <1> W16:				; bad leader
-   410 0000014D 4E                  <1> 	DEC	SI		; check retries
-   411 0000014E 7403                <1> 	JZ	W17		; jump if too many retries
-   412 00000150 E97CFF              <1> 	JMP	W4		; go back if not too many
+   410 0000014F 4E                  <1> 	DEC	SI		; check retries
+   411 00000150 7403                <1> 	JZ	W17		; jump if too many retries
+   412 00000152 E97CFF              <1> 	JMP	W4		; go back if not too many
    413                              <1> 	
    414                              <1> W17:				; no data from cassette error
-   415 00000153 5E                  <1> 	POP	SI
-   416 00000154 59                  <1> 	POP	CX
-   417 00000155 5B                  <1> 	POP	BX
-   418 00000156 29D2                <1> 	SUB	DX,DX		; 0 bytes read
-   419 00000158 B404                <1> 	MOV	AH,04H		; time out error (no leader)
-   420 0000015A 50                  <1> 	PUSH	AX
+   415 00000155 5E                  <1> 	POP	SI
+   416 00000156 59                  <1> 	POP	CX
+   417 00000157 5B                  <1> 	POP	BX
+   418 00000158 29D2                <1> 	SUB	DX,DX		; 0 bytes read
+   419 0000015A B404                <1> 	MOV	AH,04H		; time out error (no leader)
+   420 0000015C 50                  <1> 	PUSH	AX
    421                              <1> 
    422                              <1> W18:
-   423 0000015B E856FF              <1> 	CALL	fn01		; turn off motor
-   424 0000015E 58                  <1> 	POP	AX		; restore return code
-   425 0000015F 894602              <1> 	mov	word [bp+offset_AX],ax	; return error code to caller	
+   423 0000015D E856FF              <1> 	CALL	fn01		; turn off motor
+   424 00000160 58                  <1> 	POP	AX		; restore return code
+   425 00000161 894602              <1> 	mov	word [bp+offset_AX],ax	; return error code to caller	
    426                              <1> 
-   427 00000162 83F800              <1> 	CMP	AX,0
-   428 00000165 7403                <1> 	je	W19
-   429 00000167 E9DAFE              <1> 	jmp	set_carry
+   427 00000164 83F800              <1> 	CMP	AX,0
+   428 00000167 7403                <1> 	je	W19
+   429 00000169 E9D8FE              <1> 	jmp	set_carry
    430                              <1> 
    431                              <1> W19:
-   432 0000016A E9E1FE              <1> 	jmp	clear_carry
+   432 0000016C E9DFFE              <1> 	jmp	clear_carry
    433                              <1> 
    434                              <1> 
    435                              <1> ;--------------------------------------------
@@ -1561,68 +1561,68 @@
    446                              <1> ;--------------------------------------------
    447                              <1> fn03:
    448                              <1> WRITE_BLOCK:
-   449 0000016D 53                  <1> 	PUSH	BX		; used by BEGIN_OP
-   450 0000016E 51                  <1> 	PUSH	CX		; used in W23
+   449 0000016F 53                  <1> 	PUSH	BX		; used by BEGIN_OP
+   450 00000170 51                  <1> 	PUSH	CX		; used in W23
    451                              <1> ;jrc	STD			; always count down 
-   452 0000016F 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag  jrc
-   453 00000174 E89400              <1> 	CALL	BEGIN_OP	; uses BX
-   454 00000177 B0FF                <1> 	MOV	AL,0FFH		; write leader 256 dup FF
-   455 00000179 B9FF00              <1> 	MOV	CX,00FFH	; leader count
+   452 00000171 802671007F          <1> 	and	byte [break_flag],07FH	; turn off break flag  jrc
+   453 00000176 E89400              <1> 	CALL	BEGIN_OP	; uses BX
+   454 00000179 B0FF                <1> 	MOV	AL,0FFH		; write leader 256 dup FF
+   455 0000017B B9FF00              <1> 	MOV	CX,00FFH	; leader count
    456                              <1> 	
    457                              <1> W23:
-   458 0000017C E87B00              <1> 	CALL	WRITE_BYTE	; output leader byte to cassette
-   459 0000017F E2FB                <1> 	LOOP	W23		; write a 256-byte leader
+   458 0000017E E87B00              <1> 	CALL	WRITE_BYTE	; output leader byte to cassette
+   459 00000181 E2FB                <1> 	LOOP	W23		; write a 256-byte leader
    460                              <1> 
-   461 00000181 59                  <1> 	POP	CX		; restore CX
-   462 00000182 5B                  <1> 	POP	BX		; balance the stack
-   463 00000183 B03C                <1> 	MOV	AL,3CH		; get start byte
-   464 00000185 E87200              <1> 	CALL	WRITE_BYTE	; output start byte to cassette
+   461 00000183 59                  <1> 	POP	CX		; restore CX
+   462 00000184 5B                  <1> 	POP	BX		; balance the stack
+   463 00000185 B03C                <1> 	MOV	AL,3CH		; get start byte
+   464 00000187 E87200              <1> 	CALL	WRITE_BYTE	; output start byte to cassette
    465                              <1> 	
-   466 00000188 B0E6                <1> 	MOV	AL,0E6H		; get sync byte
-   467 0000018A E86D00              <1> 	CALL	WRITE_BYTE	; output sync byte to cassette
+   466 0000018A B0E6                <1> 	MOV	AL,0E6H		; get sync byte
+   467 0000018C E86D00              <1> 	CALL	WRITE_BYTE	; output sync byte to cassette
    468                              <1> 
    469                              <1> WR_BLOCK:
-   470 0000018D C706A200FFFF        <1> 	MOV	word [crc_reg],0FFFFH	; initialize CRC     jrc
-   471 00000193 BA0001              <1> 	MOV	DX,256		; for 256 byte blocks
+   470 0000018F C706A200FFFF        <1> 	MOV	word [crc_reg],0FFFFH	; initialize CRC     jrc
+   471 00000195 BA0001              <1> 	MOV	DX,256		; for 256 byte blocks
    472                              <1> 
    473                              <1> W24:	
-   474 00000196 268A07              <1> 	MOV	AL,[ES:BX]	; get a data byte from memory
-   475 00000199 E85E00              <1> 	CALL	WRITE_BYTE	; output data byte to cassette
-   476 0000019C E302                <1> 	JCXZ	W25		; unlexx CX=0, decrement counters
-   477 0000019E 43                  <1> 	INC	BX		; increment buffer ptr
-   478 0000019F 49                  <1> 	DEC	CX		; decrement byte count
+   474 00000198 268A07              <1> 	MOV	AL,[ES:BX]	; get a data byte from memory
+   475 0000019B E85E00              <1> 	CALL	WRITE_BYTE	; output data byte to cassette
+   476 0000019E E302                <1> 	JCXZ	W25		; unlexx CX=0, decrement counters
+   477 000001A0 43                  <1> 	INC	BX		; increment buffer ptr
+   478 000001A1 49                  <1> 	DEC	CX		; decrement byte count
    479                              <1> 
    480                              <1> W25:
-   481 000001A0 4A                  <1> 	DEC	DX		; decrement block count
-   482 000001A1 7FF3                <1> 	JG	W24		; loop until 256-byte block is written
+   481 000001A2 4A                  <1> 	DEC	DX		; decrement block count
+   482 000001A3 7FF3                <1> 	JG	W24		; loop until 256-byte block is written
    483                              <1> 
-   484 000001A3 A1A200              <1> 	MOV	AX,[crc_reg]	; otherwise, get checksum
-   485 000001A6 F7D0                <1> 	NOT	AX	
-   486 000001A8 50                  <1> 	PUSH	AX		; save it
-   487 000001A9 86E0                <1> 	XCHG	AH,AL		; write MS byte first
-   488 000001AB E84C00              <1> 	CALL	WRITE_BYTE	; and output it
-   489 000001AE 58                  <1> 	POP	AX		; get it back
-   490 000001AF E84800              <1> 	CALL	WRITE_BYTE	; now write LS byte
-   491 000001B2 09C9                <1> 	OR	CX,CX		; is byte count 0?
-   492 000001B4 75D7                <1> 	JNZ	WR_BLOCK	; jump if not done yet
+   484 000001A5 A1A200              <1> 	MOV	AX,[crc_reg]	; otherwise, get checksum
+   485 000001A8 F7D0                <1> 	NOT	AX	
+   486 000001AA 50                  <1> 	PUSH	AX		; save it
+   487 000001AB 86E0                <1> 	XCHG	AH,AL		; write MS byte first
+   488 000001AD E84C00              <1> 	CALL	WRITE_BYTE	; and output it
+   489 000001B0 58                  <1> 	POP	AX		; get it back
+   490 000001B1 E84800              <1> 	CALL	WRITE_BYTE	; now write LS byte
+   491 000001B4 09C9                <1> 	OR	CX,CX		; is byte count 0?
+   492 000001B6 75D7                <1> 	JNZ	WR_BLOCK	; jump if not done yet
    493                              <1> 
    494                              <1> ; write trailer 4 bytes of FF
-   495 000001B6 51                  <1> 	PUSH	CX
-   496 000001B7 B8FF00              <1> 	MOV	AX,0FFH
-   497 000001BA B90400              <1> 	MOV	CX,4
+   495 000001B8 51                  <1> 	PUSH	CX
+   496 000001B9 B8FF00              <1> 	MOV	AX,0FFH
+   497 000001BC B90400              <1> 	MOV	CX,4
    498                              <1> W26:
-   499 000001BD E83A00              <1> 	CALL	WRITE_BYTE
-   500 000001C0 E2FB                <1> 	LOOP	W26
+   499 000001BF E83A00              <1> 	CALL	WRITE_BYTE
+   500 000001C2 E2FB                <1> 	LOOP	W26
    501                              <1> 
    502                              <1> W31:
-   503 000001C2 B9C002              <1> 	MOV	CX,2C0H		; slight delay to settle
+   503 000001C4 B9C002              <1> 	MOV	CX,2C0H		; slight delay to settle
    504                              <1> ;jrc might use int 15h, fn86
-   505 000001C5 E2FB                <1> 	LOOP	W31
+   505 000001C7 E2FB                <1> 	LOOP	W31
    506                              <1> 
-   507 000001C7 59                  <1> 	POP	CX
-   508 000001C8 E8E9FE              <1> 	CALL	fn01		; turn off motor
-   509 000001CB C746020000          <1> 	mov	word [bp+offset_AX],0000h	; return error code to caller
-   510 000001D0 E97BFE              <1> 	jmp	clear_carry
+   507 000001C9 59                  <1> 	POP	CX
+   508 000001CA E8E9FE              <1> 	CALL	fn01		; turn off motor
+   509 000001CD C746020000          <1> 	mov	word [bp+offset_AX],0000h	; return error code to caller
+   510 000001D2 E979FE              <1> 	jmp	clear_carry
    511                              <1> 
    512                              <1> 
    513                              <1> ;--------------------------------------------------------
@@ -1633,12 +1633,12 @@
    518                              <1> ;  GPIO2 is OUT2* on 16550, which is bit3 of MCR.
    519                              <1> ;--------------------------------------------------------
    520                              <1> fn04:
-   521 000001D3 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
-   522 000001D6 EC                  <1> 	in	al,dx   			;read cassette uart mcr
-   523 000001D7 0C08                <1> 	or	al,08h				; set bit to turn on
-   524 000001D9 EE                  <1> W40:	out	dx,al				;write it out
-   525 000001DA C746020000          <1> 	mov	word [bp+offset_AX],0000h	; signal success to caller
-   526 000001DF E96CFE              <1> 	jmp	clear_carry
+   521 000001D5 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
+   522 000001D8 EC                  <1> 	in	al,dx   			;read cassette uart mcr
+   523 000001D9 0C08                <1> 	or	al,08h				; set bit to turn on
+   524 000001DB EE                  <1> W40:	out	dx,al				;write it out
+   525 000001DC C746020000          <1> 	mov	word [bp+offset_AX],0000h	; signal success to caller
+   526 000001E1 E96AFE              <1> 	jmp	clear_carry
    527                              <1> 
    528                              <1> 
    529                              <1> ;----------------------------------
@@ -1646,10 +1646,10 @@
    531                              <1> ;  TO TURN CASSETTE GPIO2 OFF
    532                              <1> ;-----------------------------------
    533                              <1> fn05:
-   534 000001E2 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
-   535 000001E5 EC                  <1> 	in	al,dx				;read cassette uart mcr
-   536 000001E6 24F7                <1> 	and	al,~08h				; clear bit to turn off motor
-   537 000001E8 E9E4FE              <1> 	jmp	W4				;write it, clear error, return
+   534 000001E4 BA8404              <1> 	mov	dx,cuart_mcr			; get device code
+   535 000001E7 EC                  <1> 	in	al,dx				;read cassette uart mcr
+   536 000001E8 24F7                <1> 	and	al,~08h				; clear bit to turn off motor
+   537 000001EA E9E4FE              <1> 	jmp	W4				;write it, clear error, return
    538                              <1> 	
    539                              <1> 
    540                              <1> 
@@ -1661,35 +1661,35 @@
    546                              <1> ; returns with AL=char
    547                              <1> 
    548                              <1> .1:
-   549 000001EB 52                  <1> 	push	dx
-   550 000001EC BA8504              <1> 	mov	dx,cuart_lsr
-   551 000001EF EC                  <1> 	in	al,dx
-   552 000001F0 2401                <1> 	and	al,01h		; do we have any data in receive buffer?
-   553 000001F2 7404                <1> 	jz	.exit
+   549 000001ED 52                  <1> 	push	dx
+   550 000001EE BA8504              <1> 	mov	dx,cuart_lsr
+   551 000001F1 EC                  <1> 	in	al,dx
+   552 000001F2 2401                <1> 	and	al,01h		; do we have any data in receive buffer?
+   553 000001F4 7404                <1> 	jz	.exit
    554                              <1> 
-   555 000001F4 BA8004              <1> 	mov	dx,cuart_rbr
-   556 000001F7 EC                  <1> 	in	al,dx		; get next character
+   555 000001F6 BA8004              <1> 	mov	dx,cuart_rbr
+   556 000001F9 EC                  <1> 	in	al,dx		; get next character
    557                              <1> 	
    558                              <1> .exit:						; jrc
-   559 000001F8 5A                  <1> 	pop	dx
-   560 000001F9 C3                  <1> 	ret
+   559 000001FA 5A                  <1> 	pop	dx
+   560 000001FB C3                  <1> 	ret
    561                              <1> 	
    562                              <1> 	
    563                              <1> WRITE_BYTE:
    564                              <1> ; Borrowed from INT10 code
-   565 000001FA 52                  <1> 	push	dx
-   566 000001FB 50                  <1> 	push	ax
+   565 000001FC 52                  <1> 	push	dx
+   566 000001FD 50                  <1> 	push	ax
    567                              <1> 
-   568 000001FC BA8504              <1> 	mov	dx,cuart_lsr
+   568 000001FE BA8504              <1> 	mov	dx,cuart_lsr
    569                              <1> .1:
-   570 000001FF EC                  <1> 	in	al,dx
-   571 00000200 A820                <1> 	test	al,20h		; THRE is empty
-   572 00000202 74FB                <1> 	jz	.1
-   573 00000204 58                  <1> 	pop	ax
-   574 00000205 BA8004              <1> 	mov	dx,cuart_thr
-   575 00000208 EE                  <1> 	out	dx,al		; write character
-   576 00000209 5A                  <1> 	pop	dx
-   577 0000020A C3                  <1> 	RET			; return from COUT
+   570 00000201 EC                  <1> 	in	al,dx
+   571 00000202 A820                <1> 	test	al,20h		; THRE is empty
+   572 00000204 74FB                <1> 	jz	.1
+   573 00000206 58                  <1> 	pop	ax
+   574 00000207 BA8004              <1> 	mov	dx,cuart_thr
+   575 0000020A EE                  <1> 	out	dx,al		; write character
+   576 0000020B 5A                  <1> 	pop	dx
+   577 0000020C C3                  <1> 	RET			; return from COUT
    578                              <1> 
    579                              <1> 
    580                              <1> BEGIN_OP:
@@ -1698,15 +1698,15 @@
    583                              <1> ; being 3.4x faster than PC??
    584                              <1> ; original BL == 42h
    585                              <1> ;
-   586 0000020B E893FE              <1> 	CALL	fn00		; turn on motor
+   586 0000020D E893FE              <1> 	CALL	fn00		; turn on motor
    587                              <1> ;jrc might use int 15h, fn86
-   588 0000020E B3E0                <1> 	MOV	BL,0E0H		; delay for tape drive to reach speed (1/2s)
+   588 00000210 B3E0                <1> 	MOV	BL,0E0H		; delay for tape drive to reach speed (1/2s)
    589                              <1> W33:
-   590 00000210 B90007              <1> 	MOV	CX,700H		; inner loop approx 10ms
-   591 00000213 E2FE                <1> W34:	LOOP	W34
-   592 00000215 FECB                <1> 	DEC	BL
-   593 00000217 75F7                <1> 	JNZ	W33
-   594 00000219 C3                  <1> 	RET
+   590 00000212 B90007              <1> 	MOV	CX,700H		; inner loop approx 10ms
+   591 00000215 E2FE                <1> W34:	LOOP	W34
+   592 00000217 FECB                <1> 	DEC	BL
+   593 00000219 75F7                <1> 	JNZ	W33
+   594 0000021B C3                  <1> 	RET
    595                              <1> 
    596                              <1> 
    597                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1865,11 +1865,11 @@
    369                                  ;	Carry clear	success
    370                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    371                                  fnC0:
-   372 0000021A C74604[0000]                    mov     word [bp+offset_BX],env_table
-   373 0000021F 68[ssss]                        push    DGROUP
-   374 00000222 07                              popm    es                              ; return ES:BX
+   372 0000021C C74604[0000]                    mov     word [bp+offset_BX],env_table
+   373 00000221 68[ssss]                        push    DGROUP
+   374 00000224 0790                            popm    es                              ; return ES:BX
    375                                  ;;;	mov     byte [bp+offset_AH],0           ; signal no error
-   376 00000223 E928FE                          jmp     clear_carry
+   376 00000226 E925FE                          jmp     clear_carry
    377                                  
    378                                  
    379                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1881,10 +1881,10 @@
    385                                  ;	Carry clear	success
    386                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    387                                  fnC1:
-   388 00000226 6A40                            push    bios_data_seg
-   389 00000228 1F                              popm    ds
-   390 00000229 8E06F200                        mov     es,[EBDA_paragraph]
-   391 0000022D E91EFE                          jmp     clear_carry
+   388 00000229 6A40                            push    bios_data_seg
+   389 0000022B 1F90                            popm    ds
+   390 0000022D 8E06F200                        mov     es,[EBDA_paragraph]
+   391 00000231 E91AFE                          jmp     clear_carry
    392                                  
    393                                  
    394                                  ; Disable timer1 interrupts
@@ -1893,51 +1893,51 @@
    397                                  ;	exits with AX=0
    398                                  ;
    399                                  timer_disable:
-   400 00000230 BA5EFF                  	mov	dx,timer1+TCON	
-   401 00000233 ED                      	in	ax,dx		; get control register
-   402 00000234 25FF7F                  	and	ax,(~tc_EN)&0FFFFh  ; disable timer
-   403 00000237 0D0040                  	or	ax,tc_nINH		; change enable flag
-   404 0000023A EF                      	out	dx,ax		; disable the timer
+   400 00000234 BA5EFF                  	mov	dx,timer1+TCON	
+   401 00000237 ED                      	in	ax,dx		; get control register
+   402 00000238 25FF7F                  	and	ax,(~tc_EN)&0FFFFh  ; disable timer
+   403 0000023B 0D0040                  	or	ax,tc_nINH		; change enable flag
+   404 0000023E EF                      	out	dx,ax		; disable the timer
    405                                  	
-   406 0000023B 31C0                    	xor	ax,ax
-   407 0000023D BA58FF                  	mov	dx,timer1+TCNT		; zero the count
-   408 00000240 EF                      	out	dx,ax
-   409 00000241 C3                       	ret
+   406 0000023F 31C0                    	xor	ax,ax
+   407 00000241 BA58FF                  	mov	dx,timer1+TCNT		; zero the count
+   408 00000244 EF                      	out	dx,ax
+   409 00000245 C3                       	ret
    410                                  
    411                                  ; Enable timer1 interrupts
    412                                  ;
    413                                  ;	uses AX & DX
    414                                  ;
    415                                  timer_enable:
-   416 00000242 BA5EFF                  	mov	dx,timer1+TCON	
-   417 00000245 ED                      	in	ax,dx		; get control register
-   418 00000246 0D00E0                  	or	ax,tc_EN+tc_nINH+tc_INT		; enable timer & interrupts
-   419 00000249 EF                      	out	dx,ax		; enable the timer
-   420 0000024A C3                       	ret	
+   416 00000246 BA5EFF                  	mov	dx,timer1+TCON	
+   417 00000249 ED                      	in	ax,dx		; get control register
+   418 0000024A 0D00E0                  	or	ax,tc_EN+tc_nINH+tc_INT		; enable timer & interrupts
+   419 0000024D EF                      	out	dx,ax		; enable the timer
+   420 0000024E C3                       	ret	
    421                                  
    422                                  	global set_count
    423                                  set_count:
-   424 0000024B 31DB                    	xor	bx,bx
+   424 0000024F 31DB                    	xor	bx,bx
    425                                  ; wait in microseconds in BX:CX:DX
    426                                  
    427                                  ;  to divide by 976 microseconds, the resolution of the timer
    428                                  ;  we divide by 1000000/1024 == 15625/16
    429                                  ;  OR we multiply by 16, then divide by 15625
    430                                  
-   431 0000024D 51                      	pushm	cx
-   432 0000024E 89C8                    	mov	ax,cx		; BX:AX:DX is microsecond count
-   433 00000250 B90400                  	mov	cx,4
-   434 00000253 D1E2                    .4:	shl	dx,1		; * 16 is left shift by 4
-   435 00000255 D1D0                    	rcl	ax,1
-   436 00000257 D1D3                    	rcl	bx,1
-   437 00000259 E2F8                    	loop	.4
-   438 0000025B B9093D                  	mov	cx,15625	; divisor
-   439 0000025E 87DA                    	xchg	bx,dx		; DX:AX:BX is count
-   440 00000260 F7F1                    	div	cx
-   441 00000262 A39E00                  	mov	word [rtc_count+2],ax	; AX is high quotient
-   442 00000265 93                      	xchg	ax,bx		; and DX is remainder
-   443 00000266 F7F1                    	div	cx		; DX:AX is low dividend
-   444 00000268 59                      	popm	cx
+   431 00000251 51                      	pushm	cx
+   432 00000252 89C8                    	mov	ax,cx		; BX:AX:DX is microsecond count
+   433 00000254 B90400                  	mov	cx,4
+   434 00000257 D1E2                    .4:	shl	dx,1		; * 16 is left shift by 4
+   435 00000259 D1D0                    	rcl	ax,1
+   436 0000025B D1D3                    	rcl	bx,1
+   437 0000025D E2F8                    	loop	.4
+   438 0000025F B9093D                  	mov	cx,15625	; divisor
+   439 00000262 87DA                    	xchg	bx,dx		; DX:AX:BX is count
+   440 00000264 F7F1                    	div	cx
+   441 00000266 A39E00                  	mov	word [rtc_count+2],ax	; AX is high quotient
+   442 00000269 93                      	xchg	ax,bx		; and DX is remainder
+   443 0000026A F7F1                    	div	cx		; DX:AX is low dividend
+   444 0000026C 59                      	popm	cx
    445                                  
    446                                  %if 0
    447                                  ; since count goes to -1, there will always be at least 1 tick
@@ -1946,8 +1946,8 @@
    450                                  	inc	ax		; wait at least 1 tick
    451                                  .5:
    452                                  %endif
-   453 00000269 A39C00                  	mov	word [rtc_count],ax	; AX is final low quotient
-   454 0000026C C3                      	ret
+   453 0000026D A39C00                  	mov	word [rtc_count],ax	; AX is final low quotient
+   454 00000270 C3                      	ret
    455                                  
    456                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    457                                  ; fn83 -- Event Wait
@@ -1969,37 +1969,37 @@
    473                                  ;	Carry flag set if function unsuccessful (event wait already active)
    474                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    475                                  fn83:		; BP,AX,BX,DX,DS already saved
-   476 0000026D 6A40                    	push	bios_data_seg
-   477 0000026F 1F                      	popm	ds
-   478 00000270 08C0                    	or	al,al		; test for zero
-   479 00000272 741C                    	jz	.set_wait
+   476 00000271 6A40                    	push	bios_data_seg
+   477 00000273 1F90                    	popm	ds
+   478 00000275 08C0                    	or	al,al		; test for zero
+   479 00000277 741C                    	jz	.set_wait
    480                                  
-   481 00000274 FEC8                    	dec	al		; test for one
-   482 00000276 7403E9C9FD              	jnz	set_carry	; error on illegal subfunction
+   481 00000279 FEC8                    	dec	al		; test for one
+   482 0000027B 7403E9C4FD              	jnz	set_carry	; error on illegal subfunction
    483                                  ; cancel wait
-   484 0000027B E8B2FF                  	call	timer_disable
+   484 00000280 E8B1FF                  	call	timer_disable
    485                                  ;	xor	ax,ax		; side effect of 'timer_disable'
-   486 0000027E A2A000                  	mov	byte [rtc_wait_active],al
-   487 00000281 A39E00                  	mov	word [rtc_count+2],ax
-   488 00000284 A39C00                  	mov	word [rtc_count],ax
-   489 00000287 A39A00                  	mov	word [user_semaphore+2],ax
-   490 0000028A A39800                  	mov	word [user_semaphore],ax
-   491 0000028D E9BEFD                  	jmp	clear_carry
+   486 00000283 A2A000                  	mov	byte [rtc_wait_active],al
+   487 00000286 A39E00                  	mov	word [rtc_count+2],ax
+   488 00000289 A39C00                  	mov	word [rtc_count],ax
+   489 0000028C A39A00                  	mov	word [user_semaphore+2],ax
+   490 0000028F A39800                  	mov	word [user_semaphore],ax
+   491 00000292 E9B9FD                  	jmp	clear_carry
    492                                  
    493                                  .set_wait:
-   494 00000290 F606A00001              	test	byte [rtc_wait_active],01h	; any wait in progress
-   495 00000295 7403E9AAFD              	jnz	set_carry
+   494 00000295 F606A00001              	test	byte [rtc_wait_active],01h	; any wait in progress
+   495 0000029A 7403E9A5FD              	jnz	set_carry
    496                                  
-   497 0000029A 8B5E04                  	mov	bx,[offset_BX+bp]	; restore BX
-   498 0000029D 8C069A00                	mov	word [user_semaphore+2],es
-   499 000002A1 891E9800                	mov	word [user_semaphore],bx
+   497 0000029F 8B5E04                  	mov	bx,[offset_BX+bp]	; restore BX
+   498 000002A2 8C069A00                	mov	word [user_semaphore+2],es
+   499 000002A6 891E9800                	mov	word [user_semaphore],bx
    500                                  
-   501 000002A5 E8A3FF                  	call	set_count	
+   501 000002AA E8A2FF                  	call	set_count	
    502                                  	
-   503 000002A8 E897FF                  	call	timer_enable
-   504 000002AB C606A00001              	mov	byte [rtc_wait_active],01h	; flag wait active
-   505 000002B0 B80083                  	mov	ax,8300h
-   506 000002B3 E998FD                  	jmp	clear_carry
+   503 000002AD E896FF                  	call	timer_enable
+   504 000002B0 C606A00001              	mov	byte [rtc_wait_active],01h	; flag wait active
+   505 000002B5 B80083                  	mov	ax,8300h
+   506 000002B8 E993FD                  	jmp	clear_carry
    507                                  
    508                                  
    509                                  
@@ -2015,29 +2015,29 @@
    519                                  ;	Carry flag set if timer busy; no delay occurred
    520                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    521                                  fn86:		; BP,AX,BX,DX,DS already saved
-   522 000002B6 6A40                    	push	bios_data_seg
-   523 000002B8 1F                      	popm	ds
-   524 000002B9 F606A00001              	test	byte [rtc_wait_active],01h	; is a wait active?
-   525 000002BE 7403E981FD              	jnz	set_carry		; perform no wait, we're busy
+   522 000002BB 6A40                    	push	bios_data_seg
+   523 000002BD 1F90                    	popm	ds
+   524 000002BF F606A00001              	test	byte [rtc_wait_active],01h	; is a wait active?
+   525 000002C4 7403E97BFD              	jnz	set_carry		; perform no wait, we're busy
    526                                  
-   527 000002C3 E885FF                  	call	set_count
-   528 000002C6 C606A00001              	mov	byte [rtc_wait_active],01h		; mark timer active
+   527 000002C9 E883FF                  	call	set_count
+   528 000002CC C606A00001              	mov	byte [rtc_wait_active],01h		; mark timer active
    529                                  
-   530 000002CB 31DB                    	xor	bx,bx
-   531 000002CD 891E9800                	mov	word [user_semaphore],bx
-   532 000002D1 891E9A00                	mov	word [user_semaphore+2],bx
+   530 000002D1 31DB                    	xor	bx,bx
+   531 000002D3 891E9800                	mov	word [user_semaphore],bx
+   532 000002D7 891E9A00                	mov	word [user_semaphore+2],bx
    533                                  
-   534 000002D5 E86AFF                  	call	timer_enable
-   535 000002D8 FB                      	sti					; don't forget to enable interrupts
-   536 000002D9 EB01                    	jmp	.3
+   534 000002DB E868FF                  	call	timer_enable
+   535 000002DE FB                      	sti					; don't forget to enable interrupts
+   536 000002DF EB01                    	jmp	.3
    537                                  
    538                                  
-   539 000002DB F4                      .wait:	hlt
-   540 000002DC F606A00080              .3:	test	byte [rtc_wait_active],80h		; wait for posting
-   541 000002E1 74F8                    	jz	.wait
+   539 000002E1 F4                      .wait:	hlt
+   540 000002E2 F606A00080              .3:	test	byte [rtc_wait_active],80h		; wait for posting
+   541 000002E7 74F8                    	jz	.wait
    542                                  
-   543 000002E3 C606A00000              	mov	byte [rtc_wait_active],0		; mark not in use
-   544 000002E8 E963FD                  	jmp	clear_carry
+   543 000002E9 C606A00000              	mov	byte [rtc_wait_active],0		; mark not in use
+   544 000002EE E95DFD                  	jmp	clear_carry
    545                                  
    546                                  	
    547                                  	global	rtc_interrupt
@@ -2048,33 +2048,33 @@
    552                                  ;
    553                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    554                                  rtc_interrupt:
-   555 000002EB 1E565250                	pushm	ax,dx,si,ds
+   555 000002F1 1E565250                	pushm	ax,dx,si,ds
    556                                  
-   557 000002EF 6A40                    	push	bios_data_seg
-   558 000002F1 1F                      	popm	ds
+   557 000002F5 6A40                    	push	bios_data_seg
+   558 000002F7 1F90                    	popm	ds
    559                                  
-   560 000002F2 F606A00001              	test	byte [rtc_wait_active],01h	; test active bit
-   561 000002F7 7421                    	jz	.dismiss
+   560 000002F9 F606A00001              	test	byte [rtc_wait_active],01h	; test active bit
+   561 000002FE 7421                    	jz	.dismiss
    562                                  
-   563 000002F9 832E9C0001              	sub	word [rtc_count],1
-   564 000002FE 831E9E0000              	sbb	word [rtc_count+2],0
-   565 00000303 7315                    	jnc	.dismiss		; counted down by 1
+   563 00000300 832E9C0001              	sub	word [rtc_count],1
+   564 00000305 831E9E0000              	sbb	word [rtc_count+2],0
+   565 0000030A 7315                    	jnc	.dismiss		; counted down by 1
    566                                  
    567                                  ; counted down to -1, post the event
-   568 00000305 C606A00080              	mov	byte [rtc_wait_active],80h	; mark posted, inactive
-   569 0000030A C5369800                	lds	si,[user_semaphore]
-   570 0000030E 8CD8                    	mov	ax,ds			; check for null pointer
-   571 00000310 09F0                    	or	ax,si			; **
-   572 00000312 7403                    	jz	.2
-   573 00000314 800C80                  	or	byte [si],80h			; post event
-   574 00000317 E816FF                  .2:	call	timer_disable
+   568 0000030C C606A00080              	mov	byte [rtc_wait_active],80h	; mark posted, inactive
+   569 00000311 C5369800                	lds	si,[user_semaphore]
+   570 00000315 8CD8                    	mov	ax,ds			; check for null pointer
+   571 00000317 09F0                    	or	ax,si			; **
+   572 00000319 7403                    	jz	.2
+   573 0000031B 800C80                  	or	byte [si],80h			; post event
+   574 0000031E E813FF                  .2:	call	timer_disable
    575                                  
    576                                  .dismiss:
    577                                  ; signal EOI (End of Interrupt)
-   578 0000031A BA22FF                          mov     dx,PIC_EOI              ; EOI register
-   579 0000031D B80080                          mov     ax,EOI_NSPEC            ; non-specific
-   580 00000320 EF                              out     dx,ax                   ; signal it
+   578 00000321 BA22FF                          mov     dx,PIC_EOI              ; EOI register
+   579 00000324 B80080                          mov     ax,EOI_NSPEC            ; non-specific
+   580 00000327 EF                              out     dx,ax                   ; signal it
    581                                  
-   582 00000321 585A5E1F                	popm	ax,dx,si,ds
-   583 00000325 CF                              iret
+   582 00000328 585A5E1F90              	popm	ax,dx,si,ds
+   583 0000032D CF                              iret
    584                                  

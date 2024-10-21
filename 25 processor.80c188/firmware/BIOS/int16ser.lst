@@ -96,7 +96,7 @@
     96                              <1> ; It may be smaller than the actual EPROM in use.
     97                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     98                              <1> %ifndef ROM
-    99                              <1> ROM             equ     32              ; 64 is the default
+    99                              <1> ROM             equ     64              ; 64 is the default
    100                              <1> %endif
    101                              <1> 
    102                              <1> ; Define the number of Wait States at which the ROM operates
@@ -121,12 +121,12 @@
    121                              <1> 
    122                              <1> ; Define the time zone in which we build the Relocatable BIOS
    123                              <1> %ifndef TIMEZONE
-   124                              <1> %define TIMEZONE "PST"
+   124                              <1> %define TIMEZONE "CDT"
    125                              <1> %endif
    126                              <1> 
    127                              <1> ; Has the REDBUG debugger been loaded?
    128                              <1> %ifndef SOFT_DEBUG
-   129                              <1> %define SOFT_DEBUG 0
+   129                              <1> %define SOFT_DEBUG 1
    130                              <1> %endif
    131                              <1> 
    132                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -141,7 +141,7 @@
    141                              <1> %endif
    142                              <1> 
    143                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   144                              <1> EMM_BOARDS      equ     4
+   144                              <1> EMM_BOARDS      equ     0
    145                              <1> 
    146                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    147                              <1> ; or at locations 0280h..3FFh in low memory?
@@ -1132,43 +1132,43 @@
     59 00000004 89E5                    	mov	bp,sp		; establish stack addressing
     60                                  
     61 00000006 6A40                    	push	bios_data_seg
-    62 00000008 1F                      	popm	ds		; establish addressability
+    62 00000008 1F90                    	popm	ds		; establish addressability
     63                                  
-    64 00000009 88E3                    	mov     bl,ah		; set to index into dispatch table
-    65 0000000B B700                    	mov	bh,0
+    64 0000000A 88E3                    	mov     bl,ah		; set to index into dispatch table
+    65 0000000C B700                    	mov	bh,0
     66                                  
-    67 0000000D 80FB06                  	cmp     bl,.max/2
-    68 00000010 7307                    	jae    	.testEnh
-    69 00000012 01DB                    	add	bx,bx		; index words
-    70 00000014 2EFFA7[2800]                cs	jmp     near [.dispatch+bx]
+    67 0000000E 80FB06                  	cmp     bl,.max/2
+    68 00000011 7307                    	jae    	.testEnh
+    69 00000013 01DB                    	add	bx,bx		; index words
+    70 00000015 2EFFA7[2900]                cs	jmp     near [.dispatch+bx]
     71                                  
     72                                  .testEnh:
-    73 00000019 80EB10                  	sub	bl,10h
-    74 0000001C 80FB03                  	cmp	bl,.max10/2
-    75 0000001F 7319                    	jae	err_exit
-    76 00000021 01DB                    	add	bx,bx		; index words
-    77 00000023 2EFFA7[3400]                cs	jmp	near [.dispatch10+bx]
+    73 0000001A 80EB10                  	sub	bl,10h
+    74 0000001D 80FB03                  	cmp	bl,.max10/2
+    75 00000020 7319                    	jae	err_exit
+    76 00000022 01DB                    	add	bx,bx		; index words
+    77 00000024 2EFFA7[3500]                cs	jmp	near [.dispatch10+bx]
     78                                  	
     79                                  .dispatch:
-    80 00000028 [4300]                  	dw      fn00		; Read char from buffer, wait if empty
-    81 0000002A [5F00]                  	dw      fn01		; Check buffer, do not clear
-    82 0000002C [7700]                  	dw      fn02		; Return Keyboard flags in AL
-    83 0000002E [3A00]                  	dw	err_exit	; Set Repeat Rate
-    84 00000030 [3A00]                  	dw	err_exit	; Set Keyclick
-    85 00000032 [8100]                  	dw	fn05		; Push Char and Scan Code in CX
+    80 00000029 [4600]                  	dw      fn00		; Read char from buffer, wait if empty
+    81 0000002B [6200]                  	dw      fn01		; Check buffer, do not clear
+    82 0000002D [7A00]                  	dw      fn02		; Return Keyboard flags in AL
+    83 0000002F [3B00]                  	dw	err_exit	; Set Repeat Rate
+    84 00000031 [3B00]                  	dw	err_exit	; Set Keyclick
+    85 00000033 [8400]                  	dw	fn05		; Push Char and Scan Code in CX
     86                                  .max	equ     $-.dispatch
     87                                  
     88                                  .dispatch10:
-    89 00000034 [4300]                  	dw	fn10		; Read Enhanced Keyboard
-    90 00000036 [5F00]                  	dw	fn11		; Check Enh. kbd buffer
-    91 00000038 [7C00]                  	dw	fn12		; Get Enh. kbd flags in AX
+    89 00000035 [4600]                  	dw	fn10		; Read Enhanced Keyboard
+    90 00000037 [6200]                  	dw	fn11		; Check Enh. kbd buffer
+    91 00000039 [7F00]                  	dw	fn12		; Get Enh. kbd flags in AX
     92                                  .max10	equ	$-.dispatch10
     93                                  
     94                                  err_exit:
-    95 0000003A 834E0A41                	or	word [offset_FLAGS+bp],41h	; set the Carry & Zero flags
+    95 0000003B 834E0A41                	or	word [offset_FLAGS+bp],41h	; set the Carry & Zero flags
     96                                  exit:
-    97 0000003E 5D5B1F                  	popm	bp,bx,ds
-    98 00000041 CF                      	iret
+    97 0000003F 5D5B1F90                	popm	bp,bx,ds
+    98 00000043 CF                      	iret
     99                                  
    100                                  ;========================================================================
    101                                  ; Function 00h - Read char from buffer, wait if empty
@@ -1181,9 +1181,9 @@
    108                                  ;========================================================================
    109                                  fn00w:
    110                                  %if SOFT_DEBUG
-   111                                  	jmp	fn001
+   111 00000044 EB00                    	jmp	fn001
    112                                  %else
-   113 00000042 F4                              hlt                     ; wait for interrupt
+   113                                          hlt                     ; wait for interrupt
    114                                  %endif
    115                                  ;;;	jmp	fn001
    116                                  
@@ -1191,19 +1191,19 @@
    118                                  fn10:
    119                                  
    120                                  fn001:
-   121 00000043 8B1E1A00                	mov	bx,word [kbd_buffer_head]
-   122 00000047 3B1E1C00                	cmp	bx,word [kbd_buffer_tail]
-   123 0000004B 74F5                    	jz	fn00w		; buffer is empty - let's wait
-   124 0000004D 8B07                    	mov	ax,word [bx]
+   121 00000046 8B1E1A00                	mov	bx,word [kbd_buffer_head]
+   122 0000004A 3B1E1C00                	cmp	bx,word [kbd_buffer_tail]
+   123 0000004E 74F4                    	jz	fn00w		; buffer is empty - let's wait
+   124 00000050 8B07                    	mov	ax,word [bx]
    125                                  
-   126 0000004F 43                      	inc	bx		; move kbd_buffer_head to the next location
-   127 00000050 43                      	inc	bx
-   128 00000051 83FB3E                  	cmp	bx,kbd_buffer_last
-   129 00000054 7503                    	jne	.1
-   130 00000056 BB1E00                  	mov	bx,kbd_buffer
+   126 00000052 43                      	inc	bx		; move kbd_buffer_head to the next location
+   127 00000053 43                      	inc	bx
+   128 00000054 83FB3E                  	cmp	bx,kbd_buffer_last
+   129 00000057 7503                    	jne	.1
+   130 00000059 BB1E00                  	mov	bx,kbd_buffer
    131                                  .1:
-   132 00000059 891E1A00                	mov	word [kbd_buffer_head],bx
-   133 0000005D EBDF                    	jmp	exit
+   132 0000005C 891E1A00                	mov	word [kbd_buffer_head],bx
+   133 00000060 EBDD                    	jmp	exit
    134                                  
    135                                  ;========================================================================
    136                                  ; Function 01h - Check buffer, do not clear
@@ -1219,15 +1219,15 @@
    146                                  ;========================================================================
    147                                  fn01:
    148                                  fn11:
-   149 0000005F 8B1E1A00                	mov	bx,word [kbd_buffer_head]
-   150 00000063 3B1E1C00                	cmp	bx,word [kbd_buffer_tail]
-   151 00000067 7408                    	jz	.1
-   152 00000069 8B07                    	mov	ax,word [bx]
-   153 0000006B 83660ABF                	and	word [bp+offset_FLAGS],~40h	; clear ZF in the stack
-   154 0000006F EBCD                    	jmp	exit
+   149 00000062 8B1E1A00                	mov	bx,word [kbd_buffer_head]
+   150 00000066 3B1E1C00                	cmp	bx,word [kbd_buffer_tail]
+   151 0000006A 7408                    	jz	.1
+   152 0000006C 8B07                    	mov	ax,word [bx]
+   153 0000006E 83660ABF                	and	word [bp+offset_FLAGS],~40h	; clear ZF in the stack
+   154 00000072 EBCB                    	jmp	exit
    155                                  .1:
-   156 00000071 834E0A40                	or	word [bp+offset_FLAGS],40h	; set ZF in the stack
-   157 00000075 EBC7                    	jmp	exit
+   156 00000074 834E0A40                	or	word [bp+offset_FLAGS],40h	; set ZF in the stack
+   157 00000078 EBC5                    	jmp	exit
    158                                  
    159                                  ;========================================================================
    160                                  ; Function 02h - Return Keyboard Shift Key Status
@@ -1259,11 +1259,11 @@
    186                                  ;
    187                                  ;========================================================================
    188                                  fn02:
-   189 00000077 A01700                  	mov	al,byte [keyboard_flags_0]
-   190 0000007A EBC2                    	jmp	exit
+   189 0000007A A01700                  	mov	al,byte [keyboard_flags_0]
+   190 0000007D EBC0                    	jmp	exit
    191                                  fn12:
-   192 0000007C A11700                  	mov	ax,word [keyboard_flags_0]
-   193 0000007F EBBD                    	jmp	exit
+   192 0000007F A11700                  	mov	ax,word [keyboard_flags_0]
+   193 00000082 EBBB                    	jmp	exit
    194                                  
    195                                  ;========================================================================
    196                                  ; Function 05h - Check buffer, do not clear
@@ -1279,15 +1279,15 @@
    206                                  ;	AL = 01h
    207                                  ;========================================================================
    208                                  fn05:
-   209 00000081 89C8                    	mov	ax,cx		; AX is argument to enqueue
-   210 00000083 E81000                  	call	enqueue		; DS is bios_data_seg
-   211 00000086 7205                    	jc	.2
-   212 00000088 B80105                  	mov	ax,0501h
-   213 0000008B EBAD                    	jmp	err_exit
+   209 00000084 89C8                    	mov	ax,cx		; AX is argument to enqueue
+   210 00000086 E81000                  	call	enqueue		; DS is bios_data_seg
+   211 00000089 7205                    	jc	.2
+   212 0000008B B80105                  	mov	ax,0501h
+   213 0000008E EBAB                    	jmp	err_exit
    214                                  
-   215 0000008D B80005                  .2:	mov	ax,0500h
-   216 00000090 83660AFE                	and	word [offset_FLAGS+bp],~01h	; clear the carry
-   217 00000094 EBA8                    	jmp	exit
+   215 00000090 B80005                  .2:	mov	ax,0500h
+   216 00000093 83660AFE                	and	word [offset_FLAGS+bp],~01h	; clear the carry
+   217 00000097 EBA6                    	jmp	exit
    218                                  
    219                                  
    220                                  
@@ -1306,33 +1306,33 @@
    233                                  ;========================================================================
    234                                  enqueue:
    235                                  ; do we have space in the buffer?
-   236 00000096 8B1E1C00                	mov	bx,word [kbd_buffer_tail]
-   237 0000009A 43                      	inc	bx
-   238 0000009B 43                      	inc	bx
-   239 0000009C 83FB3E                  	cmp	bx,kbd_buffer_last
-   240 0000009F 7503                    	jne	.3
-   241 000000A1 BB1E00                  	mov	bx,kbd_buffer
+   236 00000099 8B1E1C00                	mov	bx,word [kbd_buffer_tail]
+   237 0000009D 43                      	inc	bx
+   238 0000009E 43                      	inc	bx
+   239 0000009F 83FB3E                  	cmp	bx,kbd_buffer_last
+   240 000000A2 7503                    	jne	.3
+   241 000000A4 BB1E00                  	mov	bx,kbd_buffer
    242                                  .3:
-   243 000000A4 3B1E1A00                	cmp	bx,word [kbd_buffer_head]
-   244 000000A8 7502                    	jne	.4
+   243 000000A7 3B1E1A00                	cmp	bx,word [kbd_buffer_head]
+   244 000000AB 7502                    	jne	.4
    245                                  			; no space in buffer, throw away char
    246                                  			; but check for the next one anyway
-   247 000000AA F9                      	stc
-   248 000000AB C3                      	ret		; Return with carry Set if no space
+   247 000000AD F9                      	stc
+   248 000000AE C3                      	ret		; Return with carry Set if no space
    249                                  
    250                                  .4:	; we have some space in the buffer
-   251 000000AC 8B1E1C00                	mov	bx,word [kbd_buffer_tail]
-   252 000000B0 8907                    	mov	word [bx],ax	; store ASCII and scan code to the buffer
-   253 000000B2 43                      	inc	bx
-   254 000000B3 43                      	inc	bx
-   255 000000B4 83FB3E                  	cmp	bx,kbd_buffer_last
-   256 000000B7 7503                    	jne	.5
-   257 000000B9 BB1E00                  	mov	bx,kbd_buffer
+   251 000000AF 8B1E1C00                	mov	bx,word [kbd_buffer_tail]
+   252 000000B3 8907                    	mov	word [bx],ax	; store ASCII and scan code to the buffer
+   253 000000B5 43                      	inc	bx
+   254 000000B6 43                      	inc	bx
+   255 000000B7 83FB3E                  	cmp	bx,kbd_buffer_last
+   256 000000BA 7503                    	jne	.5
+   257 000000BC BB1E00                  	mov	bx,kbd_buffer
    258                                  .5:
-   259 000000BC 891E1C00                	mov	word [kbd_buffer_tail],bx
-   260 000000C0 F8                      	clc		; Return with carry clear if A-okay
+   259 000000BF 891E1C00                	mov	word [kbd_buffer_tail],bx
+   260 000000C3 F8                      	clc		; Return with carry clear if A-okay
    261                                  ;;;.1:
-   262 000000C1 C3                      	ret
+   262 000000C4 C3                      	ret
    263                                  
    264                                  %if CVDU_8242
    265                                  ;========================================================================
@@ -1424,61 +1424,61 @@
    351                                  ;========================================================================
    352                                  	global	uart_int
    353                                  uart_int:
-   354 000000C2 1E525350                	pushm	ax,bx,dx,ds
-   355 000000C6 6A40                    	push	bios_data_seg
-   356 000000C8 1F                      	popm	ds		; establish addressability
+   354 000000C5 1E525350                	pushm	ax,bx,dx,ds
+   355 000000C9 6A40                    	push	bios_data_seg
+   356 000000CB 1F90                    	popm	ds		; establish addressability
    357                                  %if SOFT_DEBUG
-   358                                  	push	0xFF
+   358 000000CD 68FF00                  	push	0xFF
    359                                  	extern	lites
-   360                                  	call	lites
-   361                                  	hlt
+   360 000000D0 E8(0000)                	call	lites
+   361 000000D3 F4                      	hlt
    362                                  %endif
    363                                  .1:
-   364 000000C9 BA8506                  	mov	dx,uart_lsr
-   365 000000CC EC                      	in	al,dx
-   366 000000CD 2401                    	and	al,01h		; do we have any data in receive buffer?
-   367 000000CF 742E                    	jz	int_exit
+   364 000000D4 BA8506                  	mov	dx,uart_lsr
+   365 000000D7 EC                      	in	al,dx
+   366 000000D8 2401                    	and	al,01h		; do we have any data in receive buffer?
+   367 000000DA 7432                    	jz	int_exit
    368                                  
-   369 000000D1 BA8006                  	mov	dx,uart_rbr
-   370 000000D4 EC                      	in	al,dx		; get next character
+   369 000000DC BA8006                  	mov	dx,uart_rbr
+   370 000000DF EC                      	in	al,dx		; get next character
    371                                  
-   372 000000D5 B400                    	mov	ah,0
-   373 000000D7 3C80                    	cmp	al,80h		; the ASCII code =< 80?
-   374 000000D9 73EE                    	jae	.1		; ignore, check for the next character
+   372 000000E0 B400                    	mov	ah,0
+   373 000000E2 3C80                    	cmp	al,80h		; the ASCII code =< 80?
+   374 000000E4 73EE                    	jae	.1		; ignore, check for the next character
    375                                  %if SOFT_DEBUG
-   376                                  	cmp	al,'B' & 01Fh	; ctrl-B
-   377                                  	je	v.redbug
+   376 000000E6 3C02                    	cmp	al,'B' & 01Fh	; ctrl-B
+   377 000000E8 7431                    	je	v.redbug
    378                                  %endif
-   379 000000DB 3C12                    	cmp	al,('R' & 01Fh)	; ctrl-R
-   380 000000DD 750D                    	jne	.20
-   381 000000DF FE061500                	inc	byte [uart_kbd_ctrl_R]
-   382 000000E3 803E150003              	cmp	byte [uart_kbd_ctrl_R], 3	; 3 ctrl-R's will re-boot
-   383 000000E8 7207                    	jb	.2
+   379 000000EA 3C12                    	cmp	al,('R' & 01Fh)	; ctrl-R
+   380 000000EC 750D                    	jne	.20
+   381 000000EE FE061500                	inc	byte [uart_kbd_ctrl_R]
+   382 000000F2 803E150003              	cmp	byte [uart_kbd_ctrl_R], 3	; 3 ctrl-R's will re-boot
+   383 000000F7 7207                    	jb	.2
    384                                  %if 1
-   385 000000EA CD19                    	int	19h		; does not return
+   385 000000F9 CD19                    	int	19h		; does not return
    386                                  %else
    387                                  	mov	word [warm_boot],1234h		; signal warm boot
    388                                  	jmp	0FFFFh:0000h
    389                                  %endif
    390                                  .20:
-   391 000000EC C606150000              	mov	byte [uart_kbd_ctrl_R], 0	; zero the re-boot count
+   391 000000FB C606150000              	mov	byte [uart_kbd_ctrl_R], 0	; zero the re-boot count
    392                                  .2:
-   393 000000F1 88C3                    	mov	bl,al		; find the scan code
-   394 000000F3 B700                    	mov	bh,0
-   395 000000F5 2E8AA7[0B01]                cs	mov	ah,byte [ascii2scan+bx]
+   393 00000100 88C3                    	mov	bl,al		; find the scan code
+   394 00000102 B700                    	mov	bh,0
+   395 00000104 2E8AA7[2A01]                cs	mov	ah,byte [ascii2scan+bx]
    396                                  
-   397 000000FA E899FF                      	call	enqueue
+   397 00000109 E88DFF                      	call	enqueue
    398                                  
-   399 000000FD EBCA                    	jmp	.1		; check for the next character
+   399 0000010C EBC6                    	jmp	.1		; check for the next character
    400                                  
    401                                  int_exit:
    402                                  ; signal EOI (End of Interrupt)
-   403 000000FF BA22FF                  	mov	dx,PIC_EOI	; EOI register
-   404 00000102 B80080                  	mov	ax,EOI_NSPEC	; non-specific
-   405 00000105 EF                      	out	dx,ax		; signal it
+   403 0000010E BA22FF                  	mov	dx,PIC_EOI	; EOI register
+   404 00000111 B80080                  	mov	ax,EOI_NSPEC	; non-specific
+   405 00000114 EF                      	out	dx,ax		; signal it
    406                                  
-   407 00000106 585B5A1F                	popm	ax,bx,dx,ds
-   408 0000010A CF                      	iret
+   407 00000115 585B5A1F90              	popm	ax,bx,dx,ds
+   408 0000011A CF                      	iret
    409                                  
    410                                  ; Debugging code added 10/17/2010 -- JRC
    411                                  ;  Use ctrl-B (^B) as immediate entry into the debugger
@@ -1486,55 +1486,55 @@
    413                                  	extern	redbug
    414                                  v.redbug:
    415                                  ; signal EOI (End of Interrupt)
-   416                                  	mov	dx,PIC_EOI	; EOI register
-   417                                  	mov	ax,EOI_NSPEC	; non-specific
-   418                                  	out	dx,ax		; signal it
+   416 0000011B BA22FF                  	mov	dx,PIC_EOI	; EOI register
+   417 0000011E B80080                  	mov	ax,EOI_NSPEC	; non-specific
+   418 00000121 EF                      	out	dx,ax		; signal it
    419                                  ; restore the registers
-   420                                  	popm	ax,bx,dx,ds
+   420 00000122 585B5A1F90              	popm	ax,bx,dx,ds
    421                                  ; keep the 'iret' block on the stack
-   422                                  	jmp	redbug
+   422 00000127 E9(0000)                	jmp	redbug
    423                                  %endif
    424                                  
    425                                  ascii2scan:
    426                                  	;	NUL,SOH,STX,ETX,EOT,ENQ,ACL,BEL
-   427 0000010B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0, 
+   427 0000012A 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0, 
    428                                  	;	BS, TAB,LF, VT, FF, CR, SO, SI
-   429 00000113 0E0F0000001C0000        	db      0Eh,0Fh,0,  0,  0,  1Ch,0  ,0
+   429 00000132 0E0F0000001C0000        	db      0Eh,0Fh,0,  0,  0,  1Ch,0  ,0
    430                                  	;	DLE,DC1,DC2,DC3,DC4,NAK,SYN,ETB
-   431 0000011B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
+   431 0000013A 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
    432                                  	;	CAN,EM, SUB,ESC,FS, GS, RS, US
-   433 00000123 0000000100000000        	db      0,  0,  0,  01h,0,  0,  0,  0,
+   433 00000142 0000000100000000        	db      0,  0,  0,  01h,0,  0,  0,  0,
    434                                  	;	 ,  !,  ",  #,  $,  %,  &,  '
-   435 0000012B 3902280405060828        	db	39h,02h,28h,04h,05h,06h,08h,28h
+   435 0000014A 3902280405060828        	db	39h,02h,28h,04h,05h,06h,08h,28h
    436                                  	;	(,  ),  *,  +,  ,,  -,  .,  /  
-   437 00000133 0A0B090D330C3435        	db	0Ah,0Bh,09h,0Dh,33h,0Ch,34h,35h
+   437 00000152 0A0B090D330C3435        	db	0Ah,0Bh,09h,0Dh,33h,0Ch,34h,35h
    438                                  	;	0,  1,  2,  3,  4,  5,  6,  7
-   439 0000013B 0B02030405060708        	db	0Bh,02h,03h,04h,05h,06h,07h,08h
+   439 0000015A 0B02030405060708        	db	0Bh,02h,03h,04h,05h,06h,07h,08h
    440                                  	;	8,  9,  :,  ;,  <,  =,  >,  ?
-   441 00000143 090A2727330D3435        	db	09h,0Ah,27h,27h,33h,0Dh,34h,35h
+   441 00000162 090A2727330D3435        	db	09h,0Ah,27h,27h,33h,0Dh,34h,35h
    442                                  	;	@,  A,  B,  C,  D,  E,  F,  G
-   443 0000014B 031E302E20122122        	db	03h,1Eh,30h,2Eh,20h,12h,21h,22h
+   443 0000016A 031E302E20122122        	db	03h,1Eh,30h,2Eh,20h,12h,21h,22h
    444                                  	;	H,  I,  J,  K,  L,  M,  N,  O
-   445 00000153 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
+   445 00000172 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
    446                                  	;	P,  Q,  R,  S,  T,  U,  V,  W
-   447 0000015B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
+   447 0000017A 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
    448                                  	;	X,  Y,  Z,  [,  \,  ],  ^,  _
-   449 00000163 2D152C1A2B1B070C        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,07h,0Ch
+   449 00000182 2D152C1A2B1B070C        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,07h,0Ch
    450                                  	;	`,  a,  b,  c,  d,  e,  f,  g
-   451 0000016B 291E302E20122122        	db	29h,1Eh,30h,2Eh,20h,12h,21h,22h
+   451 0000018A 291E302E20122122        	db	29h,1Eh,30h,2Eh,20h,12h,21h,22h
    452                                  	;	h,  i,  j,  k,  l,  m,  n,  o
-   453 00000173 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
+   453 00000192 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
    454                                  	;	p,  q,  r,  s,  t,  u,  v,  w
-   455 0000017B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
+   455 0000019A 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
    456                                  	;	x,  y,  z,  {,  |,  },  ~,  DEL
-   457 00000183 2D152C1A2B1B2953        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,29h,53h
+   457 000001A2 2D152C1A2B1B2953        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,29h,53h
    458                                  	
    459                                  ;========================================================================
    460                                  ; keyboart_init - initialize keyboard
    461                                  ;========================================================================
    462                                  	global	keyboard_init
    463                                  keyboard_init:
-   464 0000018B 061E60                  	pushm	all,ds,es	; was AX,DS,ES
+   464 000001AA 061E60                  	pushm	all,ds,es	; was AX,DS,ES
    465                                  	
    466                                  %if CVDU_8242
    467                                  	push	bios_data_seg
@@ -1543,8 +1543,8 @@
    470                                  	mov	word [keyboard_flags_0],CVDU_KEYBOARD_STATUS	; set NumLock Status early
    471                                  %endif
    472                                  
-   473 0000018E 68[ssss]                	push	DGROUP
-   474 00000191 1F                      	popm	ds
+   473 000001AD 68[ssss]                	push	DGROUP
+   474 000001B0 1F90                    	popm	ds
    475                                  %if CVDU_8242
    476                                  
    477                                  %if  1-CVDU_USE_KBD_HOOK
@@ -1559,29 +1559,29 @@
    486                                  	call	Init8242_
    487                                  %endif
    488                                  
-   489 00000192 6A40                    	push	bios_data_seg
-   490 00000194 1F                      	popm	ds
+   489 000001B2 6A40                    	push	bios_data_seg
+   490 000001B4 1F90                    	popm	ds
    491                                  
-   492 00000195 B81E00                  	mov	ax,kbd_buffer	; setup keyboard buffer
-   493 00000198 A31A00                  	mov	word [kbd_buffer_head],ax
-   494 0000019B A31C00                  	mov	word [kbd_buffer_tail],ax
+   492 000001B6 B81E00                  	mov	ax,kbd_buffer	; setup keyboard buffer
+   493 000001B9 A31A00                  	mov	word [kbd_buffer_head],ax
+   494 000001BC A31C00                  	mov	word [kbd_buffer_tail],ax
    495                                  %if CVDU_8242==0
-   496 0000019E 31C0                    	xor	ax,ax		; clear keyboard flags
-   497 000001A0 A31700                  	mov	word [keyboard_flags_0],ax
+   496 000001BF 31C0                    	xor	ax,ax		; clear keyboard flags
+   497 000001C1 A31700                  	mov	word [keyboard_flags_0],ax
    498                                  %endif
    499                                  
    500                                  %if UART
-   501 000001A3 B001                    	mov	al,01h
-   502 000001A5 BA8106                  	mov	dx,uart_ier
-   503 000001A8 EE                      	out	dx,al		; Enable interrupts on receive
+   501 000001C4 B001                    	mov	al,01h
+   502 000001C6 BA8106                  	mov	dx,uart_ier
+   503 000001C9 EE                      	out	dx,al		; Enable interrupts on receive
    504                                  
-   505 000001A9 BA3AFF                  	mov	dx,PIC_I1CON	; Int 1 control register
-   506 000001AC ED                      	in	ax,dx
-   507 000001AD 83E0F7                  	and	ax,~08h		; clear the mask bit
-   508 000001B0 EF                      	out	dx,ax
+   505 000001CA BA3AFF                  	mov	dx,PIC_I1CON	; Int 1 control register
+   506 000001CD ED                      	in	ax,dx
+   507 000001CE 83E0F7                  	and	ax,~08h		; clear the mask bit
+   508 000001D1 EF                      	out	dx,ax
    509                                  %endif
-   510 000001B1 611F07                  	popm	all,ds,es
-   511 000001B4 C3                      	ret
+   510 000001D2 611F900790              	popm	all,ds,es
+   511 000001D7 C3                      	ret
    512                                  
    513                                  ;========================================================================
    514                                  ; uart_getchar - Read char from buffer, wait if empty
@@ -1593,10 +1593,10 @@
    520                                  ;========================================================================
    521                                  	global	@uart_getchar
    522                                  @uart_getchar:
-   523 000001B5 B400                    	mov	ah,0
-   524 000001B7 CD16                    	int	16h
-   525 000001B9 B400                    	mov	ah,0
-   526 000001BB C3                      	ret
+   523 000001D8 B400                    	mov	ah,0
+   524 000001DA CD16                    	int	16h
+   525 000001DC B400                    	mov	ah,0
+   526 000001DE C3                      	ret
    527                                  
    528                                  
    529                                  %if CVDU_8242

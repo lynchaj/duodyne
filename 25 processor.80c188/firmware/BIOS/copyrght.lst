@@ -90,7 +90,7 @@
     90                              <1> ; It may be smaller than the actual EPROM in use.
     91                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     92                              <1> %ifndef ROM
-    93                              <1> ROM             equ     32              ; 64 is the default
+    93                              <1> ROM             equ     64              ; 64 is the default
     94                              <1> %endif
     95                              <1> 
     96                              <1> ; Define the number of Wait States at which the ROM operates
@@ -115,12 +115,12 @@
    115                              <1> 
    116                              <1> ; Define the time zone in which we build the Relocatable BIOS
    117                              <1> %ifndef TIMEZONE
-   118                              <1> %define TIMEZONE "PST"
+   118                              <1> %define TIMEZONE "CDT"
    119                              <1> %endif
    120                              <1> 
    121                              <1> ; Has the REDBUG debugger been loaded?
    122                              <1> %ifndef SOFT_DEBUG
-   123                              <1> %define SOFT_DEBUG 0
+   123                              <1> %define SOFT_DEBUG 1
    124                              <1> %endif
    125                              <1> 
    126                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -135,7 +135,7 @@
    135                              <1> %endif
    136                              <1> 
    137                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   138                              <1> EMM_BOARDS      equ     4
+   138                              <1> EMM_BOARDS      equ     0
    139                              <1> 
    140                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    141                              <1> ; or at locations 0280h..3FFh in low memory?

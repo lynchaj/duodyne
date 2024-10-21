@@ -82,7 +82,7 @@
     82                              <1> ; It may be smaller than the actual EPROM in use.
     83                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     84                              <1> %ifndef ROM
-    85                              <1> ROM             equ     32              ; 64 is the default
+    85                              <1> ROM             equ     64              ; 64 is the default
     86                              <1> %endif
     87                              <1> 
     88                              <1> ; Define the number of Wait States at which the ROM operates
@@ -107,12 +107,12 @@
    107                              <1> 
    108                              <1> ; Define the time zone in which we build the Relocatable BIOS
    109                              <1> %ifndef TIMEZONE
-   110                              <1> %define TIMEZONE "PST"
+   110                              <1> %define TIMEZONE "CDT"
    111                              <1> %endif
    112                              <1> 
    113                              <1> ; Has the REDBUG debugger been loaded?
    114                              <1> %ifndef SOFT_DEBUG
-   115                              <1> %define SOFT_DEBUG 0
+   115                              <1> %define SOFT_DEBUG 1
    116                              <1> %endif
    117                              <1> 
    118                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -127,7 +127,7 @@
    127                              <1> %endif
    128                              <1> 
    129                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   130                              <1> EMM_BOARDS      equ     4
+   130                              <1> EMM_BOARDS      equ     0
    131                              <1> 
    132                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    133                              <1> ; or at locations 0280h..3FFh in low memory?
@@ -1167,25 +1167,25 @@
     94 00000001 061E60                          pushm   all,ds,es       ; Standard register save
     95 00000004 89E5                            mov     bp,sp           ; establish stack addressing
     96 00000006 6A40                            push    bios_data_seg
-    97 00000008 1F                              popm    ds              ; establish addressability
-    98 00000009 FC                              cld
+    97 00000008 1F90                            popm    ds              ; establish addressability
+    98 0000000A FC                              cld
     99                                  
    100                                  	global	IDE8_entry
    101                                  IDE8_entry:
-   102 0000000A 30FF                            xor     bh,bh           ; zero extend byte
-   103 0000000C 88E3                            mov     bl,ah           ; set to index into dispatch table
-   104 0000000E 80FC19                          cmp     ah,max/2
-   105 00000011 7307                            jae     try_extended
-   106 00000013 D1E3                            shl     bx,1            ; index words
+   102 0000000B 30FF                            xor     bh,bh           ; zero extend byte
+   103 0000000D 88E3                            mov     bl,ah           ; set to index into dispatch table
+   104 0000000F 80FC19                          cmp     ah,max/2
+   105 00000012 7307                            jae     try_extended
+   106 00000014 D1E3                            shl     bx,1            ; index words
    107                                  
-   108 00000015 2EFFA7[3F00]                cs  jmp     near [dispatch+bx]
+   108 00000016 2EFFA7[4200]                cs  jmp     near [dispatch+bx]
    109                                  
    110                                  try_extended:
-   111 0000001A 80EB41                          sub     bl,41h          ; start of extended calls
-   112 0000001D 80FB0E                          cmp     bl,max41/2
-   113 00000020 7307                            jae     undefined
-   114 00000022 D1E3                            shl     bx,1            ; index word addresses
-   115 00000024 2EFFA7[7100]                cs  jmp     near [dispatch41+bx]
+   111 0000001B 80EB41                          sub     bl,41h          ; start of extended calls
+   112 0000001E 80FB0E                          cmp     bl,max41/2
+   113 00000021 7307                            jae     undefined
+   114 00000023 D1E3                            shl     bx,1            ; index word addresses
+   115 00000025 2EFFA7[7400]                cs  jmp     near [dispatch41+bx]
    116                                  
    117                                  
    118                                  ;fn00:           ; Reset Disk System
@@ -1229,66 +1229,66 @@
    156                                  %if SOFT_DEBUG & 0
    157                                          int 0
    158                                  %endif
-   159 00000029 B401                            mov     ah,ERR_invalid_command     ; Invalid command
-   160 0000002B EB06                    	jmp	error_exit
+   159 0000002A B401                            mov     ah,ERR_invalid_command     ; Invalid command
+   160 0000002C EB06                    	jmp	error_exit
    161                                  
    162                                  good_exit:
-   163 0000002D 30E4                    	xor	ah,ah			; clear the carry, AH=0
+   163 0000002E 30E4                    	xor	ah,ah			; clear the carry, AH=0
    164                                  exit_sequence:
-   165 0000002F 08E4                            or      ah,ah
-   166 00000031 7401                            jz     exit_pops
+   165 00000030 08E4                            or      ah,ah
+   166 00000032 7401                            jz     exit_pops
    167                                  error_exit:
-   168 00000033 F9                      	stc				; set the carry
+   168 00000034 F9                      	stc				; set the carry
    169                                  exit_pops:
-   170 00000034 88660F                          mov     [bp+offset_AH],ah          ; set the error code
-   171 00000037 89EC                            mov     sp,bp			; deallocate any variables
-   172 00000039 611F07                          popm    ALL,ds,es
-   173 0000003C CA0200                          retf	2			; rather than IRET
+   170 00000035 88660F                          mov     [bp+offset_AH],ah          ; set the error code
+   171 00000038 89EC                            mov     sp,bp			; deallocate any variables
+   172 0000003A 611F900790                      popm    ALL,ds,es
+   173 0000003F CA0200                          retf	2			; rather than IRET
    174                                  
    175                                  
    176                                  dispatch:
-   177 0000003F [9702]                          dw      fn00    ; Reset Disk System
-   178 00000041 [2900]                          dw      fn01    ; 
-   179 00000043 [A202]                          dw      fn02
-   180 00000045 [A202]                          dw      fn03
-   181 00000047 [A202]                          dw      fn04
-   182 00000049 [2900]                          dw      fn05
-   183 0000004B [2900]                          dw      fn06
-   184 0000004D [2900]                          dw      fn07
-   185 0000004F [F302]                          dw      fn08
-   186 00000051 [2900]                          dw      fn09
-   187 00000053 [2900]                          dw      fn0A
-   188 00000055 [2900]                          dw      fn0B
-   189 00000057 [2900]                          dw      fn0C
-   190 00000059 [2900]                          dw      fn0D
-   191 0000005B [2900]                          dw      fn0E
-   192 0000005D [2900]                          dw      fn0F
-   193 0000005F [2900]                          dw      fn10
-   194 00000061 [2900]                          dw      fn11
-   195 00000063 [2900]                          dw      fn12
-   196 00000065 [2900]                          dw      fn13
-   197 00000067 [2900]                          dw      fn14
-   198 00000069 [1A03]                          dw      fn15
-   199 0000006B [2900]                          dw      fn16
-   200 0000006D [2900]                          dw      fn17
-   201 0000006F [2900]                          dw      fn18
+   177 00000042 [A202]                          dw      fn00    ; Reset Disk System
+   178 00000044 [2A00]                          dw      fn01    ; 
+   179 00000046 [AD02]                          dw      fn02
+   180 00000048 [AD02]                          dw      fn03
+   181 0000004A [AD02]                          dw      fn04
+   182 0000004C [2A00]                          dw      fn05
+   183 0000004E [2A00]                          dw      fn06
+   184 00000050 [2A00]                          dw      fn07
+   185 00000052 [FE02]                          dw      fn08
+   186 00000054 [2A00]                          dw      fn09
+   187 00000056 [2A00]                          dw      fn0A
+   188 00000058 [2A00]                          dw      fn0B
+   189 0000005A [2A00]                          dw      fn0C
+   190 0000005C [2A00]                          dw      fn0D
+   191 0000005E [2A00]                          dw      fn0E
+   192 00000060 [2A00]                          dw      fn0F
+   193 00000062 [2A00]                          dw      fn10
+   194 00000064 [2A00]                          dw      fn11
+   195 00000066 [2A00]                          dw      fn12
+   196 00000068 [2A00]                          dw      fn13
+   197 0000006A [2A00]                          dw      fn14
+   198 0000006C [2503]                          dw      fn15
+   199 0000006E [2A00]                          dw      fn16
+   200 00000070 [2A00]                          dw      fn17
+   201 00000072 [2A00]                          dw      fn18
    202                                  max     equ     $-dispatch
    203                                  
    204                                  dispatch41:
-   205 00000071 [3D03]                          dw      fn41
-   206 00000073 [6403]                          dw      fn42
-   207 00000075 [6403]                          dw      fn43
-   208 00000077 [6403]                          dw      fn44
-   209 00000079 [2900]                          dw      fn45
-   210 0000007B [2900]                          dw      fn46
-   211 0000007D [6403]                          dw      fn47
-   212 0000007F [A103]                          dw      fn48
-   213 00000081 [2900]                          dw      fn49
-   214 00000083 [2900]                          dw      undefined       ; 4A
-   215 00000085 [2900]                          dw      undefined       ; 4B
-   216 00000087 [2900]                          dw      undefined       ; 4C
-   217 00000089 [2900]                          dw      undefined       ; 4D
-   218 0000008B [1604]                          dw      fn4E
+   205 00000074 [4803]                          dw      fn41
+   206 00000076 [6F03]                          dw      fn42
+   207 00000078 [6F03]                          dw      fn43
+   208 0000007A [6F03]                          dw      fn44
+   209 0000007C [2A00]                          dw      fn45
+   210 0000007E [2A00]                          dw      fn46
+   211 00000080 [6F03]                          dw      fn47
+   212 00000082 [AC03]                          dw      fn48
+   213 00000084 [2A00]                          dw      fn49
+   214 00000086 [2A00]                          dw      undefined       ; 4A
+   215 00000088 [2A00]                          dw      undefined       ; 4B
+   216 0000008A [2A00]                          dw      undefined       ; 4C
+   217 0000008C [2A00]                          dw      undefined       ; 4D
+   218 0000008E [2104]                          dw      fn4E
    219                                  max41   equ     $-dispatch41
    220                                  
    221                                  
@@ -1303,26 +1303,26 @@
    230                                  ;
    231                                  ;-----------------------------------------------------------------------------
    232                                  _IDE8_READ_ID:
-   233 0000008D 55                              push    bp
-   234 0000008E 89E5                            mov     bp,sp
-   235 00000090 575306                          pushm   es,bx,di
+   233 00000090 55                              push    bp
+   234 00000091 89E5                            mov     bp,sp
+   235 00000093 575306                          pushm   es,bx,di
    236                                  %if DEBUG
    237                                  	push	0x81
    238                                  	call	lites
    239                                  %endif
    240                                  
-   241 00000093 BFC006                  	mov	di,IDE8_CS0
+   241 00000096 BFC006                  	mov	di,IDE8_CS0
    242                                  
-   243 00000096 E80C01                  	call	ide_wait_not_busy		;make sure drive is ready
+   243 00000099 E81201                  	call	ide_wait_not_busy		;make sure drive is ready
    244                                  %if DEBUG
    245                                  	push	0x82
    246                                  	call	lites
    247                                  %endif
    248                                  
-   249 00000099 31C0                            xor     ax,ax
-   250 0000009B 31D2                            xor     dx,dx
-   251 0000009D 8B4E08                          mov     cx,ARG(3)               ; select Master/Slave
-   252 000000A0 E86301                          call    wr_lba                  ; select device
+   249 0000009C 31C0                            xor     ax,ax
+   250 0000009E 31D2                            xor     dx,dx
+   251 000000A0 8B4E08                          mov     cx,ARG(3)               ; select Master/Slave
+   252 000000A3 E86B01                          call    wr_lba                  ; select device
    253                                  %if DEBUG
    254                                  	push	0x83
    255                                  	call	lites
@@ -1336,39 +1336,39 @@
    263                                  %endif
    264                                  
    265                                  
-   266 000000A3 B0EC                    	mov	al,ide_cmd_ident
-   267 000000A5 8D5507                  	lea	dx,[ide_command+di]
-   268 000000A8 EE                      	out	dx,al
+   266 000000A6 B0EC                    	mov	al,ide_cmd_ident
+   267 000000A8 8D5507                  	lea	dx,[ide_command+di]
+   268 000000AB EE                      	out	dx,al
    269                                  %if DEBUG
    270                                  	push	0x86
    271                                  	call	lites
    272                                  %endif
    273                                  
    274                                  
-   275 000000A9 E81301                  	call	ide_wait_drq			;wait until it's got the data
+   275 000000AC E81901                  	call	ide_wait_drq			;wait until it's got the data
    276                                  %if DEBUG
    277                                  	push	0x87
    278                                  	call	lites
    279                                  %endif
    280                                  
    281                                  
-   282 000000AC C45E04                          les     bx,ARG(1)
-   283 000000AF E81C01                  	call	read_data				;grab the data
+   282 000000AF C45E04                          les     bx,ARG(1)
+   283 000000B2 E82201                  	call	read_data				;grab the data
    284                                  %if DEBUG
    285                                  	push	0x88
    286                                  	call	lites
    287                                  %endif
    288                                  
    289                                  
-   290 000000B2 31C0                            xor     ax,ax
+   290 000000B5 31C0                            xor     ax,ax
    291                                  %if DEBUG
    292                                  	push	ax
    293                                  	call	lites
    294                                  %endif
    295                                  
-   296 000000B4 075B5F                          popm    es,bx,di
-   297 000000B7 C9                              leave
-   298 000000B8 C3                      	ret
+   296 000000B7 07905B5F                        popm    es,bx,di
+   297 000000BB C9                              leave
+   298 000000BC C3                      	ret
    299                                  
    300                                  
    301                                  	
@@ -1383,40 +1383,40 @@
    310                                  ;
    311                                  ;-----------------------------------------------------------------------------
    312                                  @IDE8_READ_SECTOR:
-   313 000000B9 5152500653                      pushm   bx,es,ax,dx,cx
-   314 000000BE E80600                          call    _IDE8_READ_SECTOR
-   315 000000C1 5B07585A59                      popm    bx,es,ax,dx,cx
-   316 000000C6 C3                              ret
+   313 000000BD 5152500653                      pushm   bx,es,ax,dx,cx
+   314 000000C2 E80700                          call    _IDE8_READ_SECTOR
+   315 000000C5 5B0790585A59                    popm    bx,es,ax,dx,cx
+   316 000000CB C3                              ret
    317                                  
    318                                  _IDE8_READ_SECTOR:
-   319 000000C7 55                              push    bp
-   320 000000C8 89E5                            mov     bp,sp
-   321 000000CA 575306                          pushm   es,bx,di
+   319 000000CC 55                              push    bp
+   320 000000CD 89E5                            mov     bp,sp
+   321 000000CF 575306                          pushm   es,bx,di
    322                                  
-   323 000000CD 8B4E0C                          mov     cx,ARG(5)
+   323 000000D2 8B4E0C                          mov     cx,ARG(5)
    324                                  ; set device code into DI
-   325 000000D0 BFC006                  	mov	di,IDE8_CS0
-   326 000000D3 80E1F0                  	and	cl,0F0h
+   325 000000D5 BFC006                  	mov	di,IDE8_CS0
+   326 000000D8 80E1F0                  	and	cl,0F0h
    327                                  
-   328 000000D6 E8CC00                  	call	ide_wait_not_busy		;make sure drive is ready
+   328 000000DB E8D000                  	call	ide_wait_not_busy		;make sure drive is ready
    329                                  
-   330 000000D9 8B4608                          mov     ax,ARG(3)
-   331 000000DC 8B560A                          mov     dx,ARG(4)
-   332 000000DF E82401                  	call	wr_lba					;tell it which sector we want
+   330 000000DE 8B4608                          mov     ax,ARG(3)
+   331 000000E1 8B560A                          mov     dx,ARG(4)
+   332 000000E4 E82A01                  	call	wr_lba					;tell it which sector we want
    333                                  
    334                                  
-   335 000000E2 B020                            mov     al,ide_cmd_read
-   336 000000E4 8D5507                  	lea	dx,[ide_command+di]
-   337 000000E7 EE                      	out	dx,al
+   335 000000E7 B020                            mov     al,ide_cmd_read
+   336 000000E9 8D5507                  	lea	dx,[ide_command+di]
+   337 000000EC EE                      	out	dx,al
    338                                  
-   339 000000E8 E8D400                  	call	ide_wait_drq			;wait until it's got the data
-   340 000000EB C45E04                          les     bx,ARG(1)
-   341 000000EE E8DD00                  	call	read_data				;grab the data
-   342 000000F1 31C0                            xor     ax,ax
+   339 000000ED E8D800                  	call	ide_wait_drq			;wait until it's got the data
+   340 000000F0 C45E04                          les     bx,ARG(1)
+   341 000000F3 E8E100                  	call	read_data				;grab the data
+   342 000000F6 31C0                            xor     ax,ax
    343                                  
-   344 000000F3 075B5F                          popm    es,bx,di
-   345 000000F6 C9                              leave
-   346 000000F7 C3                      	ret
+   344 000000F8 07905B5F                        popm    es,bx,di
+   345 000000FC C9                              leave
+   346 000000FD C3                      	ret
    347                                  
    348                                  
    349                                  ; -----------------------------------------------------------------------------	
@@ -1430,38 +1430,38 @@
    357                                  ;
    358                                  ;-----------------------------------------------------------------------------
    359                                  @IDE8_VERIFY_SECTOR:
-   360 000000F8 515250                          pushm   ax,dx,cx
-   361 000000FB E80400                          call    _IDE8_VERIFY_SECTOR
-   362 000000FE 585A59                          popm    ax,dx,cx
-   363 00000101 C3                              ret
+   360 000000FE 515250                          pushm   ax,dx,cx
+   361 00000101 E80400                          call    _IDE8_VERIFY_SECTOR
+   362 00000104 585A59                          popm    ax,dx,cx
+   363 00000107 C3                              ret
    364                                  
    365                                  _IDE8_VERIFY_SECTOR:
-   366 00000102 55                              push    bp
-   367 00000103 89E5                            mov     bp,sp
-   368 00000105 575306                          pushm   es,bx,di
+   366 00000108 55                              push    bp
+   367 00000109 89E5                            mov     bp,sp
+   368 0000010B 575306                          pushm   es,bx,di
    369                                  
-   370 00000108 8B4E08                          mov     cx,ARG(3)
+   370 0000010E 8B4E08                          mov     cx,ARG(3)
    371                                  ; set device code into DI
-   372 0000010B BFC006                  	mov	di,IDE8_CS0
-   373 0000010E 80E1F0                  	and	cl,0F0h
+   372 00000111 BFC006                  	mov	di,IDE8_CS0
+   373 00000114 80E1F0                  	and	cl,0F0h
    374                                  
-   375 00000111 E89100                  	call	ide_wait_not_busy		;make sure drive is ready
+   375 00000117 E89400                  	call	ide_wait_not_busy		;make sure drive is ready
    376                                  
-   377 00000114 8B4604                          mov     ax,ARG(1)
-   378 00000117 8B5606                          mov     dx,ARG(2)
-   379 0000011A E8E900                  	call	wr_lba					;tell it which sector we want
+   377 0000011A 8B4604                          mov     ax,ARG(1)
+   378 0000011D 8B5606                          mov     dx,ARG(2)
+   379 00000120 E8EE00                  	call	wr_lba					;tell it which sector we want
    380                                  
-   381 0000011D B020                       	mov	al,ide_cmd_read
-   382 0000011F 8D5507                  	lea	dx,[ide_command+di]
-   383 00000122 EE                      	out	dx,al
+   381 00000123 B020                       	mov	al,ide_cmd_read
+   382 00000125 8D5507                  	lea	dx,[ide_command+di]
+   383 00000128 EE                      	out	dx,al
    384                                  
-   385 00000123 E89900                  	call	ide_wait_drq			;wait until it's got the data
-   386 00000126 E8B800                  	call	verify_data				;grab the data
-   387 00000129 31C0                            xor     ax,ax
+   385 00000129 E89C00                  	call	ide_wait_drq			;wait until it's got the data
+   386 0000012C E8BB00                  	call	verify_data				;grab the data
+   387 0000012F 31C0                            xor     ax,ax
    388                                  
-   389 0000012B 075B5F                          popm    es,bx,di
-   390 0000012E C9                              leave
-   391 0000012F C3                      	ret
+   389 00000131 07905B5F                        popm    es,bx,di
+   390 00000135 C9                              leave
+   391 00000136 C3                      	ret
    392                                  
    393                                  
    394                                  ;-----------------------------------------------------------------------------
@@ -1476,40 +1476,40 @@
    403                                  ;
    404                                  ;-----------------------------------------------------------------------------
    405                                  @IDE8_WRITE_SECTOR:
-   406 00000130 5152500653                      pushm   bx,es,ax,dx,cx
-   407 00000135 E80600                          call    _IDE8_WRITE_SECTOR
-   408 00000138 5B07585A59                      popm    bx,es,ax,dx,cx
-   409 0000013D C3                              ret
+   406 00000137 5152500653                      pushm   bx,es,ax,dx,cx
+   407 0000013C E80700                          call    _IDE8_WRITE_SECTOR
+   408 0000013F 5B0790585A59                    popm    bx,es,ax,dx,cx
+   409 00000145 C3                              ret
    410                                  
    411                                  _IDE8_WRITE_SECTOR:
-   412 0000013E 55                              push    bp
-   413 0000013F 89E5                            mov     bp,sp
-   414 00000141 575306                          pushm   es,bx,di
+   412 00000146 55                              push    bp
+   413 00000147 89E5                            mov     bp,sp
+   414 00000149 575306                          pushm   es,bx,di
    415                                  
-   416 00000144 8B4E0C                          mov     cx,ARG(5)
+   416 0000014C 8B4E0C                          mov     cx,ARG(5)
    417                                  ; set device code into DI
-   418 00000147 BFC006                  	mov	di,IDE8_CS0
-   419 0000014A 80E1F0                  	and	cl,0F0h
+   418 0000014F BFC006                  	mov	di,IDE8_CS0
+   419 00000152 80E1F0                  	and	cl,0F0h
    420                                  
-   421 0000014D E85500                  	call	ide_wait_not_busy	;make sure drive is ready
+   421 00000155 E85600                  	call	ide_wait_not_busy	;make sure drive is ready
    422                                  
-   423 00000150 8B4608                          mov     ax,ARG(3)
-   424 00000153 8B560A                          mov     dx,ARG(4)
-   425 00000156 E8AD00                  	call	wr_lba				;tell it which sector we want
+   423 00000158 8B4608                          mov     ax,ARG(3)
+   424 0000015B 8B560A                          mov     dx,ARG(4)
+   425 0000015E E8B000                  	call	wr_lba				;tell it which sector we want
    426                                          
-   427 00000159 B030                    	mov	al,ide_cmd_write
-   428 0000015B 8D5507                  	lea	dx,[ide_command+di]
-   429 0000015E EE                      	out	dx,al
+   427 00000161 B030                    	mov	al,ide_cmd_write
+   428 00000163 8D5507                  	lea	dx,[ide_command+di]
+   429 00000166 EE                      	out	dx,al
    430                                  
-   431 0000015F E85D00                  	call	ide_wait_drq		;wait unit it wants the data
-   432 00000162 C45E04                          les     bx,ARG(1)
-   433 00000165 E88800                  	call	write_data			;give the data to the drive
-   434 00000168 E83A00                  	call	ide_wait_not_busy	;wait until the write is complete
-   435 0000016B 31C0                            xor     ax,ax
+   431 00000167 E85E00                  	call	ide_wait_drq		;wait unit it wants the data
+   432 0000016A C45E04                          les     bx,ARG(1)
+   433 0000016D E88900                  	call	write_data			;give the data to the drive
+   434 00000170 E83B00                  	call	ide_wait_not_busy	;wait until the write is complete
+   435 00000173 31C0                            xor     ax,ax
    436                                          
-   437 0000016D 075B5F                          popm    es,bx,di
-   438 00000170 C9                              leave
-   439 00000171 C3                      	ret
+   437 00000175 07905B5F                        popm    es,bx,di
+   438 00000179 C9                              leave
+   439 0000017A C3                      	ret
    440                                  
    441                                  
    442                                  ST_ERROR	equ	01h		; error Stauts
@@ -1517,26 +1517,26 @@
    444                                  ; set the device for 8-bit transfers
    445                                  ;-----------------------------------------------------------------------------
    446                                  ide_set_8bit:
-   447 00000172 8D5501                  	lea	dx,[ide_feature+di]
-   448 00000175 B001                    	mov	al,SET_8BIT
-   449 00000177 EE                      	out	dx,al
-   450 00000178 E83500                  	call	ide_wait_ready
+   447 0000017B 8D5501                  	lea	dx,[ide_feature+di]
+   448 0000017E B001                    	mov	al,SET_8BIT
+   449 00000180 EE                      	out	dx,al
+   450 00000181 E83500                  	call	ide_wait_ready
    451                                  	
-   452 0000017B 8D5507                  	lea	dx,[ide_command+di]
-   453 0000017E B0EF                    	mov	al,ide_cmd_set_feature
-   454 00000180 EE                      	out	dx,al
+   452 00000184 8D5507                  	lea	dx,[ide_command+di]
+   453 00000187 B0EF                    	mov	al,ide_cmd_set_feature
+   454 00000189 EE                      	out	dx,al
    455                                  	
-   456 00000181 B9A00F                  	mov	cx,4000
+   456 0000018A B9A00F                  	mov	cx,4000
    457                                  ;;.1:	loop	.1
-   458 00000184 E82900                  	call	ide_wait_ready
+   458 0000018D E82900                  	call	ide_wait_ready
    459                                  	
-   460 00000187 8D5507                  	lea	dx,[ide_status+di]
-   461 0000018A EC                      	in	al,dx
+   460 00000190 8D5507                  	lea	dx,[ide_status+di]
+   461 00000193 EC                      	in	al,dx
    462                                  
-   463 0000018B A801                    	test	al,ST_ERROR		; error flag set
-   464 0000018D 7403E9(0000)            	jnz	FIXED_error
+   463 00000194 A801                    	test	al,ST_ERROR		; error flag set
+   464 00000196 7403E9(0000)            	jnz	FIXED_error
    465                                  	
-   466 00000192 C3                      	ret
+   466 0000019B C3                      	ret
    467                                  	
    468                                  
    469                                  ;-----------------------------------------------------------------------------
@@ -1559,20 +1559,20 @@
    486                                  ;
    487                                  ;-------------------------------------------------------------------------------------------	
    488                                  ide_soft_reset:
-   489 00000193 51                              pushm   cx
+   489 0000019C 51                              pushm   cx
    490                                  
-   491 00000194 8D5516                  	lea	dx,[ide_control+di]	; get device code of alt. control
-   492 00000197 B00E                     	mov	al,CTRL_ALWAYS | CTRL_RESET | CTRL_nIEN
-   493 00000199 EE                      	out	dx,al
+   491 0000019D 8D5516                  	lea	dx,[ide_control+di]	; get device code of alt. control
+   492 000001A0 B00E                     	mov	al,CTRL_ALWAYS | CTRL_RESET | CTRL_nIEN
+   493 000001A2 EE                      	out	dx,al
    494                                  
-   495 0000019A B9F401                          mov     cx,500                ; 500usec delay
-   496 0000019D E8(0000)                        call    microsecond
+   495 000001A3 B9F401                          mov     cx,500                ; 500usec delay
+   496 000001A6 E8(0000)                        call    microsecond
    497                                  
-   498 000001A0 B00A                     	mov	al,CTRL_ALWAYS | CTRL_nIEN
-   499 000001A2 EE                      	out	dx,al
+   498 000001A9 B00A                     	mov	al,CTRL_ALWAYS | CTRL_nIEN
+   499 000001AB EE                      	out	dx,al
    500                                  
-   501 000001A3 59                              popm    cx
-   502 000001A4 C3                      	ret
+   501 000001AC 59                              popm    cx
+   502 000001AD C3                      	ret
    503                                  
    504                                  
    505                                  ;------------------------------------------------------------------------------
@@ -1590,16 +1590,16 @@
    517                                  ;
    518                                  ;------------------------------------------------------------------------------
    519                                  ide_wait_not_busy:
-   520 000001A5 52                              pushm   dx
+   520 000001AE 52                              pushm   dx
    521                                  .1:
-   522 000001A6 8D5507                  	lea	dx,[ide_status+di]
-   523 000001A9 EC                      	in	al,dx
+   522 000001AF 8D5507                  	lea	dx,[ide_status+di]
+   523 000001B2 EC                      	in	al,dx
    524                                  
-   525 000001AA 2480                            and     al,10000000b
-   526 000001AC 75F8                            jnz     .1
+   525 000001B3 2480                            and     al,10000000b
+   526 000001B5 75F8                            jnz     .1
    527                                  
-   528 000001AE 5A                              popm    dx
-   529 000001AF C3                      	ret
+   528 000001B7 5A                              popm    dx
+   529 000001B8 C3                      	ret
    530                                  
    531                                  ;------------------------------------------------------------------------------
    532                                  ;  Wait for Ready from the drive
@@ -1610,17 +1610,17 @@
    537                                  ;
    538                                  ;------------------------------------------------------------------------------
    539                                  ide_wait_ready:
-   540 000001B0 5253                            pushm   bx,dx
+   540 000001B9 5253                            pushm   bx,dx
    541                                  .1:
-   542 000001B2 8D5507                  	lea	dx,[ide_status+di]
-   543 000001B5 EC                      	in	al,dx
+   542 000001BB 8D5507                  	lea	dx,[ide_status+di]
+   543 000001BE EC                      	in	al,dx
    544                                  
-   545 000001B6 24C0                            and     al,11000000b            ;Mask off busy and ready bits
-   546 000001B8 3440                            xor     al,01000000b            ;We want Busy(7) to be 0 and Ready(6) to be 1
-   547 000001BA 75F6                            jnz     .1
+   545 000001BF 24C0                            and     al,11000000b            ;Mask off busy and ready bits
+   546 000001C1 3440                            xor     al,01000000b            ;We want Busy(7) to be 0 and Ready(6) to be 1
+   547 000001C3 75F6                            jnz     .1
    548                                  
-   549 000001BC 5B5A                            popm    bx,dx
-   550 000001BE C3                      	ret
+   549 000001C5 5B5A                            popm    bx,dx
+   550 000001C7 C3                      	ret
    551                                  
    552                                  ;------------------------------------------------------------------------------
    553                                  	;Wait for the drive to be ready to transfer data (DRQ = data request)
@@ -1631,18 +1631,18 @@
    558                                  ;       All other registers preserved
    559                                  ;------------------------------------------------------------------------------
    560                                  ide_wait_drq:
-   561 000001BF 5253                            pushm   bx,dx
+   561 000001C8 5253                            pushm   bx,dx
    562                                  .1:
-   563 000001C1 8D5507                     	lea	dx,[ide_status+di]
-   564 000001C4 EC                      	in	al,dx
+   563 000001CA 8D5507                     	lea	dx,[ide_status+di]
+   564 000001CD EC                      	in	al,dx
    565                                  
-   566 000001C5 2488                            and     al,10001000b		; Mask off Busy(7) and DRQ(3)
-   567 000001C7 3408                            xor     al,00001000b		; We want Busy(7) to be 0 and DRQ (3) to be 1
+   566 000001CE 2488                            and     al,10001000b		; Mask off Busy(7) and DRQ(3)
+   567 000001D0 3408                            xor     al,00001000b		; We want Busy(7) to be 0 and DRQ (3) to be 1
    568                                  
-   569 000001C9 75F6                            jnz     .1
+   569 000001D2 75F6                            jnz     .1
    570                                  
-   571 000001CB 5B5A                            popm    bx,dx
-   572 000001CD C3                      	ret
+   571 000001D4 5B5A                            popm    bx,dx
+   572 000001D6 C3                      	ret
    573                                  
    574                                  
    575                                  
@@ -1659,26 +1659,26 @@
    586                                  ;
    587                                  ;-----------------------------------------------------------------------------
    588                                  read_data:
-   589 000001CE 5153                            pushm   bx,cx
+   589 000001D7 5153                            pushm   bx,cx
    590                                  
-   591 000001D0 8D15                    	lea	dx,[ide_data8+di]
-   592 000001D2 87FB                            xchg    di,bx
-   593 000001D4 B90002                  	mov     cx,512          ; sector size in bytes
+   591 000001D9 8D15                    	lea	dx,[ide_data8+di]
+   592 000001DB 87FB                            xchg    di,bx
+   593 000001DD B90002                  	mov     cx,512          ; sector size in bytes
    594                                  
    595                                  %if 1
    596                                  rdblk2:
-   597 000001D7 EC                      	in	al,dx
-   598 000001D8 90                      	nop
-   599 000001D9 AA                      	stosb
+   597 000001E0 EC                      	in	al,dx
+   598 000001E1 90                      	nop
+   599 000001E2 AA                      	stosb
    600                                  
-   601 000001DA E2FB                            loop    rdblk2
+   601 000001E3 E2FB                            loop    rdblk2
    602                                  %else
    603                                  	rep	insb
    604                                  %endif
-   605 000001DC 87FB                    	xchg	di,bx
+   605 000001E5 87FB                    	xchg	di,bx
    606                                  
-   607 000001DE 5B59                            popm    bx,cx
-   608 000001E0 C3                      	ret
+   607 000001E7 5B59                            popm    bx,cx
+   608 000001E9 C3                      	ret
    609                                  
    610                                  ;------------------------------------------------------------------------------
    611                                  	;Read a block of 512 bytes (one sector) from the drive
@@ -1691,22 +1691,22 @@
    618                                  ;
    619                                  ;-----------------------------------------------------------------------------
    620                                  verify_data:
-   621 000001E1 51                              pushm   cx
+   621 000001EA 51                              pushm   cx
    622                                  
-   623 000001E2 8D5508                  	lea	dx,[ide_data16+di]
+   623 000001EB 8D5508                  	lea	dx,[ide_data16+di]
    624                                  
-   625 000001E5 B90002                  	mov	cx,512		; sector size in bytes
+   625 000001EE B90002                  	mov	cx,512		; sector size in bytes
    626                                  
    627                                  verblk2:
-   628 000001E8 90                      	nop
-   629 000001E9 90                      	nop
-   630 000001EA 90                      	nop
-   631 000001EB EC                      	in	al,dx
+   628 000001F1 90                      	nop
+   629 000001F2 90                      	nop
+   630 000001F3 90                      	nop
+   631 000001F4 EC                      	in	al,dx
    632                                  
-   633 000001EC E2FA                            loop    verblk2
+   633 000001F5 E2FA                            loop    verblk2
    634                                  
-   635 000001EE 59                              popm    cx
-   636 000001EF C3                      	ret
+   635 000001F7 59                              popm    cx
+   636 000001F8 C3                      	ret
    637                                  
    638                                  ;-----------------------------------------------------------------------------
    639                                  ;Write a block of 512 bytes (at HL) to the drive
@@ -1721,26 +1721,26 @@
    648                                  ;
    649                                  ;-----------------------------------------------------------------------------
    650                                  write_data:
-   651 000001F0 1E5651                          pushm   cx,si,ds
+   651 000001F9 1E5651                          pushm   cx,si,ds
    652                                  
-   653 000001F3 06                      	push	es
-   654 000001F4 1F                      	popm	ds
+   653 000001FC 06                      	push	es
+   654 000001FD 1F90                    	popm	ds
    655                                  
-   656 000001F5 B90002                          mov     cx,512          ; 512 bytes = 256 words
-   657 000001F8 89DE                            mov     si,bx           ; use SI for the loads
-   658 000001FA 8D15                    	lea	dx,[ide_data8+di]
+   656 000001FF B90002                          mov     cx,512          ; 512 bytes = 256 words
+   657 00000202 89DE                            mov     si,bx           ; use SI for the loads
+   658 00000204 8D15                    	lea	dx,[ide_data8+di]
    659                                  %if 1
    660                                  wrblk2: 
-   661 000001FC AC                      	lodsb	     		; slow loop
-   662 000001FD 90                      	nop
-   663 000001FE 90                      	nop
-   664 000001FF EE                      	out	dx,al
-   665 00000200 E2FA                            loop            wrblk2
+   661 00000206 AC                      	lodsb	     		; slow loop
+   662 00000207 90                      	nop
+   663 00000208 90                      	nop
+   664 00000209 EE                      	out	dx,al
+   665 0000020A E2FA                            loop            wrblk2
    666                                  %else
    667                                  	rep	outsb		; fastest
    668                                  %endif
-   669 00000202 595E1F                          popm    cx,si,ds
-   670 00000205 C3                      	ret
+   669 0000020C 595E1F90                        popm    cx,si,ds
+   670 00000210 C3                      	ret
    671                                  
    672                                  
    673                                  ;-----------------------------------------------------------------------------
@@ -1755,39 +1755,39 @@
    682                                  ;
    683                                  ;-----------------------------------------------------------------------------
    684                                  wr_lba:
-   685 00000206 50                              push    ax
-   686 00000207 52                              push    dx
+   685 00000211 50                              push    ax
+   686 00000212 52                              push    dx
    687                                  
-   688 00000208 B010                            mov     al,10h          ; Master/Slave mask
-   689 0000020A 20C8                            and     al,cl           ; mask bit
-   690 0000020C 88F3                            mov     bl,dh           ; high order
-   691 0000020E 80E30F                          and     bl,00Fh
-   692 00000211 80CBE0                          or      bl,0E0h         ; mark as LBA
-   693 00000214 08D8                    	or	al,bl
-   694 00000216 8D5506                  	lea	dx,[ide_head+di]
-   695 00000219 EE                      	out	dx,al
+   688 00000213 B010                            mov     al,10h          ; Master/Slave mask
+   689 00000215 20C8                            and     al,cl           ; mask bit
+   690 00000217 88F3                            mov     bl,dh           ; high order
+   691 00000219 80E30F                          and     bl,00Fh
+   692 0000021C 80CBE0                          or      bl,0E0h         ; mark as LBA
+   693 0000021F 08D8                    	or	al,bl
+   694 00000221 8D5506                  	lea	dx,[ide_head+di]
+   695 00000224 EE                      	out	dx,al
    696                                  	
-   697 0000021A 5B                              pop     bx              ; get DL to BL
-   698 0000021B 88D8                    	mov	al,bl
-   699 0000021D 4A                      	dec	dx
-   700 0000021E EE                      	out	dx,al
+   697 00000225 5B                              pop     bx              ; get DL to BL
+   698 00000226 88D8                    	mov	al,bl
+   699 00000228 4A                      	dec	dx
+   700 00000229 EE                      	out	dx,al
    701                                  
-   702 0000021F 5B                              pop     bx
-   703 00000220 88F8                    	mov	al,bh
-   704 00000222 4A                      	dec	dx
-   705 00000223 EE                      	out	dx,al
+   702 0000022A 5B                              pop     bx
+   703 0000022B 88F8                    	mov	al,bh
+   704 0000022D 4A                      	dec	dx
+   705 0000022E EE                      	out	dx,al
    706                                  	
-   707 00000224 88D8                    	mov	al,bl
-   708 00000226 4A                      	dec	dx
-   709 00000227 EE                      	out	dx,al
+   707 0000022F 88D8                    	mov	al,bl
+   708 00000231 4A                      	dec	dx
+   709 00000232 EE                      	out	dx,al
    710                                  	
-   711 00000228 B001                    	mov	al,1
-   712 0000022A 4A                      	dec	dx
-   713 0000022B EE                      	out	dx,al
+   711 00000233 B001                    	mov	al,1
+   712 00000235 4A                      	dec	dx
+   713 00000236 EE                      	out	dx,al
    714                                  
-   715 0000022C E843FF                  	call	ide_set_8bit
+   715 00000237 E841FF                  	call	ide_set_8bit
    716                                  		
-   717 0000022F C3                      	ret
+   717 0000023A C3                      	ret
    718                                  	
    719                                  ;-------------------------------------------------------------------------------
    720                                  
@@ -1899,7 +1899,7 @@
    826                                  ;
    827                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    828                                  integrity:
-   829 00000230 5150                            pushm   ax,cx
+   829 0000023B 5150                            pushm   ax,cx
    830                                  %if DEBUG
    831                                  	push	0x70
    832                                  	call	lites        
@@ -1910,40 +1910,40 @@
    837                                          cmp     al,[n_fixed_disks]
    838                                  %else
    839                                  	extern	get_IDE_num
-   840 00000232 E8(0000)                	call	get_IDE_num		; get number of IDE disks total
-   841 00000235 88C4                    	mov	ah,al
-   842 00000237 B07F                    	mov	al,7Fh
-   843 00000239 20D0                            and     al,dl                   ; mask out the high bit
-   844 0000023B 38E0                    	cmp	al,ah			; compare against max
+   840 0000023D E8(0000)                	call	get_IDE_num		; get number of IDE disks total
+   841 00000240 88C4                    	mov	ah,al
+   842 00000242 B07F                    	mov	al,7Fh
+   843 00000244 20D0                            and     al,dl                   ; mask out the high bit
+   844 00000246 38E0                    	cmp	al,ah			; compare against max
    845                                  %endif
-   846 0000023D 7203E9E7FD                      jae     undefined               ; harsh error exit
-   847 00000242 BEB000                          mov     si,fx80
-   848 00000245 B91000                          mov     cx,fx81-fx80            ; size of fixed disk table
-   849 00000248 84C0                    	test    al,al
-   850 0000024A 7406                            jz      .1
-   851 0000024C 01CE                    .0:	add     si,cx                   ; point at fx8?
-   852 0000024E FEC8                    	dec	al
-   853 00000250 75FA                    	jnz	.0
+   846 00000248 7203E9DDFD                      jae     undefined               ; harsh error exit
+   847 0000024D BEB000                          mov     si,fx80
+   848 00000250 B91000                          mov     cx,fx81-fx80            ; size of fixed disk table
+   849 00000253 84C0                    	test    al,al
+   850 00000255 7406                            jz      .1
+   851 00000257 01CE                    .0:	add     si,cx                   ; point at fx8?
+   852 00000259 FEC8                    	dec	al
+   853 0000025B 75FA                    	jnz	.0
    854                                  .1:
-   855 00000252 BFC006                  	mov	di,IDE8_CS0		; first controller device code
+   855 0000025D BFC006                  	mov	di,IDE8_CS0		; first controller device code
    856                                  
-   857 00000255 56                              push    si
-   858 00000256 B800EE                          mov     ax,0EE00h               ; error code and zero checksum
+   857 00000260 56                              push    si
+   858 00000261 B800EE                          mov     ax,0EE00h               ; error code and zero checksum
    859                                  
-   860 00000259 0204                    .2:     add     al,[si]                 ; compute checksum
-   861 0000025B 46                              inc     si
-   862 0000025C E2FB                            loop    .2                      ; loop back
+   860 00000264 0204                    .2:     add     al,[si]                 ; compute checksum
+   861 00000266 46                              inc     si
+   862 00000267 E2FB                            loop    .2                      ; loop back
    863                                  
-   864 0000025E 5E                              pop     si
-   865 0000025F 08C0                            or      al,al                   ; test AL for zero
-   866 00000261 7403E9CDFD                      jnz     error_exit              ; BIOS data area clobbered
+   864 00000269 5E                              pop     si
+   865 0000026A 08C0                            or      al,al                   ; test AL for zero
+   866 0000026C 7403E9C3FD                      jnz     error_exit              ; BIOS data area clobbered
    867                                  %if DEBUG
    868                                  	push	0x7F
    869                                  	call	lites
    870                                  %endif
    871                                  
-   872 00000266 5859                            popm    ax,cx
-   873 00000268 C3                              ret
+   872 00000271 5859                            popm    ax,cx
+   873 00000273 C3                              ret
    874                                  
    875                                  
    876                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1959,30 +1959,30 @@
    886                                  ;
    887                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    888                                  cv_lba:
-   889 00000269 89C8                            mov     ax,cx           ; cylinder info to AX
-   890 0000026B C0C002                          rol     al,2            ; position high 2 bits
-   891 0000026E 2403                            and     al,3            ; mask 2 bits
-   892 00000270 86C4                            xchg    al,ah           ; AX = cylinder number
-   893 00000272 C1EA08                          shr     dx,8            ; heads to DL   DH=0
+   889 00000274 89C8                            mov     ax,cx           ; cylinder info to AX
+   890 00000276 C0C002                          rol     al,2            ; position high 2 bits
+   891 00000279 2403                            and     al,3            ; mask 2 bits
+   892 0000027B 86C4                            xchg    al,ah           ; AX = cylinder number
+   893 0000027D C1EA08                          shr     dx,8            ; heads to DL   DH=0
    894                                  
-   895 00000275 89D3                            mov     bx,dx           ; heads to BX
-   896 00000277 8A5402                          mov     dl,[fx_log_heads - fx80 + si]   ; may be 0, meaning 256
-   897 0000027A FECA                            dec     dl
-   898 0000027C 42                              inc     dx              ; recover 256 !!!
+   895 00000280 89D3                            mov     bx,dx           ; heads to BX
+   896 00000282 8A5402                          mov     dl,[fx_log_heads - fx80 + si]   ; may be 0, meaning 256
+   897 00000285 FECA                            dec     dl
+   898 00000287 42                              inc     dx              ; recover 256 !!!
    899                                  
-   900 0000027D F7E2                            mul     dx
-   901 0000027F 01D8                            add     ax,bx           ; add in the head number
-   902 00000281 83D200                          adc     dx,0            ; **
+   900 00000288 F7E2                            mul     dx
+   901 0000028A 01D8                            add     ax,bx           ; add in the head number
+   902 0000028C 83D200                          adc     dx,0            ; **
    903                                  
-   904 00000284 8A5C0E                          mov     bl,[fx_log_sectors - fx80 + si]    ; BH is already 0
-   905 00000287 51                              push    cx
-   906 00000288 E8(0000)                        call    @mulLS          ; DX:AX = DX:AX * BX
-   907 0000028B 59                              pop     cx
-   908 0000028C FEC9                            dec     cl              ; sector address is from 1, not 0
-   909 0000028E 83E13F                          and     cx,63
-   910 00000291 01C8                            add     ax,cx           ; add in sector number
-   911 00000293 83D200                          adc     dx,0            ; **
-   912 00000296 C3                              ret
+   904 0000028F 8A5C0E                          mov     bl,[fx_log_sectors - fx80 + si]    ; BH is already 0
+   905 00000292 51                              push    cx
+   906 00000293 E8(0000)                        call    @mulLS          ; DX:AX = DX:AX * BX
+   907 00000296 59                              pop     cx
+   908 00000297 FEC9                            dec     cl              ; sector address is from 1, not 0
+   909 00000299 83E13F                          and     cx,63
+   910 0000029C 01C8                            add     ax,cx           ; add in sector number
+   911 0000029E 83D200                          adc     dx,0            ; **
+   912 000002A1 C3                              ret
    913                                  
    914                                  
    915                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1996,10 +1996,10 @@
    923                                  ;
    924                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    925                                  fn00:
-   926 00000297 E896FF                          call    integrity       ; perhaps no subsystem
-   927 0000029A E8F6FE                          call    ide_soft_reset  ; do the dirty
-   928 0000029D B400                            mov     ah,0
-   929 0000029F E98DFD                          jmp     exit_sequence
+   926 000002A2 E896FF                          call    integrity       ; perhaps no subsystem
+   927 000002A5 E8F4FE                          call    ide_soft_reset  ; do the dirty
+   928 000002A8 B400                            mov     ah,0
+   929 000002AA E983FD                          jmp     exit_sequence
    930                                  
    931                                  
    932                                  
@@ -2029,50 +2029,50 @@
    956                                  fn02:
    957                                  fn03:
    958                                  fn04:
-   959 000002A2 E88BFF                          call    integrity       ; set pointer to Fixed Disk Table in SI
-   960 000002A5 E8C1FF                          call    cv_lba          ; convert to LBA address in DX:AX
-   961 000002A8 8A4C08                          mov     cl,[fx_drive_control - fx80 + si]
-   962 000002AB 8A6E0E                          mov     ch,[bp + offset_AL]      ; get sector count
-   963 000002AE 8B5E08                          mov     bx,[bp + offset_BX]      ; get transfer address
+   959 000002AD E88BFF                          call    integrity       ; set pointer to Fixed Disk Table in SI
+   960 000002B0 E8C1FF                          call    cv_lba          ; convert to LBA address in DX:AX
+   961 000002B3 8A4C08                          mov     cl,[fx_drive_control - fx80 + si]
+   962 000002B6 8A6E0E                          mov     ch,[bp + offset_AL]      ; get sector count
+   963 000002B9 8B5E08                          mov     bx,[bp + offset_BX]      ; get transfer address
    964                                  
    965                                  ; Enter here on Read, Write, Verify or
    966                                  ;     extended  Read, Write, Verify, Seek
    967                                  RWV: 
-   968 000002B1 FEC5                            inc     ch                      ; zero is valid for no transfer
-   969 000002B3 EB30                            jmp     .6              ; enter loop at the bottom
+   968 000002BC FEC5                            inc     ch                      ; zero is valid for no transfer
+   969 000002BE EB30                            jmp     .6              ; enter loop at the bottom
    970                                  ; the read/write/verify loop
    971                                  .1:
-   972 000002B5 F6C140                          test    cl,40h          ; test LBA bit in drive control
-   973 000002B8 7431                            jz      .7
+   972 000002C0 F6C140                          test    cl,40h          ; test LBA bit in drive control
+   973 000002C3 7431                            jz      .7
    974                                  ; LBA call is okay
-   975 000002BA F6460F04                        test    byte [bp+offset_AH],04h         ; Seek/Verify?
-   976 000002BE 7510                            jnz     .4
-   977 000002C0 F6460F01                        test    byte [bp+offset_AH],01h         ; Write?
-   978 000002C4 7505                            jnz     .3
-   979 000002C6 E8F0FD                  .2:     call    @IDE8_READ_SECTOR
-   980 000002C9 EB08                            jmp     .5
-   981 000002CB E862FE                  .3:     call    @IDE8_WRITE_SECTOR
-   982 000002CE EB03                            jmp     .5
-   983 000002D0 E825FE                  .4:     call    @IDE8_VERIFY_SECTOR
+   975 000002C5 F6460F04                        test    byte [bp+offset_AH],04h         ; Seek/Verify?
+   976 000002C9 7510                            jnz     .4
+   977 000002CB F6460F01                        test    byte [bp+offset_AH],01h         ; Write?
+   978 000002CF 7505                            jnz     .3
+   979 000002D1 E8E9FD                  .2:     call    @IDE8_READ_SECTOR
+   980 000002D4 EB08                            jmp     .5
+   981 000002D6 E85EFE                  .3:     call    @IDE8_WRITE_SECTOR
+   982 000002D9 EB03                            jmp     .5
+   983 000002DB E820FE                  .4:     call    @IDE8_VERIFY_SECTOR
    984                                  
    985                                  .5:
-   986 000002D3 83C001                          add     ax,1            ; increment the LBA address
-   987 000002D6 83D200                          adc     dx,0            ; **
-   988 000002D9 80C702                          add     bh,2            ; add 512 == 200h to the BX
-   989 000002DC 7307                            jnc     .6
-   990 000002DE 8CC7                            mov     di,es
-   991 000002E0 83C710                          add     di,10h
-   992 000002E3 8EC7                            mov     es,di           ; update the segment register
-   993 000002E5 FECD                    .6:     dec     ch
-   994 000002E7 75CC                            jnz     .1
-   995 000002E9 EB03                            jmp     .8
+   986 000002DE 83C001                          add     ax,1            ; increment the LBA address
+   987 000002E1 83D200                          adc     dx,0            ; **
+   988 000002E4 80C702                          add     bh,2            ; add 512 == 200h to the BX
+   989 000002E7 7307                            jnc     .6
+   990 000002E9 8CC7                            mov     di,es
+   991 000002EB 83C710                          add     di,10h
+   992 000002EE 8EC7                            mov     es,di           ; update the segment register
+   993 000002F0 FECD                    .6:     dec     ch
+   994 000002F2 75CC                            jnz     .1
+   995 000002F4 EB03                            jmp     .8
    996                                  
    997                                  ; CHS call is required
-   998 000002EB E83BFD                  .7:     call    undefined
+   998 000002F6 E831FD                  .7:     call    undefined
    999                                  
   1000                                  .8:     
-  1001 000002EE 30E4                            xor     ah,ah
-  1002 000002F0 E93CFD                          jmp     exit_sequence
+  1001 000002F9 30E4                            xor     ah,ah
+  1002 000002FB E932FD                          jmp     exit_sequence
   1003                                  
   1004                                  
   1005                                  
@@ -2094,28 +2094,28 @@
   1021                                  ;
   1022                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1023                                  fn08:           ; Get Drive Parameters
-  1024 000002F3 C6460A00                        mov     byte [bp + offset_DL],0         ; say no fixed disks
+  1024 000002FE C6460A00                        mov     byte [bp + offset_DL],0         ; say no fixed disks
   1025                                  
-  1026 000002F7 E836FF                          call    integrity       ; bad device code or no fixed disks
+  1026 00000302 E836FF                          call    integrity       ; bad device code or no fixed disks
   1027                                  
-  1028 000002FA 8B04                            mov     ax,[fx_log_cylinders - fx80 + si]
-  1029 000002FC 48                              dec     ax
-  1030 000002FD C0E406                          shl     ah,6
-  1031 00000300 0A640E                          or      ah,[fx_log_sectors - fx80 + si]
-  1032 00000303 86C4                            xchg    al,ah
-  1033 00000305 89460C                          mov     [bp + offset_CX],ax
-  1034 00000308 8A7402                          mov     dh,[fx_log_heads - fx80 + si]
-  1035 0000030B FECE                            dec     dh
+  1028 00000305 8B04                            mov     ax,[fx_log_cylinders - fx80 + si]
+  1029 00000307 48                              dec     ax
+  1030 00000308 C0E406                          shl     ah,6
+  1031 0000030B 0A640E                          or      ah,[fx_log_sectors - fx80 + si]
+  1032 0000030E 86C4                            xchg    al,ah
+  1033 00000310 89460C                          mov     [bp + offset_CX],ax
+  1034 00000313 8A7402                          mov     dh,[fx_log_heads - fx80 + si]
+  1035 00000316 FECE                            dec     dh
   1036                                  %if 0
   1037                                          mov     dl,[n_fixed_disks]      ; return parameter
   1038                                  %else
-  1039 0000030D E8(0000)                	call	get_IDE_num		; get number of IDE disks
-  1040 00000310 88C2                    	mov	dl,al
+  1039 00000318 E8(0000)                	call	get_IDE_num		; get number of IDE disks
+  1040 0000031B 88C2                    	mov	dl,al
   1041                                  %endif
-  1042 00000312 89560A                          mov     [bp + offset_DX],dx
+  1042 0000031D 89560A                          mov     [bp + offset_DX],dx
   1043                                  
-  1044 00000315 30E4                            xor     ah,ah
-  1045 00000317 E915FD                          jmp     exit_sequence
+  1044 00000320 30E4                            xor     ah,ah
+  1045 00000322 E90BFD                          jmp     exit_sequence
   1046                                  
   1047                                  
   1048                                          
@@ -2135,21 +2135,21 @@
   1062                                  ;
   1063                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1064                                  fn15:
-  1065 0000031A E813FF                          call    integrity       ; sets DS:SI
-  1066 0000031D 8B04                            mov     ax,[fx_log_cylinders - fx80 + si]
-  1067 0000031F 8A5C02                          mov     bl,[fx_log_heads - fx80 + si]
-  1068 00000322 30FF                            xor     bh,bh
-  1069 00000324 FECB                            dec     bl              ; 00 means 256
-  1070 00000326 43                              inc     bx              ; do the conversion
-  1071 00000327 F7E3                            mul     bx              ; cyls * heads
-  1072 00000329 8A5C0E                          mov     bl,[fx_log_sectors - fx80 + si]
-  1073 0000032C 30FF                            xor     bh,bh
-  1074 0000032E E8(0000)                        call    @mulLS          ; cyls * heads * sectors
-  1075 00000331 89560C                          mov     word [bp+offset_CX],dx  ; high order
-  1076 00000334 89460A                          mov     word [bp+offset_DX],ax  ; low order word
-  1077 00000337 B403                            mov     ah,3   			; code for HARD DISK
-  1078 00000339 F8                              clc
-  1079 0000033A E9F7FC                          jmp     exit_pops
+  1065 00000325 E813FF                          call    integrity       ; sets DS:SI
+  1066 00000328 8B04                            mov     ax,[fx_log_cylinders - fx80 + si]
+  1067 0000032A 8A5C02                          mov     bl,[fx_log_heads - fx80 + si]
+  1068 0000032D 30FF                            xor     bh,bh
+  1069 0000032F FECB                            dec     bl              ; 00 means 256
+  1070 00000331 43                              inc     bx              ; do the conversion
+  1071 00000332 F7E3                            mul     bx              ; cyls * heads
+  1072 00000334 8A5C0E                          mov     bl,[fx_log_sectors - fx80 + si]
+  1073 00000337 30FF                            xor     bh,bh
+  1074 00000339 E8(0000)                        call    @mulLS          ; cyls * heads * sectors
+  1075 0000033C 89560C                          mov     word [bp+offset_CX],dx  ; high order
+  1076 0000033F 89460A                          mov     word [bp+offset_DX],ax  ; low order word
+  1077 00000342 B403                            mov     ah,3   			; code for HARD DISK
+  1078 00000344 F8                              clc
+  1079 00000345 E9EDFC                          jmp     exit_pops
   1080                                  
   1081                                  
   1082                                  
@@ -2172,16 +2172,16 @@
   1099                                  ;
   1100                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1101                                  fn41:
-  1102 0000033D E8F0FE                          call    integrity       ; test drive number (sets DS:SI)
-  1103 00000340 817E08AA55                      cmp     word [offset_BX + bp],55AAh
-  1104 00000345 7403E9DFFC                      jne     undefined
-  1105 0000034A F6440840                        test    byte [fx_drive_control - fx80 + si],40h         ; test LBA bit
-  1106 0000034E 7503E9D6FC                      jz      undefined
+  1102 00000348 E8F0FE                          call    integrity       ; test drive number (sets DS:SI)
+  1103 0000034B 817E08AA55                      cmp     word [offset_BX + bp],55AAh
+  1104 00000350 7403E9D5FC                      jne     undefined
+  1105 00000355 F6440840                        test    byte [fx_drive_control - fx80 + si],40h         ; test LBA bit
+  1106 00000359 7503E9CCFC                      jz      undefined
   1107                                  
-  1108 00000353 C6460F21                        mov     byte [offset_AH + bp],21h       ; version 1.1
-  1109 00000357 C7460855AA                      mov     word [offset_BX + bp],0AA55h    ; magic number II
-  1110 0000035C C7460C0500                      mov     word [offset_CX + bp],00000101b       ; packet calls & EDD i/f
-  1111 00000361 E9C9FC                          jmp     good_exit
+  1108 0000035E C6460F21                        mov     byte [offset_AH + bp],21h       ; version 1.1
+  1109 00000362 C7460855AA                      mov     word [offset_BX + bp],0AA55h    ; magic number II
+  1110 00000367 C7460C0500                      mov     word [offset_CX + bp],00000101b       ; packet calls & EDD i/f
+  1111 0000036C E9BFFC                          jmp     good_exit
   1112                                  
   1113                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1114                                  ; fn42 -- Extended Read
@@ -2207,27 +2207,27 @@
   1134                                  fn43:
   1135                                  fn44:
   1136                                  fn47:
-  1137 00000364 E8C9FE                          call    integrity       ; set pointer to Fixed Disk Table in SI
-  1138 00000367 8E4610                          mov     es,[bp + offset_DS]     ; packet pointer
-  1139 0000036A 8B5E02                          mov     bx,[bp + offset_SI]     ; **
-  1140 0000036D 26803F10                   es   cmp     byte [bx + pkt_size],16 ; check for correct size
-  1141 00000371 7303E9B3FC                      jb      undefined
+  1137 0000036F E8C9FE                          call    integrity       ; set pointer to Fixed Disk Table in SI
+  1138 00000372 8E4610                          mov     es,[bp + offset_DS]     ; packet pointer
+  1139 00000375 8B5E02                          mov     bx,[bp + offset_SI]     ; **
+  1140 00000378 26803F10                   es   cmp     byte [bx + pkt_size],16 ; check for correct size
+  1141 0000037C 7303E9A9FC                      jb      undefined
   1142                                  
-  1143 00000376 268B470E                   es   mov     ax,[bx + pkt_LBA3]      ; LBA address
-  1144 0000037A 260B470C                   es   or      ax,[bx + pkt_LBA2]      ; LBA address
-  1145 0000037E 7403E9A6FC                      jnz     undefined
-  1146 00000383 268B4708                   es   mov     ax,[bx + pkt_LBA0]      ; LBA address
-  1147 00000387 268B570A                   es   mov     dx,[bx + pkt_LBA1]      ; LBA address hi
+  1143 00000381 268B470E                   es   mov     ax,[bx + pkt_LBA3]      ; LBA address
+  1144 00000385 260B470C                   es   or      ax,[bx + pkt_LBA2]      ; LBA address
+  1145 00000389 7403E99CFC                      jnz     undefined
+  1146 0000038E 268B4708                   es   mov     ax,[bx + pkt_LBA0]      ; LBA address
+  1147 00000392 268B570A                   es   mov     dx,[bx + pkt_LBA1]      ; LBA address hi
   1148                                  
-  1149 0000038B B501                            mov     ch,1                    ; assume Seek
-  1150 0000038D 807E0F47                        cmp     byte [offset_AH + bp],47h       ; Seek?
-  1151 00000391 7404                            je      .7
-  1152 00000393 268A6F02                   es   mov     ch,[bx + pkt_blocks]    ; sector count
+  1149 00000396 B501                            mov     ch,1                    ; assume Seek
+  1150 00000398 807E0F47                        cmp     byte [offset_AH + bp],47h       ; Seek?
+  1151 0000039C 7404                            je      .7
+  1152 0000039E 268A6F02                   es   mov     ch,[bx + pkt_blocks]    ; sector count
   1153                                  .7:
-  1154 00000397 8A4C08                          mov     cl,[fx_drive_control - fx80 + si]
-  1155 0000039A 26C45F04                   es   les     bx,[bx + pkt_address]   ; get transfer address
+  1154 000003A2 8A4C08                          mov     cl,[fx_drive_control - fx80 + si]
+  1155 000003A5 26C45F04                   es   les     bx,[bx + pkt_address]   ; get transfer address
   1156                                  
-  1157 0000039E E910FF                          jmp     RWV             ; common read/write/verify code
+  1157 000003A9 E910FF                          jmp     RWV             ; common read/write/verify code
   1158                                  
   1159                                  
   1160                                          
@@ -2247,46 +2247,46 @@
   1174                                  ;
   1175                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1176                                  fn48:
-  1177 000003A1 E88CFE                          call    integrity               ; set DS:SI
-  1178 000003A4 8E4610                          mov     es,[bp + offset_DS]     ; packet pointer
-  1179 000003A7 8B5E02                          mov     bx,[bp + offset_SI]     ; **
-  1180 000003AA B9FFFF                          mov     cx,0FFFFh               ; CX = -1  (FFFFh)
-  1181 000003AD B81A00                          mov     ax,pkt_ptr              ; AX = 26
-  1182 000003B0 263907                     es   cmp     [bx + pkt_size],ax      ; check for correct size = 26
-  1183 000003B3 7303E971FC                      jb      undefined
-  1184 000003B8 83C004                          add     ax,4
-  1185 000003BB 263907                     es   cmp     [bx + pkt_size],ax      ; check for correct size = 30
-  1186 000003BE 7208                            jb      .1
-  1187 000003C0 26894F1A                   es   mov     [bx + pkt_ptr],cx       ; flag invalid pointer
-  1188 000003C4 26894F1C                   es   mov     [bx + pkt_ptr+2],cx     ; **
+  1177 000003AC E88CFE                          call    integrity               ; set DS:SI
+  1178 000003AF 8E4610                          mov     es,[bp + offset_DS]     ; packet pointer
+  1179 000003B2 8B5E02                          mov     bx,[bp + offset_SI]     ; **
+  1180 000003B5 B9FFFF                          mov     cx,0FFFFh               ; CX = -1  (FFFFh)
+  1181 000003B8 B81A00                          mov     ax,pkt_ptr              ; AX = 26
+  1182 000003BB 263907                     es   cmp     [bx + pkt_size],ax      ; check for correct size = 26
+  1183 000003BE 7303E967FC                      jb      undefined
+  1184 000003C3 83C004                          add     ax,4
+  1185 000003C6 263907                     es   cmp     [bx + pkt_size],ax      ; check for correct size = 30
+  1186 000003C9 7208                            jb      .1
+  1187 000003CB 26894F1A                   es   mov     [bx + pkt_ptr],cx       ; flag invalid pointer
+  1188 000003CF 26894F1C                   es   mov     [bx + pkt_ptr+2],cx     ; **
   1189                                  .1:
-  1190 000003C8 268907                     es   mov     [bx + pkt_size],ax      ; set the returned size
+  1190 000003D3 268907                     es   mov     [bx + pkt_size],ax      ; set the returned size
   1191                                  
-  1192 000003CB 41                              inc     cx                      ; CX = 0
-  1193 000003CC 26C747020300               es   mov     word [bx + pkt_info], 000011b   ; DMA bound/ Geom OK
+  1192 000003D6 41                              inc     cx                      ; CX = 0
+  1193 000003D7 26C747020300               es   mov     word [bx + pkt_info], 000011b   ; DMA bound/ Geom OK
   1194                                  
-  1195 000003D2 8B4409                          mov     ax,[fx_phys_cylinders - fx80 + si]      ; cylinders
-  1196 000003D5 26894704                   es   mov     [bx + pkt_phys_cyl],ax  
-  1197 000003D9 26894F06                   es   mov     [bx + pkt_phys_cyl+2],cx
+  1195 000003DD 8B4409                          mov     ax,[fx_phys_cylinders - fx80 + si]      ; cylinders
+  1196 000003E0 26894704                   es   mov     [bx + pkt_phys_cyl],ax  
+  1197 000003E4 26894F06                   es   mov     [bx + pkt_phys_cyl+2],cx
   1198                                  
-  1199 000003DD 8A440B                          mov     al,[fx_phys_heads - fx80 + si]          ; heads
-  1200 000003E0 88EC                            mov     ah,ch
-  1201 000003E2 26894708                   es   mov     [bx + pkt_phys_hds],ax  
-  1202 000003E6 26894F0A                   es   mov     [bx + pkt_phys_hds+2],cx
+  1199 000003E8 8A440B                          mov     al,[fx_phys_heads - fx80 + si]          ; heads
+  1200 000003EB 88EC                            mov     ah,ch
+  1201 000003ED 26894708                   es   mov     [bx + pkt_phys_hds],ax  
+  1202 000003F1 26894F0A                   es   mov     [bx + pkt_phys_hds+2],cx
   1203                                  
-  1204 000003EA 8A4404                          mov     al,[fx_phys_sectors - fx80 + si]        ; sectors
-  1205 000003ED 2689470C                   es   mov     [bx + pkt_phys_spt],ax  
-  1206 000003F1 26894F0E                   es   mov     [bx + pkt_phys_spt+2],cx
+  1204 000003F5 8A4404                          mov     al,[fx_phys_sectors - fx80 + si]        ; sectors
+  1205 000003F8 2689470C                   es   mov     [bx + pkt_phys_spt],ax  
+  1206 000003FC 26894F0E                   es   mov     [bx + pkt_phys_spt+2],cx
   1207                                  
-  1208 000003F5 8B440C                          mov     ax,[fx_LBA_low - fx80 + si]             ; total LBA sectors
-  1209 000003F8 26894710                   es   mov     [bx + pkt_sectors],ax                   ; total sectors
-  1210 000003FC 8B4405                          mov     ax,[fx_LBA_high - fx80 + si]            ; **
-  1211 000003FF 26894712                   es   mov     [bx + pkt_sectors+2],ax                 ; **
-  1212 00000403 26894F14                   es   mov     [bx + pkt_sectors+4],cx                 ; **
-  1213 00000407 26894F16                   es   mov     [bx + pkt_sectors+6],cx                 ; **
-  1214 0000040B 26C747180002               es   mov     word [bx + pkt_bytes],512               ; sector size
-  1215 00000411 B400                            mov     ah,0
-  1216 00000413 E919FC                          jmp     exit_sequence
+  1208 00000400 8B440C                          mov     ax,[fx_LBA_low - fx80 + si]             ; total LBA sectors
+  1209 00000403 26894710                   es   mov     [bx + pkt_sectors],ax                   ; total sectors
+  1210 00000407 8B4405                          mov     ax,[fx_LBA_high - fx80 + si]            ; **
+  1211 0000040A 26894712                   es   mov     [bx + pkt_sectors+2],ax                 ; **
+  1212 0000040E 26894F14                   es   mov     [bx + pkt_sectors+4],cx                 ; **
+  1213 00000412 26894F16                   es   mov     [bx + pkt_sectors+6],cx                 ; **
+  1214 00000416 26C747180002               es   mov     word [bx + pkt_bytes],512               ; sector size
+  1215 0000041C B400                            mov     ah,0
+  1216 0000041E E90FFC                          jmp     exit_sequence
   1217                                  
   1218                                  
   1219                                  
@@ -2309,9 +2309,9 @@
   1236                                  ;
   1237                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1238                                  fn4E:
-  1239 00000416 E817FE                          call    integrity
-  1240 00000419 B80100                          mov     ax,0001h
-  1241 0000041C E910FC                          jmp     exit_sequence
+  1239 00000421 E817FE                          call    integrity
+  1240 00000424 B80100                          mov     ax,0001h
+  1241 00000427 E906FC                          jmp     exit_sequence
   1242                                  
   1243                                  
   1244                                  

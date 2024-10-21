@@ -81,7 +81,7 @@
     81                              <1> ; It may be smaller than the actual EPROM in use.
     82                              <1> ; The following sizes are supported:  32, 64, 128, and 256
     83                              <1> %ifndef ROM
-    84                              <1> ROM             equ     32              ; 64 is the default
+    84                              <1> ROM             equ     64              ; 64 is the default
     85                              <1> %endif
     86                              <1> 
     87                              <1> ; Define the number of Wait States at which the ROM operates
@@ -106,12 +106,12 @@
    106                              <1> 
    107                              <1> ; Define the time zone in which we build the Relocatable BIOS
    108                              <1> %ifndef TIMEZONE
-   109                              <1> %define TIMEZONE "PST"
+   109                              <1> %define TIMEZONE "CDT"
    110                              <1> %endif
    111                              <1> 
    112                              <1> ; Has the REDBUG debugger been loaded?
    113                              <1> %ifndef SOFT_DEBUG
-   114                              <1> %define SOFT_DEBUG 0
+   114                              <1> %define SOFT_DEBUG 1
    115                              <1> %endif
    116                              <1> 
    117                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
@@ -126,7 +126,7 @@
    126                              <1> %endif
    127                              <1> 
    128                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   129                              <1> EMM_BOARDS      equ     4
+   129                              <1> EMM_BOARDS      equ     0
    130                              <1> 
    131                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
    132                              <1> ; or at locations 0280h..3FFh in low memory?
@@ -1220,12 +1220,12 @@
     38 00000007 90                      	align	2
     39                                  ; driver dispatch table
     40                                  dispatch:
-    41 00000008 [3700]                  	dw	FIXED_error	; NO_disk
+    41 00000008 [3800]                  	dw	FIXED_error	; NO_disk
     42 0000000A [0000]                  	dw	PPIDE_entry	; PPI_type
-    43 0000000C [3700]                  	dw	DIDE0_entry	; DIDE0_type
-    44 0000000E [3700]                  	dw	DIDE1_entry	; DIDE1_type
+    43 0000000C [3800]                  	dw	DIDE0_entry	; DIDE0_type
+    44 0000000E [3800]                  	dw	DIDE1_entry	; DIDE1_type
     45 00000010 [0000]                  	dw	DSD_entry	; DSD_type
-    46 00000012 [3700]                  	dw	IDE8_entry	; V3IDE8 type
+    46 00000012 [0000]                  	dw	IDE8_entry	; V3IDE8 type
     47 00000014 [0000]                  	dw	DISKIO_entry	; DISKIO_type
     48 00000016 [0000]                  	dw	MFPIC_entry	; MFPIC_type
     49                                  n_dispatch	equ	$-dispatch-2
@@ -1236,32 +1236,32 @@
     54 0000001C 89E5                            mov     bp,sp           ; establish stack addressing
     55 0000001E FC                              cld			; make no assumptions!
     56 0000001F 6A40                            push    bios_data_seg
-    57 00000021 1F                              popm    ds              ; establish addressability
+    57 00000021 1F90                            popm    ds              ; establish addressability
     58                                  ;------------------------------------------------------------------------
     59                                  ; Format of the "fixed_disk_tab" in the BIOS data area:
     60                                  ;	byte entries:   0000 ddds (binary)  ddd=driver number, s="secondary"
     61                                  ;------------------------------------------------------------------------
-    62 00000022 88D3                    	mov	bl,dl		; drive number (80h..83h) to BL
-    63 00000024 83E303                  	and	bx,FIXED_DISK_MAX-1	; mask device code
-    64 00000027 8A9FA900                	mov	bl,[fixed_disk_tab+bx]	; get driver number from BIOS data area
-    65 0000002B 83E30E                  	and	bx,0Eh		; mask driver number (all even)
-    66 0000002E 2EFFA7[0800]              cs	jmp	near [dispatch+bx]
+    62 00000023 88D3                    	mov	bl,dl		; drive number (80h..83h) to BL
+    63 00000025 83E303                  	and	bx,FIXED_DISK_MAX-1	; mask device code
+    64 00000028 8A9FA900                	mov	bl,[fixed_disk_tab+bx]	; get driver number from BIOS data area
+    65 0000002C 83E30E                  	and	bx,0Eh		; mask driver number (all even)
+    66 0000002F 2EFFA7[0800]              cs	jmp	near [dispatch+bx]
     67                                  
     68                                    
     69                                  
     70                                  	global	FIXED_timeout
     71                                  FIXED_timeout:
-    72 00000033 B480                    	mov	ah,ERR_disk_timeout
-    73 00000035 EB02                    	jmp	FIXED_exit_AH
+    72 00000034 B480                    	mov	ah,ERR_disk_timeout
+    73 00000036 EB02                    	jmp	FIXED_exit_AH
     74                                  	
     75                                  	global	FIXED_error, FIXED_exit_AH
     76                                  FIXED_error:
-    77 00000037 B401                    	mov	ah,ERR_invalid_command
+    77 00000038 B401                    	mov	ah,ERR_invalid_command
     78                                  FIXED_exit_AH:
-    79 00000039 804E1801                        or      byte [bp+offset_FLAGS],1        ; set the carry
-    80 0000003D 89EC                    	mov	sp,bp
-    81 0000003F 611F07                  	popm	all,ds,es
-    82 00000042 CF                      	iret
+    79 0000003A 804E1801                        or      byte [bp+offset_FLAGS],1        ; set the carry
+    80 0000003E 89EC                    	mov	sp,bp
+    81 00000040 611F900790              	popm	all,ds,es
+    82 00000045 CF                      	iret
     83                                  
     84                                  
     85                                  
@@ -1312,23 +1312,23 @@
    130                                  	mov	ah,0
    131                                  	popm	ds
    132                                  %else
-   133 00000043 1E5153                  	pushm	bx,cx,ds
-   134 00000046 6A40                    	push	bios_data_seg
-   135 00000048 1F                      	popm	ds
-   136 00000049 B90400                  	mov	cx,FIXED_DISK_MAX
-   137 0000004C BBA900                  	mov	bx,fixed_disk_tab
-   138 0000004F 31C0                    	xor	ax,ax
+   133 00000046 1E5153                  	pushm	bx,cx,ds
+   134 00000049 6A40                    	push	bios_data_seg
+   135 0000004B 1F90                    	popm	ds
+   136 0000004D B90400                  	mov	cx,FIXED_DISK_MAX
+   137 00000050 BBA900                  	mov	bx,fixed_disk_tab
+   138 00000053 31C0                    	xor	ax,ax
    139                                  .1:
-   140 00000051 F6073F                  	test	byte [bx],03Fh
-   141 00000054 7401                       	jz	.2
-   142 00000056 40                      	inc	ax
+   140 00000055 F6073F                  	test	byte [bx],03Fh
+   141 00000058 7401                       	jz	.2
+   142 0000005A 40                      	inc	ax
    143                                  .2:
-   144 00000057 43                      	inc	bx
-   145 00000058 E2F7                    	loop	.1
+   144 0000005B 43                      	inc	bx
+   145 0000005C E2F7                    	loop	.1
    146                                  
-   147 0000005A 5B591F                  	popm	bx,cx,ds
+   147 0000005E 5B591F90                	popm	bx,cx,ds
    148                                  %endif
-   149 0000005D C3                      	ret
+   149 00000062 C3                      	ret
    150                                  
    151                                  
    152                                  	global	fixed_device_code
@@ -1340,15 +1340,15 @@
    158                                  ;	V3IDE8_type=10, DISKIO_type=12 };
    159                                  ;
    160                                  fixed_device_code:
-   161 0000005E 0000                    	dw	0		; NO_disk
-   162 00000060 6006                    	dw	PPI		; PPI_type
-   163 00000062 2004                    	dw	DIDE0		; DIDE0_type
-   164 00000064 3004                    	dw	DIDE1		; DIDE1_type
-   165 00000066 0804                    	dw	0x408		; DSD_type
-   166 00000068 C006                    	dw	FIDE_BASE	; V3IDE8_type
-   167 0000006A 2004                    	dw	DISKIO_PPIDE	; DISKIO_type
-   168 0000006C 4404                    	dw	MFPIC_PPIDE	; MFPIC_type
-   169 0000006E FFFF                    	dw	-1
+   161 00000063 0000                    	dw	0		; NO_disk
+   162 00000065 6006                    	dw	PPI		; PPI_type
+   163 00000067 2004                    	dw	DIDE0		; DIDE0_type
+   164 00000069 3004                    	dw	DIDE1		; DIDE1_type
+   165 0000006B 0804                    	dw	0x408		; DSD_type
+   166 0000006D C006                    	dw	FIDE_BASE	; V3IDE8_type
+   167 0000006F 2004                    	dw	DISKIO_PPIDE	; DISKIO_type
+   168 00000071 4404                    	dw	MFPIC_PPIDE	; MFPIC_type
+   169 00000073 FFFF                    	dw	-1
    170                                  	
    171                                  
    172                                  	 
