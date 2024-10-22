@@ -1,9 +1,9 @@
 %SIGNAL
 PIN   5 =  A19 
 PIN   1 =  ALE 
-PIN  21 = !BDREQ 
+PIN  21 =  BDREQ 
 PIN  13 =  BUSAK 
-PIN  22 =  BUS_DREQ 
+PIN  22 = !BUS_DREQ 
 PIN  14 = !CS0 
 PIN  15 = !CS1 
 PIN  20 = !G_DATA 
@@ -28,7 +28,7 @@ PIN   6 = !UCS
 
 %EQUATION
 BUS_DREQ =>
-    !BDREQ
+    BDREQ
 
 CS0 =>
     !A19 & BUSAK & !MREQ_IO
@@ -51,28 +51,15 @@ EXTIORQ =>
   # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
 
 EXTMREQ =>
-    !ALE & !BUSAK & MCS0 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS1 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS2 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS3 & !ST1 & ST2
-  # !ALE & !BUSAK & MCS0 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS1 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS3 & !ST0 & ST2
-  # !ALE & !BUSAK & MCS2 & !ST0 & ST2
+    !ALE & !BUSAK & !ST1 & ST2 & !UCS
+  # !ALE & !BUSAK & !ST0 & ST2 & !UCS
 
 G_DATA =>
-    BUSAK
-  # !ALE & !PCS0
-  # !ALE & !PCS1
-  # !ALE & !MCS0 & !ST0 & ST2
-  # !ALE & !MCS1 & !ST0 & ST2
-  # !ALE & !MCS2 & !ST0 & ST2
-  # !ALE & !MCS3 & !ST0 & ST2
-  # !ALE & !MCS0 & !ST1 & ST2
-  # !ALE & !MCS1 & !ST1 & ST2
-  # !ALE & !MCS2 & !ST1 & ST2
-  # !ALE & !MCS3 & !ST1 & ST2
-  # !ALE & !ST0 & !ST1 & !ST2
+    !ALE & !BUSAK & !PCS0
+  # !ALE & !BUSAK & !PCS1
+  # !ALE & !BUSAK & !ST0 & !ST1 & !ST2
+  # !ALE & !BUSAK & !ST0 & ST2 & UCS
+  # !ALE & !BUSAK & !ST1 & ST2 & UCS
 
 HALT =>
     ST0 & ST1 & !ST2
@@ -113,14 +100,10 @@ MEMOP =>
   # !ST0 & ST2
 
 MREQ_IO =>
-    !ALE & !BUSAK & !MCS0 & !ST0 & ST2
-  # !ALE & !BUSAK & !MCS1 & !ST0 & ST2
-  # !ALE & !BUSAK & !MCS2 & !ST0 & ST2
-  # !ALE & !BUSAK & !MCS3 & !ST0 & ST2
-  # !ALE & !BUSAK & !MCS0 & !ST1 & ST2
-  # !ALE & !BUSAK & !MCS1 & !ST1 & ST2
-  # !ALE & !BUSAK & !MCS2 & !ST1 & ST2
-  # !ALE & !BUSAK & !MCS3 & !ST1 & ST2
+    !CS0
+  # !CS1
+  # !ALE & !BUSAK & !ST0 & ST2 & UCS
+  # !ALE & !BUSAK & !ST1 & ST2 & UCS
 
 MREQ_IO.oe  =>
     !BUSAK

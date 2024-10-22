@@ -1,0 +1,1915 @@
+     1                                  ;**********************************************************************
+     2                                  ;
+     3                                  ; MON88 (c) HT-LAB
+     4                                  ;
+     5                                  ; - Simple Monitor for 8088/86
+     6                                  ; - Some bios calls
+     7                                  ; converted to NASM syntax and adapted for Duodyne 80c188 by D.Werner 10/2024
+     8                                  ;
+     9                                  ;----------------------------------------------------------------------
+    10                                  ;
+    11                                  ; Copyright (C) 2005 Hans Tiggeler - http://www.ht-lab.com
+    12                                  ; Send comments and bugs to : cpu86@ht-lab.com
+    13                                  ;
+    14                                  ; This program is free software; you can redistribute it and/or modify
+    15                                  ; it under the terms of the GNU General Public License as published by
+    16                                  ; the Free Software Foundation; either version 2 of the License, or
+    17                                  ; (at your option) any later version.
+    18                                  ;
+    19                                  ; This program is distributed in the hope that it will be useful, but
+    20                                  ; WITHOUT ANY WARRANTY; without even the implied warranty of
+    21                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    22                                  ; General Public License for more details.
+    23                                  ;
+    24                                  ; You should have received a copy of the GNU General Public License
+    25                                  ; along with this program; if not, write to the Free Software Foundation,
+    26                                  ; Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+    27                                  ;----------------------------------------------------------------------
+    28                                  ;
+    29                                  ; Ver 0.1     30 July 2005  H.Tiggeler  WWW.HT-LAB.COM
+    30                                  ;**********************************************************************
+    31                                          %DEFINE DEBUG   1
+    32                                  
+    33                                          CPU     186
+    34                                  
+    35                                          SECTION monitor  start=1F000h vstart=0F0000h
+    36                                          GLOBAL  cold_boot
+    37                                          GLOBAL  INITMON
+    38                                  
+    39                                          SEGMENT _TEXT
+    40                                  
+    41                                  TOS             EQU 0A000h      ; Top of stack
+    42                                  
+    43                                  LF              EQU 0Ah
+    44                                  CR              EQU 0Dh
+    45                                  ESC             EQU 01Bh
+    46                                  
+    47                                  ;----------------------------------------------------------------------
+    48                                  ; Used for Load Hex file command
+    49                                  ;----------------------------------------------------------------------
+    50                                  EOF_REC         EQU 01          ; End of file record
+    51                                  DATA_REC        EQU 00          ; Load data record
+    52                                  EAD_REC         EQU 02          ; Extended Address Record, use to set CS
+    53                                  SSA_REC         EQU 03          ; Execute Address
+    54                                  
+    55                                  
+    56                                  ;------------------------------------------------------------------------------------
+    57                                  ; Default Base Segment Pointer
+    58                                  ; All MON88 commands operate on the BASE_SEGMENT:xxxx address.
+    59                                  ; The base_segment value can be changed by the BS command
+    60                                  ;------------------------------------------------------------------------------------
+    61                                  BASE_SEGMENT    EQU 0050h
+    62                                  
+    63                                  ;----------------------------------------------------------------------
+    64                                  ; Working Storage values
+    65                                  ;----------------------------------------------------------------------
+    66                                  ; Interrupt Vectors 0000h-03ffh
+    67                                  ;
+    68                                  ;----------------------------------------------------------------------
+    69                                  ; Save Register values
+    70                                  ;----------------------------------------------------------------------
+    71                                  UAX             EQU 0400h
+    72                                  UBX             EQU 0402h
+    73                                  UCX             EQU 0404h
+    74                                  UDX             EQU 0406h
+    75                                  USP             EQU 0408h
+    76                                  UBP             EQU 040ah
+    77                                  USI             EQU 040ch
+    78                                  UDI             EQU 040eh
+    79                                  UDS             EQU 0410h
+    80                                  UES             EQU 0412h
+    81                                  USS             EQU 0414h
+    82                                  UCS             EQU 0416h
+    83                                  UIP             EQU 0418h
+    84                                  UFL             EQU 041ah
+    85                                  ;----------------------------------------------------------------------
+    86                                  ; memory dump working storage
+    87                                  ;----------------------------------------------------------------------
+    88                                  DUMPMEMS        EQU 041ch
+    89                                  
+    90                                  
+    91                                  
+    92                                          %IMACRO WRSPACE  0      ; Write space character
+    93                                          MOV     AL,' '
+    94                                          CALL    TXCHAR
+    95                                          %ENDM
+    96                                  
+    97                                          %IMACRO WREQUAL  0      ; Write = character
+    98                                          MOV     AL,'='
+    99                                          CALL    TXCHAR
+   100                                          %ENDM
+   101                                  
+   102                                  
+   103                                  INITMON:
+   104                                  
+   105                                          %IFDEF  DEBUG
+   106 00000000 B001                                MOV     al,01h          ; Put POST Pattern on Front Panel
+   107 00000002 BA30FA                              MOV     dx,front_panel_LEDs
+   108 00000005 EE                                  OUT     dx,al
+   109                                          %ENDIF
+   110                                  
+   111 00000006 B800A0                          MOV     AX,TOS          ; Top of Stack
+   112 00000009 89C4                            MOV     SP,AX           ; Set Stack pointer
+   113                                  
+   114                                  ;----------------------------------------------------------------------
+   115                                  ; Install Interrupt Vectors
+   116                                  ; INT1 & INT3 used for single stepping and breakpoints
+   117                                  ; INT# * 4     =
+   118                                  ; INT# * 4 + 2 = Segment
+   119                                  ;----------------------------------------------------------------------
+   120                                  
+   121 0000000B 31C0                            XOR     AX,AX           ; Segment=0000
+   122 0000000D 8EC0                            MOV     ES,AX
+   123                                  
+   124                                  ; Point all vectors to unknown handler!
+   125 0000000F 31DB                            XOR     BX,BX           ; 256 vectors * 4 bytes
+   126                                  NEXTINTS:
+   127 00000011 26C707[A307]                    MOV     WORD [ES:BX],   INTX; Spurious Interrupt Handler
+   128 00000016 26C7470200F0                    MOV     WORD [ES:BX+2], 0F000h; interrupts in segment 0F0000h (for now)
+   129 0000001C 83C304                          ADD     BX,4
+   130 0000001F 81FB0004                        CMP     BX,0400h
+   131 00000023 75EC                            JNE     NEXTINTS
+   132                                  
+   133 00000025 26C7060400[0C06]                MOV     WORD [ES:04],   INT1_3; INT1 Single Step handler
+   134 0000002C 26C7060C00[0C06]                MOV     WORD [ES:12],   INT1_3; INT3 Breakpoint handler
+   135 00000033 26C7064000[7906]                MOV     WORD [ES:64],   INT10; INT10h
+   136 0000003A 26C7065800[8C06]                MOV     WORD [ES:88],   INT16; INT16h
+   137 00000041 26C7066800[C606]                MOV     WORD [ES:104],  INT1A; INT1A, Timer functions
+   138 00000048 26C7068400[F606]                MOV     WORD [ES:132],  INT21; INT21h
+   139                                  
+   140                                          %IFDEF  DEBUG
+   141 0000004F B002                                MOV     al,02h          ; Put POST Pattern on Front Panel
+   142 00000051 BA30FA                              MOV     dx,front_panel_LEDs
+   143 00000054 EE                                  OUT     dx,al
+   144                                          %ENDIF
+   145                                  
+   146 00000055 B80000                          MOV     ax, 0000h       ; Set DS
+   147 00000058 8ED8                            MOV     DS,AX           ;
+   148                                  ;----------------------------------------------------------------------
+   149                                  ; Entry point, Display welcome message
+   150                                  ;----------------------------------------------------------------------
+   151                                  START:
+   152 0000005A FC                              CLD
+   153 0000005B BE[B007]                        MOV     SI,  WELCOME_MESS;   -> SI
+   154 0000005E E89E04                          CALL    PUTS            ; String pointed to by CS:[SI]
+   155                                  
+   156                                          %IFDEF  DEBUG
+   157 00000061 B004                                MOV     al,04h          ; Put POST Pattern on Front Panel
+   158 00000063 BA30FA                              MOV     dx,front_panel_LEDs
+   159 00000066 EE                                  OUT     dx,al
+   160                                          %ENDIF
+   161                                  
+   162 00000067 B85000                          MOV     AX,BASE_SEGMENT ; Get Default Base segment
+   163 0000006A 8EC0                            MOV     ES,AX
+   164                                  
+   165                                  ;----------------------------------------------------------------------
+   166                                  ; Process commands
+   167                                  ;----------------------------------------------------------------------
+   168                                  CMD:
+   169 0000006C BE[2708]                        MOV     SI,  PROMPT_MESS; Display prompt >
+   170 0000006F E88D04                          CALL    PUTS
+   171                                  
+   172 00000072 E87605                          CALL    RXCHAR          ; Get Command First Byte
+   173 00000075 E85505                          CALL    TO_UPPER
+   174 00000078 88C6                            MOV     DH,AL
+   175                                  
+   176 0000007A BB[C200]                        MOV     BX,  CMDTAB1    ; Single Command?
+   177                                  CMPCMD1:
+   178 0000007D 2E8A07                          MOV     AL,[CS:BX]
+   179 00000080 38F0                            CMP     AL,DH
+   180 00000082 7509                            JNE     NEXTCMD1
+   181                                          WRSPACE
+    93 00000084 B020                <1>  MOV AL,' '
+    94 00000086 E85105              <1>  CALL TXCHAR
+   182 00000089 2EFF6702                        JMP     [CS:BX+2]       ; Execute Command
+   183                                  
+   184                                  NEXTCMD1:
+   185 0000008D 83C304                          ADD     BX,4
+   186 00000090 81FB[EA00]                      CMP     BX,  ENDTAB1
+   187 00000094 75E7                            JNE     CMPCMD1         ; Continue looking
+   188                                  
+   189 00000096 E85205                          CALL    RXCHAR          ; Get Second Command Byte, DX=command
+   190 00000099 E83105                          CALL    TO_UPPER
+   191 0000009C 88C2                            MOV     DL,AL
+   192                                  
+   193 0000009E BB[EC00]                        MOV     BX,  CMDTAB2
+   194                                  CMPCMD2:
+   195 000000A1 2E8B07                          MOV     AX,[CS:BX]
+   196 000000A4 39D0                            CMP     AX,DX
+   197 000000A6 7509                            JNE     NEXTCMD2
+   198                                          WRSPACE
+    93 000000A8 B020                <1>  MOV AL,' '
+    94 000000AA E82D05              <1>  CALL TXCHAR
+   199 000000AD 2EFF6702                        JMP     [CS:BX+2]       ; Execute Command
+   200                                  
+   201                                  NEXTCMD2:
+   202 000000B1 83C304                          ADD     BX,4
+   203 000000B4 81FB[0401]                      CMP     BX,  ENDTAB2
+   204 000000B8 75E7                            JNE     CMPCMD2         ; Continue looking
+   205                                  
+   206 000000BA BE[2E08]                        MOV     SI,  ERRCMD_MESS; Display Unknown Command, followed by usage message
+   207 000000BD E83F04                          CALL    PUTS
+   208 000000C0 EBAA                            JMP     CMD             ; Try again
+   209                                  
+   210                                  CMDTAB1:
+   211 000000C2 4C00[1D04]                      DW      'L',LOADHEX     ; Single char Command Jump Table
+   212 000000C6 5200[4703]                      DW      'R',DISPREG
+   213 000000CA 4700[D301]                      DW      'G',EXECPROG
+   214 000000CE 4800[E504]                      DW      'H',DISPHELP
+   215 000000D2 3F00[E504]                      DW      '?',DISPHELP
+   216 000000D6 4600[2603]                      DW      'F',FILLMEM     ; Double char Command Jump Table
+   217 000000DA 4400[6602]                      DW      'D',DUMPMEM
+   218 000000DE 4300[4201]                      DW      'C',CHANGEREG   ; Change Register
+   219 000000E2 4200[C101]                      DW      'B',CHANGEBS    ; Change Base Segment Address
+   220 000000E6 0D00[6C00]                      DW      CR ,CMD
+   221                                  ENDTAB1:
+   222 000000EA 2000                            DW      ' '
+   223                                  
+   224                                  ; note bytes are reversed . . . . .
+   225                                  CMDTAB2:
+   226 000000EC 424F[2102]                      DW      'BO',OUTPORTB
+   227 000000F0 574F[3202]                      DW      'WO',OUTPORTW
+   228 000000F4 4249[4302]                      DW      'BI',INPORTB
+   229 000000F8 5749[5402]                      DW      'WI',INPORTW
+   230 000000FC 4257[0601]                      DW      'BW',WRMEMB     ; Write Byte to Memory
+   231 00000100 5757[2401]                      DW      'WW',WRMEMW     ; Write Word to Memory
+   232                                  ENDTAB2:
+   233 00000104 3F3F                            DW      '??'
+   234                                  
+   235                                  
+   236                                  ;----------------------------------------------------------------------
+   237                                  ; Write Byte to Memory
+   238                                  ;----------------------------------------------------------------------
+   239                                  WRMEMB:
+   240 00000106 E84D04                          CALL    GETHEX4         ; Get Address
+   241 00000109 89C3                            MOV     BX,AX           ; Store Address
+   242                                          WRSPACE
+    93 0000010B B020                <1>  MOV AL,' '
+    94 0000010D E8CA04              <1>  CALL TXCHAR
+   243                                  
+   244 00000110 268A07                          MOV     AL,[ES:BX]      ; Get current value and display it
+   245 00000113 E88304                          CALL    PUTHEX2
+   246                                          WREQUAL
+    98 00000116 B03D                <1>  MOV AL,'='
+    99 00000118 E8BF04              <1>  CALL TXCHAR
+   247 0000011B E84504                          CALL    GETHEX2         ; Get new value
+   248 0000011E 268807                          MOV     [ES:BX],AL      ; and write it
+   249                                  
+   250 00000121 E948FF                          JMP     CMD             ; Next Command
+   251                                  
+   252                                  ;----------------------------------------------------------------------
+   253                                  ; Write Word to Memory
+   254                                  ;----------------------------------------------------------------------
+   255                                  WRMEMW:
+   256 00000124 E82F04                          CALL    GETHEX4         ; Get Address
+   257 00000127 89C3                            MOV     BX,AX
+   258                                          WRSPACE
+    93 00000129 B020                <1>  MOV AL,' '
+    94 0000012B E8AC04              <1>  CALL TXCHAR
+   259                                  
+   260 0000012E 268B07                          MOV     AX,[ES:BX]      ; Get current value and display it
+   261 00000131 E85A04                          CALL    PUTHEX4
+   262                                          WREQUAL
+    98 00000134 B03D                <1>  MOV AL,'='
+    99 00000136 E8A104              <1>  CALL TXCHAR
+   263 00000139 E81A04                          CALL    GETHEX4         ; Get new value
+   264 0000013C 268907                          MOV     [ES:BX],AX      ; and write it
+   265                                  
+   266 0000013F E92AFF                          JMP     CMD             ; Next Command
+   267                                  
+   268                                  ;----------------------------------------------------------------------
+   269                                  ; Change Register
+   270                                  ; Valid register names: AX,BX,CX,DX,SP,BP,SI,DI,DS,ES,SS,CS,IP,FL (flag)
+   271                                  ;----------------------------------------------------------------------
+   272                                  CHANGEREG:
+   273 00000142 E8A604                          CALL    RXCHAR          ; Get Command First Register character
+   274 00000145 E88504                          CALL    TO_UPPER
+   275 00000148 88C6                            MOV     DH,AL
+   276 0000014A E89E04                          CALL    RXCHAR          ; Get Second Register character, DX=register
+   277 0000014D E87D04                          CALL    TO_UPPER
+   278 00000150 88C2                            MOV     DL,AL
+   279                                  
+   280 00000152 BB[8701]                        MOV     BX,  REGTAB
+   281                                  CMPREG:
+   282 00000155 2E8B07                          MOV     AX,[CS:BX]
+   283 00000158 39D0                            CMP     AX,DX           ; Compare register string with user input
+   284 0000015A 7519                            JNE     NEXTREG         ; No, continue search
+   285                                  
+   286                                          WREQUAL
+    98 0000015C B03D                <1>  MOV AL,'='
+    99 0000015E E87904              <1>  CALL TXCHAR
+   287 00000161 E8F203                          CALL    GETHEX4         ; Get new value
+   288 00000164 89C1                            MOV     CX,AX           ; CX=New reg value
+   289                                  
+   290 00000166 8D3E0004                        LEA     DI,UAX          ; Point to User Register Storage
+   291 0000016A 2E8A5F02                        MOV     BL,[CS:BX+2]    ; Get
+   292 0000016E 30FF                            XOR     BH,BH
+   293 00000170 8909                            MOV     [DI+BX],CX
+   294 00000172 E9D201                          JMP     DISPREG         ; Display All registers
+   295                                  
+   296                                  NEXTREG:
+   297 00000175 83C304                          ADD     BX,4
+   298 00000178 81FB[BF01]                      CMP     BX,  ENDREG
+   299 0000017C 75D7                            JNE     CMPREG          ; Continue looking
+   300                                  
+   301 0000017E BE[5A08]                        MOV     SI,  ERRREG_MESS; Display Unknown Register Name
+   302 00000181 E87B03                          CALL    PUTS
+   303                                  
+   304 00000184 E9E5FE                          JMP     CMD             ; Try Again
+   305                                  
+   306                                  REGTAB:
+   307 00000187 41580000                        DW      'AX',0          ; register name,
+   308 0000018B 42580200                        DW      'BX',2
+   309 0000018F 43580400                        DW      'CX',4
+   310 00000193 44580600                        DW      'DX',6
+   311 00000197 53500800                        DW      'SP',8
+   312 0000019B 42500A00                        DW      'BP',10
+   313 0000019F 53490C00                        DW      'SI',12
+   314 000001A3 44490E00                        DW      'DI',14
+   315 000001A7 44531000                        DW      'DS',16
+   316 000001AB 45531200                        DW      'ES',18
+   317 000001AF 53531400                        DW      'SS',20
+   318 000001B3 43531600                        DW      'CS',22
+   319 000001B7 49501800                        DW      'IP',24
+   320 000001BB 464C1A00                        DW      'FL',26
+   321                                  ENDREG:
+   322 000001BF 3F3F                            DW      '??'
+   323                                  
+   324                                  
+   325                                  ;----------------------------------------------------------------------
+   326                                  ; Change Base Segment pointer
+   327                                  ; Dump/Fill/Load operate on BASE_SEGMENT:[USER INPUT ADDRESS]
+   328                                  ; Note: CB command will not update the User Registers!
+   329                                  ;----------------------------------------------------------------------
+   330                                  CHANGEBS:
+   331 000001C1 8CC0                            MOV     AX,ES           ; WORD BASE_SEGMENT
+   332 000001C3 E8C803                          CALL    PUTHEX4         ; Display current value
+   333                                          WRSPACE
+    93 000001C6 B020                <1>  MOV AL,' '
+    94 000001C8 E80F04              <1>  CALL TXCHAR
+   334 000001CB E88803                          CALL    GETHEX4
+   335 000001CE 50                              PUSH    AX
+   336 000001CF 07                              POP     ES
+   337 000001D0 E999FE                          JMP     CMD             ; Next Command
+   338                                  
+   339                                  
+   340                                  ;----------------------------------------------------------------------
+   341                                  ; Execute program
+   342                                  ; 1) Restore User registers
+   343                                  ; 2) Jump to BASE_SEGMENT:USER_
+   344                                  ;----------------------------------------------------------------------
+   345                                  EXECPROG:
+   346 000001D3 8CC0                            MOV     AX,ES           ; Display Segment Address
+   347 000001D5 E8B603                          CALL    PUTHEX4
+   348 000001D8 B03A                            MOV     AL,':'
+   349 000001DA E8FD03                          CALL    TXCHAR
+   350 000001DD E87603                          CALL    GETHEX4         ; Get new IP
+   351 000001E0 A31804                          MOV     [UIP],AX        ; Update User IP
+   352 000001E3 8CC0                            MOV     AX,ES
+   353 000001E5 A31604                          MOV     [UCS],AX
+   354                                  
+   355 000001E8 A10004                          MOV     AX,[UAX]        ; Restore User Registers
+   356 000001EB 8B1E0204                        MOV     BX,[UBX]
+   357 000001EF 8B0E0404                        MOV     CX,[UCX]
+   358 000001F3 8B160604                        MOV     DX,[UDX]
+   359 000001F7 8B2E0A04                        MOV     BP,[UBP]
+   360 000001FB 8B360C04                        MOV     SI,[USI]
+   361 000001FF 8B3E0E04                        MOV     DI,[UDI]
+   362                                  
+   363 00000203 8E061204                        MOV     ES,[UES]
+   364 00000207 FA                              CLI                     ; User User Stack!!
+   365 00000208 8E161404                        MOV     SS,[USS]
+   366 0000020C 8B260804                        MOV     SP,[USP]
+   367                                  
+   368 00000210 FF361A04                        PUSH    word [UFL]
+   369 00000214 FF361604                        PUSH    word [UCS]      ; Push CS (Base Segment)
+   370 00000218 FF361804                        PUSH    word [UIP]
+   371 0000021C 8E1E1004                        MOV     DS,[UDS]
+   372 00000220 CF                              IRET                    ; Execute!
+   373                                  
+   374                                  ;----------------------------------------------------------------------
+   375                                  ; Write Byte to Output port
+   376                                  ;----------------------------------------------------------------------
+   377                                  OUTPORTB:
+   378 00000221 E83203                          CALL    GETHEX4         ; Get Port address
+   379 00000224 89C2                            MOV     DX,AX
+   380                                          WREQUAL
+    98 00000226 B03D                <1>  MOV AL,'='
+    99 00000228 E8AF03              <1>  CALL TXCHAR
+   381 0000022B E83503                          CALL    GETHEX2         ; Get Port value
+   382 0000022E EE                              OUT     DX,AL
+   383 0000022F E93AFE                          JMP     CMD             ; Next Command
+   384                                  
+   385                                  ;----------------------------------------------------------------------
+   386                                  ; Write Word to Output port
+   387                                  ;----------------------------------------------------------------------
+   388                                  OUTPORTW:
+   389 00000232 E82103                          CALL    GETHEX4         ; Get Port address
+   390 00000235 89C2                            MOV     DX,AX
+   391                                          WREQUAL
+    98 00000237 B03D                <1>  MOV AL,'='
+    99 00000239 E89E03              <1>  CALL TXCHAR
+   392 0000023C E81703                          CALL    GETHEX4         ; Get Port value
+   393 0000023F EF                              OUT     DX,AX
+   394 00000240 E929FE                          JMP     CMD             ; Next Command
+   395                                  
+   396                                  ;----------------------------------------------------------------------
+   397                                  ; Read Byte from Input port
+   398                                  ;----------------------------------------------------------------------
+   399                                  INPORTB:
+   400 00000243 E81003                          CALL    GETHEX4         ; Get Port address
+   401 00000246 89C2                            MOV     DX,AX
+   402                                          WREQUAL
+    98 00000248 B03D                <1>  MOV AL,'='
+    99 0000024A E88D03              <1>  CALL TXCHAR
+   403 0000024D EC                              IN      AL,DX
+   404 0000024E E84803                          CALL    PUTHEX2
+   405 00000251 E918FE                          JMP     CMD             ; Next Command
+   406                                  
+   407                                  ;----------------------------------------------------------------------
+   408                                  ; Read Word from Input port
+   409                                  ;----------------------------------------------------------------------
+   410                                  INPORTW:
+   411 00000254 E8FF02                          CALL    GETHEX4         ; Get Port address
+   412                                          WREQUAL
+    98 00000257 B03D                <1>  MOV AL,'='
+    99 00000259 E87E03              <1>  CALL TXCHAR
+   413 0000025C E87B03                          CALL    TXCHAR
+   414 0000025F ED                              IN      AX,DX
+   415 00000260 E82B03                          CALL    PUTHEX4
+   416 00000263 E906FE                          JMP     CMD             ; Next Command
+   417                                  
+   418                                  ;----------------------------------------------------------------------
+   419                                  ; Display Memory
+   420                                  ;----------------------------------------------------------------------
+   421                                  DUMPMEM:
+   422 00000266 E8DB02                          CALL    GETRANGE        ; Range from BX to DX
+   423                                  NEXTDMP:
+   424 00000269 BE1C04                          MOV     SI,  DUMPMEMS   ; Store ASCII values
+   425                                  
+   426 0000026C E8C802                          CALL    NEWLINE
+   427 0000026F 8CC0                            MOV     AX,ES
+   428 00000271 E81A03                          CALL    PUTHEX4
+   429 00000274 B03A                            MOV     AL,':'
+   430 00000276 E86103                          CALL    TXCHAR
+   431 00000279 89D8                            MOV     AX,BX
+   432 0000027B 83E0F0                          AND     AX,0FFF0h
+   433 0000027E E80D03                          CALL    PUTHEX4
+   434                                          WRSPACE                 ; Write Space
+    93 00000281 B020                <1>  MOV AL,' '
+    94 00000283 E85403              <1>  CALL TXCHAR
+   435                                          WRSPACE                 ; Write Space
+    93 00000286 B020                <1>  MOV AL,' '
+    94 00000288 E84F03              <1>  CALL TXCHAR
+   436                                  
+   437 0000028B 88DC                            MOV     AH,BL           ; Save lsb
+   438 0000028D 80E40F                          AND     AH,0Fh          ; 16 byte boundary
+   439                                  
+   440 00000290 E87F00                          CALL    WRNSPACE        ; Write AH spaces
+   441 00000293 E87C00                          CALL    WRNSPACE        ; Write AH spaces
+   442 00000296 E87900                          CALL    WRNSPACE        ; Write AH spaces
+   443                                  
+   444                                  DISPBYTE:
+   445 00000299 B91000                          MOV     CX,16
+   446 0000029C 28E1                            SUB     CL,AH
+   447                                  
+   448                                  LOOPDMP1:
+   449 0000029E 268A07                          MOV     AL,[ES:BX]      ; Get Byte and display it in HEX
+   450 000002A1 3E8804                          MOV     [DS:SI],AL      ; Save it
+   451 000002A4 E8F202                          CALL    PUTHEX2
+   452                                          WRSPACE                 ; Write Space
+    93 000002A7 B020                <1>  MOV AL,' '
+    94 000002A9 E82E03              <1>  CALL TXCHAR
+   453 000002AC 43                              INC     BX
+   454 000002AD 46                              INC     SI
+   455 000002AE 39D3                            CMP     BX,DX
+   456 000002B0 7309                            JNC     SHOWREM         ; show remaining
+   457 000002B2 E2EA                            LOOP    LOOPDMP1
+   458                                  
+   459 000002B4 E83300                          CALL    PUTSDMP         ; Display it
+   460                                  
+   461 000002B7 39DA                            CMP     DX,BX           ; End of memory range?
+   462 000002B9 73AE                            JNC     NEXTDMP         ; No, continue with next 16 bytes
+   463                                  
+   464                                  SHOWREM:
+   465 000002BB BE1C04                          MOV     SI,  DUMPMEMS   ; Stored ASCII values
+   466 000002BE 89D8                            MOV     AX,BX
+   467 000002C0 83E00F                          AND     AX,0000Fh
+   468 000002C3 84C0                            TEST    AL,AL
+   469 000002C5 741B                            JZ      SKIPCLR
+   470 000002C7 01C6                            ADD     SI,AX           ;
+   471 000002C9 B410                            MOV     AH,16
+   472 000002CB 28C4                            SUB     AH,AL
+   473 000002CD 88E1                            MOV     CL,AH
+   474 000002CF 30ED                            XOR     CH,CH
+   475 000002D1 B020                            MOV     AL,' '          ; Clear non displayed values
+   476                                  NEXTCLR:
+   477 000002D3 3E8804                          MOV     [DS:SI],AL      ; Save it
+   478 000002D6 46                              INC     SI
+   479 000002D7 E2FA                            LOOP    NEXTCLR
+   480 000002D9 E83600                          CALL    WRNSPACE        ; Write AH spaces
+   481 000002DC E83300                          CALL    WRNSPACE        ; Write AH spaces
+   482 000002DF E83000                          CALL    WRNSPACE        ; Write AH spaces
+   483                                  SKIPCLR:
+   484 000002E2 30E4                            XOR     AH,AH
+   485 000002E4 E80300                          CALL    PUTSDMP
+   486                                  
+   487                                  EXITDMP:
+   488 000002E7 E982FD                          JMP     CMD             ; Next Command
+   489                                  
+   490                                  PUTSDMP:
+   491 000002EA BE1C04                          MOV     SI,  DUMPMEMS   ; Stored ASCII values
+   492                                          WRSPACE                 ; Add 2 spaces
+    93 000002ED B020                <1>  MOV AL,' '
+    94 000002EF E8E802              <1>  CALL TXCHAR
+   493                                          WRSPACE
+    93 000002F2 B020                <1>  MOV AL,' '
+    94 000002F4 E8E302              <1>  CALL TXCHAR
+   494 000002F7 E81800                          CALL    WRNSPACE        ; Write AH spaces
+   495 000002FA B91000                          MOV     CX,16
+   496 000002FD 28E1                            SUB     CL,AH           ; Adjust if not started at xxx0
+   497                                  NEXTCH:
+   498 000002FF AC                              LODSB                   ; Get character AL=DS:[SI++]
+   499 00000300 3C1F                            CMP     AL,01Fh         ; 20..7E printable
+   500 00000302 7606                            JBE     PRINTDOT
+   501 00000304 3C7F                            CMP     AL,07Fh
+   502 00000306 7302                            JAE     PRINTDOT
+   503 00000308 EB02                            JMP     PRINTCH
+   504                                  PRINTDOT:
+   505 0000030A B02E                            MOV     AL,'.'
+   506                                  PRINTCH:
+   507 0000030C E8CB02                          CALL    TXCHAR
+   508 0000030F E2EE                            LOOP    NEXTCH          ; Next Character
+   509 00000311 C3                              RET
+   510                                  
+   511                                  WRNSPACE:
+   512 00000312 50                              PUSH    AX              ; Write AH space, skip if 0
+   513 00000313 51                              PUSH    CX
+   514 00000314 84E4                            TEST    AH,AH
+   515 00000316 740B                            JZ      EXITWRNP
+   516 00000318 30ED                            XOR     CH,CH           ; Write AH spaces
+   517 0000031A 88E1                            MOV     CL,AH
+   518 0000031C B020                            MOV     AL,' '
+   519                                  NEXTDTX:
+   520 0000031E E8B902                          CALL    TXCHAR
+   521 00000321 E2FB                            LOOP    NEXTDTX
+   522                                  EXITWRNP:
+   523 00000323 59                              POP     CX
+   524 00000324 58                              POP     AX
+   525 00000325 C3                              RET
+   526                                  
+   527                                  ;----------------------------------------------------------------------
+   528                                  ; Fill Memory
+   529                                  ;----------------------------------------------------------------------
+   530                                  FILLMEM:
+   531 00000326 E81B02                          CALL    GETRANGE        ; First get range BX to DX
+   532                                          WRSPACE
+    93 00000329 B020                <1>  MOV AL,' '
+    94 0000032B E8AC02              <1>  CALL TXCHAR
+   533 0000032E E83202                          CALL    GETHEX2
+   534 00000331 50                              PUSH    AX              ; Store fill character
+   535 00000332 E80202                          CALL    NEWLINE
+   536                                  
+   537 00000335 39DA                            CMP     DX,BX
+   538 00000337 720B                            JB      EXITFILL
+   539                                  DOFILL:
+   540 00000339 29DA                            SUB     DX,BX
+   541 0000033B 89D1                            MOV     CX,DX
+   542 0000033D 89DF                            MOV     DI,BX           ; [ES:DI]
+   543 0000033F 58                              POP     AX              ; Restore fill char
+   544                                  NEXTFILL:
+   545 00000340 AA                              STOSB
+   546 00000341 E2FD                            LOOP    NEXTFILL
+   547 00000343 AA                              STOSB                   ; Last byte
+   548                                  EXITFILL:
+   549 00000344 E925FD                          JMP     CMD             ; Next Command
+   550                                  
+   551                                  ;----------------------------------------------------------------------
+   552                                  ; Display Registers
+   553                                  ;
+   554                                  ; AX=0001 BX=0002 CX=0003 DX=0004 SP=0005 BP=0006 SI=0007 DI=0008
+   555                                  ; DS=0009 ES=000A SS=000B CS=000C IP=0100   ODIT-SZAPC=0000-00000
+   556                                  ;----------------------------------------------------------------------
+   557                                  DISPREG:
+   558 00000347 E8ED01                          CALL    NEWLINE
+   559 0000034A BE[DC03]                        MOV     SI,  REG_MESS   ;   -> SI
+   560 0000034D 8D3E0004                        LEA     DI,UAX
+   561                                  
+   562 00000351 B90800                          MOV     CX,8
+   563                                  NEXTDR1:
+   564 00000354 E8A801                          CALL    PUTS            ; Point to first "AX=" string
+   565 00000357 8B05                            MOV     AX,[DI]         ; DI points to AX value
+   566 00000359 E83202                          CALL    PUTHEX4         ; Display AX value
+   567 0000035C 83C605                          ADD     SI,5            ; point to "BX=" string
+   568 0000035F 83C702                          ADD     DI,2            ; Point to BX value
+   569 00000362 E2F0                            LOOP    NEXTDR1         ; etc
+   570                                  
+   571 00000364 E8D001                          CALL    NEWLINE
+   572 00000367 B90500                          MOV     CX,5
+   573                                  NEXTDR2:
+   574 0000036A E89201                          CALL    PUTS            ; Point to first "DS=" string
+   575 0000036D 8B05                            MOV     AX,[DI]         ; DI points to DS value
+   576 0000036F E81C02                          CALL    PUTHEX4         ; Display DS value
+   577 00000372 83C605                          ADD     SI,5            ; point to "ES=" string
+   578 00000375 83C702                          ADD     DI,2            ; Point to ES value
+   579 00000378 E2F0                            LOOP    NEXTDR2         ; etc
+   580                                  
+   581 0000037A BE[8A09]                        MOV     SI,  FLAG_MESS
+   582 0000037D E87F01                          CALL    PUTS
+   583 00000380 BE[9909]                        MOV     SI,  FLAG_VALID ; String indicating which bits to display
+   584 00000383 8B1D                            MOV     BX,[DI]         ; get flag value in BX
+   585                                  
+   586 00000385 B90800                          MOV     CX,8            ; Display first 4 bits
+   587                                  NEXTBIT1:
+   588 00000388 AC                              LODSB                   ; Get display/notdisplay flag AL=DS:[SI++]
+   589 00000389 3C58                            CMP     AL,'X'          ; Display?
+   590 0000038B 7504                            JNE     SHFTCAR         ; Yes, shift bit into carry and display it
+   591 0000038D D1E3                            SAL     BX,1            ; no, ignore bit
+   592 0000038F EB0D                            JMP     EXITDISP1
+   593                                  SHFTCAR:
+   594 00000391 D1E3                            SAL     BX,1
+   595 00000393 7204                            JC      DISP1
+   596 00000395 B030                            MOV     AL,'0'
+   597 00000397 EB02                            JMP     DISPBIT
+   598                                  DISP1:
+   599 00000399 B031                            MOV     AL,'1'
+   600                                  DISPBIT:
+   601 0000039B E83C02                          CALL    TXCHAR
+   602                                  EXITDISP1:
+   603 0000039E E2E8                            LOOP    NEXTBIT1
+   604                                  
+   605 000003A0 B02D                            MOV     AL,'-'          ; Display seperator 0000-00000
+   606 000003A2 E83502                          CALL    TXCHAR
+   607                                  
+   608 000003A5 B90800                          MOV     CX,8            ; Display remaining 5 bits
+   609                                  NEXTBIT2:
+   610 000003A8 AC                              LODSB                   ; Get display/notdisplay flag AL=DS:[SI++]
+   611 000003A9 3C58                            CMP     AL,'X'          ; Display?
+   612 000003AB 7504                            JNE     SHFTCAR2        ; Yes, shift bit into carry and display it
+   613 000003AD D1E3                            SAL     BX,1            ; no, ignore bit
+   614 000003AF EB0D                            JMP     EXITDISP2
+   615                                  SHFTCAR2:
+   616 000003B1 D1E3                            SAL     BX,1
+   617 000003B3 7204                            JC      DISP2
+   618 000003B5 B030                            MOV     AL,'0'
+   619 000003B7 EB02                            JMP     DISPBIT2
+   620                                  DISP2:
+   621 000003B9 B031                            MOV     AL,'1'
+   622                                  DISPBIT2:
+   623 000003BB E81C02                          CALL    TXCHAR
+   624                                  EXITDISP2:
+   625 000003BE E2E8                            LOOP    NEXTBIT2
+   626                                  
+   627 000003C0 E87401                          CALL    NEWLINE         ; Display CS:IP Instr
+   628 000003C3 A11604                          MOV     AX,[UCS]
+   629 000003C6 E8C501                          CALL    PUTHEX4
+   630 000003C9 B03A                            MOV     AL,':'
+   631 000003CB E80C02                          CALL    TXCHAR
+   632 000003CE A11804                          MOV     AX,[UIP]
+   633 000003D1 E8BA01                          CALL    PUTHEX4
+   634                                          WRSPACE
+    93 000003D4 B020                <1>  MOV AL,' '
+    94 000003D6 E80102              <1>  CALL TXCHAR
+   635                                  
+   636 000003D9 E990FC                          JMP     CMD             ; Next Command
+   637                                  
+   638                                  REG_MESS:
+   639 000003DC 41583D0000                      DB      "AX=",0,0       ; Display Register names table
+   640 000003E1 2042583D00                      DB      " BX=",0
+   641 000003E6 2043583D00                      DB      " CX=",0
+   642 000003EB 2044583D00                      DB      " DX=",0
+   643 000003F0 2053503D00                      DB      " SP=",0
+   644 000003F5 2042503D00                      DB      " BP=",0
+   645 000003FA 2053493D00                      DB      " SI=",0
+   646 000003FF 2044493D00                      DB      " DI=",0
+   647                                  
+   648 00000404 44533D0000                      DB      "DS=",0,0
+   649 00000409 2045533D00                      DB      " ES=",0
+   650 0000040E 2053533D00                      DB      " SS=",0
+   651 00000413 2043533D00                      DB      " CS=",0
+   652 00000418 2049503D00                      DB      " IP=",0
+   653                                  
+   654                                  ;----------------------------------------------------------------------
+   655                                  ; Load Hex, terminate when ":00000001FF" is received
+   656                                  ; Mon88 may hang if this string is not received
+   657                                  ; Print '.' for each valid received frame, exit upon error
+   658                                  ; Bytes are loaded at Segment=ES
+   659                                  ;----------------------------------------------------------------------
+   660                                  LOADHEX:
+   661 0000041D BE[A708]                        MOV     SI,  LOAD_MESS  ; Display Ready to receive upload
+   662 00000420 E8DC00                          CALL    PUTS
+   663                                  
+   664 00000423 B03E                            MOV     AL,'>'
+   665 00000425 EB33                            JMP     DISPCH
+   666                                  
+   667                                  RXBYTE:
+   668 00000427 86FC                            XCHG    BH,AH           ; save AH register
+   669 00000429 E81400                          CALL    RXNIB
+   670 0000042C 88C4                            MOV     AH,AL
+   671 0000042E D0E4                            SHL     AH,1            ; Can't use CL
+   672 00000430 D0E4                            SHL     AH,1
+   673 00000432 D0E4                            SHL     AH,1
+   674 00000434 D0E4                            SHL     AH,1
+   675 00000436 E80700                          CALL    RXNIB
+   676 00000439 08E0                            OR      AL,AH
+   677 0000043B 00C3                            ADD     BL,AL           ; Add to check sum
+   678 0000043D 86FC                            XCHG    BH,AH           ; Restore AH register
+   679 0000043F C3                              RET
+   680                                  
+   681                                  RXNIB:
+   682 00000440 E8BA01                          CALL    RXCHARNE        ; Get Hex Character in AL
+   683 00000443 3C30                            CMP     AL,'0'          ; Check to make sure 0-9,A-F
+   684 00000445 7211                            JB      ERROR           ;ERRHEX
+   685 00000447 3C46                            CMP     AL,'F'
+   686 00000449 770D                            JA      ERROR           ;ERRHEX
+   687 0000044B 3C39                            CMP     AL,'9'
+   688 0000044D 7606                            JBE     SUB0
+   689 0000044F 3C41                            CMP     AL,'A'
+   690 00000451 7205                            JB      ERROR           ; ERRHEX
+   691 00000453 2C07                            SUB     AL,07h          ; Convert to hex
+   692                                  SUB0:
+   693 00000455 2C30                            SUB     AL,'0'          ; Convert to hex
+   694 00000457 C3                              RET
+   695                                  
+   696                                  
+   697                                  ERROR:
+   698 00000458 B045                            MOV     AL,'E'
+   699                                  DISPCH:
+   700 0000045A E87D01                          CALL    TXCHAR
+   701                                  
+   702                                  WAITLDS:
+   703 0000045D E89D01                          CALL    RXCHARNE        ; Wait for ':'
+   704 00000460 3C3A                            CMP     AL,':'
+   705 00000462 75F9                            JNE     WAITLDS
+   706                                  
+   707 00000464 31C9                            XOR     CX,CX           ; CL=Byte count
+   708 00000466 31DB                            XOR     BX,BX           ; BL=Checksum
+   709                                  
+   710 00000468 E8BCFF                          CALL    RXBYTE          ; Get length in CX
+   711 0000046B 88C1                            MOV     CL,AL
+   712                                  
+   713 0000046D E8B7FF                          CALL    RXBYTE          ; Get Address HIGH
+   714 00000470 88C4                            MOV     AH,AL
+   715 00000472 E8B2FF                          CALL    RXBYTE          ; Get Address LOW
+   716 00000475 89C7                            MOV     DI,AX           ; DI=Store Address
+   717                                  
+   718 00000477 E8ADFF                          CALL    RXBYTE          ; Get Record Type
+   719 0000047A 3C01                            CMP     AL,EOF_REC      ; End Of File Record
+   720 0000047C 742A                            JE      GOENDLD
+   721 0000047E 3C00                            CMP     AL,DATA_REC     ; Data Record?
+   722 00000480 7446                            JE      GOLOAD
+   723 00000482 3C02                            CMP     AL,EAD_REC      ; Extended Address Record?
+   724 00000484 744A                            JE      GOEAD
+   725 00000486 3C03                            CMP     AL,SSA_REC      ; Start Segment Address Record?
+   726 00000488 7402                            JE      GOSSA
+   727 0000048A EBCC                            JMP     ERROR           ;ERRREC
+   728                                  
+   729                                  GOSSA:
+   730 0000048C B90200                          MOV     CX,2            ; Get 2 word
+   731                                  NEXTW:
+   732 0000048F E895FF                          CALL    RXBYTE
+   733 00000492 88C4                            MOV     AH,AL
+   734 00000494 E890FF                          CALL    RXBYTE
+   735 00000497 50                              PUSH    AX              ; Push CS, IP
+   736 00000498 E2F5                            LOOP    NEXTW
+   737 0000049A E88AFF                          CALL    RXBYTE          ; Get Checksum
+   738 0000049D 28C3                            SUB     BL,AL           ; Remove checksum from checksum
+   739 0000049F F6D0                            NOT     AL              ; Two's complement
+   740 000004A1 0401                            ADD     AL,1
+   741 000004A3 38D8                            CMP     AL,BL           ; Checksum held in BL
+   742 000004A5 75B1                            JNE     ERROR           ;ERRCHKS
+   743 000004A7 CB                              RETF                    ; Execute loaded file
+   744                                  
+   745                                  GOENDLD:
+   746 000004A8 E87CFF                          CALL    RXBYTE
+   747 000004AB 28C3                            SUB     BL,AL           ; Remove checksum from checksum
+   748 000004AD F6D0                            NOT     AL              ; Two's complement
+   749 000004AF 0401                            ADD     AL,1
+   750 000004B1 38D8                            CMP     AL,BL           ; Checksum held in BL
+   751 000004B3 75A3                            JNE     ERROR           ;ERRCHKS
+   752 000004B5 EB25                            JMP     LOADOK
+   753                                  
+   754                                  GOCHECK:
+   755 000004B7 E86DFF                          CALL    RXBYTE
+   756 000004BA 28C3                            SUB     BL,AL           ; Remove checksum from checksum
+   757 000004BC F6D0                            NOT     AL              ; Two's complement
+   758 000004BE 0401                            ADD     AL,1
+   759 000004C0 38D8                            CMP     AL,BL           ; Checksum held in BL
+   760 000004C2 7594                            JNE     ERROR           ;ERRCHKS
+   761 000004C4 B02E                            MOV     AL,'.'          ; After each successful record print a '.'
+   762 000004C6 EB92                            JMP     DISPCH
+   763                                  
+   764                                  GOLOAD:
+   765 000004C8 E85CFF                          CALL    RXBYTE          ; Read Bytes
+   766 000004CB AA                              STOSB                   ; ES:DI <= AL
+   767 000004CC E2FA                            LOOP    GOLOAD
+   768 000004CE EBE7                            JMP     GOCHECK
+   769                                  
+   770                                  GOEAD:
+   771 000004D0 E854FF                          CALL    RXBYTE
+   772 000004D3 88C4                            MOV     AH,AL
+   773 000004D5 E84FFF                          CALL    RXBYTE
+   774 000004D8 8EC0                            MOV     ES,AX           ; Set Segment address (ES)
+   775 000004DA EBDB                            JMP     GOCHECK
+   776                                  
+   777                                  ;ERRCHKS:    MOV     SI,  LD_CHKS_MESS      ; Display Checksum error
+   778                                  ;            JMP     EXITLD                      ; Exit Load Command
+   779                                  ;ERRREC:     MOV     SI,  LD_REC_MESS       ; Display unknown record type
+   780                                  ;            JMP     EXITLD                      ; Exit Load Command
+   781                                  LOADOK:
+   782 000004DC BE[3C09]                        MOV     SI,  LD_OK_MESS ; Display Load OK
+   783                                  ;            JMP     EXITLD
+   784                                  ;ERRHEX:     MOV     SI,  LD_HEX_MESS       ; Display Error hex value
+   785                                  EXITLD:
+   786 000004DF E81D00                          CALL    PUTS
+   787 000004E2 E987FB                          JMP     CMD             ; Exit Load Command
+   788                                  
+   789                                  ;----------------------------------------------------------------------
+   790                                  ; Display Help Menu
+   791                                  ;----------------------------------------------------------------------
+   792                                  DISPHELP:
+   793 000004E5 BE[AA09]                        MOV     SI,  HELP_MESS  ;   -> SI
+   794 000004E8 E81400                          CALL    PUTS            ; String pointed to by DS:[SI]
+   795                                  EXITDH:
+   796 000004EB E97EFB                          JMP     CMD             ; Next Command
+   797                                  
+   798                                  
+   799                                  ;======================================================================
+   800                                  ; Monitor routines
+   801                                  ;======================================================================
+   802                                  ;----------------------------------------------------------------------
+   803                                  ; Return String Length in AL
+   804                                  ; String pointed to by DS:[SI]
+   805                                  ;----------------------------------------------------------------------
+   806                                  STRLEN:
+   807 000004EE 56                              PUSH    SI
+   808 000004EF B4FF                            MOV     AH,-1
+   809 000004F1 FC                              CLD
+   810                                  NEXTSL:
+   811 000004F2 FEC4                            INC     AH
+   812 000004F4 AC                              LODSB                   ; AL=DS:[SI++]
+   813 000004F5 08C0                            OR      AL,AL           ; Zero?
+   814 000004F7 75F9                            JNZ     NEXTSL          ; No, continue
+   815 000004F9 88E0                            MOV     AL,AH           ; Return Result in AX
+   816 000004FB 30E4                            XOR     AH,AH
+   817 000004FD 5E                              POP     SI
+   818 000004FE C3                              RET
+   819                                  
+   820                                  ;----------------------------------------------------------------------
+   821                                  ; Write zero terminated string to CONOUT
+   822                                  ; String pointed to by CS:[SI]
+   823                                  ;----------------------------------------------------------------------
+   824                                  PUTS:
+   825 000004FF 1E                              PUSH    DS
+   826 00000500 56                              PUSH    SI
+   827 00000501 50                              PUSH    AX
+   828                                  
+   829 00000502 50                              PUSH    AX
+   830 00000503 8CC8                            MOV     AX,CS
+   831 00000505 8ED8                            MOV     DS,AX
+   832 00000507 58                              POP     AX
+   833                                  
+   834 00000508 FC                              CLD
+   835                                  PRINT:
+   836 00000509 AC                              LODSB                   ; AL=DS:[SI++]
+   837 0000050A 08C0                            OR      AL,AL           ; Zero?
+   838 0000050C 7405                            JZ      PRINT_X         ; then exit
+   839 0000050E E8C900                          CALL    TXCHAR
+   840 00000511 EBF6                            JMP     PRINT           ; Next Character
+   841                                  PRINT_X:
+   842 00000513 58                              POP     AX
+   843 00000514 5E                              POP     SI
+   844 00000515 1F                              POP     DS
+   845 00000516 C3                              RET
+   846                                  
+   847                                  ;----------------------------------------------------------------------
+   848                                  ; Write zero terminated string to CONOUT
+   849                                  ; String pointed to by DS:[SI]
+   850                                  ;----------------------------------------------------------------------
+   851                                  PUTSD:
+   852 00000517 56                              PUSH    SI
+   853 00000518 50                              PUSH    AX
+   854 00000519 FC                              CLD
+   855                                  PRINTD:
+   856 0000051A AC                              LODSB                   ; AL=DS:[SI++]
+   857 0000051B 08C0                            OR      AL,AL           ; Zero?
+   858 0000051D 7405                            JZ      PRINTD_X        ; then exit
+   859 0000051F E8B800                          CALL    TXCHAR
+   860 00000522 EBF6                            JMP     PRINTD          ; Next Character
+   861                                  PRINTD_X:
+   862 00000524 58                              POP     AX
+   863 00000525 5E                              POP     SI
+   864 00000526 C3                              RET
+   865                                  
+   866                                  
+   867                                  ;----------------------------------------------------------------------
+   868                                  ; Write string to CONOUT, length in CL
+   869                                  ; String pointed to by DS:[SI]
+   870                                  ;----------------------------------------------------------------------
+   871                                  PUTSF:
+   872 00000527 56                              PUSH    SI
+   873 00000528 51                              PUSH    CX
+   874 00000529 50                              PUSH    AX
+   875 0000052A FC                              CLD
+   876 0000052B 30ED                            XOR     CH,CH
+   877                                  PRTF:
+   878 0000052D AC                              LODSB                   ; AL=DS:[SI++]
+   879 0000052E E8A900                          CALL    TXCHAR
+   880 00000531 E2FA                            LOOP    PRTF
+   881 00000533 58                              POP     AX
+   882 00000534 59                              POP     CX
+   883 00000535 5E                              POP     SI
+   884 00000536 C3                              RET
+   885                                  
+   886                                  ;----------------------------------------------------------------------
+   887                                  ; Write newline
+   888                                  ;----------------------------------------------------------------------
+   889                                  NEWLINE:
+   890 00000537 50                              PUSH    AX
+   891 00000538 B00D                            MOV     AL,CR
+   892 0000053A E89D00                          CALL    TXCHAR
+   893 0000053D B00A                            MOV     AL,LF
+   894 0000053F E89800                          CALL    TXCHAR
+   895 00000542 58                              POP     AX
+   896 00000543 C3                              RET
+   897                                  ;----------------------------------------------------------------------
+   898                                  ; Get Address range into BX, DX
+   899                                  ;----------------------------------------------------------------------
+   900                                  GETRANGE:
+   901 00000544 50                              PUSH    AX
+   902 00000545 E80E00                          CALL    GETHEX4
+   903 00000548 89C3                            MOV     BX,AX
+   904 0000054A B02D                            MOV     AL,'-'
+   905 0000054C E88B00                          CALL    TXCHAR
+   906 0000054F E80400                          CALL    GETHEX4
+   907 00000552 89C2                            MOV     DX,AX
+   908 00000554 58                              POP     AX
+   909 00000555 C3                              RET
+   910                                  
+   911                                  ;----------------------------------------------------------------------
+   912                                  ; Get Hex4,2,1 Into AX, AL, AL
+   913                                  ;----------------------------------------------------------------------
+   914                                  GETHEX4:
+   915 00000556 53                              PUSH    BX
+   916 00000557 E80900                          CALL    GETHEX2         ; Get Hex Character in AX
+   917 0000055A 88C3                            MOV     BL,AL
+   918 0000055C E80400                          CALL    GETHEX2
+   919 0000055F 88DC                            MOV     AH,BL
+   920 00000561 5B                              POP     BX
+   921 00000562 C3                              RET
+   922                                  
+   923                                  GETHEX2:
+   924 00000563 53                              PUSH    BX
+   925 00000564 E81100                          CALL    GETHEX1         ; Get Hex character in AL
+   926 00000567 88C3                            MOV     BL,AL
+   927 00000569 D0E3                            SHL     BL,1
+   928 0000056B D0E3                            SHL     BL,1
+   929 0000056D D0E3                            SHL     BL,1
+   930 0000056F D0E3                            SHL     BL,1
+   931 00000571 E80400                          CALL    GETHEX1
+   932 00000574 08D8                            OR      AL,BL
+   933 00000576 5B                              POP     BX
+   934 00000577 C3                              RET
+   935                                  
+   936                                  GETHEX1:
+   937 00000578 E87000                          CALL    RXCHAR          ; Get Hex character in AL
+   938 0000057B 3C1B                            CMP     AL,ESC
+   939 0000057D 7503                            JNE     OKCHAR
+   940 0000057F E9EAFA                          JMP     CMD             ; Abort if ESC is pressed
+   941                                  OKCHAR:
+   942 00000582 E84800                          CALL    TO_UPPER
+   943 00000585 3C39                            CMP     AL,39h          ; 0-9?
+   944 00000587 7E02                            JLE     CONVDEC         ; yes, subtract 30
+   945 00000589 2C07                            SUB     AL,07h          ; A-F subtract 39
+   946                                  CONVDEC:
+   947 0000058B 2C30                            SUB     AL,30h
+   948 0000058D C3                              RET
+   949                                  
+   950                                  ;----------------------------------------------------------------------
+   951                                  ; Display AX/AL in HEX
+   952                                  ;----------------------------------------------------------------------
+   953                                  PUTHEX4:
+   954 0000058E 86C4                            XCHG    AL,AH           ; Write AX in hex
+   955 00000590 E80600                          CALL    PUTHEX2
+   956 00000593 86C4                            XCHG    AL,AH
+   957 00000595 E80100                          CALL    PUTHEX2
+   958 00000598 C3                              RET
+   959                                  
+   960                                  PUTHEX2:
+   961 00000599 50                              PUSH    AX              ; Save the working register
+   962 0000059A D0E8                            SHR     AL,1
+   963 0000059C D0E8                            SHR     AL,1
+   964 0000059E D0E8                            SHR     AL,1
+   965 000005A0 D0E8                            SHR     AL,1
+   966 000005A2 E80500                          CALL    PUTHEX1         ; Output it
+   967 000005A5 58                              POP     AX              ; Get the LSD
+   968 000005A6 E80100                          CALL    PUTHEX1         ; Output
+   969 000005A9 C3                              RET
+   970                                  
+   971                                  PUTHEX1:
+   972 000005AA 50                              PUSH    AX              ; Save the working register
+   973 000005AB 240F                            AND     AL, 0FH         ; Mask off any unused bits
+   974 000005AD 3C0A                            CMP     AL, 0AH         ; Test for alpha or numeric
+   975 000005AF 7C02                            JL      NUMERIC         ; Take the branch if numeric
+   976 000005B1 0407                            ADD     AL, 7           ; Add the adjustment for hex alpha
+   977                                  NUMERIC:
+   978 000005B3 0430                            ADD     AL, '0'         ; Add the numeric bias
+   979 000005B5 E82200                          CALL    TXCHAR          ; Send to the console
+   980 000005B8 58                              POP     AX
+   981 000005B9 C3                              RET
+   982                                  
+   983                                  ;----------------------------------------------------------------------
+   984                                  ; Convert HEX to BCD
+   985                                  ; 3Bh->59
+   986                                  ;----------------------------------------------------------------------
+   987                                  HEX2BCD:
+   988 000005BA 51                              PUSH    CX
+   989 000005BB 30E4                            XOR     AH,AH
+   990 000005BD B10A                            MOV     CL,0Ah
+   991 000005BF F6F1                            DIV     CL
+   992 000005C1 D0E0                            SHL     AL,1
+   993 000005C3 D0E0                            SHL     AL,1
+   994 000005C5 D0E0                            SHL     AL,1
+   995 000005C7 D0E0                            SHL     AL,1
+   996 000005C9 08E0                            OR      AL,AH
+   997 000005CB 59                              POP     CX
+   998 000005CC C3                              RET
+   999                                  
+  1000                                  ;----------------------------------------------------------------------
+  1001                                  ; Convert to Upper Case
+  1002                                  ; if (c >= 'a' && c <= 'z') c -= 32;
+  1003                                  ;----------------------------------------------------------------------
+  1004                                  TO_UPPER:
+  1005 000005CD 3C61                            CMP     AL,'a'
+  1006 000005CF 7D01                            JGE     CHECKZ
+  1007 000005D1 C3                              RET
+  1008                                  CHECKZ:
+  1009 000005D2 3C7A                            CMP     AL,'z'
+  1010 000005D4 7E01                            JLE     SUB32
+  1011 000005D6 C3                              RET
+  1012                                  SUB32:
+  1013 000005D7 2C20                            SUB     AL,32
+  1014 000005D9 C3                              RET
+  1015                                  
+  1016                                  ;----------------------------------------------------------------------
+  1017                                  ; Transmit character in AL
+  1018                                  ;----------------------------------------------------------------------
+  1019                                  TXCHAR:
+  1020 000005DA 52                              PUSH    DX
+  1021 000005DB 50                              PUSH    AX              ; Character in AL
+  1022 000005DC BA85FA                          MOV     dx,uart_lsr     ; READ LINE STATUS REGISTER
+  1023                                  WAITTX:
+  1024 000005DF EC                              IN      AL,DX
+  1025 000005E0 2420                            AND     AL,20h          ; And status with user BH mask
+  1026 000005E2 74FB                            JZ      WAITTX          ; no, wait
+  1027 000005E4 BA80FA                          MOV     DX,uart_thr     ; point to data port
+  1028 000005E7 58                              POP     AX
+  1029 000005E8 EE                              OUT     DX,AL
+  1030 000005E9 5A                              POP     DX
+  1031 000005EA C3                              RET
+  1032                                  
+  1033                                  ;----------------------------------------------------------------------
+  1034                                  ; Receive character in AL, blocking
+  1035                                  ; AL Changed
+  1036                                  ;----------------------------------------------------------------------
+  1037                                  RXCHAR:
+  1038 000005EB 52                              PUSH    DX
+  1039 000005EC BA85FA                          MOV     DX,uart_lsr
+  1040                                  WAITRX:
+  1041 000005EF EC                              IN      AL,DX
+  1042 000005F0 2401                            AND     AL,01h
+  1043 000005F2 74FB                            JZ      WAITRX          ; blocking
+  1044 000005F4 BA80FA                          MOV     DX,uart_rbr
+  1045 000005F7 EC                              IN      AL,DX           ; return result in al
+  1046 000005F8 E8DFFF                          CALL    TXCHAR          ; Echo back
+  1047 000005FB 5A                              POP     DX
+  1048 000005FC C3                              RET
+  1049                                  
+  1050                                  ;----------------------------------------------------------------------
+  1051                                  ; Receive character in AL, blocking
+  1052                                  ; AL Changed
+  1053                                  ; No Echo
+  1054                                  ;----------------------------------------------------------------------
+  1055                                  RXCHARNE:
+  1056 000005FD 52                              PUSH    DX
+  1057 000005FE BA85FA                          MOV     DX,uart_lsr
+  1058                                  WAITRXNE:
+  1059 00000601 EC                              IN      AL,DX
+  1060 00000602 2401                            AND     AL,01h
+  1061 00000604 74FB                            JZ      WAITRXNE        ; blocking
+  1062 00000606 BA80FA                          MOV     DX,uart_rbr
+  1063 00000609 EC                              IN      AL,DX           ; return result in al
+  1064 0000060A 5A                              POP     DX
+  1065 0000060B C3                              RET
+  1066                                  
+  1067                                  ;======================================================================
+  1068                                  ; Monitor Interrupt Handlers
+  1069                                  ;======================================================================
+  1070                                  ;----------------------------------------------------------------------
+  1071                                  ; Breakpoint/Trace Interrupt Handler
+  1072                                  ; Restore All instructions
+  1073                                  ; Display Breakpoint Number
+  1074                                  ; Update & Display Registers
+  1075                                  ; Return to monitor
+  1076                                  ;----------------------------------------------------------------------
+  1077                                  INT1_3:
+  1078 0000060C 55                              PUSH    BP
+  1079 0000060D 89E5                            MOV     BP,SP           ; BP+2=IP, BP+4=CS, BP+6=Flags
+  1080 0000060F 16                              PUSH    SS
+  1081 00000610 06                              PUSH    ES
+  1082 00000611 1E                              PUSH    DS
+  1083 00000612 57                              PUSH    DI
+  1084 00000613 56                              PUSH    SI
+  1085 00000614 55                              PUSH    BP              ; Note this is the wrong value
+  1086 00000615 54                              PUSH    SP
+  1087 00000616 52                              PUSH    DX
+  1088 00000617 51                              PUSH    CX
+  1089 00000618 53                              PUSH    BX
+  1090 00000619 50                              PUSH    AX
+  1091                                  
+  1092 0000061A B80000                          MOV     ax, 0000h       ; Set DS
+  1093 0000061D 8ED8                            MOV     DS,AX
+  1094                                  
+  1095 0000061F 368B4604                        MOV     AX,[SS:BP+4]    ; Get user CS
+  1096 00000623 8EC0                            MOV     ES,AX           ; Used for restoring bp replaced opcode
+  1097 00000625 A31604                          MOV     [UCS],AX        ; Save User CS
+  1098                                  
+  1099 00000628 368B4602                        MOV     AX,[SS:BP+2]    ; Save User IP
+  1100 0000062C A31804                          MOV     [UIP],AX
+  1101                                  
+  1102 0000062F 89E7                            MOV     DI,SP           ; SS:SP=AX
+  1103 00000631 BB0004                          MOV     BX,  UAX        ; Update User registers, DI=pointing to AX
+  1104 00000634 B90B00                          MOV     CX,11
+  1105                                  NEXTUREG:
+  1106 00000637 368B05                          MOV     AX,[SS:DI]      ; Get register
+  1107 0000063A 8907                            MOV     [BX],AX         ; Write it to user reg
+  1108 0000063C 83C302                          ADD     BX,2
+  1109 0000063F 83C702                          ADD     DI,2
+  1110 00000642 E2F3                            LOOP    NEXTUREG
+  1111                                  
+  1112 00000644 89E8                            MOV     AX,BP           ; Save User SP
+  1113 00000646 83C008                          ADD     AX,8
+  1114 00000649 A30804                          MOV     [USP],AX
+  1115                                  
+  1116 0000064C 368B4600                        MOV     AX,[SS:BP]
+  1117 00000650 A30A04                          MOV     [UBP],AX        ; Restore real BP value
+  1118                                  
+  1119 00000653 368B4606                        MOV     AX,[SS:BP+6]    ; Save Flags
+  1120 00000657 A31A04                          MOV     [UFL],AX
+  1121 0000065A 81261A04FFFE                    AND     word [UFL],0FEFFh; Clear TF
+  1122                                  ;        TEST    AX,0100h        ; Check If Trace flag set then
+  1123                                  ;        JZ      CONTBPC         ; No, check which bp triggered it
+  1124                                  
+  1125 00000660 EB00                            JMP     EXITINT3        ; Exit, Display regs, Cmd prompt
+  1126                                  
+  1127                                  ;CONTBPC:
+  1128                                  ;        DEC     word [UIP]      ; No, IP-1 and save;
+  1129                                  
+  1130                                  ;        MOV     SI,  BREAKP_MESS; Display "***** BreakPoint # *****
+  1131                                  
+  1132                                  ;        MOV     BX,  BPTAB      ; Check which breakpoint triggered
+  1133                                  ;        MOV     CX,8            ; and restore opcode
+  1134                                  ;INTNEXTBP:
+  1135                                  ;        MOV     AX,8
+  1136                                  ;        SUB     AL,CL
+  1137                                  
+  1138                                  ;        TEST    BYTE [BX+3],1   ; Check enable/disable flag
+  1139                                  ;        JZ      INT3RESBP
+  1140                                  
+  1141                                  ;        MOV     DI,[BX]         ; Get Breakpoint Address
+  1142                                  ;        CMP     [UIP],DI
+  1143                                  ;        JNE     INT3RES
+  1144                                  
+  1145                                  ;        ADD     AL, '0'         ; Add the numeric bias
+  1146                                  ;        MOV     [SI+18],AL      ; Save number
+  1147                                  
+  1148                                  ;INT3RES:
+  1149                                  ;        MOV     AL,BYTE [BX+2]  ; Get original Opcode
+  1150                                  ;       MOV     [ES:DI],AL      ; Write it back
+  1151                                  
+  1152                                  ;INT3RESBP:
+  1153                                  ;       ADD     BX,4            ; Next entry
+  1154                                  ;       LOOP    INTNEXTBP
+  1155                                  
+  1156                                  ;        CALL    PUTS            ; Write BP Number message
+  1157                                  
+  1158                                  EXITINT3:
+  1159 00000662 B80091                          MOV     ax, 9100h       ; Stack at top of RAM
+  1160 00000665 8ED0                            MOV     ss, ax
+  1161 00000667 B80000                          MOV     ax, 0000h       ; Set DS
+  1162 0000066A 8ED8                            MOV     DS,AX
+  1163 0000066C B800A0                          MOV     AX,  TOS        ; Top of Stack
+  1164 0000066F 89C4                            MOV     SP,AX           ; Restore Monitor Stack pointer
+  1165 00000671 B85000                          MOV     AX,BASE_SEGMENT ; Restore Base Pointer
+  1166 00000674 8EC0                            MOV     ES,AX
+  1167                                  
+  1168 00000676 E9CEFC                          JMP     DISPREG         ; Jump to Display Registers
+  1169                                  
+  1170                                  ;======================================================================
+  1171                                  ; BIOS Services
+  1172                                  ;======================================================================
+  1173                                  
+  1174                                  ;----------------------------------------------------------------------
+  1175                                  ; Interrupt 10H, video function
+  1176                                  ; Service   0E   Teletype Output
+  1177                                  ; Input     AL   Character, BL and BH are ignored
+  1178                                  ; Output
+  1179                                  ; Changed
+  1180                                  ;----------------------------------------------------------------------
+  1181                                  INT10:
+  1182 00000679 80FC0E                          CMP     AH,0Eh
+  1183 0000067C 7505                            JNE     ISR10_X
+  1184                                  
+  1185 0000067E E859FF                          CALL    TXCHAR          ; Transmit character
+  1186 00000681 EB08                            JMP     ISR10_RET
+  1187                                  
+  1188                                  ;----------------------------------------------------------------------
+  1189                                  ; Service Unkown service, display message int and ah value, return to monitor
+  1190                                  ;----------------------------------------------------------------------
+  1191                                  ISR10_X:
+  1192 00000683 B010                            MOV     AL,10h
+  1193 00000685 E8FE00                          CALL    DISPSERI        ; Display Int and service number
+  1194 00000688 E975F9                          JMP     INITMON         ; Jump back to monitor
+  1195                                  
+  1196                                  ISR10_RET:
+  1197 0000068B CF                              IRET
+  1198                                  
+  1199                                  
+  1200                                  ;----------------------------------------------------------------------
+  1201                                  ; Interrupt 16H, I/O function
+  1202                                  ; Service   00   Wait for keystroke
+  1203                                  ; Input
+  1204                                  ; Output    AL   Character, AH=ScanCode=0
+  1205                                  ; Changed   AX
+  1206                                  ;----------------------------------------------------------------------
+  1207                                  INT16:
+  1208 0000068C 52                              PUSH    DX
+  1209 0000068D 55                              PUSH    BP
+  1210 0000068E 89E5                            MOV     BP,SP
+  1211                                  
+  1212                                  ISR16_00:
+  1213 00000690 80FC00                          CMP     AH,00h
+  1214 00000693 7507                            JNE     ISR16_01
+  1215                                  
+  1216 00000695 E853FF                          CALL    RXCHAR
+  1217 00000698 30E4                            XOR     AH,AH
+  1218                                  
+  1219 0000069A EB27                            JMP     ISR16_RET
+  1220                                  
+  1221                                  ;----------------------------------------------------------------------
+  1222                                  ; Interrupt 16H, I/O function
+  1223                                  ; Service   01   Check for keystroke (kbhit)
+  1224                                  ; Input
+  1225                                  ; Output    AL   Character, AH=ScanCode=0 ZF=0 when keystoke available
+  1226                                  ; Changed   AX
+  1227                                  ;----------------------------------------------------------------------
+  1228                                  ISR16_01:
+  1229 0000069C 80FC01                          CMP     AH,01h
+  1230 0000069F 751A                            JNE     ISR16_X
+  1231                                  
+  1232 000006A1 30E4                            XOR     AH,AH           ; Clear ScanCode
+  1233 000006A3 36834E0840                      OR      WORD [SS:BP+8],0040h; SET ZF in stack stored flag
+  1234                                  
+  1235 000006A8 BA85FA                          MOV     DX,uart_lsr
+  1236 000006AB EC                              IN      AL,DX           ; Get Status
+  1237 000006AC 2401                            AND     AL,01h
+  1238 000006AE 7413                            JZ      ISR16_RET       ; No keystoke
+  1239                                  
+  1240 000006B0 BA80FA                          MOV     DX,uart_rbr
+  1241 000006B3 EC                              IN      AL,DX           ; return result in al
+  1242 000006B4 36836608BF                      AND     WORD [SS:BP+8],0FFBFh; Clear ZF in stack stored flag
+  1243                                  
+  1244 000006B9 EB08                            JMP     ISR16_RET
+  1245                                  
+  1246                                  ;----------------------------------------------------------------------
+  1247                                  ; Service Unkown service, display message int and ah value, return to monitor
+  1248                                  ;----------------------------------------------------------------------
+  1249                                  ISR16_X:
+  1250 000006BB B016                            MOV     AL,16h
+  1251 000006BD E8C600                          CALL    DISPSERI        ; Display Int and service number
+  1252 000006C0 E93DF9                          JMP     INITMON         ; Jump back to monitor
+  1253                                  
+  1254                                  ISR16_RET:
+  1255 000006C3 5D                              POP     BP
+  1256 000006C4 5A                              POP     DX
+  1257 000006C5 CF                              IRET
+  1258                                  
+  1259                                  
+  1260                                  ;----------------------------------------------------------------------
+  1261                                  ;  INT 1AH, timer function
+  1262                                  ;  AX is not saved!
+  1263                                  ;        Addr    Function
+  1264                                  ;====    =========================================;
+  1265                                  ; 00     current second for real-time clock
+  1266                                  ; 02     current minute
+  1267                                  ; 04     current hour
+  1268                                  ; 07     current date of month
+  1269                                  ; 08     current month
+  1270                                  ; 09     current year  (final two digits; eg, 93)
+  1271                                  ; 0A     Status Register A - Read/Write except UIP
+  1272                                  ;----------------------------------------------------------------------
+  1273                                  INT1A:
+  1274 000006C6 1E                              PUSH    DS
+  1275 000006C7 55                              PUSH    BP
+  1276 000006C8 89E5                            MOV     BP,SP
+  1277                                  
+  1278                                  ;----------------------------------------------------------------------
+  1279                                  ; Interrupt 1AH, Time function
+  1280                                  ; Service   00   Get System Time in ticks
+  1281                                  ; Input
+  1282                                  ; Output    CX:DX ticks since midnight
+  1283                                  ;----------------------------------------------------------------------
+  1284                                  ISR1A_00:
+  1285 000006CA 31D2                            XOR     DX,DX
+  1286 000006CC 31C9                            XOR     CX,CX
+  1287 000006CE EB1E                            JMP     ISR1A_RET       ; exit
+  1288                                  
+  1289                                  
+  1290                                  ;----------------------------------------------------------------------
+  1291                                  ; Interrupt 1AH, Time function
+  1292                                  ; Service   01   Set System Time from ticks
+  1293                                  ; Input     CX:DX ticks since midnight
+  1294                                  ; Output
+  1295                                  ;----------------------------------------------------------------------
+  1296                                  ISR1A_01:
+  1297 000006D0 31D2                            XOR     DX,DX
+  1298 000006D2 31C9                            XOR     CX,CX
+  1299 000006D4 EB18                            JMP     ISR1A_RET       ; exit
+  1300                                  
+  1301                                  
+  1302                                  ;----------------------------------------------------------------------
+  1303                                  ; Interrupt 1AH, Time function
+  1304                                  ; Service   02   Get RTC time
+  1305                                  ;   exit :  CF clear if successful, set on error ***NOT YET ADDED***
+  1306                                  ;           CH = hour (BCD)
+  1307                                  ;           CL = minutes (BCD)
+  1308                                  ;           DH = seconds (BCD)
+  1309                                  ;           DL = daylight savings flag  (!! NOT IMPLEMENTED !!)
+  1310                                  ;                (00h standard time, 01h daylight time)
+  1311                                  ;----------------------------------------------------------------------
+  1312                                  ISR1A_02:
+  1313 000006D6 31D2                            XOR     DX,DX
+  1314 000006D8 31C9                            XOR     CX,CX
+  1315 000006DA EB12                            JMP     ISR1A_RET       ; exit
+  1316                                  
+  1317                                  ;----------------------------------------------------------------------
+  1318                                  ; Int 1Ah function 03h - Set RTC time
+  1319                                  ;   entry:  AH = 03h
+  1320                                  ;           CH = hour (BCD)
+  1321                                  ;           CL = minutes (BCD)
+  1322                                  ;           DH = seconds (BCD)
+  1323                                  ;           DL = daylight savings flag (as above)
+  1324                                  ;   exit:   none
+  1325                                  ;----------------------------------------------------------------------
+  1326                                  ISR1A_03:
+  1327                                  
+  1328 000006DC EB10                            JMP     ISR1A_RET
+  1329                                  
+  1330                                  ;----------------------------------------------------------------------
+  1331                                  ; Int 1Ah function 04h - Get RTC date
+  1332                                  ;   entry:  AH = 04h
+  1333                                  ;   exit:   CF clear if successful, set on error
+  1334                                  ;           CH = century (BCD)
+  1335                                  ;           CL = year (BCD)
+  1336                                  ;           DH = month (BCD)
+  1337                                  ;           DL = day (BCD)
+  1338                                  ;----------------------------------------------------------------------
+  1339                                  ISR1A_04:
+  1340 000006DE 31D2                            XOR     DX,DX
+  1341 000006E0 31C9                            XOR     CX,CX
+  1342 000006E2 EB0A                            JMP     ISR1A_RET
+  1343                                  
+  1344                                  ;----------------------------------------------------------------------
+  1345                                  ; Int 1Ah function 05h - Set RTC date
+  1346                                  ;   entry:  AH = 05h
+  1347                                  ;           CH = century (BCD)
+  1348                                  ;           CL = year (BCD)
+  1349                                  ;           DH = month (BCD)
+  1350                                  ;           DL = day (BCD)
+  1351                                  ;   exit:   none
+  1352                                  ;----------------------------------------------------------------------
+  1353                                  ISR1A_05:
+  1354 000006E4 EB08                            JMP     ISR1A_RET
+  1355                                  
+  1356                                  ;----------------------------------------------------------------------
+  1357                                  ; Interrupt 1Ah
+  1358                                  ; Service   xx   Unknown service, print message, jump to monitor
+  1359                                  ;----------------------------------------------------------------------
+  1360                                  ISR1A_X:
+  1361 000006E6 B01A                            MOV     AL,1Ah
+  1362 000006E8 E89B00                          CALL    DISPSERI        ; Display Int and service number
+  1363 000006EB E912F9                          JMP     INITMON         ; Jump back to monitor
+  1364                                  
+  1365                                  ISR1A_RET:
+  1366 000006EE 36836608FE                      AND     WORD [SS:BP+8],0FFFEh; Clear Carry to indicate no error
+  1367 000006F3 5D                              POP     BP
+  1368 000006F4 1F                              POP     DS
+  1369 000006F5 CF                              IRET
+  1370                                  
+  1371                                  ;----------------------------------------------------------------------
+  1372                                  ; INT 21H, basic I/O functions
+  1373                                  ; AX REGISTER NOT SAVED
+  1374                                  ;----------------------------------------------------------------------
+  1375                                  INT21:
+  1376 000006F6 1E                              PUSH    DS              ; DS used for service 25h
+  1377 000006F7 06                              PUSH    ES
+  1378 000006F8 56                              PUSH    SI
+  1379                                  
+  1380 000006F9 FB                              STI                     ; INT21 is reentrant!
+  1381                                  
+  1382                                  ;----------------------------------------------------------------------
+  1383                                  ; Interrupt 21h
+  1384                                  ; Service   01   get character from UART
+  1385                                  ; Input
+  1386                                  ; Output    AL   character read
+  1387                                  ; Changed   AX
+  1388                                  ;----------------------------------------------------------------------
+  1389                                  ISR21_1:
+  1390 000006FA 80FC01                          CMP     AH,01
+  1391 000006FD 7505                            JNE     ISR21_2
+  1392                                  
+  1393 000006FF E8E9FE                          CALL    RXCHAR          ; Return result in AL
+  1394 00000702 EB7E                            JMP     ISR21_RET       ; return to caller
+  1395                                  
+  1396                                  ;----------------------------------------------------------------------
+  1397                                  ; Interrupt 21h
+  1398                                  ; Service   02   write character to UART
+  1399                                  ; Input     DL   character
+  1400                                  ; Output
+  1401                                  ; Changed   AX
+  1402                                  ;----------------------------------------------------------------------
+  1403                                  ISR21_2:
+  1404 00000704 80FC02                          CMP     AH,02
+  1405 00000707 7507                            JNE     ISR21_8
+  1406                                  
+  1407 00000709 88D0                            MOV     AL,DL
+  1408 0000070B E8CCFE                          CALL    TXCHAR
+  1409                                  
+  1410 0000070E EB72                            JMP     ISR21_RET       ; return to caller
+  1411                                  
+  1412                                  ;----------------------------------------------------------------------
+  1413                                  ; Interrupt 21h
+  1414                                  ; Service   08   Console input without an echo
+  1415                                  ; Input
+  1416                                  ; Output
+  1417                                  ; Changed   AX
+  1418                                  ;----------------------------------------------------------------------
+  1419                                  ISR21_8:
+  1420 00000710 80FC08                          CMP     AH,08
+  1421 00000713 7505                            JNE     ISR21_9
+  1422                                  
+  1423 00000715 E8D3FE                          CALL    RXCHAR          ; Return result in AL
+  1424 00000718 EB68                            JMP     ISR21_RET       ; return to caller
+  1425                                  
+  1426                                  ;----------------------------------------------------------------------
+  1427                                  ; Interrupt 21h
+  1428                                  ; Service   09   write 0 terminated string to UART  (change to $ terminated ??)
+  1429                                  ; Input     DX     to string
+  1430                                  ; Output
+  1431                                  ; Changed   AX
+  1432                                  ;----------------------------------------------------------------------
+  1433                                  ISR21_9:
+  1434 0000071A 80FC09                          CMP     AH,09
+  1435 0000071D 7507                            JNE     ISR21_25
+  1436                                  
+  1437 0000071F 89D6                            MOV     SI,DX
+  1438 00000721 E8F3FD                          CALL    PUTSD           ; Display string DS[SI]
+  1439                                  
+  1440 00000724 EB5C                            JMP     ISR21_RET       ; return to caller
+  1441                                  
+  1442                                  ;----------------------------------------------------------------------
+  1443                                  ; Interrupt 21h
+  1444                                  ; Service   25   Set Interrupt Vector
+  1445                                  ; Input     AL   Interrupt Number, DS:DX -> new interrupt handler
+  1446                                  ; Output
+  1447                                  ; Changed   AX
+  1448                                  ;----------------------------------------------------------------------
+  1449                                  ISR21_25:
+  1450 00000726 80FC25                          CMP     AH,25h
+  1451 00000729 7517                            JNE     ISR21_0B
+  1452                                  
+  1453 0000072B FA                              CLI                     ; Disable Interrupts
+  1454 0000072C 30E4                            XOR     AH,AH
+  1455 0000072E 89C6                            MOV     SI,AX
+  1456 00000730 D1EE                            SHR     SI,1
+  1457 00000732 D1EE                            SHR     SI,1            ; Int number * 4
+  1458                                  
+  1459 00000734 31C0                            XOR     AX,AX
+  1460 00000736 8EC0                            MOV     ES,AX           ; Int table segment=0000
+  1461                                  
+  1462 00000738 268914                          MOV     [ES:SI],DX      ; Set
+  1463 0000073B 46                              INC     SI
+  1464 0000073C 46                              INC     SI              ; SI POINT TO INT CS
+  1465 0000073D 268C1C                          MOV     [ES:SI],DS      ; Set segment
+  1466                                  
+  1467                                  
+  1468 00000740 EB40                            JMP     ISR21_RET       ; return to caller
+  1469                                  
+  1470                                  ;----------------------------------------------------------------------
+  1471                                  ; Interrupt 21h
+  1472                                  ; Service   48   Allocate memory
+  1473                                  ; Input
+  1474                                  ; Output
+  1475                                  ; Changed   AX
+  1476                                  ;----------------------------------------------------------------------
+  1477                                  ;ISR21_48:CMP       AH,48h
+  1478                                  ;        JNE    ISR21_4C
+  1479                                  ;        JMP    ISR21_RET                       ; return to caller
+  1480                                  
+  1481                                  
+  1482                                  ;----------------------------------------------------------------------
+  1483                                  ; Interrupt 21h
+  1484                                  ; Service   0Bh  Check for character waiting (kbhit)
+  1485                                  ; Input
+  1486                                  ; Output    AL   kbhit status !=0 if key pressed
+  1487                                  ; Changed   AL
+  1488                                  ;----------------------------------------------------------------------
+  1489                                  ISR21_0B:
+  1490 00000742 80FC0B                          CMP     AH,0Bh
+  1491 00000745 750A                            JNE     ISR21_2C
+  1492                                  
+  1493 00000747 30E4                            XOR     AH,AH
+  1494 00000749 BA85FA                          MOV     DX,uart_lsr     ; get UART RX status
+  1495 0000074C EC                              IN      AL,DX
+  1496 0000074D 2420                            AND     AL,20h
+  1497                                  
+  1498 0000074F EB31                            JMP     ISR21_RET
+  1499                                  
+  1500                                  ;----------------------------------------------------------------------
+  1501                                  ; Interrupt 21h
+  1502                                  ; Service   2Ch  Get System Time
+  1503                                  ;           CH = hour (BCD)
+  1504                                  ;           CL = minutes (BCD)
+  1505                                  ;           DH = seconds (BCD)
+  1506                                  ;           DL = 0
+  1507                                  ;----------------------------------------------------------------------
+  1508                                  ISR21_2C:
+  1509 00000751 80FC2C                          CMP     AH,02Ch
+  1510 00000754 7502                            JNE     ISR21_30
+  1511                                  
+  1512                                  ;            MOV        AH,02h
+  1513                                  ;            INT        1Ah
+  1514                                  ;            XOR        DL,DL                       ; Ignore 1/100 seconds value
+  1515 00000756 EB2A                            JMP     ISR21_RET
+  1516                                  
+  1517                                  ;----------------------------------------------------------------------
+  1518                                  ; Interrupt 21h
+  1519                                  ; Service   30h  Get DOS version, return 2
+  1520                                  ;----------------------------------------------------------------------
+  1521                                  ISR21_30:
+  1522 00000758 80FC30                          CMP     AH,030h
+  1523 0000075B 7504                            JNE     ISR21_4C
+  1524                                  
+  1525 0000075D B002                            MOV     AL,02           ; DOS=2.0
+  1526                                  
+  1527 0000075F EB21                            JMP     ISR21_RET
+  1528                                  
+  1529                                  ;----------------------------------------------------------------------
+  1530                                  ; Interrupt 21h
+  1531                                  ; Service   4Ch  exit to bootloader
+  1532                                  ;----------------------------------------------------------------------
+  1533                                  ISR21_4C:
+  1534 00000761 80FC4C                          CMP     AH,04CH
+  1535 00000764 7514                            JNE     ISR21_x
+  1536 00000766 88C3                            MOV     BL,AL           ; Save exit code
+  1537                                  
+  1538 00000768 8CC8                            MOV     AX,CS
+  1539 0000076A 8ED8                            MOV     DS,AX
+  1540 0000076C BE[4A09]                        MOV     SI,  TERM_MESS
+  1541 0000076F E88DFD                          CALL    PUTS
+  1542 00000772 88D8                            MOV     AL,BL
+  1543 00000774 E822FE                          CALL    PUTHEX2
+  1544                                  
+  1545 00000777 E986F8                          JMP     INITMON         ; Re-start MON88
+  1546                                  
+  1547                                  ;----------------------------------------------------------------------
+  1548                                  ; Interrupt 21h
+  1549                                  ; Service   xx   Unkown service, display message int and ah value, return to monitor
+  1550                                  ;----------------------------------------------------------------------
+  1551                                  ISR21_x:
+  1552 0000077A B021                            MOV     AL,21h
+  1553 0000077C E80700                          CALL    DISPSERI        ; Display Int and service number
+  1554 0000077F E97EF8                          JMP     INITMON         ; Jump back to monitor
+  1555                                  
+  1556                                  ISR21_RET:
+  1557 00000782 5E                              POP     SI
+  1558 00000783 07                              POP     ES
+  1559 00000784 1F                              POP     DS
+  1560 00000785 CF                              IRET
+  1561                                  
+  1562                                  ;----------------------------------------------------------------------
+  1563                                  ; Unknown Service Handler
+  1564                                  ; Display Message, interrupt and service number before jumping back to the monitor
+  1565                                  ;----------------------------------------------------------------------
+  1566                                  DISPSERI:
+  1567 00000786 89C3                            MOV     BX,AX           ; Store int number (AL) and service (AH)
+  1568 00000788 B80000                          MOV     ax, 0000h       ; Set DS
+  1569 0000078B 8ED8                            MOV     DS,AX
+  1570 0000078D BE[D50C]                        MOV     SI,  UNKNOWNSER_MESS; Print Error: Unknown Service
+  1571 00000790 E86CFD                          CALL    PUTS
+  1572 00000793 88D8                            MOV     AL,BL
+  1573 00000795 E801FE                          CALL    PUTHEX2         ; Print Interrupt Number
+  1574 00000798 B02C                            MOV     AL,','
+  1575 0000079A E83DFE                          CALL    TXCHAR
+  1576 0000079D 88F8                            MOV     AL,BH
+  1577 0000079F E8F7FD                          CALL    PUTHEX2         ; Write Service number
+  1578 000007A2 C3                              RET
+  1579                                  
+  1580                                  ;----------------------------------------------------------------------
+  1581                                  ; Spurious Interrupt Handler
+  1582                                  ;----------------------------------------------------------------------
+  1583                                  INTX:
+  1584 000007A3 1E                              PUSH    DS
+  1585 000007A4 56                              PUSH    SI
+  1586 000007A5 50                              PUSH    AX
+  1587                                  
+  1588 000007A6 BE[B40C]                        MOV     SI,  UNKNOWN_MESS; Print Error: Unknown Service
+  1589 000007A9 E853FD                          CALL    PUTS
+  1590                                  
+  1591 000007AC 58                              POP     AX
+  1592 000007AD 5E                              POP     SI
+  1593 000007AE 1F                              POP     DS
+  1594 000007AF CF                              IRET
+  1595                                  
+  1596                                  
+  1597                                  ;----------------------------------------------------------------------
+  1598                                  ; Text Strings
+  1599                                  ;----------------------------------------------------------------------
+  1600                                  WELCOME_MESS:
+  1601 000007B0 0D0A0A4D4F4E383820-             DB      CR,LF,LF,"MON88 8088/8086 Monitor ver 0.1"
+  1601 000007B9 383038382F38303836-
+  1601 000007C2 204D6F6E69746F7220-
+  1601 000007CB 76657220302E31     
+  1602 000007D2 0D0A436F7079726967-             DB      CR,LF,"Copyright WWW.HT-LAB.COM 2005",
+  1602 000007DB 6874205757572E4854-
+  1602 000007E4 2D4C41422E434F4D20-
+  1602 000007ED 32303035           
+  1603 000007F1 0D0A4D6F6469666965-             DB      CR,LF,"Modified for Duodyne 80c188",
+  1603 000007FA 6420666F722044756F-
+  1603 00000803 64796E652038306331-
+  1603 0000080C 3838               
+  1604 0000080E 0D0A416C6C20726967-             DB      CR,LF,"All rights reserved.",CR,LF,0
+  1604 00000817 687473207265736572-
+  1604 00000820 7665642E0D0A00     
+  1605                                  PROMPT_MESS:
+  1606 00000827 0D0A436D643E00                  DB      CR,LF,"Cmd>",0
+  1607                                  ERRCMD_MESS:
+  1608 0000082E 203C2D20556E6B6E6F-             DB      " <- Unknown Command, type H to Display Help",0
+  1608 00000837 776E20436F6D6D616E-
+  1608 00000840 642C20747970652048-
+  1608 00000849 20746F20446973706C-
+  1608 00000852 61792048656C7000   
+  1609                                  ERRREG_MESS:
+  1610 0000085A 203C2D20556E6B6E6F-             DB      " <- Unknown Register, valid names: AX,BX,CX,DX,SP,BP,SI,DI,DS,ES,SS,CS,IP,FL",0
+  1610 00000863 776E20526567697374-
+  1610 0000086C 65722C2076616C6964-
+  1610 00000875 206E616D65733A2041-
+  1610 0000087E 582C42582C43582C44-
+  1610 00000887 582C53502C42502C53-
+  1610 00000890 492C44492C44532C45-
+  1610 00000899 532C53532C43532C49-
+  1610 000008A2 502C464C00         
+  1611                                  
+  1612                                  LOAD_MESS:
+  1613 000008A7 0D0A53746172742075-             DB      CR,LF,"Start upload now, load is terminated by :00000001FF",CR,LF,0
+  1613 000008B0 706C6F6164206E6F77-
+  1613 000008B9 2C206C6F6164206973-
+  1613 000008C2 207465726D696E6174-
+  1613 000008CB 6564206279203A3030-
+  1613 000008D4 30303030303146460D-
+  1613 000008DD 0A00               
+  1614                                  LD_CHKS_MESS:
+  1615 000008DF 0D0A4572726F723A20-             DB      CR,LF,"Error: CheckSum failure",CR,LF,0
+  1615 000008E8 436865636B53756D20-
+  1615 000008F1 6661696C7572650D0A-
+  1615 000008FA 00                 
+  1616                                  LD_REC_MESS:
+  1617 000008FB 0D0A4572726F723A20-             DB      CR,LF,"Error: Unknown Record Type",CR,LF,0
+  1617 00000904 556E6B6E6F776E2052-
+  1617 0000090D 65636F726420547970-
+  1617 00000916 650D0A00           
+  1618                                  LD_HEX_MESS:
+  1619 0000091A 0D0A4572726F723A20-             DB      CR,LF,"Error: Non Hex value received",CR,LF,0
+  1619 00000923 4E6F6E204865782076-
+  1619 0000092C 616C75652072656365-
+  1619 00000935 697665640D0A00     
+  1620                                  LD_OK_MESS:
+  1621 0000093C 0D0A4C6F616420646F-             DB      CR,LF,"Load done",CR,LF,0
+  1621 00000945 6E650D0A00         
+  1622                                  TERM_MESS:
+  1623 0000094A 0D0A50726F6772616D-             DB      CR,LF,"Program Terminated with exit code ",0
+  1623 00000953 205465726D696E6174-
+  1623 0000095C 656420776974682065-
+  1623 00000965 78697420636F646520-
+  1623 0000096E 00                 
+  1624                                  
+  1625                                  ; Mess+18=? character, change by bp number
+  1626                                  BREAKP_MESS:
+  1627 0000096F 0D0A2A2A2A2A204252-             DB      CR,LF,"**** BREAKPOINT ? ****",CR,LF,0
+  1627 00000978 45414B504F494E5420-
+  1627 00000981 3F202A2A2A2A0D0A00 
+  1628                                  
+  1629                                  FLAG_MESS:
+  1630 0000098A 2020204F4449542D53-             DB      "   ODIT-SZAPC=",0
+  1630 00000993 5A4150433D00       
+  1631                                  FLAG_VALID:
+  1632 00000999 585858582E2E2E2E2E-             DB      "XXXX......X.X.X.",0; X=Don't display flag bit, .=Display
+  1632 000009A2 2E582E582E582E00   
+  1633                                  
+  1634                                  HELP_MESS:
+  1635 000009AA 0D0A436F6D6D616E64-             DB      CR,LF,"Commands"
+  1635 000009B3 73                 
+  1636 000009B4 0D0A44207B66726F6D-             DB      CR,LF,"D {from} {to}         : Dump Memory, example D 0000 0100"
+  1636 000009BD 7D207B746F7D202020-
+  1636 000009C6 2020202020203A2044-
+  1636 000009CF 756D70204D656D6F72-
+  1636 000009D8 792C206578616D706C-
+  1636 000009E1 652044203030303020-
+  1636 000009EA 30313030           
+  1637 000009EE 0D0A46207B66726F6D-             DB      CR,LF,"F {from} {to} {Byte}  : Fill Memory, example FM 0200 020F 5A"
+  1637 000009F7 7D207B746F7D207B42-
+  1637 00000A00 7974657D20203A2046-
+  1637 00000A09 696C6C204D656D6F72-
+  1637 00000A12 792C206578616D706C-
+  1637 00000A1B 6520464D2030323030-
+  1637 00000A24 2030323046203541   
+  1638 00000A2C 0D0A52202020202020-             DB      CR,LF,"R                     : Display Registers"
+  1638 00000A35 202020202020202020-
+  1638 00000A3E 2020202020203A2044-
+  1638 00000A47 6973706C6179205265-
+  1638 00000A50 67697374657273     
+  1639 00000A57 0D0A43207B7265677D-             DB      CR,LF,"C {reg}               : Change Registers, example CR SP=1234"
+  1639 00000A60 202020202020202020-
+  1639 00000A69 2020202020203A2043-
+  1639 00000A72 68616E676520526567-
+  1639 00000A7B 6973746572732C2065-
+  1639 00000A84 78616D706C65204352-
+  1639 00000A8D 2053503D31323334   
+  1640 00000A95 0D0A4C202020202020-             DB      CR,LF,"L                     : Load Intel hexfile"
+  1640 00000A9E 202020202020202020-
+  1640 00000AA7 2020202020203A204C-
+  1640 00000AB0 6F616420496E74656C-
+  1640 00000AB9 2068657866696C65   
+  1641 00000AC1 0D0A4720207B416464-             DB      CR,LF,"G  {Address}          : Execute, example G 0100"
+  1641 00000ACA 726573737D20202020-
+  1641 00000AD3 2020202020203A2045-
+  1641 00000ADC 7865637574652C2065-
+  1641 00000AE5 78616D706C65204720-
+  1641 00000AEE 30313030           
+  1642 00000AF2 0D0A42207B576F7264-             DB      CR,LF,"B {Word}              : Change Base Segment Address, example BS 0340"
+  1642 00000AFB 7D2020202020202020-
+  1642 00000B04 2020202020203A2043-
+  1642 00000B0D 68616E676520426173-
+  1642 00000B16 65205365676D656E74-
+  1642 00000B1F 20416464726573732C-
+  1642 00000B28 206578616D706C6520-
+  1642 00000B31 42532030333430     
+  1643 00000B38 0D0A5742207B416464-             DB      CR,LF,"WB {Address} {Byte}   : Write Byte to address, example WB 1234 5A"
+  1643 00000B41 726573737D207B4279-
+  1643 00000B4A 74657D2020203A2057-
+  1643 00000B53 726974652042797465-
+  1643 00000B5C 20746F206164647265-
+  1643 00000B65 73732C206578616D70-
+  1643 00000B6E 6C6520574220313233-
+  1643 00000B77 34203541           
+  1644 00000B7B 0D0A5757207B416464-             DB      CR,LF,"WW {Address} {Word}   : Write Word to address"
+  1644 00000B84 726573737D207B576F-
+  1644 00000B8D 72647D2020203A2057-
+  1644 00000B96 7269746520576F7264-
+  1644 00000B9F 20746F206164647265-
+  1644 00000BA8 7373               
+  1645 00000BAA 0D0A4942207B506F72-             DB      CR,LF,"IB {Port}             : Read Byte from Input port, example IB 03F8"
+  1645 00000BB3 747D20202020202020-
+  1645 00000BBC 2020202020203A2052-
+  1645 00000BC5 656164204279746520-
+  1645 00000BCE 66726F6D20496E7075-
+  1645 00000BD7 7420706F72742C2065-
+  1645 00000BE0 78616D706C65204942-
+  1645 00000BE9 2030334638         
+  1646 00000BEE 0D0A4957207B506F72-             DB      CR,LF,"IW {Port}             : Read Word from Input port"
+  1646 00000BF7 747D20202020202020-
+  1646 00000C00 2020202020203A2052-
+  1646 00000C09 65616420576F726420-
+  1646 00000C12 66726F6D20496E7075-
+  1646 00000C1B 7420706F7274       
+  1647 00000C21 0D0A4F42207B506F72-             DB      CR,LF,"OB {Port} {Byte}      : Write Byte to Output port, example OB 03F8 3A"
+  1647 00000C2A 747D207B427974657D-
+  1647 00000C33 2020202020203A2057-
+  1647 00000C3C 726974652042797465-
+  1647 00000C45 20746F204F75747075-
+  1647 00000C4E 7420706F72742C2065-
+  1647 00000C57 78616D706C65204F42-
+  1647 00000C60 2030334638203341   
+  1648 00000C68 0D0A4F57207B506F72-             DB      CR,LF,"OW {Port} {Word}      : Write Word to Output port, example OB 03F8 3A5A"
+  1648 00000C71 747D207B576F72647D-
+  1648 00000C7A 2020202020203A2057-
+  1648 00000C83 7269746520576F7264-
+  1648 00000C8C 20746F204F75747075-
+  1648 00000C95 7420706F72742C2065-
+  1648 00000C9E 78616D706C65204F42-
+  1648 00000CA7 203033463820334135-
+  1648 00000CB0 41                 
+  1649 00000CB1 0D0A00                          DB      CR,LF,0
+  1650                                  
+  1651                                  
+  1652                                  UNKNOWN_MESS:
+  1653 00000CB4 0D0A2A2A2A20455252-             DB      CR,LF,"*** ERROR: Spurious Interrupt ",0
+  1653 00000CBD 4F523A205370757269-
+  1653 00000CC6 6F757320496E746572-
+  1653 00000CCF 727570742000       
+  1654                                  UNKNOWNSER_MESS:
+  1655 00000CD5 0D0A2A2A2A20455252-             DB      CR,LF,"*** ERROR: Unknown Service INT,AH=",0
+  1655 00000CDE 4F523A20556E6B6E6F-
+  1655 00000CE7 776E20536572766963-
+  1655 00000CF0 6520494E542C41483D-
+  1655 00000CF9 00                 
+  1656                                  
+  1657                                          %INCLUDE "startup.asm"
+  1658                              <1> ; ROM startup code Duodyne 80C188
+  1659                              <1> ; This is based on the STARTUP.ASM for the N8VEM SBC-188, which is under GPL 3.
+  1660                              <1>         [LIST   -]
+  1663                              <1> 
+  1664                              <1>         SECTION startup start=1FF00h vstart=0FFF00h
+  1665                              <1> 
+  1666                              <1> begin:
+  1667 00000000 FA                  <1>         CLI
+  1668 00000001 FC                  <1>         CLD
+  1669 00000002 B6FF                <1>         MOV     dh, ip_base >> 8
+  1670 00000004 BE[6C00]            <1>         MOV     si, table       ; Point to the table
+  1671 00000007 8CC8                <1>         MOV     ax, cs
+  1672 00000009 8ED8                <1>         MOV     ds, ax
+  1673 0000000B B90400              <1>         MOV     cx, tablecnt
+  1674                              <1> 
+  1675                              <1> .1:
+  1676 0000000E AC                  <1>         LODSB                   ; Initialise registers from table
+  1677 0000000F 88C2                <1>         MOV     dl, al
+  1678 00000011 AD                  <1>         LODSW
+  1679 00000012 EF                  <1>         OUT     dx, ax
+  1680 00000013 E2F9                <1>         LOOP    .1
+  1681                              <1> 
+  1682 00000015 B80091              <1>         MOV     ax, 9100h       ; Stack at top of RAM
+  1683 00000018 8ED0                <1>         MOV     ss, ax
+  1684 0000001A BC0070              <1>         MOV     sp, 7000h
+  1685 0000001D B80091              <1>         MOV     ax, 9100h       ; Set DS
+  1686 00000020 8ED8                <1>         MOV     ds, ax
+  1687 00000022 B800F0              <1>         MOV     ax, 0F000h      ; Set CS=ES
+  1688 00000025 8EC0                <1>         MOV     es, ax
+  1689                              <1> 
+  1690                              <1> ; setup UART
+  1691 00000027 B080                <1>         MOV     al,80h
+  1692 00000029 BA83FA              <1>         MOV     dx,uart_lcr
+  1693 0000002C EE                  <1>         OUT     dx,al
+  1694 0000002D B00C                <1>         MOV     al,12
+  1695 0000002F BA80FA              <1>         MOV     dx,uart_thr
+  1696 00000032 EE                  <1>         OUT     dx,al
+  1697 00000033 B000                <1>         MOV     al,00
+  1698 00000035 BA81FA              <1>         MOV     dx,uart_ier
+  1699 00000038 EE                  <1>         OUT     dx,al
+  1700 00000039 B003                <1>         MOV     al,03
+  1701 0000003B BA83FA              <1>         MOV     dx,uart_lcr
+  1702 0000003E EE                  <1>         OUT     dx,al
+  1703 0000003F BA84FA              <1>         MOV     dx,uart_mcr
+  1704 00000042 EE                  <1>         OUT     dx,al
+  1705                              <1> 
+  1706 00000043 B001                <1>         MOV     al,01h          ; light first LED on RAM Card
+  1707 00000045 BA94F8              <1>         MOV     dx,RAMROM_card_1
+  1708 00000048 EE                  <1>         OUT     dx,al
+  1709                              <1> 
+  1710 00000049 B000                <1>         MOV     al,00h          ; Put LED Pattern on Front Panel
+  1711 0000004B BA30FA              <1>         MOV     dx,front_panel_LEDs
+  1712 0000004E EE                  <1>         OUT     dx,al
+  1713                              <1> 
+  1714 0000004F B000                <1>         MOV     al,00h          ; Turn on First LED on CPU Card
+  1715 00000051 BA38FA              <1>         MOV     dx,local_ls259_LED1
+  1716 00000054 EE                  <1>         OUT     dx,al
+  1717 00000055 B001                <1>         MOV     al,01h          ; Turn off Second LED on CPU Card
+  1718 00000057 BA39FA              <1>         MOV     dx,local_ls259_LED2
+  1719 0000005A EE                  <1>         OUT     dx,al
+  1720 0000005B B000                <1>         MOV     al,00h          ; Turn on Third LED on CPU Card
+  1721 0000005D BA3AFA              <1>         MOV     dx,local_ls259_LED3
+  1722 00000060 EE                  <1>         OUT     dx,al
+  1723 00000061 B001                <1>         MOV     al,01h          ; Turn off Fourth LED on CPU Card
+  1724 00000063 BA3BFA              <1>         MOV     dx,local_ls259_LED4
+  1725 00000066 EE                  <1>         OUT     dx,al
+  1726                              <1> 
+  1727 00000067 EA[0000]00F0        <1>         JMP     0F000h:INITMON  ; Continue to body of ROM
+  1728                              <1> 
+  1729                              <1> table:
+  1730                              <1>         DB_LO   ics_umcs        ; ROM
+  1674 0000006C A0                  <2>  DB %1 & 0ffh
+  1731 0000006D 3CE0                <1>         DW      0E03Ch          ; 128KB, no wait states, no external ready
+  1732                              <1>         DB_LO   ics_mmcs        ; RAM
+  1674 0000006F A6                  <2>  DB %1 & 0ffh
+  1733 00000070 FC01                <1>         DW      01FCh           ; 00000h, no wait states, no external ready
+  1734                              <1>         DB_LO   ics_mpcs        ; /MCSx size, /PCSx configuration
+  1674 00000072 A8                  <2>  DB %1 & 0ffh
+  1735 00000073 BCC0                <1>         DW      0C0BCh          ; 512KB, 7 /PCSx, I/O space, no wait states, no external ready
+  1736                              <1>         DB_LO   ics_pacs        ; External peripherals
+  1674 00000075 A4                  <2>  DB %1 & 0ffh
+  1737 00000076 BC0F                <1>         DW      0FBCh           ; F800h, no wait states, no external ready (0FBCh=0 WS)
+  1738                              <1> tablecnt        EQU ($-table)/3
+  1739                              <1> 
+  1740 00000078 FF<rep 78h>         <1>         SETLOC  0F0h            ; Reset entry is FFFF:0000h
+  1741 000000F0 EA[0000]00F0        <1>         JMP     0F000h:begin    ; Jump to the startup code above
+  1742 000000F5 30392F32392F323400  <1>         DB      "09/29/24", 00h ; BIOS date (mm/dd/yy)
+  1743 000000FE FBFF                <1>         DB      0FBh, 0FFh      ; Model identifier (FBh is a 1986 XT)

@@ -1,0 +1,1300 @@
+     1                                  %define DEBUG 0
+     2                                  ;========================================================================
+     3                                  ;  startup.asm  -  start the 80C188 processor from a power-on condition
+     4                                  ;========================================================================
+     5                                  ;   This version is for assembly by  NASM 0.98.39 or later
+     6                                  ;
+     7                                  ; Copyright (C) 2010,2020 John R Coffman.  All rights reserved.
+     8                                  ; Provided for hobbyist use on the N8VEM SBC-188 v3 board.
+     9                                  ;
+    10                                  ; This program is free software: you can redistribute it and/or modify
+    11                                  ; it under the terms of the GNU General Public License as published by
+    12                                  ; the Free Software Foundation, either version 3 of the License, or
+    13                                  ; (at your option) any later version.
+    14                                  ;
+    15                                  ; This program is distributed in the hope that it will be useful,
+    16                                  ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    17                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    18                                  ; GNU General Public License for more details.
+    19                                  ;
+    20                                  ; You should have received a copy of the GNU General Public License
+    21                                  ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    22                                  ;
+    23                                  ;========================================================================
+    24
+    25                                  %include	"config.asm"
+    26                              <1> ;/*
+    27                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    28                              <1> ; ANSI.CFG
+    29                              <1> ;   Copied to CONFIG.ASM for general release.
+    30                              <1> ;
+    31                              <1> ;       Modify the parameters below to reflect your system
+    32                              <1> ;
+    33                              <1> ;
+    34                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    35                              <1> ;
+    36                              <1> ;   Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    37                              <1> ;   Provided for hobbyist use on the N8VEM SBC-188 board.
+    38                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    39                              <1> ;
+    40                              <1> ; Define the serial terminal that the Video BIOS must emulate
+    41                              <1> ; Set one of the following to 1
+    42                              <1> ; If you have no idea what to choose, set TTY to 1
+    43                              <1> TTY     equ     0       ; hardcopy -- cannot position the cursor
+    44                              <1> DUMB    equ     0       ; dumb CRT -- ^H, ^J, ^K, ^L can move the cursor
+    45                              <1> ANSI    equ     1       ; very smart, like a VT-100
+    46                              <1> WYSE    equ     0       ; very smart Wyse series (30, 50, ...)
+    47                              <1> ; others may get added in the future
+    48                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
+    49                              <1> ;
+    50                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
+    51                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
+    52                              <1> CVDU	equ	0	; system does not have the CVDU
+    53                              <1> ;
+    54                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
+    55                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
+    56                              <1> ; The default is VGA3=0
+    57                              <1> VGA3    equ     0       ; system does not have the VGA3
+    58                              <1> %if 0
+    59                              <1> 	*/
+    60                              <1> #define VGA3 0
+    61                              <1> /*
+    62                              <1> %endif
+    63                              <1> ;
+    64                              <1> ; Boot up keyboard mode:  20h for NumLock on
+    65                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
+    66                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
+    67                              <1>
+    68                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    69                              <1> ;UART_RATE	equ	0		; 1200
+    70                              <1> ;UART_RATE	equ	1		; 2400
+    71                              <1> ;UART_RATE	equ	2		; 4800
+    72                              <1> UART_RATE	equ	3		; 9600
+    73                              <1> ;UART_RATE	equ	4		; 19200
+    74                              <1> ;UART_RATE	equ	5		; 38400
+    75                              <1> ;UART_RATE	equ	6		; 57600
+    76                              <1> ;UART_RATE	equ	7		; 115200
+    77                              <1>
+    78                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    79                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    80                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    81                              <1> 						; but not ANSI
+    82                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    83                              <1> ; It may be smaller than the actual EPROM in use.
+    84                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    85                              <1> %ifndef ROM
+    86                              <1> ROM             equ     64              ; 64 is the default
+    87                              <1> %endif
+    88                              <1>
+    89                              <1> ; Define the number of Wait States at which the ROM operates
+    90                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    91                              <1>
+    92                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    93                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    94                              <1> RAM_DOS         equ     640
+    95                              <1>
+    96                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    97                              <1> ; the default is 512 kilobytes
+    98                              <1> RAM             equ     512             ; (512 is the default)
+    99                              <1>
+   100                              <1> ; Define the number of Wait States at which the RAM operates
+   101                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+   102                              <1>
+   103                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+   104                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+   105                              <1>
+   106                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+   107                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+   108                              <1>
+   109                              <1> ; Define the time zone in which we build the Relocatable BIOS
+   110                              <1> %ifndef TIMEZONE
+   111                              <1> %define TIMEZONE "CDT"
+   112                              <1> %endif
+   113                              <1>
+   114                              <1> ; Has the REDBUG debugger been loaded?
+   115                              <1> %ifndef SOFT_DEBUG
+   116                              <1> %define SOFT_DEBUG 1
+   117                              <1> %endif
+   118                              <1>
+   119                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   120                              <1> %ifndef TBASIC
+   121                              <1> TBASIC          equ     1		; default is 1
+   122                              <1> %endif
+   123                              <1>
+   124                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   125                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   126                              <1> %ifndef FPEM
+   127                              <1> FPEM            equ     1               ; default is 1
+   128                              <1> %endif
+   129                              <1>
+   130                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   131                              <1> EMM_BOARDS      equ     0
+   132                              <1>
+   133                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   134                              <1> ; or at locations 0280h..3FFh in low memory?
+   135                              <1> %if SOFT_DEBUG
+   136                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   137                              <1> %else
+   138                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   139                              <1> %endif
+   140                              <1>
+   141                              <1> ; Define the size of the EPROM that is to be installed on the system
+   142                              <1> ; It may be larger than the actual ROM image to be generated.
+   143                              <1> %ifndef CHIP
+   144                              <1> CHIP            equ     64
+   145                              <1> %endif
+   146                              <1>
+   147                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   148                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   149                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   150                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   151                              <1>
+   152                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   153                              <1> ; If the wiring update is installed, or you have a later board, then
+   154                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   155                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   156                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   157                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   158                              <1>
+   159                              <1> ; Define the UART oscillator speed
+   160                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   161                              <1>
+   162                              <1>
+   163                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   164                              <1> ; end of the User configuration
+   165                              <1> ;       Do Not modify anything below this point
+   166                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   167                              <1>
+   168                              <1> CVDU_8563	equ	CVDU		; separate inits
+   169                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
+   170                              <1> VGA3_6445       equ     VGA3            ; separate inits
+   171                              <1> ; Suppress all UART output in color video Mode 3
+   172                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563
+   173                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
+   174                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
+   175                              <1>
+   176                              <1> ; Define existence of any uart chip
+   177                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   178                              <1> startuplength   equ     512                     ; may be up to 1024
+   179                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   180                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   181                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   182                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   183                              <1>
+   184                              <1>
+   185                              <1> %define ARG(n) [bp+2+(n)*2]
+   186                              <1>
+   187                              <1> %macro  check   1.nolist
+   188                              <1>  %if (%1)
+   189                              <1>    %error Check Failure: %1
+   190                              <1>  %endif
+   191                              <1> %endm
+   192                              <1> %macro  range   3.nolist
+   193                              <1>  %if (%1)<(%2)
+   194                              <1>    %error Out of Range: %1
+   195                              <1>  %elif (%1)>(%3)
+   196                              <1>    %error Out of Range: %1
+   197                              <1>  %endif
+   198                              <1> %endm
+   199                              <1> _terminal equ UART+CVDU
+   200                              <1>  check   RAM_DOS&15
+   201                              <1>  check   RAM&(RAM-1)
+   202                              <1>  check   ROM&(ROM-1)
+   203                              <1>  range   RAM,32,512
+   204                              <1>  range   ROM,32,256
+   205                              <1>  range   RAM_WS,0,3
+   206                              <1>  range   ROM_WS,0,3
+   207                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   208                              <1>  range   LCL_IO_WS,0,3
+   209                              <1>  range   BUS_IO_WS,0,3
+   210                              <1>  range   UART_OSC,500000,16000000
+   211                              <1>  range   UART_RATE,0,7
+   212                              <1>  range	 UART,0,1
+   213                              <1>  range	 _terminal,1,2
+   214                              <1>
+   215                              <1> %ifndef SOFT_DEBUG
+   216                              <1> %define SOFT_DEBUG 0
+   217                              <1> %endif
+   218                              <1>
+   219                              <1> %ifndef TRACE
+   220                              <1> %define TRACE 0
+   221                              <1> %endif
+   222                              <1>
+   223                              <1> %ifdef MAKE_OBJECT_FILE
+   224                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   225                              <1>         export _ROMsize
+   226                              <1>         export _CHIPsize
+   227                              <1> _ROMsize        dw      ROM
+   228                              <1> _CHIPsize       dw      CHIP
+   229                              <1> %endif
+   230                              <1> ; end of the Hardware configuration file
+   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   232                              <1> ;*/
+    26                                  %include        "cpuregs.asm"
+    27                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    28                              <1> ; CPUREGS.ASM
+    29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    30                              <1> ;
+    31                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    32                              <1> ;
+    33                              <1> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    34                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    35                              <1> ;
+    36                              <1> ; This program is free software: you can redistribute it and/or modify
+    37                              <1> ; it under the terms of the GNU General Public License as published by
+    38                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    39                              <1> ; (at your option) any later version.
+    40                              <1> ;
+    41                              <1> ; This program is distributed in the hope that it will be useful,
+    42                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    43                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    44                              <1> ; GNU General Public License for more details.
+    45                              <1> ;
+    46                              <1> ; You should have received a copy of the GNU General Public License
+    47                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    48                              <1> ;
+    49                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    50                              <1> %include	"macros.inc"
+    51                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    52                              <2> ; MACROS.INC
+    53                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    54                              <2> ;
+    55                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+    56                              <2> ;
+    57                              <2> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    58                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    59                              <2> ;
+    60                              <2> ; This program is free software: you can redistribute it and/or modify
+    61                              <2> ; it under the terms of the GNU General Public License as published by
+    62                              <2> ; the Free Software Foundation, either version 3 of the License, or
+    63                              <2> ; (at your option) any later version.
+    64                              <2> ;
+    65                              <2> ; This program is distributed in the hope that it will be useful,
+    66                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    67                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    68                              <2> ; GNU General Public License for more details.
+    69                              <2> ;
+    70                              <2> ; You should have received a copy of the GNU General Public License
+    71                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    72                              <2> ;
+    73                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    74                              <2>
+    75                              <2> ; general macros for the SBC188 BIOS ASSEMBLY
+    76                              <2> ;
+    77                              <2> ;
+    78                              <2> %ifndef __MACROS_DEFINED_
+    79                              <2> %define __MACROS_DEFINED_ 1
+    80                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    81                              <2> ;
+    82                              <2> ; some useful macros:
+    83                              <2> ;
+    84                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    85                              <2> ;
+    86                              <2> 	cpu	186
+    87                              <2>
+    88                              <2> %imacro setloc  1.nolist
+    89                              <2>  times   (%1-($-$$)) db 0FFh
+    90                              <2> %endm
+    91                              <2>
+    92                              <2> %imacro db_lo   1
+    93                              <2>  db (%1)&255
+    94                              <2> %endm
+    95                              <2>
+    96                              <2> %imacro cnop    0.nolist
+    97                              <2> %if SOFT_DEBUG
+    98                              <2>         nop
+    99                              <2> %endif
+   100                              <2> %endm
+   101                              <2>
+   102                              <2> %imacro popm 1-*.nolist
+   103                              <2> %rep %0
+   104                              <2> %ifidni %1,ALL
+   105                              <2>  popa
+   106                              <2> %elifidni %1,F
+   107                              <2>  popf
+   108                              <2> %else
+   109                              <2>  pop %1
+   110                              <2> %ifidni %1,DS
+   111                              <2>  cnop
+   112                              <2> %elifidni %1,ES
+   113                              <2>  cnop
+   114                              <2> %endif
+   115                              <2> %endif
+   116                              <2> %rotate 1
+   117                              <2> %endrep
+   118                              <2> %endm
+   119                              <2>
+   120                              <2> %imacro pushm 1-*.nolist
+   121                              <2> %rep %0
+   122                              <2> %rotate -1
+   123                              <2> %ifidni %1,ALL
+   124                              <2>  pusha
+   125                              <2> %elifidni %1,F
+   126                              <2>  pushf
+   127                              <2> %else
+   128                              <2>  push %1
+   129                              <2> %endif
+   130                              <2> %endrep
+   131                              <2> %endm
+   132                              <2>
+   133                              <2> ;
+   134                              <2> ; added from the 386EX project
+   135                              <2> ;
+   136                              <2>
+   137                              <2> ; call arguments
+   138                              <2> %define ARG(n) [bp+2+(n)*2]
+   139                              <2>
+   140                              <2> ;
+   141                              <2> ; format of the BYTE initialization table:  address, byte
+   142                              <2> ;
+   143                              <2> %imacro  binit 2
+   144                              <2>         dw      %1
+   145                              <2>         db      %2
+   146                              <2> %endmacro
+   147                              <2> ; end with DW -1
+   148                              <2>
+   149                              <2> ;
+   150                              <2> ; format of the WORD initialization table:  address, word
+   151                              <2> ;
+   152                              <2> %imacro  winit 2
+   153                              <2>         dw      %1
+   154                              <2>         dw      %2
+   155                              <2> %endmacro
+   156                              <2> ; end with DW -1
+   157                              <2>
+   158                              <2>
+   159                              <2> ; get the BIOS Data Area segment pointer to a [segment] register
+   160                              <2> %imacro get_bda	1.nolist
+   161                              <2> 	push	0x0040
+   162                              <2> 	pop	%1
+   163                              <2> 	cnop
+   164                              <2> %endm
+   165                              <2>
+   166                              <2>
+   167                              <2> %endif
+    51                              <1>
+    52                              <1> 	cpu     186
+    53                              <1> ;
+    54                              <1> ;
+    55                              <1> ; IBM model byte -- must be less than a 286
+    56                              <1> ;
+    57                              <1> ;MODEL_BYTE		equ	0FEh	; PC-XT
+    58                              <1> ;SUBMODEL_BYTE		equ	0FFh	; not used
+    59                              <1>
+    60                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    61                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    62                              <1>
+    63                              <1>
+    64                              <1> ; 80188 peripheral control register block address
+    65                              <1> CPU_CSCR	        equ	0FF00h
+    66                              <1>
+    67                              <1> ; Compatible Mode registers
+    68                              <1>
+    69                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    70                              <1>
+    71                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
+    72                              <1>
+    73                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    74                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    75                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    76                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    77                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    78                              <1>
+    79                              <1> ; Enhanced Mode registers
+    80                              <1>
+    81                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    82                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    83                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+    84                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+    85                              <1>
+    86                              <1>
+    87                              <1> ; On-board internal peripheral equates
+    88                              <1> ; Programmable Interrupt Controller
+    89                              <1> PIC	        equ	CPU_CSCR+020H
+    90                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+    91                              <1> PIC_POLLR	equ	PIC+4
+    92                              <1> PIC_POLLSR	equ	PIC+6
+    93                              <1> PIC_IMASK	equ	PIC+8
+    94                              <1> PIC_PMREG	equ	PIC+0AH
+    95                              <1> PIC_SRVR	equ	PIC+0CH
+    96                              <1> PIC_IRQR	equ	PIC+0EH
+    97                              <1> PIC_IRQSR	equ	PIC+10H
+    98                              <1> PIC_TCR	        equ	PIC+12H
+    99                              <1> PIC_DMA0CR	equ	PIC+14H
+   100                              <1> PIC_DMA1CR	equ	PIC+16H
+   101                              <1> PIC_I0CON	equ	PIC+18H
+   102                              <1> PIC_I1CON	equ	PIC+1AH
+   103                              <1> PIC_I2CON	equ	PIC+1CH
+   104                              <1> PIC_I3CON	equ	PIC+1EH
+   105                              <1>
+   106                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
+   107                              <1>
+   108                              <1> ; Interrupt masks (Master Mode)
+   109                              <1> ;
+   110                              <1> mask_timer_all          equ     0001h
+   111                              <1> mask_dma0               equ     0004h
+   112                              <1> mask_dma1               equ     0008h
+   113                              <1> mask_int0               equ     0010h
+   114                              <1> mask_int1               equ     0020h
+   115                              <1> mask_int2               equ     0040h
+   116                              <1> mask_int3               equ     0080h
+   117                              <1>
+   118                              <1>
+   119                              <1>
+   120                              <1> ; Timers
+   121                              <1> TIM0	        equ	CPU_CSCR+050H
+   122                              <1> TIM1	        equ	CPU_CSCR+058H
+   123                              <1> TIM2	        equ	CPU_CSCR+060H
+   124                              <1>
+   125                              <1> TCNT	        equ	0	; count register
+   126                              <1> CMPA	        equ	2	; max count A
+   127                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   128                              <1> TCON	        equ	6	; mode/control word
+   129                              <1>
+   130                              <1> ; Timer control bits:
+   131                              <1> tc_EN           equ     8000h   ; Enable bit
+   132                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   133                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   134                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   135                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   136                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   137                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   138                              <1> tc_EXT          equ     0004h   ; External clock
+   139                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   140                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   141                              <1>
+   142                              <1>
+   143                              <1>
+   144                              <1>
+   145                              <1> ; DMA
+   146                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   147                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   148                              <1> DMASPL	        equ	0	; source pointer low
+   149                              <1> DMASPU	        equ	2	; source pointer high
+   150                              <1> DMADPL	        equ	4	; destination pointer low
+   151                              <1> DMADPU	        equ	6	; destination pointer high
+   152                              <1> DMATC	        equ	8	; terminal count
+   153                              <1> DMACW	        equ	0AH	; control word
+   154                              <1>
+   155                              <1>
+   156                              <1>
+   157                              <1>
+   158                              <1>
+   159                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   160                              <1> ;
+   161                              <1> ;       SBC-188 external devices
+   162                              <1> ;
+   163                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   164                              <1>
+   165                              <1> IO_BASE			equ	0400h
+   166                              <1>
+   167                              <1>
+   168                              <1>
+   169                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   170                              <1> ; The UART registers
+   171                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   172                              <1>
+   173                              <1> uart_base               equ     IO_BASE+0280h
+   174                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   175                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   176                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   177                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   178                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   179                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   180                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   181                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   182                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   183                              <1> uart_sr			equ	uart_base+7	;Scratch
+   184                              <1>
+   185                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   186                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   187                              <1>
+   188                              <1>
+   189                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   190                              <1> ; Floppy controller
+   191                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   192                              <1> FDC	        equ	IO_BASE+0200H
+   193                              <1> FDC_MSR         equ     FDC
+   194                              <1> FDC_DATA        equ     FDC_MSR+1
+   195                              <1> FDC_DACK        equ	FDC+10H
+   196                              <1> FDC_LDOR	equ	FDC+20H
+   197                              <1> FDC_LDCR	equ	FDC+30H
+   198                              <1> FDC_TC	        equ	FDC+40H
+   199                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+   200                              <1>
+   201                              <1>
+   202                              <1> %if SBC188==1
+   203                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   204                              <1> ;DS1302 RTC
+   205                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   206                              <1> RTC	equ	IO_BASE+0300H
+   207                              <1> %endif
+   208                              <1>
+   209                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   210                              <1> ; PIO 82C55 I/O
+   211                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   212                              <1> ; for the SBCv1/v2 with PPIDE adapter board
+   213                              <1> ; and for the SBCv3 with PPIDE connector
+   214                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   215                              <1> PPI	        equ	IO_BASE+0260H
+   216                              <1>
+   217                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   218                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   219                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   220                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   221                              <1>
+   222                              <1> portA           equ     PPI+0   ;
+   223                              <1> portB           equ     PPI+1   ;
+   224                              <1> portC           equ     PPI+2   ;
+   225                              <1>
+   226                              <1>
+   227                              <1>
+   228                              <1> ;;;%if SBC188==3   startup.asm is universal
+   229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   230                              <1> ; CONTROL LS259 PORT ON SBC188 V3
+   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   232                              <1> CTRL259		equ	IO_BASE+0270H
+   233                              <1> ; LEDS are at addresses 0..3
+   234                              <1> ; other control ports on 4..7
+   235                              <1> LED0		equ	CTRL259+0
+   236                              <1> LED1		equ	LED0+1
+   237                              <1> LED2		equ	LED0+2
+   238                              <1> LED3		equ	LED0+3
+   239                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
+   240                              <1> ;unused		equ	CTRL259+5
+   241                              <1> FDC_RES		equ	CTRL259+6	; RESET IS ACTIVE HIGH
+   242                              <1> IDE8_RES	equ	CTRL259+7	; fast IDE RESET IS ACTIVE LOW
+   243                              <1>
+   244                              <1>
+   245                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   246                              <1> ; FIDE8 8-bit IDE on the 80C188 bus
+   247                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   248                              <1> FIDE_BASE       equ     IO_BASE+2C0h
+   249                              <1>
+   250                              <1> IDE8_CS0        equ     FIDE_BASE
+   251                              <1> IDE8_CS1        equ     FIDE_BASE+0x10
+   252                              <1>
+   253                              <1> ;;;%endif   startup.asm is universal
+   254                              <1>
+   255                              <1>
+   256                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   257                              <1> ; Dual [DMA] IDE devices
+   258                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   259                              <1> DIDE		equ	IO_BASE + 20H	; range 0x20..0x3F
+   260                              <1>
+   261                              <1> DIDE0		equ	DIDE		; first interface (master & slave)
+   262                              <1> DIDE1		equ	DIDE+10h	; second interface (master & slave)
+   263                              <1>
+   264                              <1>
+   265                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   266                              <1> ; DISK I/O v3 device codes (PPIDE only)
+   267                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   268                              <1> DISKIO		equ	IO_BASE + 20h	; range 0x20..0x3F
+   269                              <1>
+   270                              <1> DISKIO_PPIDE	equ	DISKIO		; 82c55
+   271                              <1> DISKIO_FDC	equ	DISKIO + 10h	; FDC 9266
+   272                              <1> DISKIO_DOR	equ	DISKIO + 18h	; OPERATION REGISTER
+   273                              <1>
+   274                              <1>
+   275                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   276                              <1> ; MF/PIC interfaces
+   277                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   278                              <1> MFPIC		equ	IO_BASE + 40h	; range 0x40..0x4F
+   279                              <1>
+   280                              <1> ;MFPIC_202	equ	MFPIC		; NS32202 is not usable on SBC-188
+   281                              <1> MFPIC_PPIDE	equ	MFPIC + 4	; PPIDE disk interface
+   282                              <1> MFPIC_UART	equ	MFPIC + 8	; TL16Cx50 SIO chip
+   283                              <1>
+   284                              <1>
+   285                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   286                              <1> ; Cassette I/O
+   287                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   288                              <1> cuart_base	EQU 	IO_BASE+80H	; BASE IO ADDRESS OF CASSETTE UART
+   289                              <1> cuart_rbr	equ     cuart_base	;Rcvr Buffer / read only
+   290                              <1> cuart_thr	equ     cuart_base	;Transmit Holding / write only
+   291                              <1> cuart_ier	equ     cuart_base+1	;Interrupt Enable
+   292                              <1> cuart_iir	equ     cuart_base+2	;Interrupt Ident / read only
+   293                              <1> cuart_fcr	equ     cuart_base+2	;FIFO Control / write only
+   294                              <1> cuart_lcr	equ     cuart_base+3	;Line Control
+   295                              <1> cuart_mcr	equ     cuart_base+4	;Modem Control
+   296                              <1> cuart_lsr	equ     cuart_base+5	;Line Status
+   297                              <1> cuart_msr	equ     cuart_base+6	;Modem Status
+   298                              <1> cuart_sr	equ	cuart_base+7	;Scratch
+   299                              <1>
+   300                              <1> cuart_dll	equ     cuart_base	;Divisor Latch LS Byte
+   301                              <1> cuart_dlm	equ	cuart_base+1	;Divisor Latch MS Byte
+   302                              <1>
+   303                              <1>
+   304                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   305                              <1> ;
+   306                              <1> ;       4MEM control registers
+   307                              <1> ;
+   308                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   309                              <1> EMM_addr        equ     1               ; high 6 bits of 20-bit address
+   310                              <1> EMM_page        equ     0               ; 4MEM page in [0..254]
+   311                              <1>
+   312                              <1> EMM_BASE        equ     IO_BASE + 000h          ; first EMM (4MEM) board
+   313                              <1> EMM_unmapped    equ     255             ; unmapped 4MEM page
+   314                              <1>
+   315                              <1> EMM0            equ     EMM_BASE        ; first  EMM board
+   316                              <1> EMM1            equ     EMM0 + 2        ; second EMM board
+   317                              <1> EMM2            equ     EMM1 + 2        ; third  EMM board
+   318                              <1> EMM3            equ     EMM2 + 2        ; fourth EMM board
+   319                              <1>
+   320                              <1>
+   321                              <1>
+   322                              <1>
+   323                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   324                              <1> ;
+   325                              <1> ;	ColorVDU devices
+   326                              <1> ;
+   327                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   328                              <1> ;
+   329                              <1> ;	major select on the Z80 bus
+   330                              <1> ;
+   331                              <1> devCVDU_8bit	equ	0xE0		; this may change to 0x10
+   332                              <1>
+   333                              <1> devCVDUbase 	equ	IO_BASE + devCVDU_8bit
+   334                              <1>
+   335                              <1> M8563status	equ	devCVDUbase + 4		; 4 == bitrev(2)
+   336                              <1> M8563register	equ	devCVDUbase + 4
+   337                              <1> M8563data	equ	devCVDUbase + 12	; 12 == bitrev(3)
+   338                              <1>
+   339                              <1> %if CVDU_8563
+   340                              <1> I8242status	equ	devCVDUbase + 10	; 10 == bitrev(5)
+   341                              <1> I8242command	equ	devCVDUbase + 10
+   342                              <1> I8242data	equ	devCVDUbase + 2		; 2 == bitrev(4)
+   343                              <1> %endif
+   344                              <1>
+   345                              <1>
+   346                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   347                              <1> ;
+   348                              <1> ;	VGA3 devices
+   349                              <1> ;
+   350                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   351                              <1> ;
+   352                              <1> ;	major select on the Z80 bus
+   353                              <1> ;
+   354                              <1> devVGA3_8bit    equ     0xE0                    ; same as CVDU
+   355                              <1>
+   356                              <1> devVGA3base       equ     IO_BASE + devVGA3_8bit
+   357                              <1>
+   358                              <1> %if VGA3_6445
+   359                              <1> I8242status	equ	devVGA3base + 1
+   360                              <1> I8242command	equ	devVGA3base + 1
+   361                              <1> I8242data	equ	devVGA3base + 0
+   362                              <1> %endif
+   363                              <1> HD6445addr	equ	devVGA3base + 2		; to address the HD6445 registers
+   364                              <1> HD6445reg	equ	devVGA3base + 3		; to r/w a register on the CRTC
+   365                              <1>
+   366                              <1> vga3cfg		equ	devVGA3base + 4
+   367                              <1> ; the following are probably not used on the SBC-188, except for testing/checking
+   368                              <1> vga3adhi	equ	devVGA3base + 5
+   369                              <1> vga3adlo	equ	devVGA3base + 6
+   370                              <1> vga3data	equ	devVGA3base + 7
+   371                              <1>
+   372                              <1>
+   373                              <1>
+   374                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   375                              <1> ;
+   376                              <1> ;       2S1P registers
+   377                              <1> ;
+   378                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   379                              <1> dev_2S1P_loc		equ	0xC0	; same as 4UART !!!
+   380                              <1>
+   381                              <1> dev_2S1P_base		equ	IO_BASE + dev_2S1P_loc
+   382                              <1>
+   383                              <1> dev_2S1P_A		equ	dev_2S1P_base		; serial port
+   384                              <1> dev_2S1P_B		equ	dev_2S1P_base + 8h	; serial port
+   385                              <1>
+   386                              <1> dev_2S1P_C		equ	dev_2S1P_base + 10h	; parallel port
+   387                              <1>
+   388                              <1>
+   389                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   390                              <1> ;
+   391                              <1> ;       4UART registers
+   392                              <1> ;
+   393                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   394                              <1> dev_4UART_loc		equ	0xC0	; same as 2S1P !!!
+   395                              <1> ;				0xA0	; possible alternate
+   396                              <1> dev_4UART_alt_offset	equ	0xA0 - dev_4UART_loc
+   397                              <1>
+   398                              <1> dev_4UART_base		equ	IO_BASE + dev_4UART_loc
+   399                              <1>
+   400                              <1> dev_4UART_A		equ	dev_4UART_base
+   401                              <1> dev_4UART_B		equ	dev_4UART_base + 8h
+   402                              <1> dev_4UART_C		equ	dev_4UART_base + 10h
+   403                              <1> dev_4UART_D		equ	dev_4UART_base + 18h
+   404                              <1>
+   405                              <1> dev_4UART_config	equ	dev_4UART_B + 7		; overlays scratch register
+   406                              <1>
+   407                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   408                              <1> ; debug port -- JRC only
+   409                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   410                              <1> portD		equ	IO_BASE + 0FFh		; 0x04FF
+   411                              <1> ;portD		equ	portB		     ; older 8255 output on PPI
+   412                              <1>
+   413                              <1> ; end CPUREGS.ASM
+   414                              <1>
+    27                                  %include	"date.asm"
+    28                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    29                              <1> ; date.asm
+    30                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    31                              <1> ; string 0 is for "startup.asm" inclusion; must be 8 chars exactly
+    32                              <1> ; string 1 is for RBIOS.ASM inclusion; should be very readable
+    33                              <1> ;
+    34                              <1> ; N.B.  version 46 is Rich Cini's version for the 2S1P board
+    35                              <1> ;
+    36                              <1> ; so we jump from BIOS 045 to 047, the first BIOS to support
+    37                              <1> ; the Version 3.0 board (with 1024K memory on-board)
+    38                              <1> ;
+    39                              <1> ; Definitions for version 3.5-2:
+    40                              <1> ;
+    41                              <1>
+    42                              <1>
+    43                              <1> %define DATE_STRING0	"04/29/21"
+    44                              <1> %define DATE_STRING1	"29-Apr-2021"
+    45                              <1>
+    46                              <1> %define VERSION_MAJOR		3
+    47                              <1> %define VERSION_MINOR		5
+    48                              <1> %define VERSION_REVISION	1
+    49                              <1> %define VERSION_SUFFIX		""
+    50                              <1> %define VERSION_SEQUENCE	55
+    51                              <1>
+    52                              <1> %define VERSION_STRING		"3.5-1",VERSION_SUFFIX
+    53                              <1>
+    54                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    55                              <1> ; Revision information:
+    56                              <1> ;  ver.	2.1 -- table-driven support for all IBM floppy types
+    57                              <1> ;	2.2 -- Dual IDE driver; CVDU memory sizing
+    58                              <1> ;	2.3 -- font_vga corrects (i grave) (n_tilde)
+    59                              <1> ;	    &  Dual SDcard & Minix boot
+    60                              <1> ;	2.4 -- Int 15h multiprogramming hooks: fn90, fn91 (never done)
+    61                              <1> ;	3.0 -- VGA3 support
+    62                              <1> ;	3.1 -- SBC-188 v.3 board support
+    63                              <1> ;	3.2 -- IDE8 support on the v.3 board
+    64                              <1> ;	3.3 -- add 2S1P board support (2 SIO & PPort)
+    65                              <1> ;	3.4 -- floppy drives did not work
+    66                              <1> ;	3.5 -- back to 3.3, sequence #51
+    67                              <1> ;		change NVRAM battery backup setup to #53
+    68                              <1> ;		re-install 3.4 boot fix for FreeDOS
+    69                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    28
+    29                                  warm_boot	equ	72h	; RESET_FLAG, our 'warm_boot' BDA offset
+    30
+    31                                  	org	0
+    32                                  init0:
+    33 00000000 FA                              cli                             ; interrupts should be off already
+    34
+    35                                  %include	"post.asm"		; P.O.S.T. of CPU
+    36                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    37                              <1> ; post.asm -- Power On Self Test
+    38                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    39                              <1> ;
+    40                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    41                              <1> ;
+    42                              <1> ; Copyright (C) 2017,2020 John R. Coffman.  All rights reserved.
+    43                              <1> ; Licensed for hobbyist use only.
+    44                              <1> ; For use on the RetroBrew SBC-188 & SBC-188v3 boards.
+    45                              <1> ;
+    46                              <1> ; This program is free software: you can redistribute it and/or modify
+    47                              <1> ; it under the terms of the GNU General Public License as published by
+    48                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    49                              <1> ; (at your option) any later version.
+    50                              <1> ;
+    51                              <1> ; This program is distributed in the hope that it will be useful,
+    52                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    53                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    54                              <1> ; GNU General Public License for more details.
+    55                              <1> ;
+    56                              <1> ; You should have received a copy of the GNU General Public License
+    57                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    58                              <1> ;
+    59                              <1> ;
+    60                              <1> ; SBC-188 board revisions:
+    61                              <1> ;       1.0     production board
+    62                              <1> ;	2.0	production board with errata
+    63                              <1> ;------------------------------------------------------------------------
+    64                              <1> ;	3.0	2 x 512k SRAM chips, GALs for glue logic
+    65                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    66                              <1>
+    67                              <1> 	cpu	8086
+    68                              <1>
+    69                              <1> ; begin P.O.S.T.
+    70                              <1> post0:
+    71                              <1> ;;;	cli			; make sure interrupts are off
+    72                              <1> ; CLI done in 'startup.asm'
+    73                              <1>
+    74 00000001 31C0                <1> 	xor	ax,ax		; AX=0; S=0, Z=1, P=1, C=0, OV=0, A=?
+    75 00000003 721E                <1> 	jc	.halt
+    76 00000005 701C                <1> 	jo	.halt
+    77 00000007 751A                <1> 	jnz	.halt
+    78 00000009 7818                <1> 	js	.halt
+    79 0000000B 7B16                <1> 	jnp	.halt		; jmp if Parity not Even
+    80 0000000D 7714                <1> 	ja	.halt		; jmp if C=0 and Z=0
+    81 0000000F 7F12                <1> 	jg	.halt		; jmp if S=OV and Z=0
+    82                              <1>
+    83 00000011 83C001              <1> 	add	ax,1		; AX=1; S=0, Z=0, P=0, C=0, O=0, A=0
+    84 00000014 720D                <1> 	jc	.halt
+    85 00000016 740B                <1> 	jz	.halt
+    86 00000018 7809                <1> 	js	.halt
+    87 0000001A 7A07                <1> 	jpe	.halt
+    88 0000001C 7605                <1> 	jbe	.halt
+    89                              <1>
+    90 0000001E 2D0280              <1> 	sub	ax,8002h 	; add 7ffeh
+    91 00000021 7901                <1> 	jns	.post1		; AX=7FFFh
+    92                              <1>
+    93 00000023 F4                  <1> .halt:	hlt			; stop right here
+    94                              <1>
+    95                              <1> .post1:
+    96 00000024 70FD                <1> 	jo	.halt
+    97 00000026 73FB                <1> 	jnc	.halt
+    98 00000028 74F9                <1> 	jz	.halt
+    99                              <1>
+   100 0000002A 40                  <1> 	inc	ax		; AX=8000h
+   101 0000002B 74F6                <1> 	jz	.halt
+   102 0000002D 71F4                <1> 	jno	.halt
+   103                              <1>
+   104 0000002F BB55D5              <1> 	mov	bx,5555h | 8000h
+   105 00000032 01C3                <1> 	add	bx,ax		; BX='0101010101010101'B = 5555h
+   106                              <1> ;;;
+   107 00000034 81FB5555            <1> 	cmp	bx,5555h
+   108 00000038 75E9                <1> 	jne	.halt
+   109                              <1> ;;;
+   110                              <1> .bittest:
+   111 0000003A 8ED3                <1> 	mov	ss,bx
+   112 0000003C 8CD1                <1> 	mov	cx,ss
+   113 0000003E 8ED9                <1> 	mov	ds,cx
+   114 00000040 8CDD                <1> 	mov	bp,ds
+   115 00000042 89E8                <1> 	mov	ax,bp
+   116 00000044 89C7                <1> 	mov	di,ax
+   117 00000046 89FA                <1> 	mov	dx,di
+   118 00000048 89D6                <1> 	mov	si,dx
+   119 0000004A 8EC6                <1> 	mov	es,si
+   120 0000004C 8CC3                <1> 	mov	bx,es
+   121 0000004E 81FB5555            <1> 	cmp	bx,5555h
+   122 00000052 75CF                <1> 	jne	.halt
+   123                              <1>
+   124 00000054 F7D3                <1> 	not	bx
+   125 00000056 81FBAAAA            <1> 	cmp	bx,0AAAAh
+   126 0000005A 75C7                <1> 	jne	.halt
+   127                              <1>
+   128 0000005C 8EC3                <1> 	mov	es,bx
+   129 0000005E 8CC6                <1> 	mov	si,es
+   130 00000060 89F2                <1> 	mov	dx,si
+   131 00000062 89D7                <1> 	mov	di,dx
+   132 00000064 89F8                <1> 	mov	ax,di
+   133 00000066 89C5                <1> 	mov	bp,ax
+   134 00000068 8EDD                <1> 	mov	ds,bp
+   135 0000006A 8CD9                <1> 	mov	cx,ds
+   136 0000006C 8ED1                <1> 	mov	ss,cx
+   137 0000006E 8CD3                <1> 	mov	bx,ss
+   138 00000070 81FBAAAA            <1> 	cmp	bx,0AAAAh
+   139 00000074 75AD                <1> 	jne	.halt
+   140                              <1> ; register bits looking good
+   141                              <1>
+   142                              <1> .post99:
+    36
+    37 00000076 B80100                  	mov	ax,1
+    38 00000079 B120                    	mov	cl,32
+    39 0000007B D3E0                    	shl	ax,cl			; 186 and higher CPUs mask the shift to 5 bits
+    40 0000007D 09C0                    	or	ax,ax			; set Z flag in case SHL does not
+    41 0000007F 740A                    	jz	.hlt			; < 80186 (8086 or 8088) will zero the AX
+    42                                  ; proceed, we definitely have a CPU > 8088
+    43
+    44                                  	cpu	186
+    45
+    46 00000081 FC                      	cld                             ; clear direction flag (set to UP)
+    47 00000082 BAFEFF                  	mov	dx,cpu_relocation		; get reset state of the relocation register
+    48 00000085 ED                      	in	ax,dx			; read reset value; it is a constant
+    49 00000086 3DFF20                  	cmp	ax,0x20FF		; it is this on the 80188/80c188
+    50 00000089 7401                    	je	.init01			;
+    51                                  ; not equal, so it is not an 80188 class CPU,
+    52                                  ;    or the relocation register has been moved
+    53                                  .hlt:
+    54 0000008B F4                      	hlt
+    55                                  .init01:
+    56                                  ;;;	mov     dh,cpu_umcs>>8          ; high byte of I/O address
+    57                                  ; high byte of I/O address is already set
+    58 0000008C BE[3D01]                        mov     si,table0               ; address of setup table
+    59 0000008F 8CC8                            mov     ax,cs                   ; get Code Segment
+    60 00000091 8ED8                            mov     ds,ax                   ; for LODS
+    61 00000093 B90A00                          mov     cx,table0_len           ; count of table items
+    62                                  init0_loop:
+    63 00000096 AC                              lodsb
+    64 00000097 88C2                            mov     dl,al
+    65 00000099 AD                              lodsw
+    66 0000009A EF                              out     dx,ax
+    67 0000009B E2F9                            loop    init0_loop
+    68                                  ; memory selects are now set up
+    69
+    70                                  %if DEBUG
+    71                                  ; do some debug I/O
+    72                                  	mov	dx,portD		;JRC's debug lights
+    73                                  	mov	al,0a5h
+    74                                  	out	dx,al
+    75                                  %endif
+    76
+    77 0000009D B606                    init1:	mov	dh,FDC>>8		; Local I/O byte setup
+    78 0000009F BE[5B01]                	mov	si,table1
+    79 000000A2 B90E00                  	mov	cx,table1_len
+    80                                  init1_loop:
+    81 000000A5 AC                      	lodsb
+    82 000000A6 88C2                    	mov	dl,al
+    83 000000A8 AC                      	lodsb
+    84 000000A9 EE                      	out	dx,al
+    85 000000AA E2F9                    	loop	init1_loop
+    86
+    87                                  %if 0
+    88                                  ; output to the UART    for debugging only
+    89                                  	mov	al,'*'
+    90                                  	mov	dx,uart_thr		; transmit holding register
+    91                                  	out	dx,al
+    92                                  %endif
+    93
+    94 000000AC 31C9                    	xor	cx,cx			; CX guaranteed zero!!!
+    95 000000AE 8ED9                            mov     ds,cx                   ; CX = 0 from above
+    96 000000B0 8EC1                    	mov	es,cx
+    97                                  ;;;        mov     ss,cx                   ; set Stack Segment
+    98                                  ;;;        mov     sp,400h                 ; set Stack Pointer (0400h absolute)
+    99 000000B2 A17204                  	mov	ax,[400h+warm_boot]	; save 'warm_boot' in SS
+   100 000000B5 8ED0                    	mov	ss,ax		; only register not trashed by the memory test
+   101
+   102                                  ; now let us test low memory
+   103                                  len_test0	equ	8192*4		; 32K words
+   104
+   105 000000B7 B80104                  	mov	ax,401h			; rotating 1-bit
+   106 000000BA BE1800                  	mov	si,0x18
+   107 000000BD B90080                  	mov	cx,len_test0		; word count
+   108 000000C0 BD[C600]                	mov	bp,.1ret
+   109 000000C3 E9BE00                  	jmp	testmem00		; return through BP
+   110                                  .1ret:
+   111 000000C6 726C                    	jc	stop
+   112
+   113 000000C8 B000                    	mov	al,0
+   114 000000CA BA7006                  	mov	dx,LED0			; turn LED0 back on if okay
+   115 000000CD EE                      	out	dx,al
+   116
+   117 000000CE B8FFFD                  	mov	ax,0xFDFF		; rotating 0-bit
+   118 000000D1 BE1C00                  	mov	si,0x1C
+   119 000000D4 B90080                  	mov	cx,len_test0		; word count
+   120 000000D7 BD[DD00]                	mov	bp,.2ret
+   121 000000DA E9A700                  	jmp	testmem00
+   122                                  .2ret:
+   123 000000DD 7255                    	jc	stop
+   124
+   125                                  ;;;	mov	al,0
+   126 000000DF 31C0                    	xor	ax,ax			; use to set SS later
+   127 000000E1 BA7306                  	mov	dx,LED3
+   128 000000E4 EE                      	out	dx,al
+   129
+   130                                  ; now restore the SS register to 0000h
+   131 000000E5 8CD2                    	mov	dx,ss
+   132                                  ;;;	xor	ax,ax
+   133 000000E7 8ED0                    	mov	ss,ax
+   134 000000E9 BC0004                  	mov	sp,400h
+   135 000000EC 3689167204              	mov	[ss:400h+warm_boot],dx
+   136
+   137
+   138                                  ; decide whether we are running on the SBC-188 v1/v2 or SBC-188 v3
+   139
+   140 000000F1 B80040                  	mov	ax,0x4000	; low memory not yet
+   141 000000F4 8ED8                    	mov	ds,ax		;   enabled on the v1/v2 boards
+   142 000000F6 8EC0                    	mov	es,ax
+   143 000000F8 B80100                  	mov	ax,0001
+   144 000000FB B90080                  	mov	cx,len_test0
+   145 000000FE E88200                  	call	testmem0
+   146                                  %if 0
+   147                                  	mov	bp,.3ret
+   148                                  	jmp	testmem00
+   149                                  .3ret:
+   150                                  %endif
+   151
+   152 00000101 B033                    	mov	al,'3'
+   153 00000103 7302                    	jnc	out3
+   154 00000105 B031                    	mov	al,'1'
+   155                                  out3:
+   156                                  %if 0
+   157                                  ; output to the UART
+   158                                          mov	dx,uart_thr		; transmit holding register
+   159                                  	out	dx,al
+   160                                  	mov	dx,portD
+   161                                  	out	dx,al			; debug output
+   162                                  %endif
+   163 00000107 3C33                    	cmp	al,'3'
+   164 00000109 750D                    	jne	.9
+   165 0000010B B001                            mov	al,1
+   166 0000010D BA7306                  	mov	dx,LED3
+   167 00000110 EE                      	out	dx,al
+   168 00000111 4A                      	dec	dx
+   169 00000112 EE                      	out	dx,al
+   170                                  ; SBC-188 v3 identified
+   171 00000113 B80300                  	mov	ax,3			; CPU board is the v3
+   172 00000116 EB16                     	jmp	startup
+   173
+   174                                  .9:
+   175 00000118 B6FF                            mov     dh,cpu_umcs>>8          ; high byte of I/O address
+   176 0000011A BE[7701]                        mov     si,table2               ; address of setup table
+   177 0000011D 8CC8                            mov     ax,cs                   ; get Code Segment
+   178 0000011F 8ED8                            mov     ds,ax                   ; for LODS
+   179 00000121 B90400                          mov     cx,table2_len           ; count of table items
+   180                                  init2_loop:
+   181 00000124 AC                              lodsb
+   182 00000125 88C2                            mov     dl,al
+   183 00000127 AD                              lodsw
+   184 00000128 EF                              out     dx,ax
+   185 00000129 E2F9                            loop    init2_loop
+   186                                  ; memory selects are now set up
+   187 0000012B B80100                  	mov	ax,1			; CPU board is the v1/v2
+   188
+   189                                  startup:
+   190                                  ;    cs  jmp     far [goto]
+   191                                  %if DEBUG
+   192                                  ; do some debug I/O
+   193                                  	mov	dx,portD		;JRC's debug lights
+   194                                  	mov	al,81h
+   195                                  	out	dx,al
+   196                                  %endif
+   197                                  %if DEBUG & 0
+   198                                  	mov	word [ss:400h+72h],1234h	; say warm boot
+   199                                  %endif
+   200 0000012E EA000000F0              	jmp	startseg:0000h
+   201 00000133 90                      	nop
+   202
+   203
+   204                                  stop:
+   205 00000134 89F0                    	mov	ax,si
+   206 00000136 BAFF04                  	mov	dx,portD
+   207 00000139 EE                      	out	dx,al
+   208                                  done:
+   209 0000013A F4                      	hlt
+   210 0000013B EBFD                    	jmp	done
+   211
+   212
+   213
+   214                                  Ignore          equ     1<<2            ; ignore external ready
+   215
+   216
+   217                                  table0:
+   218                                          db_lo   cpu_relocation
+    93 0000013D FE                  <1>  db (%1)&255
+   219 0000013E FF20                            dw      020FFh                  ;(default)
+   220
+   221                                          db_lo   cpu_umcs
+    93 00000140 A0                  <1>  db (%1)&255
+   222 00000141 3FF0                    	dw      0C038h | (256-CHIP)*64 | 3 | Ignore; wait states
+   223
+   224                                  M_RAM   equ     RAM/2		;use MMCS & LMCS on SBC188v1/v2
+   225                                  ;M_RAM   equ     RAM		;use MMCS only
+   226                                  L_RAM   equ     RAM-M_RAM
+   227
+   228                                  ;L_RAM   equ     256	; obsolete; from v3 testing
+   229                                  X_SIZ	equ	128	; 128K
+   230                                  X_AT	equ	0A0h	; A000:0000 .. B000:FFFF
+   231
+   232
+   233                                  %if L_RAM>0    ; don't touch LMCS if Zero
+   234                                  	db_lo   cpu_lmcs
+    93 00000143 A2                  <1>  db (%1)&255
+   235 00000144 FC3F                            dw      00038h | (L_RAM*64-1)&3FC0h | RAM_WS&3 | Ignore
+   236                                  %endif
+   237
+   238                                          db_lo   cpu_mmcs
+    93 00000146 A6                  <1>  db (%1)&255
+   239 00000147 FBA1                            dw      001F8h | (X_AT*256) | 3; w.s. XMEM uses SRDY
+   240
+   241                                          db_lo   cpu_mpcs
+    93 00000149 A8                  <1>  db (%1)&255
+   242 0000014A BF90                            dw      080B8h | (X_SIZ*32) | 3 | Ignore ; PACS 4..6 wait states
+   243
+   244                                  ; fix I/O space at 0400h
+   245                                          db_lo   cpu_pacs
+    93 0000014C A4                  <1>  db (%1)&255
+   246 0000014D 7B00                            dw      00078h | 3; PACS 0..1 (really 0..3) W.S. and use SRDY
+   247
+   248                                          db_lo   cpu_mdram
+    93 0000014F E0                  <1>  db (%1)&255
+   249 00000150 0000                            dw      0000h
+   250
+   251                                          db_lo   cpu_cdram
+    93 00000152 E2                  <1>  db (%1)&255
+   252 00000153 FF01                            dw      01FFh                   ; not used, so maximum
+   253
+   254                                          db_lo   cpu_edram
+    93 00000155 E4                  <1>  db (%1)&255
+   255 00000156 0000                            dw      0000h                   ; disable refresh entirely
+   256
+   257                                          db_lo   cpu_pdcon
+    93 00000158 F0                  <1>  db (%1)&255
+   258 00000159 0000                            dw      0000h                   ; Disable,  divisor=1
+   259
+   260                                  table0_len      equ     ($-table0)/3
+   261
+   262
+   263                                  ; Local I/O
+   264                                  table1:
+   265                                  		db_lo	LED0
+    93 0000015B 70                  <1>  db (%1)&255
+   266 0000015C 01                      		db	1	; off (LED state is active low)
+   267
+   268                                  		db_lo	LED1
+    93 0000015D 71                  <1>  db (%1)&255
+   269 0000015E 00                      		db	0	; Reset state
+   270
+   271                                  		db_lo	LED2
+    93 0000015F 72                  <1>  db (%1)&255
+   272 00000160 00                      		db	0	; Reset state
+   273
+   274                                  		db_lo	LED3
+    93 00000161 73                  <1>  db (%1)&255
+   275 00000162 01                      		db	1	; off (LED state is acrive low)
+   276
+   277                                  		db_lo	T1OSC18
+    93 00000163 74                  <1>  db (%1)&255
+   278 00000164 01                      		db	1	; use UART oscillator
+   279
+   280                                  		db_lo	FDC_RES
+    93 00000165 76                  <1>  db (%1)&255
+   281 00000166 01                      		db	1	; reset is active high
+   282
+   283                                  		db_lo	IDE8_RES
+    93 00000167 77                  <1>  db (%1)&255
+   284 00000168 00                      		db	0	; reset is active low (Fast IDE8)
+   285
+   286                                  ; now add the default (9600bps/8250 UART setup)
+   287                                  		db_lo	uart_ier
+    93 00000169 81                  <1>  db (%1)&255
+   288 0000016A 00                      		db	0	; disable all interrupts
+   289
+   290                                  		db_lo	uart_lcr
+    93 0000016B 83                  <1>  db (%1)&255
+   291 0000016C 80                      		db	80h	; DLAB latch access
+   292
+   293                                  		db_lo	uart_dll
+    93 0000016D 80                  <1>  db (%1)&255
+   294 0000016E 0C                      		db	12	; divisor of 12 == 9600bps
+   295
+   296                                  		db_lo	uart_dlm
+    93 0000016F 81                  <1>  db (%1)&255
+   297 00000170 00                      		db	0	; high order divisor
+   298
+   299                                  		db_lo	uart_lcr
+    93 00000171 83                  <1>  db (%1)&255
+   300 00000172 07                      		db	7	; disable DLAB, 8n2 char. mode
+   301
+   302                                  		db_lo	uart_fcr
+    93 00000173 82                  <1>  db (%1)&255
+   303 00000174 07                      		db	7	; FIFO enable, FIFOs reset
+   304
+   305                                  		db_lo	uart_mcr
+    93 00000175 84                  <1>  db (%1)&255
+   306 00000176 0B                      		db	0Bh	; OUT2, nOUT1, RTS, DTR
+   307                                  		;		RESET, CLK LO, RTS, DATA HI
+   308
+   309                                  table1_len	equ	($-table1)/2
+   310
+   311
+   312                                  ; the setup for the SBC v1/v2 memory selects
+   313                                  ;
+   314
+   315                                  table2:
+   316                                  %if L_RAM>0
+   317                                          db_lo   cpu_lmcs
+    93 00000177 A2                  <1>  db (%1)&255
+   318 00000178 FC3F                            dw      00038h | (L_RAM*64-1)&3FC0h | RAM_WS&3 | Ignore
+   319                                  %endif
+   320
+   321                                  	db_lo	cpu_umcs		; set Config.asm wait states
+    93 0000017A A0                  <1>  db (%1)&255
+   322 0000017B 3DF0                    	dw      0C038h | (256-CHIP)*64 | ROM_WS&3 | Ignore
+   323
+   324                                          db_lo   cpu_mmcs
+    93 0000017D A6                  <1>  db (%1)&255
+   325 0000017E FC41                            dw      001F8h | (L_RAM*64) | RAM_WS&3 | Ignore
+   326
+   327                                          db_lo   cpu_mpcs
+    93 00000180 A8                  <1>  db (%1)&255
+   328 00000181 BDA0                            dw      080B8h | (M_RAM*32) | LCL_IO_WS&3 | Ignore
+   329
+   330                                  table2_len      equ     ($-table2)/3
+   331
+   332
+   333
+   334
+   335
+   336                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   337                                  ; testmem0 -- simple test of memory
+   338                                  ;
+   339                                  ;  Enter with:
+   340                                  ;	AX	16-bit pattern
+   341                                  ;	DS:SI	start address to test
+   342                                  ;	CX	word count to test
+   343                                  ;
+   344                                  ;  Exit with:
+   345                                  ;	Carry clear on no error
+   346                                  ;	Carry set if there is an error
+   347                                  ;
+   348                                  ;	CX,SI,  DS,SS are preserved
+   349                                  ;
+   350                                  ;  Registers trashed:
+   351                                  ;	direction flag is cleared
+   352                                  ;	BP	used for return
+   353                                  ;	ES
+   354                                  ;	AX
+   355                                  ;	BX
+   356                                  ;	DX
+   357                                  ;	DI
+   358                                  ;
+   359                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   360                                  testmem0:
+   361 00000183 5D                      	pop	bp		; may use call if stack is set up
+   362                                  testmem00:			; entry if there is no stack
+   363 00000184 FC                      	cld
+   364 00000185 8CDA                    	mov	dx,ds		; make sure ES==DS
+   365 00000187 8EC2                    	mov	es,dx		; **
+   366 00000189 89C2                    	mov	dx,ax
+   367 0000018B 89CB                    	mov	bx,cx		; save word count
+   368 0000018D 89F7                    	mov	di,si		; save start pointer
+   369 0000018F F8                      	clc			; always clear the carry
+   370                                  .1:
+   371 00000190 AB                      	stosw	; ES:[DI]	; store a word
+   372 00000191 D1D0                    	rcl	ax,1		; rotate 17-bit pattern
+   373 00000193 E2FB                    	loop	.1		; count through words
+   374
+   375 00000195 89D9                    	mov	cx,bx		; restore count
+   376 00000197 89F7                    	mov	di,si		; restore start address
+   377 00000199 F8                      	clc			; clear the carry
+   378                                  ; for the compare, the pattern is in DX and Carry
+   379                                  .2:
+   380 0000019A 9F                      	lahf			; save state of the Carry
+   381 0000019B 3B14                    	cmp	dx,[si]		; compare
+   382 0000019D 750C                    	jne	short .3	; exit on error
+   383 0000019F 46                      	inc	si
+   384 000001A0 46                      	inc	si
+   385 000001A1 9E                      	sahf			; restore the carry
+   386 000001A2 D1D2                    	rcl	dx,1		; rotate 17-bit pattern
+   387 000001A4 E2F4                    	loop	.2
+   388
+   389 000001A6 F8                      	clc			; no error
+   390 000001A7 89FE                    	mov	si,di		; restore SI
+   391 000001A9 FFE5                    	jmp	bp
+   392                                  .3:
+   393 000001AB F9                      	stc			; error return
+   394 000001AC FFE5                    	jmp	bp	; SI is error word, DX is expected value
+   395
+   396
+   397
+   398 000001AE FF<rep 42h>                     setloc  startuplength-16
+   399                                  start:
+   400 000001F0 EA[0000]E0FF                    jmp     startupseg:init0
+   401
+   402 000001F5 30342F32392F323100      	db	DATE_STRING0, 0
+   403                                  ;  must be at F000:FFFE hex
+   404 000001FE FE                      	db	MODEL_BYTE
+   405 000001FF FF                      	db	0FFh
+   406
+   407
+   408
+   409                                  ; At power up or reset, execution starts at label 'start'.
+   410
+   411
