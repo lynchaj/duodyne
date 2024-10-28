@@ -1,0 +1,119 @@
+
+(rules PCB backplane
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 49)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.8)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.6)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.0)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd-smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    /~{EIRQ0} "/~{IEI-1}" /~{EIRQ1} /~{EIRQ2} "/~{BAI-1}" /~{EIRQ3} /USER0 /~{EIRQ4}
+    /USER1 /~{EIRQ5} /USER2 /~{EIRQ6} /USER3 /~{EIRQ7} /USER4 /~{RFSH}
+    /USER5 /~{HALT} /USER6 /~{WAIT} /USER7 /~{BUSRQ} /USER8 /CRUCLK
+    "/~{RES_IN}" /~{NMI} /CRUIN /~{INT0} /CRUOUT /CLK "/~{RES_OUT}" /~{BUSACK}
+    /~{INT1} /~{M1} /~{INT2} /~{MREQ} /PHI /~{IORQ} /ST /~{WR}
+    /E /~{RD} /A0 /A1 "/I2C_SCL" /A2 "/I2C_SDA" /A3
+    /~{DREQ0} /A4 /~{TEND0} /A5 /~{DREQ1} /A6 /~{TEND1} /A7
+    /A8 /AUXCLK1 /A9 /AUXCLK2 /A10 /AUXCLK3 /A11 /IC0
+    /A12 /IC1 /A13 /IC2 /A14 /IC3 /A15 /A24
+    /A16 /A25 /A17 /A26 /A18 /A27 /A19 /A28
+    /A20 /A29 /A21 /A30 /A22 /A31 /A23 /IPL0
+    /IPL1 /S0 /IPL2 /S1 /~{BHE} /S2 /~{BUSERR} /LDS
+    /~{VPA} /UDS /~{VMA} /D16 /D0 /D17 /D1 /D18
+    /D2 /D19 /D3 /D20 /D4 /D21 /D5 /D22
+    /D6 /D23 /D7 /D24 /D8 /D25 /D9 /D26
+    /D10 /D27 /D11 /D28 /D12 /D29 /D13 /D30
+    /D14 /D31 /D15 "/~{IEO-2}" "/~{IEI-2}" "/~{BAO-2}" "/~{BAI-2}" "/~{IEO-3}"
+    "/~{IEI-3}" "/~{BAO-3}" "/~{BAI-3}" "Net-(D5-Pad2)" "/~{IEO-4}" "/~{IEI-4}" "/~{BAO-4}" "/~{BAI-4}"
+    "/~{IEO-5}" "/~{IEI-5}" "/~{BAO-5}" "/~{BAI-5}" "/~{IEO-6}" "/~{IEI-6}" "/~{BAO-6}" "/~{BAI-6}"
+    "/~{IEO-7}" "/~{IEI-7}" "/~{BAO-7}" "/~{BAI-7}" "/~{IEO-8}" "/~{BAO-8}" /AUXCLK0 "/~{BAO-1}"
+    "/~{IEO-1}" "/~{BAI-8}" "/~{IEI-8}" "/~{IEO-9}" "/~{IEI-9}" "/~{BAO-9}" "/~{BAI-9}" "/~{IEO-10}"
+    "/~{IEI-10}" "/~{BAO-10}" "/~{BAI-10}" "/~{IEO-11}" "/~{IEI-11}" "/~{BAO-11}" "/~{BAI-11}" "/~{IEO-12}"
+    "/~{IEI-12}" "/~{BAO-12}" "/~{BAI-12}" "/~{IEO-13}" "/~{IEI-13}" "/~{BAO-13}" "/~{BAI-13}" "/~{BAI-14}"
+    "/~{BAO-14}" "/~{IEI-14}" "/~{IEO-14}" "/~{IEO-15}" "/~{IEI-15}" "/~{BAO-15}" "/~{BAI-15}" "/~{IEO-16}"
+    "/~{IEI-16}" "/~{BAO-16}" "/~{BAI-16}" "/~{BAO-20}" "/~{IEO-20}" "/~{BAI-19}" "/~{BAO-19}" "/~{IEI-19}"
+    "/~{IEO-19}" "/~{BAI-18}" "/~{BAO-18}" "/~{IEI-18}" "/~{IEO-18}" "/~{BAI-17}" "/~{BAO-17}" "/~{IEI-17}"
+    "/~{IEO-17}" "/~{IEI-20}" "/~{BAI-20}"
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC /+12V "/-12V"
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 2000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
