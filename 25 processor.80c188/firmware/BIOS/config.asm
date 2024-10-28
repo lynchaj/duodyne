@@ -58,7 +58,7 @@ UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
 ; It may be smaller than the actual EPROM in use.
 ; The following sizes are supported:  32, 64, 128, and 256
 %ifndef ROM
-ROM             equ     64              ; 64 is the default
+ROM             equ     32              ; 64 is the default
 %endif
 
 ; Define the number of Wait States at which the ROM operates
@@ -83,12 +83,12 @@ BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
 
 ; Define the time zone in which we build the Relocatable BIOS
 %ifndef TIMEZONE
-%define TIMEZONE "CDT"
+%define TIMEZONE "CST"
 %endif
 
 ; Has the REDBUG debugger been loaded?
 %ifndef SOFT_DEBUG
-%define SOFT_DEBUG 1
+%define SOFT_DEBUG 0
 %endif
 
 ; Should the BIOS include "Tiny BASIC" in the image?

@@ -9,7 +9,7 @@
 ;
 ; Copyright (C) 2010 Sergey Kiselev.
 ; Provided for hobbyist use on the N8VEM SBC-188 board.
-;  
+;
 ; This program is free software: you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by
 ; the Free Software Foundation, either version 3 of the License, or
@@ -75,7 +75,7 @@ BIOS_call_16h:			; Keyboard service entry
 	jae	err_exit
 	add	bx,bx		; index words
     cs	jmp	near [.dispatch10+bx]
-	
+
 .dispatch:
 	dw      fn00		; Read char from buffer, wait if empty
 	dw      fn01		; Check buffer, do not clear
@@ -325,7 +325,7 @@ cvdu_kbd_int:
 .33:
 	call	enqueue
 	mov	byte [uart_kbd_ctrl_R], 0
-	
+
 .exit:
 
 %if CVDU_USE_KBD_HOOK
@@ -424,7 +424,7 @@ v.redbug:
 
 ascii2scan:
 	;	NUL,SOH,STX,ETX,EOT,ENQ,ACL,BEL
-	db	0,  0,  0,  0,  0,  0,  0,  0, 
+	db	0,  0,  0,  0,  0,  0,  0,  0,
 	;	BS, TAB,LF, VT, FF, CR, SO, SI
 	db      0Eh,0Fh,0,  0,  0,  1Ch,0  ,0
 	;	DLE,DC1,DC2,DC3,DC4,NAK,SYN,ETB
@@ -433,7 +433,7 @@ ascii2scan:
 	db      0,  0,  0,  01h,0,  0,  0,  0,
 	;	 ,  !,  ",  #,  $,  %,  &,  '
 	db	39h,02h,28h,04h,05h,06h,08h,28h
-	;	(,  ),  *,  +,  ,,  -,  .,  /  
+	;	(,  ),  *,  +,  ,,  -,  .,  /
 	db	0Ah,0Bh,09h,0Dh,33h,0Ch,34h,35h
 	;	0,  1,  2,  3,  4,  5,  6,  7
 	db	0Bh,02h,03h,04h,05h,06h,07h,08h
@@ -455,14 +455,14 @@ ascii2scan:
 	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
 	;	x,  y,  z,  {,  |,  },  ~,  DEL
 	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,29h,53h
-	
+
 ;========================================================================
 ; keyboart_init - initialize keyboard
 ;========================================================================
 	global	keyboard_init
 keyboard_init:
 	pushm	all,ds,es	; was AX,DS,ES
-	
+
 %if CVDU_8242
 	push	bios_data_seg
 	popm	ds
@@ -475,7 +475,7 @@ keyboard_init:
 %if CVDU_8242
 
 %if  1-CVDU_USE_KBD_HOOK
-	mov	dx,PIC_I0CON	; Int 0 control register
+	mov	dx,PIC_I1CON	; Int 0 control register
 	in	ax,dx
 ;jrc	or	al,10h		; set Level Trigger Mode
 	and	al,~8		; clear mask bit
@@ -502,7 +502,7 @@ keyboard_init:
 	mov	dx,uart_ier
 	out	dx,al		; Enable interrupts on receive
 
-	mov	dx,PIC_I1CON	; Int 1 control register
+	mov	dx,PIC_I0CON	; Int 1 control register
 	in	ax,dx
 	and	ax,~08h		; clear the mask bit
 	out	dx,ax
@@ -528,7 +528,7 @@ keyboard_init:
 
 %if CVDU_8242
 ;========================================================================
-;  void I8242CommandPut(byte value);	
+;  void I8242CommandPut(byte value);
 ; Input:
 ;	AL = command byte
 ; Output:

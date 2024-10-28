@@ -44,14 +44,14 @@ void putline(char *s)
 char getchar(void)		/* only printing characters echo */
 {
    int ch;
-   
+
    ch = 0;
    while (!ch) {
       ch = uart_getchar();	/* wait for a character to arrive */
       if (ch==CR) ch = NL;
    }
    if (uart_echo && is_print(ch)) putchar((char)ch);
-   
+
    return ch;
 }
 
@@ -59,7 +59,7 @@ char *getline(char *buffer, int length)
 {  /* length is size of buffer; string returned will be length-1 or less */
    int n = 0;
    int ch = SP;
-   
+
    length--;	/* account for terminating NUL */
    while (n < length) {
       ch = getchar();
@@ -91,7 +91,7 @@ char *getline(char *buffer, int length)
          default:
             putchar(BEL);
          }
-      }   
+      }
       if (n == length) {
          putchar(BEL);
          putchar(BS);

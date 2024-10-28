@@ -116,10 +116,10 @@ int cprintf(const char * fmt, ...)
 	    case 'd': base=-10; }
 	       switch(type)
 	       {
-		  case 0: val=va_arg(ap, short); break; 
+		  case 0: val=va_arg(ap, short); break;
 		  case 1: val=va_arg(ap, int);   break;
 		  case 2: val=va_arg(ap, long);  break;
-		  case 4: val=va_arg(ap, unsigned short); break; 
+		  case 4: val=va_arg(ap, unsigned short); break;
 		  case 5: val=va_arg(ap, unsigned int);   break;
 		  case 6: val=va_arg(ap, unsigned long);  break;
 		  default:val=0; break;

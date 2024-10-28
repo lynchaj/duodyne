@@ -1,4 +1,4 @@
-     1
+     1                                  
      2                                  ;_________________________________________________________________________________________________________________________
      3                                  ;
      4                                  ;       SCREAM test for Duodyne 80c188 board
@@ -7,20 +7,20 @@
      7                                  ;       9600 N 8 1
      8                                  ;
      9                                  ;_________________________________________________________________________________________________________________________
-    10
-    11
-    12
+    10                                  
+    11                                  
+    12                                  
     13                                          CPU     186
-    14
-    15
-    16
-    17
+    14                                  
+    15                                  
+    16                                  
+    17                                  
     18                                          SECTION scream  start=1F000h vstart=0F0F00h
     19                                          GLOBAL  cold_boot
     20                                          GLOBAL  initialization
-    21
+    21                                  
     22                                          SEGMENT _TEXT
-    23
+    23                                  
     24                                  cold_boot:
     25                                  ; setup UART
     26 00000000 B080                            MOV     al,80h
@@ -37,20 +37,20 @@
     37 00000017 EE                              OUT     dx,al
     38 00000018 BA84FA                          MOV     dx,uart_mcr
     39 0000001B EE                              OUT     dx,al
-    40
-    41
+    40                                  
+    41                                  
     42                                  loop:
     43 0000001C B041                            MOV     al,65
     44 0000001E BA80FA                          MOV     dx,uart_thr
     45 00000021 EE                              OUT     dx,al
     46 00000022 EBF8                            JMP     loop
-    47
-    48
+    47                                  
+    48                                  
     49                                          %INCLUDE "startup.asm"
     50                              <1> ; ROM startup code Duodyne 80C188
     51                              <1> ; This is based on the STARTUP.ASM for the N8VEM SBC-188, which is under GPL 3.
     52                              <1>         [LIST   -]
-    55                              <1>
+    55                              <1> 
     56                              <1>         SECTION startup start=1FF00h vstart=0FFF00h
     57                              <1> begin:
     58 00000000 FA                  <1>         CLI
@@ -60,14 +60,14 @@
     62 00000007 8CC8                <1>         MOV     ax, cs
     63 00000009 8ED8                <1>         MOV     ds, ax
     64 0000000B B90400              <1>         MOV     cx, tablecnt
-    65                              <1>
+    65                              <1> 
     66                              <1> .1:
     67 0000000E AC                  <1>         LODSB                   ; Initialise registers from table
     68 0000000F 88C2                <1>         MOV     dl, al
     69 00000011 AD                  <1>         LODSW
     70 00000012 EF                  <1>         OUT     dx, ax
     71 00000013 E2F9                <1>         LOOP    .1
-    72                              <1>
+    72                              <1> 
     73 00000015 B800A0              <1>         MOV     ax, 0A000h       ; Stack at top of RAM
     74 00000018 8ED0                <1>         MOV     ss, ax
     75 0000001A BC0070              <1>         MOV     sp, 7000h
@@ -76,7 +76,7 @@
     78 00000022 B800F0              <1>         MOV     ax, 0F000h      ; Set CS=ES
     79 00000025 8EC0                <1>         MOV     es, ax
     80 00000027 EA[0000]00F0        <1>         JMP     0F000h:cold_boot; Continue to body of ROM
-    81                              <1>
+    81                              <1> 
     82                              <1> table:
     83                              <1>         DB_LO   ics_umcs        ; ROM
     66 0000002C A0                  <2>  DB %1 & 0ffh
@@ -91,7 +91,7 @@
     66 00000035 A4                  <2>  DB %1 & 0ffh
     90 00000036 BC0F                <1>         DW      0FBCh           ; F800h, no wait states, no external ready (0FBCh=0 WS)
     91                              <1> tablecnt        EQU ($-table)/3
-    92                              <1>
+    92                              <1> 
     93 00000038 FF<rep B8h>         <1>         SETLOC  0F0h            ; Reset entry is FFFF:0000h
     94 000000F0 EA[0000]00F0        <1>         JMP     0F000h:begin    ; Jump to the startup code above
     95 000000F5 30392F32392F323400  <1>         DB      "09/29/24", 00h ; BIOS date (mm/dd/yy)

@@ -1,6 +1,3 @@
-%ifndef SOFT_DEBUG
-;;;%define SOFT_DEBUG 1
-%endif
 ;========================================================================
 ; int10ser.asm -- Video display services implementation using serial port
 ;========================================================================
@@ -25,27 +22,13 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-; TODO:
-;       Complete the WYSE character attribute emulation -- JRC
+; Updated for the Duodyne 80c188 SBC
 ;========================================================================
 
 %include	"config.asm"
-ANY_VIDEO	equ	(CVDU_8563|VGA3_6445)
 
 %include	"cpuregs.asm"
 %include	"equates.asm"
-%if CVDU_8563
-%include	"ega9a.asm"
-%endif
-
-%if VGA3_6445
-%define Init8563_ Init_vga3_
-%define Scroll8563_ Scroll_vga3_
-%define get_char_and_attribute_ vga3_get_char_and_attribute_
-%define blast_characters_ vga3_blast_characters_
-%define @cvdu_tty_out @vga3_tty_out
-%define	set_cursor_pos_ vga3_set_cursor_pos_
-%endif
 
 
 offset_BP	equ	0
@@ -57,11 +40,7 @@ offset_FLAGS	equ	offset_CS+2
 
 EOS             equ     0FFh    ; End of String
 
-%if  WYSE
-MAX_ROWS	equ	24	; Wyse terminals have 24 rows
-%else
 MAX_ROWS	equ	24	; terminals usually have 24 rows...
-%endif
 
 
 	SEGMENT _TEXT
@@ -211,21 +190,9 @@ fn00:
 
 .set_mode:
 	mov	byte [video_mode],al
-%if ANY_VIDEO
-	pushm	ds
-	push	DGROUP
-	popm	ds
-	extern	Init8563_	; or Init_vga3_
-	call	Init8563_
-	popm	ds
-	mov	si,0800h	; page size = 2048 bytes
-	mov	[video_cga_palette],al		; set memory size
-	mov	al,0
-%else
 	mov	al,0
 	mov	[video_cga_palette],al		; clear location
 				; video_cga_palette = 0
-%endif
 ;;	cld			; clear video part of BIOS data area
 	mov	di,video_mode+1
 	mov	cx,video_cga_palette-video_mode-1
@@ -371,18 +338,6 @@ fn05:
 ;========================================================================
 fn06:
 fn07:
-%if	ANY_VIDEO
-	mov	bl,[video_page]
-	xchg	bl,bh
-	pushm	bx,ax,cx,dx,ds,es
-
-	push	DGROUP
-	popm	ds
-	extern	Scroll8563_	;or Scroll_vga3_
-	call	Scroll8563_	;
-
-	popm	bx,ax,cx,dx,ds,es
-%endif	; ANY_VIDEO
 
 %if	ANSI
 	pushm	ax,cx,dx
@@ -441,41 +396,10 @@ fn07:
 	call	uart_out
 	mov	al,'r'
 	call	uart_out
-
 .exit:
 	popm	ax,cx,dx
-%elif  WYSE
-	pushm	ax,cx,dx
-        cmp     dh,MAX_ROWS
-        jb      .0
-        mov     dh,MAX_ROWS-1
-.0:
-%if 0
-        mov	bx,word [offset_BX+bp]
-	mov	bl,bh
-	call	set_attributes
-%endif
-        or      al,al
-        jnz     .1
-        mov     al,dh
-        sub     al,ch
-        inc     al
-.1:     mov     dx,cx
-        xchg    ax,cx
-        call    cursor_set_pos
-.4:     test    ch,1            ; former AH
-        jnz     .down
-        call    uart_send
-        db      ESC, 'R', EOS
-        jmp     .5
-.down:  call    uart_send
-        db      ESC, 'E', EOS
-.5      dec     cl
-        jnz     .4
-        popm    ax,cx,dx
-%endif	; ANSI | WYSE
 	jmp	exit
-
+ %endif
 ;========================================================================
 ; Function 08h - Read character and attribute at cursor position
 ; Input:
@@ -488,24 +412,10 @@ fn07:
 ;	Impossible to emulate, returns AL = 20h, BH = 07h
 ;========================================================================
 fn08:
-%if ANY_VIDEO
-	pushm	es		; BP,BX,DS already saved
-
-	pushm	ds
-	push	DGROUP
-	popm	ds
-	mov	ax,word [offset_BX+bp]
-	extern	get_char_and_attribute_		; or vga3_get_char_and_attribute_
-	call	get_char_and_attribute_		; saves BX,CX,DX (SI,DI not used)
-	popm	ds
-
-	popm	es
-%else
 	mov	al,20h
 	mov	bx,word [offset_BX+bp]
 	mov	bh,07h
 	mov	word [offset_BX+bp],bx
-%endif
 	jmp	exit
 
 ;========================================================================
@@ -522,18 +432,6 @@ fn08:
 ;========================================================================
 fn09:
 fn0A:
-%if ANY_VIDEO
-	pushm	ax,dx,ds,es
-
-	push	DGROUP
-	popm	ds
-    	mov	dx,word [offset_BX+bp]
-	mov	bx,cx
-	extern	blast_characters_	; or vga3_blast_characters_
-	call	blast_characters_
-
-	popm	ax,dx,ds,es
-%endif
 %if UART
 	pushm	ax,cx,dx
 	cmp	al,20h
@@ -592,18 +490,6 @@ fn0A:
 ;========================================================================
 fn0E:
 	pushm	ax,dx		; preserve AX, too
-
-%if ANY_VIDEO
-	pushm	cx,ds,es
-	mov	dx,word [offset_BX+bp]
-	push	DGROUP
-	popm	ds
-	extern	@cvdu_tty_out	; or @vga3_tty_out
-	call	@cvdu_tty_out	; AX set, DX set, BX set
-; cvdu/vga3_tty_out is responsible for updating the cursor position
-	popm	cx,ds,es
-%endif
-
 	mov	bx,word [offset_BX+bp]
 	mov	bl,bh
 	mov	bh,0
@@ -661,9 +547,6 @@ fn0E:
 	mov	dl,0		; set cursor to the first column
 
 .exit:
-%if ANY_VIDEO==0
-	mov	word [video_cursor_pos+bx],dx
-%endif
 %endif
 	popm	ax,dx		; restore AX also
 	jmp	exit
@@ -854,7 +737,6 @@ fn13_exit:
 
 ;========================================================================
 ; coords_out - Output coordinates in ANSI format X;Y
-;              Output coordinates in WYSE format:  SP+row SP+col
 ; Input:
 ;	DH = X coordinate
 ;	DL = Y coordinate
@@ -889,15 +771,7 @@ coords_out:
 	add	al,ch		; al + '0' - convert to ASCII
 	call	uart_out
 	popm	cx,dx
-%elif WYSE
-        pushm   dx
-        add     dx,2020h        ; SPACE || SPACE
-        mov     al,dh           ; row
-	call	uart_out
-        mov     al,dl           ; column
-	call	uart_out
-        popm    dx
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -911,17 +785,6 @@ coords_out:
 ;	Uses ESC[<row>;<column>H ANSI sequence, row and column are 0-based
 ;========================================================================
 cursor_set_pos:
-%if ANY_VIDEO
-	pushm	ax,dx
-	mov	ax,dx
-	pushm	ds
-	pushm	DGROUP
-	popm	ds
-	extern	set_cursor_pos_		; or vga3_set_cursor_pos_
-	call	set_cursor_pos_
-	popm	ds
-	popm	ax,dx
-%endif
 %if	ANSI
 	push	ax
 	mov	al,ESC		; output CSI sequence
@@ -932,14 +795,6 @@ cursor_set_pos:
 	mov	al,'H'		; output 'H' command
 	call	uart_out
 	pop	ax
-%elif  WYSE
-        pushm   ax
-        mov     al,ESC
-	call	uart_out
-        mov     al,'='          ; ESC '=' r  c
-	call	uart_out
-        call	coords_out
-        popm    ax
 %elif	DUMB
 ; setting the cursor position back on the same line can be done
 ; by emitting the correct number of BS (backspace) characters
@@ -962,7 +817,7 @@ cursor_set_pos:
 	add	dh,ah
 	jnz	.7
 .9:
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -988,9 +843,7 @@ auto_wrap_off:
 	mov	al,'l'
 	call	uart_out
 	pop	ax
-%elif  WYSE
-;   Function is not available
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -1018,16 +871,7 @@ cursor_hide:
 	mov	al,'l'
 	call	uart_out
 	pop	ax
-%elif  WYSE
-        pushm   ax
-	mov	al,ESC
-	call	uart_out
-        mov     al, '`'
-	call	uart_out
-        mov     al,'0'
-	call	uart_out
-        popm    ax
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -1055,32 +899,7 @@ cursor_show:
 	mov	al,'h'
 	call	uart_out
 	pop	ax
-%elif  WYSE
-        pushm   ax
-	mov	al,ESC
-	call	uart_out
-        mov     al, '`'
-	call	uart_out
-        mov     ax,[video_cursor_mode]
-        and     ax,1F1Fh
-        sub     al,ah
-        cmp     al,3
-        jb      .line
-; blinking block cursor
-        mov     al,'5'
-        jmp     .3
-.line:  ; blinking line cursor
-        mov     al,'3'
-.3:     call    uart_out
-
-	mov	al,ESC
-	call	uart_out
-        mov     al, '`'
-	call	uart_out
-        mov     al,'1'
-	call	uart_out
-        popm    ax
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -1100,17 +919,7 @@ clear_screen:
 	call	uart_out
 	mov	al,'J'
 	call	uart_out
-%elif WYSE
-        call    uart_send
-        db      ESC, '+'        ; home cursor; clr to spaces; turn off
-                                ; protect and write protect modes
-        db      ESC, "A00"      ; data area attribute NORMAL
-        db      ESC, "A1p"      ; label area DIM (bottom line)
-        db      ESC, "A3x"      ; terminal message field dim underline
-        db      ESC, "A2t"      ; computer message field dim reverse
-        db      ESC, '"'        ; unlock keyboard
-        db      EOS
-%endif  ; ANSI | WYSE
+%endif  ; ANSI
 	ret
 
 ;========================================================================
@@ -1269,138 +1078,7 @@ set_attributes:
 	call	uart_out
 
 	pop	ax
-%elif WYSE & 0
-;*** this needs to be implemented correctly
-
-	push	ax
-
-	mov	al,ESC
-	call	uart_out
-	mov	al,'['
-	call	uart_out
-
-	test	bl,08h	; bold?
-	jnz	.bold
-	mov	al,'2'		; set normal mode - ESC[22m
-	call	uart_out
-	call	uart_out
-	jmp	.check_mode
-
-.bold:
-	mov	al,'1'		; set bold attribute - ESC[1m
-	call	uart_out
-
-.check_mode:
-	mov	al,byte [video_mode]
-	cmp	al,7
-	jne	.color
-
-	mov	al,';'
-	call	uart_out
-				; monochrome - set underline attribute
-	mov	al,bl
-	and	al,7		; get foreground attribute part
-	cmp	al,1		; underlined
-	je	.underline
-	mov	al,'2'		; set not underlined attribute - ESC[24m
-	call	uart_out
-	mov	al,'4'
-	call	uart_out
-	jmp	.mono_to_color
-
-.underline:
-	mov	al,'4'		; set underlined attribute - ESC[4m
-	call	uart_out
-
-.mono_to_color:
-	mov	al,bl
-	and	al,07h
-	jz	.mono_bg	; black foreground
-	or	bl,07h		; anything else is white
-.mono_bg:
-	mov	al,bl
-	and	al,70h
-	jz	.color		; black background
-	or	bl,70h		; anything else is white
-.color:
-	mov	al,';'
-	call	uart_out
-
-	mov	al,bl		; need to exchange bit 0 with 2
-	and	bl,0AAh		; and bit 4 with bit 6
-	test	al,01h
-	jz	.no_blue_fg
-	or	bl,04h
-.no_blue_fg:
-	test	al,04h
-	jz	.no_red_fg
-	or	bl,01h
-.no_red_fg:
-	test	al,10h
-	jz	.no_blue_bg
-	or	bl,40h
-.no_blue_bg:
-	test	al,40h
-	jz	.no_red_bg
-	or	bl,10h
-.no_red_bg:
-	mov	al,'3'		; set foreground color - ESC[3<0..7>m
-	call	uart_out
-	mov	al,bl
-	and	al,07h
-	add	al,'0'
-	call	uart_out
-
-	mov	al,';'
-	call	uart_out
-
-	test	bl,80h
-	jz	.normal_bg	; normal background
-	mov	al,byte [video_hw_mode]
-	test	al,20h		; intense colors
-	jnz	.normal_bg	; normal background, blinking
-
-	mov	al,'1'		; set intense background color - ESC[10<0..7>m
-	call	uart_out	; note - this is not supported everywhere
-	mov	al,'0'
-	call	uart_out
-	mov	al,bl
-	and	al,70h
-	shr	al,4
-	add	al,'0'
-	call	uart_out
-	jmp	.exit
-
-.normal_bg:
-	mov	al,'4'		; set background color - ESC[4<0..7>m
-	call	uart_out
-	mov	al,bl
-	and	al,70h
-        shr     al,4
-	add	al,'0'
-	call	uart_out
-
-	mov	al,';'
-	call	uart_out
-
-	test	bl,80h
-	jnz	.blink
-	mov	al,'2'		; set not blinking attribute - ESC[25m
-	call	uart_out
-	mov	al,'5'
-	call	uart_out
-	jmp	.exit
-
-.blink:
-	mov	al,'5'		; set blinking attribute - ESC[5m
-	call	uart_out
-
-.exit:
-	mov	al,'m'
-	call	uart_out
-
-	pop	ax
-%endif	; ANSI | WYSE
+%endif	; ANSI
 	ret
 
 ;========================================================================
@@ -1424,7 +1102,6 @@ uart_out:
 	push	dx
 	push	ax
 %if UART_DSR_PROTOCOL
- %if SBC188<3
         extern  microsecond
 .wait_dsr:
         mov     dx,uart_msr
@@ -1438,7 +1115,6 @@ BIT_DSR         equ     1<<5
         pop     cx
         jmp     .wait_dsr
 .nowait:
- %endif
 %endif
 .1:
 	mov	dx,uart_lsr
@@ -1452,31 +1128,6 @@ BIT_DSR         equ     1<<5
 .9:
 	ret
 
-%if  WYSE
-;========================================================================
-; uart_send - write an in-line EOS terminated string to serial port
-; Input:
-;	in the instruction stream
-; Output:
-;	destroys AX
-;========================================================================
-uart_send:
-        pop     ax              ; pointer to character string
-        xchg    ax,si
-	pushm	ax		; save SI
-
-.next:
-    cs	lodsb			; load byte at CS:SI
-        inc     al
-        jz      .done           ; EOS is 0FFh, so this is easy test
-        dec     al
-        call    uart_out
-        jmp     .next
-.done:
-	popm	ax		; restore SI
-        xchg    ax,si		; **
-        jmp     ax		; RETURN
-%endif ; WYSE
 
 ;========================================================================
 ; video_init - initialize video service
@@ -1515,11 +1166,7 @@ video_init:
 	popm	dx,cx
 %endif
 %endif
-%if CVDU|VGA3
-	mov	ax,0003h
-%else
 	mov	ax,0007h
-%endif
 	int	10h
 	pop	ax
 %if SOFT_DEBUG
@@ -1591,20 +1238,9 @@ video_init:
 	ret
 
 .hi:
-%if ANY_VIDEO
-%if CVDU_8563
-	db	'ColorVDU BIOS (c) 2013 John R. Coffman', NL
-%endif
-%if VGA3_6445
-	db	'VGA3 Video BIOS (c) 2017 John R. Coffman', NL
-%endif
 
 %if UART
 	db	'Serial I/O BIOS (c) 2010 Sergey Kiselev', NL
-	db	'Detected %s UART, FIFO is %sabled', NL
-%endif
-%else
-	db	'Video BIOS (C) 2010 Sergey Kiselev', NL
 	db	'Detected %s UART, FIFO is %sabled', NL
 %endif
 	db	0
@@ -1760,7 +1396,9 @@ uart_detect:
 ; Input:
 ;	AL = character
 ;========================================================================
-        global  @uart_putchar
+        global  @VIDEO_putchar
+	global  @uart_putchar
+@VIDEO_putchar:
 @uart_putchar:
         push    ax
         push    bx
@@ -1770,56 +1408,5 @@ uart_detect:
         pop     bx
         pop     ax
         ret
-
-;========================================================================
-; CVDU_putchar - write the character in teletype mode
-; Input:
-;	AL = character
-;	DL = attribute (IBM-PC)
-;  C-declaration:
-;	void __fastcall CVDU_putchar(int char, int attribute);
-;========================================================================
-        global  @VIDEO_putchar
-@VIDEO_putchar:
-	push	ax
-	mov	ah,0Fh		; get page in BH
-	int	10h
-	mov	bl,dl		; get attribute in BL
-	pop	ax
-	mov	ah,0Eh		; write char
-	int	10h
-	ret
-
-%if VGA3_6445
-;========================================================================
-; mv_word - move words using video index
-; Input:
-;	AX = destination character index
-;	DX = source character index
-;	BX = count of words to move
-;========================================================================
-	global mv_word_
-mv_word_:
-	pushm	si,di,cx,ds
-	mov	di,ax			; destination
-	shl	di,1			; it is a word pointer
-	mov	si,dx			; source
-	shl	si,1			; word pointer
-	mov	cx,bx			; count to CX
-	extern	video_buffer_ptr_
-	call	video_buffer_ptr_	; DX:AX is set
-	mov	es,dx			; set up segment registers
-	mov	ds,dx			;  **
-	add	di,ax			; AX is 0 for page 0
-	add	si,ax			;  **
-
-	rep	movsw			; do the fast move
-
-	popm	si,di,cx,ds
-	ret
-%endif
-
-
-
 
 ;========================================================================

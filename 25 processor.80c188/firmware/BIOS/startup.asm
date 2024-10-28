@@ -1,4 +1,4 @@
-%define DEBUG 0
+%define DEBUG 1
 ;========================================================================
 ;  startup.asm  -  start the 80C188 processor from a power-on condition
 ;========================================================================
@@ -20,6 +20,7 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
+; Updated for the Duodyne 80c188 SBC
 ;========================================================================
 
 %include	"config.asm"
@@ -69,7 +70,7 @@ init0_loop:
 
 %if DEBUG
 ; do some debug I/O
-	mov	dx,portD		;JRC's debug lights
+	mov	dx,FRONT_PANEL_LED		;JRC's debug lights
 	mov	al,0a5h
 	out	dx,al
 %endif
@@ -157,7 +158,7 @@ out3:
 ; output to the UART
         mov	dx,uart_thr		; transmit holding register
 	out	dx,al
-	mov	dx,portD
+	mov	dx,FRONT_PANEL_LED
 	out	dx,al			; debug output
 %endif
 	cmp	al,'3'
@@ -190,7 +191,7 @@ startup:
 ;    cs  jmp     far [goto]
 %if DEBUG
 ; do some debug I/O
-	mov	dx,portD		;JRC's debug lights
+	mov	dx,FRONT_PANEL_LED		;JRC's debug lights
 	mov	al,81h
 	out	dx,al
 %endif
@@ -203,7 +204,7 @@ startup:
 
 stop:
 	mov	ax,si
-	mov	dx,portD
+	mov	dx,FRONT_PANEL_LED
 	out	dx,al
 done:
 	hlt
@@ -279,9 +280,6 @@ table1:
 
 		db_lo	FDC_RES
 		db	1	; reset is active high
-
-		db_lo	IDE8_RES
-		db	0	; reset is active low (Fast IDE8)
 
 ; now add the default (9600bps/8250 UART setup)
 		db_lo	uart_ier

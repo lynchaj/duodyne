@@ -77,7 +77,7 @@ table:
         DB_LO   ics_mpcs        ; /MCSx size, /PCSx configuration
         DW      0C0BCh          ; 512KB, 7 /PCSx, I/O space, no wait states, no external ready
         DB_LO   ics_pacs        ; External peripherals
-        DW      0FBCh           ; F800h, no wait states, no external ready (0FBCh=0 WS)
+        DW      0FBEh           ; F800h, no wait states, no external ready (0FBCh=0 WS)
 tablecnt        EQU ($-table)/3
 
         SETLOC  0F0h            ; Reset entry is FFFF:0000h

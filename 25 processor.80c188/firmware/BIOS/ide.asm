@@ -19,6 +19,7 @@
 ;
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+; Updated for the Duodyne 80c188 SBC
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %include	"config.asm"
 %include	"cpuregs.asm"
@@ -65,13 +66,13 @@ hard:
 	and	bx,0Eh		; mask driver number (all even)
   cs	jmp	near [dispatch+bx]
 
-  
+
 
 	global	FIXED_timeout
 FIXED_timeout:
 	mov	ah,ERR_disk_timeout
 	jmp	FIXED_exit_AH
-	
+
 	global	FIXED_error, FIXED_exit_AH
 FIXED_error:
 	mov	ah,ERR_invalid_command
@@ -85,37 +86,14 @@ FIXED_exit_AH:
 
 ;  External references
 
-%if PPIDE_driver
 	extern	PPIDE_entry
-%else
-PPIDE_entry	equ	FIXED_error
-%endif
-%if DIDE_driver
-	extern	DIDE0_entry, DIDE1_entry
-%else
+
 DIDE0_entry	equ	FIXED_error
 DIDE1_entry	equ	FIXED_error
-%endif
-%if DSD_driver
-	extern	DSD_entry
-%else
 DSD_entry	equ	FIXED_error
-%endif
-%if V3IDE8_driver
-	extern	IDE8_entry
-%else
 IDE8_entry	equ	FIXED_error
-%endif
-%if DISKIO_driver
-	extern	DISKIO_entry
-%else
 DISKIO_entry	equ	FIXED_error
-%endif
-%if MFPIC_driver
-	extern	MFPIC_entry
-%else
 MFPIC_entry	equ	FIXED_error
-%endif
 
 
 	global	get_IDE_num		; to AX (AH will be clear)
@@ -151,7 +129,7 @@ get_IDE_num:
 
 	global	fixed_device_code
 
-; critical:  this table must be kept in sync with the enum at the 
+; critical:  this table must be kept in sync with the enum at the
 ;	top of 'nvram.c'
 ;
 ;enum {NO_disk=0, PPI_type=2, DIDE0_type=4, DIDE1_type=6, DSD_type=8,
@@ -160,14 +138,5 @@ get_IDE_num:
 fixed_device_code:
 	dw	0		; NO_disk
 	dw	PPI		; PPI_type
-	dw	DIDE0		; DIDE0_type
-	dw	DIDE1		; DIDE1_type
 	dw	0x408		; DSD_type
-	dw	FIDE_BASE	; V3IDE8_type
-	dw	DISKIO_PPIDE	; DISKIO_type
-	dw	MFPIC_PPIDE	; MFPIC_type
 	dw	-1
-	
-
-	 
-

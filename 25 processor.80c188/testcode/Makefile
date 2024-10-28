@@ -4,9 +4,11 @@ all:  	 scream.hex scram.hex
 
 scream.hex: scream.asm ioports.inc startup.asm
 	 nasm -o scream.hex -f ith -l scream.lst scream.asm
+	 cp scream.hex ../bin
 
 scram.hex: scram.asm ioports.inc startup.asm
 	 nasm -o scram.hex -f ith -l scram.lst scram.asm
+	 cp scram.hex ../bin
 
 pretty:
 	cp *.asm ./backup

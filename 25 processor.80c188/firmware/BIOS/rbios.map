@@ -1,7 +1,6 @@
 Open Watcom Linker Version 1.9
 Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
-Created on:       24/09/29 21:05:02
-Warning! W1027: file abios.lib(redbug.asm): redefinition of crlf ignored
+Created on:       24/10/28 02:59:40
 Executable Image: rbios.exe
 creating a DOS executable
 
@@ -13,7 +12,7 @@ creating a DOS executable
 Group                           Address              Size
 =====                           =======              ====
 
-DGROUP                          0835:0004            00000fbc
+DGROUP                          047e:0008            00000a48
 
 
 
@@ -24,11 +23,11 @@ DGROUP                          0835:0004            00000fbc
 Segment                Class          Group          Address         Size
 =======                =====          =====          =======         ====
 
-_TEXT                  CODE           AUTO           0000:0000       00008353
-CONST                  DATA           DGROUP         0835:0004       00000ee5
-CONST2                 DATA           DGROUP         0923:000a       00000080
-_DATA                  DATA           DGROUP         092c:0000       00000050
-_BSS                   BSS            DGROUP         0931:0000       00000000
+_TEXT                  CODE           AUTO           0000:0000       000047e7
+CONST                  DATA           DGROUP         047e:0008       000009ba
+CONST2                 DATA           DGROUP         051a:0002       00000080
+_DATA                  DATA           DGROUP         0523:0000       00000000
+_BSS                   BSS            DGROUP         0523:0000       00000000
 
 
                         +----------------+
@@ -48,231 +47,133 @@ Module: copyrght.obj(copyrght.asm)
 0000:00f0*     FPEM_segment
 Module: rbios.obj(rbios.asm)
 0000:0150      cold_boot
-0000:01d3*     SOFT_continue
-0000:0492*     get_vector
-0000:04a7*     set_vector
-0000:04be      cpu_table_init
-0000:04d8      @divLS
-0000:04ef      @remLS
-0000:0502      @mulLS
-0000:0515*     @microsecond
-0000:0517      microsecond
-0000:051d*     ticktime
-0000:0754      @rtc_get_loc
-0000:0754      rtc_get_loc
-0000:0782      @rtc_set_loc
-0000:0782      rtc_set_loc
-0000:07b0      lites
-0835:0132      _bios_data_area_ptr
-0835:0276      crlf
-0835:0281      boutsp
-0835:028a      wout
-0835:0291*     bout
-0835:02a7*     cout
+0000:03eb*     get_vector
+0000:03fe*     set_vector
+0000:0413      cpu_table_init
+0000:042d      @divLS
+0000:0444      @remLS
+0000:0457      @mulLS
+0000:046a*     @microsecond
+0000:046c      microsecond
+0000:0472*     ticktime
+0000:06c4      @rtc_get_loc
+0000:06c4      rtc_get_loc
+0000:06f5      @rtc_set_loc
+0000:06f5      rtc_set_loc
+0000:0726*     lites
+047e:0136      _bios_data_area_ptr
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/cprintf.c)
-0000:09f0*     nstring_
-0000:0a22      _cprintf
+0000:0910*     nstring_
+0000:0942      _cprintf
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/nvram.c)
-0835:0f46+     _rates
-0000:0d32+     set_battery_
-0000:0e61+     idow_
-0000:0f61+     Date_
-0000:120d+     Time_
-0000:13d2+     setup_spp_
-0000:1413+     setup_spp_b_
-0000:1432+     setup_serial_
-0000:14f2+     floppy_ask_
-0000:156d+     Floppy_
-0000:15c9      @nvram_check
-0000:1628+     @compute_nvram_checksum
-0000:166f+     setup_ppide_
-0000:16ab+     setup_diskio_
-0000:16e7+     setup_mfpic_
-0000:1723+     setup_v3ide8_
-0000:175f*     setup_dide_
-0000:1762+     setup_SDcard_
-0000:179e+     setup_fixed_boot_
-0000:1832+     setup_boot_sig_check_
-0000:18ae+     putstring_
-0000:192a+     p_bda_fx_
-0000:197c+     @setup_fixed_disk
-0000:1cdb+     put_char_array_
-0000:1d02+     sd_info_
-0000:1fb7+     @setup_SD_card
-0000:1fe3      @nvram_apply
-0000:244a      @nvram_setup
-0000:25bf      @nvram_get_video
+047e:0a1e+     _rates
+0000:0c52+     set_battery_
+0000:0d81+     idow_
+0000:0e81+     Date_
+0000:112d+     Time_
+0000:12f2+     setup_spp_
+0000:1333+     setup_spp_b_
+0000:1352+     setup_serial_
+0000:1412+     floppy_ask_
+0000:148d+     Floppy_
+0000:14e9      @nvram_check
+0000:1548+     @compute_nvram_checksum
+0000:158f+     setup_ppide_
+0000:15cb+     setup_fixed_boot_
+0000:165f+     setup_boot_sig_check_
+0000:16db+     putstring_
+0000:1757+     p_bda_fx_
+0000:17a9+     @setup_fixed_disk
+0000:1a77+     put_char_array_
+0000:1a9e+     sd_info_
+0000:1d53+     @setup_SD_card
+0000:1d7f      @nvram_apply
+0000:203f      @nvram_setup
+0000:2144      @nvram_get_video
 Module: abios.lib(int10ser.asm)
-0000:25de      BIOS_call_10h
-0000:2b2c      video_init
-0000:2da3*     is_present_4UART_
-0000:2dcd*     is_present_2S1P_
-0000:2e01      @uart_putchar
-0000:2e0d      @VIDEO_putchar
+0000:2164      BIOS_call_10h
+0000:269c      video_init
+0000:28f3      @VIDEO_putchar
+0000:28f3      @uart_putchar
 Module: abios.lib(int16ser.asm)
-0000:2e1a      BIOS_call_16h
-0000:2edf      uart_int
-0000:2fc4      keyboard_init
-0000:2ff2      @uart_getchar
-Module: abios.lib(redbug.asm)
-0000:2ffa      single_step
-0000:3010      breakpoint
-0000:3016      zero_divide
-0000:301c      undefined_op
-0000:3022      nmi_interrupt
-0000:3028      INTO_trap
-0000:302e      bound_trap
-0000:3034      redbug
+0000:2900      BIOS_call_16h
+0000:29c2      uart_int
+0000:2a8b      keyboard_init
+0000:2ab5      @uart_getchar
 Module: abios.lib(timers.asm)
-0000:309a      _cpu_speed
-0000:30c8      @timer_init
-0000:310c*     timer2_interrupt
-0000:3111      timer1_interrupt
-0000:3114      timer0_interrupt
-0000:315a      BIOS_call_1Ah
-0000:3197      BIOS_call_1Ch
+0000:2abc      _cpu_speed
+0000:2aea      @timer_init
+0000:2b2e*     timer2_interrupt
+0000:2b33      timer1_interrupt
+0000:2b36      timer0_interrupt
+0000:2b7a      BIOS_call_1Ah
+0000:2bb5      BIOS_call_1Ch
 Module: abios.lib(floppy.asm)
-0000:32c6      BIOS_call_13h
-0000:32fa*     undefined
-0000:33c7*     get_msr
-0000:33ce*     wait12
-0000:33e8*     fdc_ready_for_command
-0000:340d*     fdc_ready_for_result
-0000:3432*     output_byte_to_fdc
-0000:3444*     input_byte_from_fdc
-0000:3454*     output_cmd_to_fdc
-0000:3471*     input_result_from_fdc
-0000:349f      fdc_interrupt_level
-0000:34f4      fdc_timer_hook
-0000:3512*     fdc_wait_seek_done
-0000:354b      @floppy_init
-0000:3550*     fn00
-0000:35fa*     fn02
-0000:3604*     fn03
-0000:360e*     fn04
-0000:3616*     rwv_common
-0000:367e*     rwv_common.marker
-0000:368e*     end_rwv
-0000:3713      dma0_interrupt
-0000:37b4*     check_DL
-0000:37cb*     get_disk_type
-0000:37da*     get_media
-0000:37e6*     set_media_pointer
-0000:3811*     Specify
-0000:3859*     motor_on
-0000:38be*     xfer_read_sector
-0000:3939*     xfer_format_track
-0000:3939*     xfer_write_sector
-0000:396e*     xfer_verify_sector
-0000:399f*     recalibrate
-0000:39f2*     Seek
-0000:3a56*     Check_RW_Status
-0000:3a9f*     @disable
-0000:3ab0*     @enable
+0000:2ce4      BIOS_call_13h
+0000:2de9*     wait12
+0000:2e03*     fdc_ready_for_command
+0000:2e28*     fdc_ready_for_result
+0000:2e4d*     output_byte_to_fdc
+0000:2e5f*     input_byte_from_fdc
+0000:2e6f*     output_cmd_to_fdc
+0000:2e8a*     input_result_from_fdc
+0000:2eb8      fdc_interrupt_level
+0000:2f0b      fdc_timer_hook
+0000:2f29*     fdc_wait_seek_done
+0000:2f62      @floppy_init
+0000:3119      dma0_interrupt
+0000:3256*     motor_on
+0000:3453*     Check_RW_Status
+0000:349a*     @disable
+0000:34a9*     @enable
 Module: abios.lib(ide.asm)
-0000:3ae6      FIXED_BIOS_call_13h
-0000:3b1a*     FIXED_timeout
-0000:3b1e      FIXED_error
-0000:3b20*     FIXED_exit_AH
-0000:3b2c*     _get_IDE_num
-0000:3b2c      get_IDE_num
-0000:3b49*     fixed_device_code
+0000:34dc      FIXED_BIOS_call_13h
+0000:350f*     FIXED_timeout
+0000:3513*     FIXED_error
+0000:3515*     FIXED_exit_AH
+0000:351f*     _get_IDE_num
+0000:351f      get_IDE_num
+0000:353a*     fixed_device_code
 Module: abios.lib(int14ser.asm)
-0000:3b5c      BIOS_call_14h
-0000:3c2c      _spp_init
+0000:3542      BIOS_call_14h
+0000:3612      _spp_init
 Module: abios.lib(misc15.asm)
-0000:3c74      BIOS_call_15h
-0000:3ec3*     set_count
-0000:3f65      rtc_interrupt
+0000:365a      BIOS_call_15h
+0000:3729*     set_count
+0000:37c9      rtc_interrupt
 Module: abios.lib(int17par.asm)
-0000:3fa2      BIOS_call_17h
+0000:3804      BIOS_call_17h
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/libc.c)
-0000:4006      strlen_
-0000:4019*     strchr_
-0000:4040      atoi_
-0000:4066      _small_code_
-0000:4067      log2_
+0000:3868      strlen_
+0000:387b*     strchr_
+0000:38a2      atoi_
+0000:38c8      _small_code_
+0000:38c9      log2_
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/sio.c)
-0000:4092+     putchar_
-0000:40b3+     putline_
-0000:40c7+     getchar_
-0000:40f9      getline_
-0835:0f68+     _uart_echo
+0000:38f4+     putchar_
+0000:3915+     putline_
+0000:3929+     getchar_
+0000:395b      getline_
+047e:0a40+     _uart_echo
 Module: abios.lib(sdcard.asm)
-0000:41c0*     SDcard_BIOS_call_13h
-0000:41cb      DSD_entry
-0000:4270*     SDputchar
-0000:4285*     SDgetchar
-0000:432a*     @SDinit
-0000:4336      @SDinitcard
-0000:446b      _DSDgetInfo
-0000:44e0*     stepCRC7
-0000:44e0      @stepCRC7
-0000:455e*     verify_crc
-0000:45b9*     SD_put_return
-0000:46e7*     crc16
-0000:4939      _SDcsd
+0000:3a22*     SDcard_BIOS_call_13h
+0000:3a2c*     DSD_entry
+0000:3acf*     SDputchar
+0000:3ae4*     SDgetchar
+0000:3b86*     @SDinit
+0000:3b92      @SDinitcard
+0000:3cc2      _DSDgetInfo
+0000:3d36*     stepCRC7
+0000:3d36      @stepCRC7
+0000:3db4*     verify_crc
+0000:3f3b*     crc16
+0000:418d      _SDcsd
 Module: abios.lib(ppide.asm)
-0000:4b3e      _PPIDE_READ_ID
-0000:4b76*     _PPIDE_READ_SECTOR
-0000:4be2*     _PPIDE_WRITE_SECTOR
-0000:4d21*     PPIDE_BIOS_call_13h
-0000:4d2c      PPIDE_entry
-Module: abios.lib(ide8.asm)
-0000:4fa0*     IDE8_BIOS_call_13h
-0000:4fab      IDE8_entry
-0000:5030      _IDE8_READ_ID
-0000:506c*     _IDE8_READ_SECTOR
-0000:50e6*     _IDE8_WRITE_SECTOR
-Module: abios.lib(diskio.asm)
-0000:53ca      _DISKIO_READ_ID
-0000:5402*     _DISKIO_READ_SECTOR
-0000:546e*     _DISKIO_WRITE_SECTOR
-0000:55ad*     DISKIO_BIOS_call_13h
-0000:55b8      DISKIO_entry
-Module: abios.lib(mfpic.asm)
-0000:582c      _MFPIC_READ_ID
-0000:5864*     _MFPIC_READ_SECTOR
-0000:58d0*     _MFPIC_WRITE_SECTOR
-0000:5a0f*     MFPIC_BIOS_call_13h
-0000:5a1a      MFPIC_entry
-Module: abios.lib(dide.asm)
-0000:5c8e*     DIDE_BIOS_call_13h
-0000:5c99*     DIDE0_entry
-0000:5c99*     DIDE1_entry
-0000:5d1e      _DIDE_READ_ID
-0000:5d63*     _DIDE_READ_SECTOR
-0000:5ded*     _DIDE_WRITE_SECTOR
-Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/debug.c)
-0835:0f70+     _regs
-0000:60e6+     strtoul_
-0000:627b*     @len_instr
-0000:62b5+     strncmp_
-0000:6305+     strstr_
-0000:6354+     _unassemble
-0000:63dd+     usage_
-0000:63ee+     uppercase_
-0000:641e+     lowercase_
-0000:644e+     ireg_
-0000:647e+     get_value_
-0000:64cf+     output_
-0000:658b+     input_
-0000:662b+     get_flag_value_
-0000:6704+     print_flags_
-0000:674d+     print_regs_
-0000:67ca+     get_seg_off_
-0000:6863+     Rcmd_
-0000:697e+     Ucmd_
-0000:6ada+     Dcmd_
-0000:6d6c+     insert_breaks_
-0000:6de2+     remove_breaks_
-0000:6e99+     set_break_
-0000:6f86+     list_breaks_
-0000:6fd0+     Bcmd_
-0000:7120      _command
-Module: abios.lib(unasm.ASM)
-0000:7310      _unasm
-0000:72c0*     _unasm_msg
+0000:4390      _PPIDE_READ_ID
+0000:43c6*     _PPIDE_READ_SECTOR
+0000:442f*     _PPIDE_WRITE_SECTOR
+0000:456d*     PPIDE_BIOS_call_13h
+0000:4577      PPIDE_entry
 Warning! W1014: stack segment not found
 
 
@@ -289,6 +190,6 @@ cbios.lib
                         +-----------------------+
 
 Stack size:  0400 (1024.)
-Memory size:  9310 (37648.)
+Memory size:  5230 (21040.)
 Entry point address: 0000:0000
-Link time: 00:00.06
+Link time: 00:00.05

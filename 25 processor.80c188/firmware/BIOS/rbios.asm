@@ -3,6 +3,7 @@
 %endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; RBIOS.ASM -- Relocatable BIOS for the RetroBrew SBC-188 v.0.4 to 3.1
+; Updated for the Duodyne 80c188 SBC 10/2024
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;   This version is for assembly by  NASM 0.98.39 or later
@@ -23,13 +24,6 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-;
-; SBC-188 board revisions:
-;       1.0     production board
-;	2.0	production board with errata
-;------------------------------------------------------------------------
-;	3.0	2 x 512k SRAM chips, GALs for glue logic
-;	3.1	4-layer board (proposed)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	cpu	186
@@ -61,7 +55,7 @@ cold_boot:
         cli                     ; Should be clear already
 	mov	bx,ax		; save board revision in BX
 %if SOFT_DEBUG
-        mov     dx,portD
+        mov     dx,FRONT_PANEL_LED
         mov     al,0A5h         ; A5 to the LITES
         out     dx,al
 %endif
@@ -93,7 +87,7 @@ memory_testing:
 
 %if SOFT_DEBUG
         jnc     cold_continue
-        mov     dx,portD
+        mov     dx,FRONT_PANEL_LED
         mov     al,0F1h         ; F1 to the LITES
         out     dx,al
 .1:
@@ -119,9 +113,6 @@ cold_continue:
 	jz	.3
    ss	mov	word [warm_boot],1234h	; restore warm boot code
 .3:
-%endif
-%if EMM_BOARDS
-        call    EMM_init0       ; disable all EMM boards
 %endif
         call    get_ramsize
         shl     ax,6            ; convert to Segment address
@@ -288,11 +279,6 @@ PARALLEL_3	equ	1100000000000000b
 	div	cx
 	mov	byte [cpu_xtal],al	; CPU oscillator frequency
 
-%if CVDU_8563
-	xor	dx,dx
-	mov	dl,[video_cga_palette]
-	push	dx			; CVDU memory size
-%endif
 	push	word [memory_size]
 
 	push	DGROUP
@@ -324,28 +310,12 @@ PARALLEL_3	equ	1100000000000000b
    ss	mov	word [warm_boot],1234h	; set warm boot code
 
 %endif
-%if CVDU_8563
-	inc	sp
-	inc	sp			; remove CVDU memory size
-%endif
 	call	nvram_init
 
 	push	ds		; DS = DGROUP (CONST)
 	push	msg_floppy
 	call	_cprintf
 	add	sp,4
-
-%if SBC188==3
-	mov	dx,FDC_RES	; FDC reset (active high)
-	xor	al,al
-	out	dx,al		; remove FDC reset
-
-	mov	dx,IDE8_RES	; IDE8 (fast) interface
-	mov	al,1		; remove reset
-	out	dx,al
-%endif
-
-
 
 	extern	@floppy_init
 	call	@floppy_init
@@ -469,12 +439,6 @@ boot_the_OS:
 	popm	ds			; were it should
 	sti
 
-%if CVDU_8242
-    ss	or	byte [keyboard_flags_0],CVDU_KEYBOARD_STATUS ; NumLock?
-	extern	I8242UpdateLites_
-	call	I8242UpdateLites_
-%endif
-
 	push	'A'
 	push	ds
 	push	msg_booting
@@ -516,7 +480,7 @@ boot_drive:
 .1:					; loop comes back here
 	mov	ah,0			; reset the Disk Controller
 	int	13h
-	
+
 	push	dx
 	mov	ah,8			; get drive parameters
 	int	13h
@@ -730,15 +694,8 @@ interrupt_table:
 	db	0Bh			; DMA 1 interrupt
 	dw	end_of_interrupt
 
-	db	0Ch			; INT0 - external bus INT
-%if CVDU_8242 & (1-CVDU_USE_KBD_HOOK)
-	extern	cvdu_kbd_int
-	dw	cvdu_kbd_int
-%else
-	dw	end_of_interrupt
-%endif
-
-	db	0Dh			; INT1 - UART
+	db	0Ch			; INT0 - UART
+; eventually this will be PIC code here
 %if UART
 	extern	uart_int
 	dw	uart_int
@@ -746,6 +703,13 @@ interrupt_table:
 	dw	end_of_interrupt
 %endif
 
+	db	0Dh			; INT1- external bus INT
+	%if CVDU_8242 & (1-CVDU_USE_KBD_HOOK)
+	extern	cvdu_kbd_int
+	dw	cvdu_kbd_int
+%else
+	dw	end_of_interrupt
+%endif
 	db	0Fh
 	extern	fdc_interrupt_level
 	dw	fdc_interrupt_level	; INT3 - FDC
@@ -762,7 +726,7 @@ interrupt_table:
 ;;;	dw	timer1_interrupt	; non INT 12h passed to timer1
 
 	db	13h			; BIOS - Disk services
-%if PPIDE_driver | DIDE_driver | DSD_driver
+%if PPIDE_driver
 	extern	FIXED_BIOS_call_13h
 	dw	FIXED_BIOS_call_13h     ; (shared with Timer 2, prescaler, NOT USED)
 
@@ -787,7 +751,7 @@ interrupt_table:
 	extern	BIOS_call_17h
 	dw	BIOS_call_17h		; BIOS - Print services
 
-%if TBASIC==0 
+%if TBASIC==0
 	db	18h			; BIOS - Start ROM Basic
 	dw	BIOS_call_18h
 %endif
@@ -871,7 +835,7 @@ set_traps:
 	call	set_vector
 	inc	bl
 	loop	.set_default_loop
-	
+
         mov     ds,dx           ; for LODS  CS==DX==DS
         cnop
         mov     si,interrupt_table	; load address to start
@@ -948,7 +912,7 @@ set_vector:
 
         popm    cx,bx,ds	; register restores
         ret                     ; return
-        
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  cpu_table_init
 ;
@@ -987,7 +951,7 @@ cpu_table_init:
 .9:
         pop     si              ; restore SI
         ret                     ;
-        
+
 
 %if 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1117,7 +1081,7 @@ wout:
         aad
         mov     %1,al
 %endm
-        
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  ticktime -- set the tick count from the CMOS clock
@@ -1168,7 +1132,7 @@ ticktime:
         div     bx              ; CX:AX is quotient, DX is remainder
 ; round the result
         sub     bx,dx           ; if DX > BX/2
-        cmp     bx,dx           ; 
+        cmp     bx,dx           ;
         ja      .3
         add     ax,1
         adc     cx,0
@@ -1186,14 +1150,7 @@ ticktime:
 ;========================================================================
 
 %include        "memory.asm"
-
-%if SBC188==1
 %include        "ds1302.asm"
-%elif SBC188==3
-%include	"ds3uart.asm"
-%else
-%error	"SBC188 is of unknown value
-%endif
 
 %if SOFT_DEBUG+1
         global  lites
@@ -1205,7 +1162,7 @@ lites:  push    bp
         mov     bp,sp           ; establish stack frame
         pushm   ax,dx
         mov     al,[bp+4]
-        mov     dx,portD
+        mov     dx,FRONT_PANEL_LED
         out     dx,al
         popm    ax,dx
         pop     bp
@@ -1247,24 +1204,24 @@ ident3:
 %endif
         db      ".                    [%d]",NL
         db      0
-	
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  This is the banner which prints out first.
 ;  The letters are variable width; B is wide; -, and 1 are kerned.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ident1:
         db      NL,"%9a"
-        db      "   SSS   BBBBB    CCC           1     888    888",	NL
-        db      "  S   S   B   B  C   C         11    8   8  8   8",	NL
-        db      "   S      B   B  C              1    8   8  8   8",	NL
-        db      "    S     BBBB   C      HHHH    1     888    888",	NL
-        db      "     S    B   B  C              1    8   8  8   8             rev. ", VERSION, NL
-        db      "  S   S   B   B  C   C          1    8   8  8   8             of ", DATE, NL   
-        db      "   SSS   BBBBB    CCC         11111   888    888                  ("
+        DB      "  _____                  _ ",	NL
+        DB      " |  __ \                | |",	NL
+        DB      " | |  | |_   _  ___   __| |_   _ _ __   ___ ",	NL
+        DB      " | |  | | | | |/ _ \ / _` | | | | '_ \ / _ \ ",	NL
+        DB      " | |__| | |_| | (_) | (_| | |_| | | | |  __/",	NL
+        DB      " |_____/ \__,_|\___/ \__,_|\__, |_| |_|\___|",	NL
+        DB      "    80c188 pcb              __/ |  rev. ", VERSION, NL
+        DB      "                           |___/   of   ", DATE, NL
+        db      "                                   ("
 %if ANSI
         db      "ANSI"
-%elif WYSE
-        db      "Wyse"
 %elif DUMB
         db      "dumb"
 %elif TTY
@@ -1273,9 +1230,6 @@ ident1:
         db      "???"
 %endif
         db      ")",NL
-
-;	db      NL
-;	db	"%12a"		; color for the Copyright notice
 
 	db      0
 
@@ -1287,14 +1241,6 @@ bulk_of_code_end        equ     $
 
 
         segment CONST
-%if SOFT_DEBUG
-%else
-%if (CVDU_8563 | VGA3_6445)
-	global	_Font
-_Font	dw	0, 0F680h		; loaded at absolute location
-%endif
-%endif
-
 
         global  _bios_data_area_ptr
 _bios_data_area_ptr:
@@ -1303,12 +1249,6 @@ _bios_data_area_ptr:
 
 msg_cpu_memory:
 	db	"%15a%d%s %2aMhz CPU clock, %15a%u%2aK memory installed"
-%if CVDU_8563
-	db	", with %15a%d%2aK ColorVDU memory"
-%endif
-%if VGA3_6445
-	db	", with %15a32%2aK VGA3 memory"
-%endif
 	db	NL, 0
 msg_cpu_clock_05:
 	db	".5", 0
@@ -1386,7 +1326,7 @@ nout:
 	call	cout
 	pop	ax
 	ret
-	
+
 ; character output from AL
 cout:
 %if 0
