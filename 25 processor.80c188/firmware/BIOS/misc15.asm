@@ -21,6 +21,7 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
+; Updated for the Duodyne 80c188 SBC
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %include        "config.asm"
 %include        "cpuregs.asm"
@@ -43,7 +44,7 @@ timer1          equ     TIM1
 
         global  BIOS_call_15h
 
-; The stack offsets 
+; The stack offsets
 offset_BP       equ     0
 offset_AX       equ     offset_BP+2
 ;offset_AL	equ	offset_AX+0
@@ -60,7 +61,7 @@ BIOS_call_15h:
 	cmp     ah,04Fh         ; null keyboard intercept handler
         jne	.1
         iret			; carry was set by the call
-.1:	
+.1:
         pushm   bp,ax,bx,dx,ds
         mov     bp,sp           ; establish stack frame addressing
 
@@ -80,7 +81,7 @@ BIOS_call_15h:
 	je	fn04
 	cmp	ah,5		; cassette GPIO2 off command
 	je	fn05
-%else	
+%else
         mov     bl,ah
         xor     bh,bh
         cmp     bl,fn00max/2
@@ -106,7 +107,7 @@ try_fn80:
         add     bx,bx
     cs  jmp     near [int15fn80+bx]     ; dispatch
 
-         
+
 unknown:
 	mov	byte [offset_AH+bp],0FFh	; flag error
 set_carry:
@@ -187,7 +188,7 @@ fn88:
         jmp     clear_carry
 
 
-        
+
 %if TBASIC
 ; Get Line (direct access to SIO.C 'getline' routine)
 ;
@@ -216,8 +217,9 @@ fn8a:
 %endif
 
 
-%include "cassette.asm"
+
 %if 0
+%include "cassette.asm"
 ;--------------------------------------------------------
 ; Cassette support routines
 ;	(AH) = 0 TURN CASSETTE MOTOR ON
@@ -335,7 +337,16 @@ fn05:
 	in	al,dx				;read cassette uart mcr
 	and	al,~08h				; clear bit to turn off motor
 	jmp	W4				;write it, clear error, return
-%endif	
+
+%else
+fn00:
+fn01:
+fn02:
+fn03:
+fn04:
+fn05:
+jmp	set_carry
+%endif
 
 
         SEGMENT CONST
@@ -397,12 +408,12 @@ fnC1:
 ;	exits with AX=0
 ;
 timer_disable:
-	mov	dx,timer1+TCON	
+	mov	dx,timer1+TCON
 	in	ax,dx		; get control register
 	and	ax,(~tc_EN)&0FFFFh  ; disable timer
 	or	ax,tc_nINH		; change enable flag
 	out	dx,ax		; disable the timer
-	
+
 	xor	ax,ax
 	mov	dx,timer1+TCNT		; zero the count
 	out	dx,ax
@@ -413,11 +424,11 @@ timer_disable:
 ;	uses AX & DX
 ;
 timer_enable:
-	mov	dx,timer1+TCON	
+	mov	dx,timer1+TCON
 	in	ax,dx		; get control register
 	or	ax,tc_EN+tc_nINH+tc_INT		; enable timer & interrupts
 	out	dx,ax		; enable the timer
- 	ret	
+ 	ret
 
 	global set_count
 set_count:
@@ -498,8 +509,8 @@ fn83:		; BP,AX,BX,DX,DS already saved
 	mov	word [user_semaphore+2],es
 	mov	word [user_semaphore],bx
 
-	call	set_count	
-	
+	call	set_count
+
 	call	timer_enable
 	mov	byte [rtc_wait_active],01h	; flag wait active
 	mov	ax,8300h
@@ -543,7 +554,7 @@ fn86:		; BP,AX,BX,DX,DS already saved
 	mov	byte [rtc_wait_active],0		; mark not in use
 	jmp	clear_carry
 
-	
+
 	global	rtc_interrupt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  rtc_interrupt             (timer0, if NEED_TIMER_FIX)
@@ -581,4 +592,3 @@ rtc_interrupt:
 
 	popm	ax,dx,si,ds
         iret
-

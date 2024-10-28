@@ -20,6 +20,7 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
+; Updated for the Duodyne 80c188 SBC
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 %include	"macros.inc"
 
@@ -141,7 +142,7 @@ IO_BASE			equ	0400h
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; The UART registers
+; The UART registers (Duodyne SBC 80c188 Console port)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 uart_base               equ     IO_BASE+0280h
@@ -159,51 +160,10 @@ uart_sr			equ	uart_base+7	;Scratch
 uart_dll                equ     uart_base       ;Divisor Latch LS Byte
 uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Floppy controller
+; CONTROL LS259 PORT  (DuoDyne 80C188)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-FDC	        equ	IO_BASE+0200H
-FDC_MSR         equ     FDC
-FDC_DATA        equ     FDC_MSR+1
-FDC_DACK        equ	FDC+10H
-FDC_LDOR	equ	FDC+20H
-FDC_LDCR	equ	FDC+30H
-FDC_TC	        equ	FDC+40H
-FDC_DACK_TC     equ     FDC_DACK | FDC_TC
-
-
-%if SBC188==1
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;DS1302 RTC
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-RTC	equ	IO_BASE+0300H
-%endif
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; PIO 82C55 I/O 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; for the SBCv1/v2 with PPIDE adapter board
-; and for the SBCv3 with PPIDE connector
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-PPI	        equ	IO_BASE+0260H
-
-PIO_A	        equ	PPI+0	; (OUTPUT)
-PIO_B	        equ	PPI+1	; (INPUT)
-PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)  
-PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-
-portA           equ     PPI+0   ;
-portB           equ     PPI+1   ;
-portC           equ     PPI+2   ;
-
-
-
-;;;%if SBC188==3   startup.asm is universal
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; CONTROL LS259 PORT ON SBC188 V3
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-CTRL259		equ	IO_BASE+0270H
+CTRL259		equ	IO_BASE+0238H
 ; LEDS are at addresses 0..3
 ; other control ports on 4..7
 LED0		equ	CTRL259+0
@@ -212,177 +172,47 @@ LED2		equ	LED0+2
 LED3		equ	LED0+3
 T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
 ;unused		equ	CTRL259+5
-FDC_RES		equ	CTRL259+6	; RESET IS ACTIVE HIGH
-IDE8_RES	equ	CTRL259+7	; fast IDE RESET IS ACTIVE LOW
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; FIDE8 8-bit IDE on the 80C188 bus
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-FIDE_BASE       equ     IO_BASE+2C0h
-
-IDE8_CS0        equ     FIDE_BASE
-IDE8_CS1        equ     FIDE_BASE+0x10
-
-;;;%endif   startup.asm is universal
-
+;unused		equ	CTRL259+6
+;unused		equ	CTRL259+7
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Dual [DMA] IDE devices
+; Front Panel Connector  (DuoDyne 80C188)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DIDE		equ	IO_BASE + 20H	; range 0x20..0x3F
-
-DIDE0		equ	DIDE		; first interface (master & slave)
-DIDE1		equ	DIDE+10h	; second interface (master & slave)
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; DISK I/O v3 device codes (PPIDE only)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-DISKIO		equ	IO_BASE + 20h	; range 0x20..0x3F
-
-DISKIO_PPIDE	equ	DISKIO		; 82c55
-DISKIO_FDC	equ	DISKIO + 10h	; FDC 9266
-DISKIO_DOR	equ	DISKIO + 18h	; OPERATION REGISTER	
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; MF/PIC interfaces
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-MFPIC		equ	IO_BASE + 40h	; range 0x40..0x4F
-
-;MFPIC_202	equ	MFPIC		; NS32202 is not usable on SBC-188
-MFPIC_PPIDE	equ	MFPIC + 4	; PPIDE disk interface
-MFPIC_UART	equ	MFPIC + 8	; TL16Cx50 SIO chip
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Cassette I/O
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-cuart_base	EQU 	IO_BASE+80H	; BASE IO ADDRESS OF CASSETTE UART
-cuart_rbr	equ     cuart_base	;Rcvr Buffer / read only
-cuart_thr	equ     cuart_base	;Transmit Holding / write only
-cuart_ier	equ     cuart_base+1	;Interrupt Enable
-cuart_iir	equ     cuart_base+2	;Interrupt Ident / read only
-cuart_fcr	equ     cuart_base+2	;FIFO Control / write only
-cuart_lcr	equ     cuart_base+3	;Line Control
-cuart_mcr	equ     cuart_base+4	;Modem Control
-cuart_lsr	equ     cuart_base+5	;Line Status
-cuart_msr	equ     cuart_base+6	;Modem Status
-cuart_sr	equ	cuart_base+7	;Scratch
-
-cuart_dll	equ     cuart_base	;Divisor Latch LS Byte
-cuart_dlm	equ	cuart_base+1	;Divisor Latch MS Byte
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;       4MEM control registers
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-EMM_addr        equ     1               ; high 6 bits of 20-bit address
-EMM_page        equ     0               ; 4MEM page in [0..254]
-
-EMM_BASE        equ     IO_BASE + 000h          ; first EMM (4MEM) board
-EMM_unmapped    equ     255             ; unmapped 4MEM page
-
-EMM0            equ     EMM_BASE        ; first  EMM board
-EMM1            equ     EMM0 + 2        ; second EMM board
-EMM2            equ     EMM1 + 2        ; third  EMM board
-EMM3            equ     EMM2 + 2        ; fourth EMM board
-
+FRONT_PANEL_LED	equ	IO_BASE+0230H
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;	ColorVDU devices
-;
+; Floppy controller (Duodyne Disk IO)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;	major select on the Z80 bus
-;
-devCVDU_8bit	equ	0xE0		; this may change to 0x10
-
-devCVDUbase 	equ	IO_BASE + devCVDU_8bit
-
-M8563status	equ	devCVDUbase + 4		; 4 == bitrev(2)
-M8563register	equ	devCVDUbase + 4
-M8563data	equ	devCVDUbase + 12	; 12 == bitrev(3)
-
-%if CVDU_8563
-I8242status	equ	devCVDUbase + 10	; 10 == bitrev(5)
-I8242command	equ	devCVDUbase + 10
-I8242data	equ	devCVDUbase + 2		; 2 == bitrev(4)
-%endif
+FDC	        equ	IO_BASE+0200H
+FDC_MSR         equ     FDC
+FDC_DATA        equ     FDC_MSR+1
+FDC_DACK        equ	FDC+10H
+FDC_LDOR	equ	FDC+20H
+FDC_LDCR	equ	FDC+30H
+FDC_TC	        equ	FDC+40H
+FDC_RES	        equ	FDC+40H
+FDC_DACK_TC     equ     FDC_DACK | FDC_TC
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;	VGA3 devices
-;
+;DS1302 RTC (Duodyne Ram/ROM Card)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;	major select on the Z80 bus
-;
-devVGA3_8bit    equ     0xE0                    ; same as CVDU
-
-devVGA3base       equ     IO_BASE + devVGA3_8bit
-
-%if VGA3_6445
-I8242status	equ	devVGA3base + 1
-I8242command	equ	devVGA3base + 1
-I8242data	equ	devVGA3base + 0
-%endif
-HD6445addr	equ	devVGA3base + 2		; to address the HD6445 registers
-HD6445reg	equ	devVGA3base + 3		; to r/w a register on the CRTC
-
-vga3cfg		equ	devVGA3base + 4
-; the following are probably not used on the SBC-188, except for testing/checking
-vga3adhi	equ	devVGA3base + 5
-vga3adlo	equ	devVGA3base + 6
-vga3data	equ	devVGA3base + 7
-
-
+RTC	equ	IO_BASE+0094H
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;       2S1P registers
-;
+; PIO 82C55 I/O  (Duodyne Disk IO)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-dev_2S1P_loc		equ	0xC0	; same as 4UART !!!
+PPI	        equ	IO_BASE+0088H
 
-dev_2S1P_base		equ	IO_BASE + dev_2S1P_loc	
+PIO_A	        equ	PPI+0	; (OUTPUT)
+PIO_B	        equ	PPI+1	; (INPUT)
+PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
 
-dev_2S1P_A		equ	dev_2S1P_base		; serial port
-dev_2S1P_B		equ	dev_2S1P_base + 8h	; serial port
-
-dev_2S1P_C		equ	dev_2S1P_base + 10h	; parallel port
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;       4UART registers
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-dev_4UART_loc		equ	0xC0	; same as 2S1P !!!
-;				0xA0	; possible alternate
-dev_4UART_alt_offset	equ	0xA0 - dev_4UART_loc
-
-dev_4UART_base		equ	IO_BASE + dev_4UART_loc	
-
-dev_4UART_A		equ	dev_4UART_base
-dev_4UART_B		equ	dev_4UART_base + 8h
-dev_4UART_C		equ	dev_4UART_base + 10h
-dev_4UART_D		equ	dev_4UART_base + 18h
-
-dev_4UART_config	equ	dev_4UART_B + 7		; overlays scratch register
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; debug port -- JRC only
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-portD		equ	IO_BASE + 0FFh		; 0x04FF
-;portD		equ	portB		     ; older 8255 output on PPI
+portA           equ     PPI+0   ;
+portB           equ     PPI+1   ;
+portC           equ     PPI+2   ;
 
 ; end CPUREGS.ASM
-

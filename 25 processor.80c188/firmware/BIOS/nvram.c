@@ -95,9 +95,9 @@ byte set_battery(byte force)
 	if (diode == 0) state = 0;
 	else if (diode == 1) state = 0xA0 | 4 | 1;	/* 1 diode, 2K resistor */
 	else if (diode == 2) state = 0xA0 | 8 | 2;	/* 2 diodes, 4K resistor */
-	else en = -1;	
+	else en = -1;
 
-#if 0	
+#if 0
         if (cp) resistor = atoi(cp);
         rvalid = resistor==2 || resistor==4 || resistor==8;
         dvalid = diode==1 || diode==2;
@@ -113,7 +113,7 @@ byte set_battery(byte force)
         else en = -1;
 #endif
     } while (en < 0);
-    
+
     rtc_set_loc(8 | CLOCK, state);
 
     return state;
@@ -137,7 +137,7 @@ int idow(int da, int mo, int yr)
 
     for (i=0; i<12; i++) dpm[i]=dpm0[i];
 /* return 99 on error */
-    if (yr < 1583  ||  yr > 9999  ||  mo < 1  ||  mo > 12  ||  
+    if (yr < 1583  ||  yr > 9999  ||  mo < 1  ||  mo > 12  ||
            da < 1  ) return 99;
 /* 1582 was the year of the change to the Gregorian calendar */
 
@@ -153,7 +153,7 @@ int idow(int da, int mo, int yr)
     yr = yr%100;
     for (leap=0; leap<mo; ++leap) da += dpm[leap];
     da += 5*ce + yr + yr/4 + ce/4 + 2;
-    
+
     return (da % 7);
 }
 
@@ -164,7 +164,7 @@ int Date(byte *ram)
     int day, mon, year, tem;
     char line[80];
     char *cp, *tp;
-    
+
     da = rtc_get_loc( 3 | CLOCK);
     mo = rtc_get_loc( 4 | CLOCK);
     dw = rtc_get_loc( 5 | CLOCK);
@@ -185,12 +185,12 @@ int Date(byte *ram)
     printf("Date [mm/dd/yyyy]: ");
     GETLINE(line);
     if (*line==0)  return 0;
-    
+
     cp = strchr(line,'/');
     if (!cp) return 0;
     *cp++ = 0;
     mon = atoi(line);
-    
+
     tp = strchr(cp,'/');
     if (!tp) return 0;
     *tp++ = 0;
@@ -212,8 +212,8 @@ int Date(byte *ram)
         printf("Invalid date entered.  (code %d)\n", (int)dw);
         return 0;
     }
-    ++dw;    
-    printf("BCD date to be set to DS1302:  %02x/%02x/%02x%02x  dow(%x)\n", 
+    ++dw;
+    printf("BCD date to be set to DS1302:  %02x/%02x/%02x%02x  dow(%x)\n",
                     (int)mo, (int)da, (int)ce, (int)yr, (int)dw );
     rtc_WP(0);
     rtc_set_loc( 3 | CLOCK, da);
@@ -222,7 +222,7 @@ int Date(byte *ram)
     rtc_set_loc( 6 | CLOCK, yr);
     ram[ RAM_century ] = ce;
 /*    rtc_set_loc( 1 | RAM, ce);   */
-        
+
     return (int)ce;
 }
 
@@ -233,19 +233,19 @@ void Time(void)
     char line[80];
     char *cp, *tp;
     word hr, min, sec;
-    
+
     sec = rtc_get_loc(0 | CLOCK);
     min = rtc_get_loc(1 | CLOCK);
     hr  = rtc_get_loc(2 | CLOCK);
-    
+
     if (sec & 0x80) printf("The clock is stopped.\n");
     else printf("Time read:  %02x:%02x:%02x\n", hr, min, sec);
-    
+
         do {
             printf("Time [hh:mm[:ss]]: ");
             GETLINE(line);
             if (*line == 0) return;
-            
+
             cp = strchr(line,':');
             if (!cp) continue;
             *cp++ = 0;
@@ -262,7 +262,7 @@ void Time(void)
         rtc_set_loc( 1 | CLOCK, BCD(min));
         rtc_set_loc( 2 | CLOCK, BCD(hr));
         rtc_set_loc( 0 | CLOCK, (byte)sec);		/* start the clock */
-        
+
     return;
 }
 
@@ -304,7 +304,7 @@ static const char * const base_addr[8] = {"00", "20", "40", "60", "80", "A0", "C
 
 		i = (i & 0xFF)>>5;
 		if (i>0 && i<8) break;
-#else		
+#else
 		if (line[0] == '\0')
 			break;
 		for (i = 0; i < 8; i++) {
@@ -365,7 +365,7 @@ byte setup_serial (byte rate)
 }
 
 
-static const word ftype_OK = 
+static const word ftype_OK =
 #if CPM_FLOPPIES
 				(1<<10) | (1<<9) | (1<<8) |
 #endif
@@ -397,7 +397,7 @@ void Floppy(byte *ram)
 {
    int i, ftype;
    word units = 0;
-   
+
    printf("Floppy Types are:\n"
           "    0 = not present\n"
           "    1 = 360K 5.25\"\n"
@@ -429,9 +429,9 @@ int __fastcall nvram_check(void)
 	byte checksum = 0;
 	char *str = unique;
 	byte chr;
-	
+
 /* compute a seed value for the checksum */
-	while (chr=*str++) 
+	while (chr=*str++)
 		checksum = stepCRC7(chr, checksum);
 
 	for (i = 0; i < RAM_checksum-1; i++) {
@@ -439,7 +439,7 @@ int __fastcall nvram_check(void)
 		checksum = stepCRC7(chr, checksum);
 	}
 	chr = rtc_get_loc(RAM_checksum | RAM);
-	
+
 	return checksum != chr;
 }
 
@@ -452,9 +452,9 @@ int __fastcall compute_nvram_checksum(byte *ram)
 	byte chr;
 
 /* compute a seed value for the checksum */
-	while (chr=*str++) 
+	while (chr=*str++)
 		checksum = stepCRC7(chr, checksum);
-		
+
 	for (i=0; i < RAM_checksum-1; i++)
 		checksum = stepCRC7(ram[i], checksum);
 	return (int)checksum;
@@ -480,108 +480,12 @@ int setup_ppide(int nfixed)
 #endif
 }
 
-int setup_diskio(int nfixed)
-{
-#if DISKIO_driver
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..2) of DISKIOv3 fixed disks [%d]: ", nfixed);
-      GETLINE(line);
-      if (line[0]) nfixed = atoi(line);
-      okay = (nfixed >= 0  &&  nfixed <= 2);
-   } while (!okay);
-
-   return nfixed;
-#else
-	return 0;
-#endif
-}
-
-int setup_mfpic(int nfixed)
-{
-#if MFPIC_driver
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..2) of MF/PIC fixed disks [%d]: ", nfixed);
-      GETLINE(line);
-      if (line[0]) nfixed = atoi(line);
-      okay = (nfixed >= 0  &&  nfixed <= 2);
-   } while (!okay);
-
-   return nfixed;
-#else
-	return 0;
-#endif
-}
-
-int setup_v3ide8(int nfixed)
-{
-#if V3IDE8_driver
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..2) of [SBC-188v3] IDE8 fixed disks [%d]: ", nfixed);
-      GETLINE(line);
-      if (line[0]) nfixed = atoi(line);
-      okay = (nfixed >= 0  &&  nfixed <= 2);
-   } while (!okay);
-
-   return nfixed;
-#else
-	return 0;
-#endif
-}
-
-int setup_dide(int ndide, int secondary)
-{
-#if DIDE_driver
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..2) of Connector-%s Dual-IDE fixed disks [%d]: ", 
-			!secondary ? "A" : "B", ndide);
-      GETLINE(line);
-      if (line[0]) ndide = atoi(line);
-      okay = (ndide >= 0  &&  ndide <= 2);
-   } while (!okay);
-
-   return ndide;
-#else
-	return 0;
-#endif
-}
-
-int setup_SDcard(int nslot)
-{
-#if DSD_driver
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..2) of dual SDcard slots [%d]: ", nslot);
-      GETLINE(line);
-      if (line[0]) nslot = atoi(line);
-      okay = (nslot >= 0  &&  nslot <= 2);
-   } while (!okay);
-
-   return nslot;
-#else
-	return 0;
-#endif
-}
-
 int setup_fixed_boot(byte ram[])
 {
     int ndisks, diskno;
     int i;
     char line[20];
-    
+
     diskno = ram[RAM_fx_boot];
     ndisks = 0;
     for (i = RAM_fixed; i < RAM_fx_boot; i++)
@@ -594,7 +498,7 @@ int setup_fixed_boot(byte ram[])
     }
 
     if (diskno > ndisks || diskno == 0) diskno = 1;
-    
+
 /* DEBUG    i = 1;   */
     while (i) {
     	printf("Make disk [1..%d] the C: drive [%d]: ", ndisks, diskno);
@@ -603,8 +507,8 @@ int setup_fixed_boot(byte ram[])
     	    diskno = atoi(line);
     	    if (diskno > 0 && diskno <= ndisks) i = 0;
     	} else i = 0;
-    }    
-    
+    }
+
     return diskno;
 }
 
@@ -671,10 +575,7 @@ void putstring(byte *cp, int length)
 
 int __cdecl PPIDE_READ_ID(byte * far buffer, byte slave);
 /* PPIDE must be set in config.asm until this routine is moved to ppide.asm */
-int __cdecl DISKIO_READ_ID(byte * far buffer, byte slave);
-int __cdecl MFPIC_READ_ID(byte * far buffer, byte slave);
-int __cdecl IDE8_READ_ID(byte * far buffer, byte slave);
-int __cdecl DIDE_READ_ID(byte * far buffer, byte slave, byte secondary);
+
 
 EDD_DISK *p_bda_fx(byte code)
 {
@@ -701,22 +602,12 @@ void __fastcall setup_fixed_disk(char letter, byte code, byte type, byte slave)
    IDENTIFY_DEVICE_DATA id;
 
    ms = slave << 4;
-   printf("   %s fixed disk %c:    (0x%x)\n", 
-			type==PPI_type ? "PPIDE" : type==DIDE0_type ? "DIDE0" : 
-			type==DIDE1_type ? "DIDE1" : type==V3IDE8_type ? "IDE8" : 
-			type==DISKIO_type ? "DISKI/O" : type==MFPIC_type ? "MFPIC" :
+   printf("   %s fixed disk %c:    (0x%x)\n",
+			type==PPI_type ? "PPIDE" :
 			"UNKNOWN",
 			letter, (int)code);
 	if (type==PPI_type)
 	   PPIDE_READ_ID((void*)&id, ms);
-	else if (type==V3IDE8_type)
-	   IDE8_READ_ID((void*)&id, ms);
-	else if (type==DISKIO_type)
-	   DISKIO_READ_ID((void*)&id, ms);
-	else if (type==MFPIC_type)
-	   MFPIC_READ_ID((void*)&id, ms);
-	else
-	   DIDE_READ_ID((void*)&id, ms, (type - DIDE0_type)/2 );
 
    printf("Model: "); PRINT(id.ModelNumber);
    printf("\nSerial: "); PRINT(id.SerialNumber);
@@ -906,7 +797,7 @@ void __fastcall nvram_apply(void)
 	int i, j, units = 0;
 	byte ftype;
 	word spp_port, spp_enab, b_divisor;
-	word n_ppi, n_dide0, n_dide1, n_dsd, n_ide8, n_diskio, n_mfpic;
+	word n_ppi;
 	union {
 		struct {
 			word ppide : 2;
@@ -946,7 +837,7 @@ void __fastcall nvram_apply(void)
 		printf("SPP Initialized\n\n");
 
 	// not sure if initializing the LP is required...
-	} 
+	}
 /***** end RAC *****/
 
 #ifdef FLAG
@@ -977,42 +868,19 @@ void __fastcall nvram_apply(void)
 
 /* the fixed disk setup */
 	num_disk.bdisk = 0;
-   units = rtc_get_loc(RAM_fx_dide | RAM);  /* get number of DIDE fixed disks */
-	n_dide0 = units & 3;
-	n_dide1 = (units>>4) & 3;
-	num_disk.bits.dide0 = n_dide0;
-	num_disk.bits.dide1 = n_dide1;
    n_ppi = rtc_get_loc(RAM_fixed | RAM);  /* get number of PPIDE fixed disks */
 	n_ppi &= 3;
 	num_disk.bits.ppide = n_ppi;
-   n_dsd = rtc_get_loc(RAM_fx_dsd | RAM);  /* get number of SDcard slots */
-	num_disk.bits.dsd = n_dsd;
-   n_ide8 = rtc_get_loc(RAM_fx_ide8 | RAM);   /* get number of v3IDE8 slots */
-   	num_disk.bits.ide8 = n_ide8;
-   n_diskio = rtc_get_loc(RAM_fx_diskio | RAM);	/* get number of DISKIO slots */
-   	num_disk.bits.diskio = n_diskio;
-   n_mfpic = rtc_get_loc(RAM_fx_mfpic | RAM);	/* get number of MFPIC slots */
-   	num_disk.bits.mfpic = n_mfpic;
-
    bios_data_area_ptr->n_fixed_disks = (byte)num_disk.bdisk;
 /*****
 	What was this idiocy ???
    bios_data_area_ptr->equipment_flag.printers = n_ppi ? 0 : 1;
  *****/
 
-	units = n_ppi + n_ide8 + n_dide0 + n_dide1 + n_dsd + n_diskio + n_mfpic;
+	units = n_ppi ;
 
-	printf("PPI=%d  "
-#if SBC188==3	
-			"IDE8=%d  "
-#endif			
-			"DISKIO=%d  MFPIC=%d  DIDE0=%d  DIDE1=%d  "
-			"DSD=%d  Units=%d   bdisk=%02x\n",
-		n_ppi,
-#if SBC188==3		 
-		n_ide8, 
-#endif		
-			n_diskio, n_mfpic, n_dide0, n_dide1, n_dsd, units, num_disk.bdisk);
+	printf("PPI=%d  Units=%d   bdisk=%02x\n",
+		n_ppi,  units, num_disk.bdisk);
 
    printf("\n");
 #ifdef FLAG
@@ -1025,18 +893,6 @@ void __fastcall nvram_apply(void)
 	i = 0;
 	for (j=0; j<n_ppi && i<units; j++, i++)
 		bios_data_area_ptr->fixed_disk_tab[i] = PPI_type | j;
-	for (j=0; j<n_ide8 && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = V3IDE8_type | j;
-	for (j=0; j<n_diskio && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = DISKIO_type | j;
-	for (j=0; j<n_mfpic && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = MFPIC_type | j;
-	for (j=0; j<n_dide0 && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = DIDE0_type | j;
-	for (j=0; j<n_dide1 && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = DIDE1_type | j;
-	for (j=0; j<n_dsd && i<units; j++, i++)
-		bios_data_area_ptr->fixed_disk_tab[i] = DSD_type | j;
 	for (; i<FIXED_DISK_MAX; i++)
 		bios_data_area_ptr->fixed_disk_tab[i] = NO_disk;
 #if DBG>=3
@@ -1046,7 +902,7 @@ void __fastcall nvram_apply(void)
 	printf("\n\n");
 #endif
 
-     	
+
 /* scramble the drives, if it was requested */
 	{
 #define  fx_tab   bios_data_area_ptr->fixed_disk_tab
@@ -1073,7 +929,7 @@ void __fastcall nvram_apply(void)
 	    int disk_type = fx_tab[i];
 	    int slave = disk_type & 1;
 	    disk_type -= slave;
-	    
+
 	    if (disk_type == DSD_type)
 	    	setup_SD_card('C'+i, 0x80+i, disk_type, slave);
 	    else
@@ -1105,17 +961,17 @@ void __fastcall nvram_setup(void)
 		for (i=0; i<RAM_length; ++i)
  			ram[i] = rtc_get_loc(i | RAM);
 	}
-    
+
     stopped = rtc_get_loc(0 | CLOCK) & 0x80;
-    if (stopped) printf("The clock is stopped.\n");        
+    if (stopped) printf("The clock is stopped.\n");
     else printf("The clock is running.\n");
-   
+
     rtc_WP(0);
     Date(ram);		/* RAM[1] is the century in BCD; e.g., 0x19 or 0x20 */
     Time();		/* show/set the time */
     ram[RAM_trickle] = set_battery(0);	/* RAM[0] is the state of the trickle charger */
 
-/***** start RAC *****/   
+/***** start RAC *****/
     ram[RAM_spp_inst] = i = setup_spp(ram[RAM_spp_inst]);
     ram[RAM_spp_base] = i>0 ? setup_spp_b(ram[RAM_spp_base]) : 0;
 /***** end RAC *****/
@@ -1123,24 +979,17 @@ void __fastcall nvram_setup(void)
     Floppy(ram);
 	 printf("   Fixed Disk Setup\n");
     ram[RAM_fixed] = setup_ppide(ram[RAM_fixed]);
-    ram[RAM_fx_ide8] = setup_v3ide8(ram[RAM_fx_ide8]);
-    ram[RAM_fx_diskio] = setup_diskio(ram[RAM_fx_diskio]);
-    ram[RAM_fx_mfpic] = setup_mfpic(ram[RAM_fx_mfpic]);
-    i = setup_dide(ram[RAM_fx_dide] & 0x0F, 0);
-    ram[RAM_fx_dide] = i | setup_dide(ram[RAM_fx_dide]>>4, 1) << 4;
-    ram[RAM_fx_dsd] = setup_SDcard(ram[RAM_fx_dsd]);
-
     ram[RAM_fx_boot] = setup_fixed_boot(ram);
     ram[RAM_bits] = setup_boot_sig_check(ram[RAM_bits]);
- 
+
     ram[RAM_serial] = setup_serial(ram[RAM_serial]);
 
     ram[ RAM_checksum ] = compute_nvram_checksum(ram);
-   
+
     for (i=0; i<RAM_length; ++i) rtc_set_loc( i | RAM, ram[i]);
 
     rtc_WP(1);
-    
+
 }
 
 int __fastcall nvram_get_video(int default_rate)

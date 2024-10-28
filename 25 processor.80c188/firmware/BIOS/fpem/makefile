@@ -5,7 +5,14 @@ NASM=nasm
 
 ASMFILES1=em187a.asm em187b.asm em187c.asm em187d.asm em187e.asm
 ASMFILES2=em187f.asm em187g.asm em187h.asm
+
+!ifdef __UNIX__
 INCLUDES= ../config.asm ../bda.inc
+RM = rm -f
+!else
+INCLUDES= ..\config.asm ..\bda.inc
+RM = del
+!endif
 
 
 all:	em187.obj
@@ -18,8 +25,8 @@ em187.bin:  em187.asm $(INCLUDES) $(ASMFILES1) $(ASMFILES2)
 
 
 clean:		.SYMBOLIC
-        rm *.obj
-        rm *.ls?
-	rm *.bin
+        $(RM) *.obj
+        $(RM) *.ls?
+	$(RM) *.bin
 
 

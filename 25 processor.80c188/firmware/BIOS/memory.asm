@@ -65,7 +65,7 @@ get_ramsize:
         pop     bx
         pop     ds
         ret
-        
+
 
 
 
@@ -75,7 +75,7 @@ get_ramsize:
 ;       Get Equipment Configuration
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-BIOS_call_11h:          
+BIOS_call_11h:
         sti
         push    ds
         push    bios_data_seg
@@ -143,7 +143,7 @@ memtest0:                       ; entry to test page 0
         xor     di,di
         mov     ax,0A55Ah       ; alternating bits in alternating bytes
         mov     cx,8000h        ; test 64K (2 x 32K)
-        rep stosw               ; 
+        rep stosw               ;
         mov     ch,80h          ; 32K count of words
         repe scasw
         jne     .3
@@ -194,14 +194,14 @@ seed1   equ     47F8h           ; NOT a random value
         mov     ch,80h          ; 32K count of words
         repe scasw
         jne     .3
-        
+
         xor     ax,ax           ; solid pattern of 0's
         mov     ch,80h          ; 32K count of words
         rep stosw
         mov     ch,80h          ; 32K count of words
         repe scasw
         jne     .3
-        
+
         clc                     ; no error
         jmp     bp
 
@@ -253,7 +253,7 @@ POST_memory:
         push    ds		;DGROUP
         push    msg_mem_test
         call    _cprintf
-        add     sp,6 
+        add     sp,6
 
         pop     bx
         mov     ax,bx                   ; AX is segment tested
@@ -288,14 +288,14 @@ POST_memory:
         push    ds		; DGROUP
         push    msg_mem_test
         call    _cprintf
-        add     sp,6 
+        add     sp,6
 
         pushm   f,ds
         cli                             ; disable interrupts
 
         push    0
         pop     ds                      ; source is 0000:xxxx
-        push    1000h           
+        push    1000h
         pop     es                      ; dest. is 1000:xxxx (save area)
         xor     si,si
         xor     di,di
@@ -312,7 +312,7 @@ POST_memory:
 %endif
         sbb     dx,dx                   ; grab the returned carry
         mov     bx,di                   ; save error location
-        
+
         push    1000h                   ; source is 1000:xxxx
         pop     ds
         push    0
@@ -373,100 +373,3 @@ msg_mem_error0:
         db      "Halting due to error in segment 0000:xxxx",BEL,NL
         db      NUL
 	db	0
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;       Expanded Memory (EMM/4MEM) support -- LIM EMS
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-%if EMM_BOARDS
-
- %if SBC188<3
-; Define the UMB mask; '1' bit means allocate it
-UMB_MASK_80     equ     ~(0FFFFh<<((RAM_DOS-RAM)/16))   ; segments 8000,9000
-                                                        ; skip A000,B000
-UMB_MASK_C0     equ     0FFFFh>>(CHIP/16)                ; segments C000,D000,...
-                                                        ; up to start of ROM
- %else
-UMB_MASK_80	equ	0000h
-UMB_MASK_C0	equ	0000h		; nothing to allocate on v3 board
- %endif        
-
-        segment CONST
-emm_board_list:
-
-%assign xemm EMM0
-%rep    EMM_BOARDS
-        dw      xemm
-%assign xemm (xemm+EMM1-EMM0)
-%endrep
-        dw      -1
-
-        segment _TEXT
-EMM_init0:
-        pushm   ds,all
-;;        cld           ; already done!
-        push    DGROUP               ; address CONST segment
-        popm    ds
-        mov     si,emm_board_list
-
-; clear all of the paging registers
-; with no reads, the board(s) remain disabled for now
-.0:     lodsw           ; get page data reg I/O code
-        inc     ax      ; get address reg I/O code
-        jz      .3
-        mov     dx,ax
-        mov     cx,64   ; number of address reg entries
-.1:
-        mov     ax,cx
-        dec     ax      ; 
-        out     dx,al   ; set the address
-        dec     dx      ; get page data reg I/O code
-        mov     al,EMM_unmapped
-        out     dx,al
-        inc     dx      ; get address reg I/O code
-        loop    .1
-        jmp     .0      ; go on to the next board
-
-; assign memory above 512K, usually up to the 640K limit
-.3:
-        mov     dx,[emm_board_list]
-        mov     bx,RAM/16       ; get size of physical RAM chip
- check  (RAM-512)
-        mov     cx,UMB_MASK_80 & 0FFFFh  ; bits to allocate
-        mov     si,UMB_MASK_C0 & 0FFFFh  ; **
-.4:
-        mov     di,cx           ; test for done
-        or      di,si
-        jz      .6
-
-        shr     si,1            ; shift bit into carry
-        rcr     cx,1            ; carry is next to allocate
-        jnc     .5              ; skip allocation if zero
-
-        inc     dx
-        mov     al,bl           ; page address
-        out     dx,al           ; set address
-        dec     dx
-        mov     al,bh
-        out     dx,al
-        nop
-        in      al,dx           ; enable board
-        cmp     bh,al
-        jne     .9
-
-        inc     bh              ; increment page
-.5:     inc     bl              ; increment address
-        jmp     .4              ; loop back
-; all of the Upper Memory Blocks are allocated (no EMS yet)
-.6:
-        in      al,dx           ; enable board if not done above
-        
-        push    bios_data_seg
-        pop     ds
-        mov     [EMS_start],bh  ; save start page
-.9:
-        popm    ds,all
-        ret
-%endif
-

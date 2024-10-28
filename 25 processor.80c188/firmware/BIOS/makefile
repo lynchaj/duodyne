@@ -1,4 +1,4 @@
-# Makefile for the N8VEM SBC-188 relocatable BIOS
+# Makefile for the Duodyne relocatable BIOS
 #  Use Open Watcom WMAKE to make
 #  Use Open Watcom C 1.9 or 2.0
 #  Use NASM version 0.98.39 (real mode DOS)
@@ -14,11 +14,10 @@
 # Minimum (BIOS-ROM) CHIP size is 64K as of Jan 2013, release 2.0
 #  CHIP sizes of 128K and 256K are also generated.
 #
-# Makefile for the N8VEM 4MEM // SBC-188  expanded memory driver
 #
-SBC188 = 3
-ROM = 64
-#ROM = 32
+SBC188 = 1
+#ROM = 64
+ROM = 32
 ETC = tbasic.hex -d26K font.hex -d18k em187.hex
 CHIP = 64
 #CHIP = 128
@@ -91,9 +90,9 @@ SEP=\
 
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
-OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj mfpic.obj
-OBJECT2 = timers.obj inttrace.obj tests.obj font.obj ppide.obj dide.obj diskio.obj
-OBJECT3 = sdcard.obj ide8.obj idelib.obj int14ser.obj int17par.obj
+OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj
+OBJECT2 = timers.obj inttrace.obj tests.obj font.obj ppide.obj
+OBJECT3 = sdcard.obj idelib.obj int14ser.obj int17par.obj
 OBJECT4 = redbug.obj fpem/em187.obj unasm/unasm.obj
 OBJECTC1 = cprintf.obj sio.obj nvram.obj strtoul.obj libc.obj debug.obj
 OBJECTC2 = kbd.obj m8563lib.obj vga3lib.obj
@@ -106,7 +105,7 @@ OBJECTS = rbios.obj $(OBJECTA) $(OBJECTC) copyrght.obj
 
 ROMS = bios064.bin bios128.bin bios256.bin
 #ROMS =  bios128.bin bios256.bin		# bios064.bin removed for now
-MISC = COPYING config.asm abios.lib cbios.lib
+MISC = COPYING config.asm emm4mem.sys abios.lib cbios.lib
 
 .EXTENSIONS:
 .EXTENSIONS: .bin .obj .exe .asm .c .h
@@ -119,7 +118,7 @@ MISC = COPYING config.asm abios.lib cbios.lib
 	$(CC) $(COPT) $(SIZE) -fo=$@ $*.c
 	$(CLIST)
 
-all:	config.asm $(ROMS) .SYMBOLIC
+all:	config.asm emm4mem.sys $(ROMS) .SYMBOLIC
 
 test:	1Ah_time.obj
 
@@ -153,7 +152,7 @@ distro: spotless .SYMBOLIC
 	$(CP) ansi.cfg config.asm
 	wmake clean
 	wmake v$(V)ansi.zip
-
+	$(ZIP) emm4mem emm4mem.sys
 # ANSI should be last, leaving 'config.asm' == 'ansi.cfg'
 
 v$(V)wvga3.zip:	$(MISC) $(ROMS)
@@ -251,14 +250,14 @@ ppide_sa.obj:      ppide.asm $(INCLUDES)
 wbios.lib:      $(OBJECTS)
         wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
-        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj +redbug.obj +mfpic.obj
+        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj +redbug.obj
 	wlib -q wbios.lib +debug.obj +strtoul.obj +unasm/unasm.obj +inttrace.obj +tests.obj
 	wlib -q wbios.lib +m8563lib.obj +vga3lib.obj +kbd.obj +font.obj
 
 abios.lib:	$(OBJECTA)
-	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj +mfpic.obj
-	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +font.obj +ppide.obj +dide.obj +sdcard.obj
-	wlib -q    abios.lib +ide8.obj +diskio.obj +idelib.obj +redbug.obj +fpem/em187.obj +unasm/unasm.obj
+	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj
+	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +font.obj +ppide.obj  +sdcard.obj
+	wlib -q    abios.lib  +idelib.obj +redbug.obj +fpem/em187.obj +unasm/unasm.obj
 
 cbios.lib:	$(OBJECTC)
 	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj
@@ -282,6 +281,8 @@ serial:	ser_util.c
 	wcl386 -DSTANDALONE=1 $<
 	mv ser_util serial
 
+emm4mem.sys:    emm4mem.asm cpuregs.asm makefile
+        $(NASM) $(NOPT) -f bin -l $*.lst -o $@  $*.asm
 
 space64.bin:
 	$(HEX2BIN) -R 64K -o $@
@@ -345,10 +346,6 @@ redbug.obj:     redbug.asm $(INCLUDES)
 misc15.obj:     misc15.asm $(INCLUDES) cassette.asm
 ide.obj:	ide.asm $(INCLUDES)
 ppide.obj:      ppide.asm $(INCLUDES)
-diskio.obj:	diskio.asm $(INCLUDES)
-mfpic.obj:	mfpic.asm $(INCLUDES)
-dide.obj:	dide.asm $(INCLUDES)
-ide8.obj:	ide8.asm $(INCLUDES)
 idelib.obj:	idelib.asm $(INCLUDES)
 sdcard.obj:	sdcard.asm sdcard.inc crc16tab.inc $(INCLUDES)
 1Ah_time.obj:	1Ah_time.asm $(INCLUDES)

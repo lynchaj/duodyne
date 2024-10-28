@@ -3,13 +3,18 @@ all:  	 monitor.hex
 
 
 
-monitor.hex: mon88.asm ioports.inc startup.asm
+monitor.hex: mon88.asm ioports.inc startup.asm int10.asm int16.asm int1a.asm
 	 nasm -o monitor.hex -f ith -l monitor.lst mon88.asm
+	 cp monitor.hex ../../bin
 
 pretty:
 	cp *.asm ./backup
 	pretty6502 -p5 -a0 -du -mu -l ./backup/mon88.asm mon88.asm
 	pretty6502 -p5 -a0 -du -mu -l ./backup/startup.asm startup.asm
+	pretty6502 -p5 -a0 -du -mu -l ./backup/int10.asm int10.asm
+	pretty6502 -p5 -a0 -du -mu -l ./backup/int16.asm int16.asm
+	pretty6502 -p5 -a0 -du -mu -l ./backup/int1a.asm int1a.asm
+
 
 clean:
 	@rm -f *.o

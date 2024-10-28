@@ -20,14 +20,15 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
+; Updated for the Duodyne 80c188 SBC
 ;========================================================================
 
         segment         _TEXT
 
-rtc_data        equ     1               ; Data mask bit
-rtc_wren        equ     2               ; Write enable bit
-rtc_clk         equ     4               ; Clock signal
-rtc_rst         equ     8               ; Reset bit
+rtc_data        equ     80H             ; Data mask bit
+rtc_wren        equ     20H             ; Write enable bit
+rtc_clk         equ     40H             ; Clock signal
+rtc_rst         equ     10H             ; Reset bit
 
 
 ;        global  _rtc_reset
@@ -131,7 +132,7 @@ rtc_get_loc:
         call    rtc_read        ; read the data location
         push    ax              ; save the result
         call    rtc_reset_off
-        call    rtc_reset       ; and finish up  
+        call    rtc_reset       ; and finish up
 
         pop     ax              ; return value
 
@@ -182,8 +183,3 @@ rtc_set_loc:
         pop     cx              ; plus 3 register restores
         pop     dx
         ret
-
-
-
-
-

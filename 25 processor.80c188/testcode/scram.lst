@@ -1,4 +1,4 @@
-     1
+     1                                  
      2                                  ;_________________________________________________________________________________________________________________________
      3                                  ;
      4                                  ;       SCREAM test for Duodyne 80c188 board
@@ -7,19 +7,19 @@
      7                                  ;       9600 N 8 1
      8                                  ;
      9                                  ;_________________________________________________________________________________________________________________________
-    10
-    11
-    12
+    10                                  
+    11                                  
+    12                                  
     13                                          CPU     186
-    14
+    14                                  
     15                                  temp            equ     02000h
-    16
+    16                                  
     17                                          SECTION scream  start=1F000h vstart=0F0F00h
     18                                          GLOBAL  cold_boot
     19                                          GLOBAL  initialization
-    20
+    20                                  
     21                                          SEGMENT _TEXT
-    22
+    22                                  
     23                                  cold_boot:
     24                                  ; setup UART
     25 00000000 B080                            MOV     al,80h
@@ -36,20 +36,20 @@
     36 00000017 EE                              OUT     dx,al
     37 00000018 BA84FA                          MOV     dx,uart_mcr
     38 0000001B EE                              OUT     dx,al
-    39
+    39                                  
     40 0000001C 3EC606002041                    mov	byte [ds:temp],65
-    41
-    42
+    41                                  
+    42                                  
     43                                  loop:
-    44
+    44                                  
     45 00000022 B001                            MOV     al,01h                  ; light first LED on RAM Card
     46 00000024 BA94F8                          MOV     dx,RAMROM_card_1
     47 00000027 EE                              OUT     dx,al
-    48
+    48                                  
     49 00000028 B0AA                            MOV     al,0AAh                 ; Put LED Pattern on Front Panel
     50 0000002A BA30FA                          MOV     dx,front_panel_LEDs
     51 0000002D EE                              OUT     dx,al
-    52
+    52                                  
     53 0000002E B000                            MOV     al,00h                  ; Turn on First LED on CPU Card
     54 00000030 BA38FA                          MOV     dx,local_ls259_LED1
     55 00000033 EE                              OUT     dx,al
@@ -62,42 +62,42 @@
     62 00000040 B001                            MOV     al,01h                  ; Turn off Fourth LED on CPU Card
     63 00000042 BA3BFA                          MOV     dx,local_ls259_LED4
     64 00000045 EE                              OUT     dx,al
-    65
+    65                                  
     66                                  .3:
     67 00000046 BA85FA                          MOV     dx,uart_lsr             ; READ LINE STATUS REGISTER
     68 00000049 EC                              IN      AL,DX
     69 0000004A 2420                            AND     AL,20h                  ; And status with user BH mask
     70 0000004C 74F8                            JZ      .3
-    71
+    71                                  
     72 0000004E B041                            MOV     al,65
     73 00000050 BA80FA                          MOV     dx,uart_thr
     74 00000053 EE                              OUT     dx,al
-    75
+    75                                  
     76                                  .1:
     77 00000054 BA85FA                          MOV     dx,uart_lsr             ; READ LINE STATUS REGISTER
     78 00000057 EC                              IN      AL,DX
     79 00000058 2420                            AND     AL,20h                  ; And status with user BH mask
     80 0000005A 74F8                            JZ      .1
-    81
+    81                                  
     82 0000005C 3EA00020                        MOV     al,[ds:temp]
     83 00000060 BA80FA                          MOV     dx,uart_thr
     84 00000063 EE                              OUT     dx,al
-    85
+    85                                  
     86 00000064 3EFE060020                      inc     byte [ds:temp]
-    87
+    87                                  
     88 00000069 3EA00020                        MOV     AL,[ds:temp]
     89 0000006D 3C7F                            CMP     AL,127
     90 0000006F 7506                            JNZ      .2
     91 00000071 3EC606002020                    mov	byte [ds:temp],32
     92                                  .2:
     93 00000077 EBA9                            JMP     loop
-    94
-    95
+    94                                  
+    95                                  
     96                                          %INCLUDE "startup.asm"
     97                              <1> ; ROM startup code Duodyne 80C188
     98                              <1> ; This is based on the STARTUP.ASM for the N8VEM SBC-188, which is under GPL 3.
     99                              <1>         [LIST   -]
-   102                              <1>
+   102                              <1> 
    103                              <1>         SECTION startup start=1FF00h vstart=0FFF00h
    104                              <1> begin:
    105 00000000 FA                  <1>         CLI
@@ -107,14 +107,14 @@
    109 00000007 8CC8                <1>         MOV     ax, cs
    110 00000009 8ED8                <1>         MOV     ds, ax
    111 0000000B B90400              <1>         MOV     cx, tablecnt
-   112                              <1>
+   112                              <1> 
    113                              <1> .1:
    114 0000000E AC                  <1>         LODSB                   ; Initialise registers from table
    115 0000000F 88C2                <1>         MOV     dl, al
    116 00000011 AD                  <1>         LODSW
    117 00000012 EF                  <1>         OUT     dx, ax
    118 00000013 E2F9                <1>         LOOP    .1
-   119                              <1>
+   119                              <1> 
    120 00000015 B800A0              <1>         MOV     ax, 0A000h       ; Stack at top of RAM
    121 00000018 8ED0                <1>         MOV     ss, ax
    122 0000001A BC0070              <1>         MOV     sp, 7000h
@@ -123,7 +123,7 @@
    125 00000022 B800F0              <1>         MOV     ax, 0F000h      ; Set CS=ES
    126 00000025 8EC0                <1>         MOV     es, ax
    127 00000027 EA[0000]00F0        <1>         JMP     0F000h:cold_boot; Continue to body of ROM
-   128                              <1>
+   128                              <1> 
    129                              <1> table:
    130                              <1>         DB_LO   ics_umcs        ; ROM
    113 0000002C A0                  <2>  DB %1 & 0ffh
@@ -138,7 +138,7 @@
    113 00000035 A4                  <2>  DB %1 & 0ffh
    137 00000036 BC0F                <1>         DW      0FBCh           ; F800h, no wait states, no external ready (0FBCh=0 WS)
    138                              <1> tablecnt        EQU ($-table)/3
-   139                              <1>
+   139                              <1> 
    140 00000038 FF<rep B8h>         <1>         SETLOC  0F0h            ; Reset entry is FFFF:0000h
    141 000000F0 EA[0000]00F0        <1>         JMP     0F000h:begin    ; Jump to the startup code above
    142 000000F5 30392F32392F323400  <1>         DB      "09/29/24", 00h ; BIOS date (mm/dd/yy)

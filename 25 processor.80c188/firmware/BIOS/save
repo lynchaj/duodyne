@@ -2,7 +2,7 @@
 #
 export ZSUF=tar.gz
 export ZIP="tar cvfz"
-export DRIVE=MICRO2GB
+export DRIVE=/media/jrc/BULLET8-1
 export DIR=SBC188
 
 echo "SAVE has control"   $1    $2    ..
@@ -11,6 +11,9 @@ if [ ! "$1" ]; then
 	echo listing ...
 	ls -l --color=always *.$ZSUF
 	echo end of list
+	echo "****************************************************"
+	echo "**** DO NOT FORGET TO INSTALL THE BACKUP MEDIUM ****"
+	echo "****************************************************"
 	exit
 fi
 if [ -e "$1" ]; then
@@ -22,10 +25,16 @@ if [ -e "$1.$ZSUF" ]; then
 	exit
 fi
 
-$ZIP $1.$ZSUF COPYING save M* make* *.lib *.cfg *.asm *. *.inc *.b* e*.sys *.c *.h *.doc *.txt FPEM/*.asm FPEM/make* UNASM/* TOOLS/*
+# convert all filenames to lower case
+rename "y/A-Z/a-z/" *
+# restore some names
+rename "y/a-z/A-Z/" copying r_cini
+
+$ZIP $1.$ZSUF COPYING save M* make* *.lib *.cfg *.asm *. *.inc *.b* e*.sys *.c *.h *.doc *.txt fpem/*.asm fpem/make* \
+	unasm/* tools/* dmaide/*
 echo Done Compression.
 
-cp -v $1.$ZSUF /media/jrc/$DRIVE/$DIR
+cp -v $1.$ZSUF $DRIVE/$DIR
 
 echo Done Save.
 exit

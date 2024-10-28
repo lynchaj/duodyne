@@ -168,7 +168,7 @@ rtc_get_loc:
         call    rtc_read        ; read the data location
         push    ax              ; save the result
 	call	rtc_reset_off	;
-        call    rtc_reset       ; and finish up  
+        call    rtc_reset       ; and finish up
 
         pop     ax              ; return value
 
@@ -218,8 +218,3 @@ rtc_set_loc:
         pop     cx              ; plus 3 register restores
         pop     dx
         ret
-
-
-
-
-

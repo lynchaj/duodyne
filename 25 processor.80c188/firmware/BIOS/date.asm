@@ -11,18 +11,18 @@
 ;
 ; Definitions for version 3.5-2:
 ;
+; Updated for the Duodyne 80c188 SBC
 
-
-%define DATE_STRING0	"04/29/21"
-%define DATE_STRING1	"29-Apr-2021"
+%define DATE_STRING0	"10/27/24"
+%define DATE_STRING1	"27-Oct-2024"
 
 %define VERSION_MAJOR		3
 %define VERSION_MINOR		5
-%define VERSION_REVISION	1
+%define VERSION_REVISION	2
 %define VERSION_SUFFIX		""
-%define VERSION_SEQUENCE	55
+%define VERSION_SEQUENCE	66
 
-%define VERSION_STRING		"3.5-1",VERSION_SUFFIX
+%define VERSION_STRING		"3.5-D",VERSION_SUFFIX
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Revision information:
@@ -39,4 +39,5 @@
 ;	3.5 -- back to 3.3, sequence #51
 ;		change NVRAM battery backup setup to #53
 ;		re-install 3.4 boot fix for FreeDOS
+;       3.5-D  Remove SBC-188 specific items and customize for Duodyne
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 12)
+    (start_pass_no 15690)
     (layer_rule F.Cu
       (active on)
       (preferred_direction horizontal)
@@ -65,7 +65,7 @@
     Power "Via[0-1]_800:400_um-Power"
   )
   (class default
-    "Net-(D2-Pad1)" "Net-(D6-Pad2)" "CPU-NMI" "CPU-DREQ1" ~{INT0} 470D "unconnected-(RN1-Pad5)" ~{DREQ1}
+    "Net-(D2-Pad1)" "Net-(D6-Pad2)" "CPU-NMI" "CPU-DREQ1" "CPU-INT0" 470D A21 ~{DREQ1}
     ~{DREQ0} "unconnected-(RN3-Pad2)" "Net-(D5-Pad1)" ~{BUSRQ} /bus/CRUCLK ~{NMI} ~{M1} ~{MREQ}
     ~{IORQ} ~{WR} ~{RD} A0 A1 A2 A3 A4
     A5 A6 A7 A8 A9 A10 A11 A12
@@ -77,7 +77,7 @@
     ~{EIRQ1} "/fpanel/FP-D7" "/fpanel/FP-D6" "/fpanel/FP-D5" "/fpanel/FP-D4" "/fpanel/FP-D3" "/fpanel/FP-D2" "/fpanel/FP-D1"
     "/fpanel/FP-D0" "CPU-A3" "CPU-A4" "CPU-A2" "CPU-A5" "CPU-A6" "CPU-A7" ~{EIRQ2}
     "CPU-A11" "CPU-A12" "CPU-A10" "CPU-A13" "CPU-A9" "CPU-A14" "CPU-A8" "CPU-A15"
-    "unconnected-(RN1-Pad3)" "CPU-D1" "CPU-D7" "CPU-D6" "CPU-D3" "CPU-D0" "CPU-D2" "CPU-D5"
+    A20 "CPU-D1" "CPU-D7" "CPU-D6" "CPU-D3" "CPU-D0" "CPU-D2" "CPU-D5"
     "CPU-D4" A16 A17 A18 A19 "Net-(D11-Pad1)" "Net-(D11-Pad2)" ~{EIRQ3}
     ~{EIRQ4} "Net-(P1-Pad40)" ~{EIRQ5} ~{EIRQ6} "Net-(P1-Pad44)" ~{EIRQ7} "Net-(D12-Pad1)" "UART-CLK"
     /bus/E /bus/ST /bus/PHI /bus/~{INT2} /bus/~{INT1} "~{RES_IN}" /bus/CRUOUT /bus/CRUIN
@@ -94,10 +94,10 @@
     "~{CS_UART}" "~{EXT_RES}" "Net-(J11-Pad5)" "Net-(J11-Pad7)" "Net-(J11-Pad9)" "Net-(J11-Pad11)" "Net-(J11-Pad13)" "Net-(J1-Pad4)"
     "Net-(J1-Pad6)" "Net-(J1-Pad8)" "~{CPU-HALT}" ~{188EN} "Net-(JP1-Pad1)" "unconnected-(U2-Pad4)" ~{188ACTIVE} "~{CPU-INTA0}"
     "Net-(R9-Pad1)" "unconnected-(U21-Pad6)" "unconnected-(U21-Pad9)" "Net-(J1-Pad10)" "Net-(J1-Pad12)" "Net-(J1-Pad14)" "Net-(J1-Pad16)" "UART_INT"
-    "Net-(J8-Pad10)" ~{ENABLEINT} "Net-(U1-Pad3)" "unconnected-(J11-Pad26)" "unconnected-(J11-Pad28)" "unconnected-(J11-Pad29)" "unconnected-(J11-Pad30)" "unconnected-(J11-Pad32)"
+    "Net-(J7-Pad10)" EIRQ0 "Net-(U1-Pad3)" "unconnected-(J11-Pad26)" "unconnected-(J11-Pad28)" "unconnected-(J11-Pad29)" "unconnected-(J11-Pad30)" "unconnected-(J11-Pad32)"
     "unconnected-(J11-Pad34)" "unconnected-(J11-Pad36)" "unconnected-(U16-Pad1)" "unconnected-(U16-Pad2)" "unconnected-(U16-Pad3)" "Net-(U1-Pad4)" "Net-(U23-Pad13)" "unconnected-(U25-Pad13)"
     ~{SPEN} "unconnected-(RN4-Pad8)" "unconnected-(U4-Pad1)" "unconnected-(U4-Pad2)" "Net-(J13-Pad2)" "Net-(J14-Pad2)" ~{BUSACK} ~{HALT}
-    ~{RFSH} "Net-(U16-Pad12)" /bus/A21 ~{WAIT} /bus/A20 /bus/~{TEND1} /bus/~{TEND0} "unconnected-(RN3-Pad3)"
+    ~{RFSH} "Net-(U16-Pad12)" "CPU-A21" ~{WAIT} "CPU-A20" /bus/~{TEND1} /bus/~{TEND0} "unconnected-(RN3-Pad3)"
     "~{CS_PIC}" "unconnected-(U18-Pad2)" "unconnected-(U18-Pad3)" "unconnected-(U18-Pad5)" "unconnected-(U18-Pad6)" "unconnected-(U18-Pad9)" "unconnected-(U18-Pad10)" "unconnected-(U18-Pad12)"
     "unconnected-(U18-Pad13)" "Net-(U20-Pad10)" "unconnected-(U20-Pad12)" "unconnected-(U20-Pad19)" "unconnected-(U20-Pad23)" "unconnected-(U20-Pad26)" "unconnected-(U20-Pad27)" "unconnected-(U20-Pad32)"
     "unconnected-(U20-Pad34)" "unconnected-(U20-Pad37)" "Net-(U1-Pad8)" "unconnected-(U28-Pad5)" "unconnected-(U28-Pad6)" "unconnected-(U21-Pad8)" "unconnected-(U21-Pad10)" "unconnected-(U21-Pad11)"
@@ -109,12 +109,13 @@
     ~{BDREQ} "~{CPU-RFSH}" CLKOUT "DT~{R}_TS" "CPU-DREQ0" "TMR1_IN" "unconnected-(U12-Pad22)" "unconnected-(U12-Pad23)"
     "Net-(U12-Pad25)" ~{PCS1} "unconnected-(U12-Pad28)" "unconnected-(U12-Pad29)" ~{PCS4} ~{PCS5} ~{PCS6} "unconnected-(U12-Pad33)"
     ~{UCS} "Net-(U12-Pad35)" "Net-(U12-Pad36)" "Net-(U12-Pad37)" "Net-(U12-Pad38)" "unconnected-(U12-Pad39)" "Net-(U12-Pad47)" "unconnected-(U12-Pad48)"
-    SRDY HOLD "unconnected-(U12-Pad58)" "unconnected-(U15-Pad14)" "unconnected-(U15-Pad15)" 88TOGGLE "unconnected-(U17-Pad2)" "unconnected-(U17-Pad4)"
-    "unconnected-(U17-Pad5)" "unconnected-(U17-Pad15)" "unconnected-(U17-Pad16)" "unconnected-(U17-Pad18)" "unconnected-(U20-Pad35)" "unconnected-(U20-Pad38)" "Net-(U14-Pad16)" "Net-(U17-Pad7)"
-    "unconnected-(U24-Pad10)" "unconnected-(U24-Pad11)" "~{WR_LS259}" "Net-(U25-Pad11)" "~{CPU-INT0}" "unconnected-(U16-Pad4)" "Net-(U27-Pad1)" "unconnected-(U28-Pad2)"
-    "unconnected-(U28-Pad3)" "unconnected-(U28-Pad9)" "unconnected-(U28-Pad10)" "unconnected-(U28-Pad12)" "unconnected-(U28-Pad13)" 470F 470G "unconnected-(U16-Pad5)"
-    "unconnected-(U16-Pad6)" "unconnected-(U4-Pad8)" "unconnected-(U4-Pad9)" "unconnected-(U12-Pad41)" "unconnected-(U12-Pad44)" "unconnected-(U17-Pad3)" "unconnected-(U17-Pad6)" "unconnected-(U17-Pad8)"
-    "unconnected-(U17-Pad9)" "unconnected-(U17-Pad11)" "unconnected-(U17-Pad12)" "unconnected-(U17-Pad14)" "unconnected-(U17-Pad17)"
+    SRDY HOLD "unconnected-(U12-Pad58)" "unconnected-(U15-Pad14)" "unconnected-(U15-Pad15)" 88TOGGLE "unconnected-(U17-Pad5)" "unconnected-(U17-Pad15)"
+    "unconnected-(U20-Pad35)" "unconnected-(U20-Pad38)" "unconnected-(U14-Pad4)" "Net-(U17-Pad7)" "unconnected-(U24-Pad10)" "unconnected-(U24-Pad11)" "~{WR_LS259}" "Net-(U25-Pad11)"
+    EIRQ1 "unconnected-(U16-Pad4)" "Net-(U27-Pad1)" "unconnected-(U28-Pad2)" "unconnected-(U28-Pad3)" "unconnected-(U28-Pad9)" "unconnected-(U28-Pad10)" "unconnected-(U28-Pad12)"
+    "unconnected-(U28-Pad13)" 470F 470G "unconnected-(U16-Pad5)" "unconnected-(U16-Pad6)" "unconnected-(U4-Pad8)" "unconnected-(U4-Pad9)" "unconnected-(U12-Pad41)"
+    "unconnected-(U12-Pad44)" "unconnected-(U17-Pad3)" "unconnected-(U17-Pad6)" "unconnected-(U17-Pad8)" "unconnected-(U17-Pad9)" "unconnected-(U17-Pad11)" "unconnected-(U17-Pad12)" "unconnected-(U17-Pad14)"
+    "unconnected-(U17-Pad17)" "unconnected-(U14-Pad16)" "unconnected-(U23-Pad1)" "unconnected-(U23-Pad2)" "unconnected-(U23-Pad3)" EIRQ2 EIRQ3 EIRQ4
+    EIRQ5 EIRQ6 EIRQ7 "unconnected-(P1-Pad17)" "unconnected-(U24-Pad12)"
     (clearance_class default)
     (via_rule default)
     (rule
