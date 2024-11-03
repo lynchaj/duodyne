@@ -369,6 +369,8 @@ int __fastcall nvram_check(void)
 	}
 	chr = rtc_get_loc(RAM_checksum | RAM);
 
+   printf("Checksum=%d(%d)\n\r",checksum,chr);
+
 	return checksum != chr;
 }
 

@@ -71,7 +71,7 @@ rtc_write:
 	call rtc_out                 ; put out the data
 
 	jmp .3
-	.2
+.2:
 	mov al, rtc_ce               ; send '0'
 	call rtc_outs                ; put out the data
 	mov al, rtc_clk |rtc_ce      ; send '0'

@@ -355,7 +355,7 @@ env_table:
 	db	MODEL_BYTE	; PC/XT
 	db	SUBMODEL_BYTE	; rev 1		CPUREGS.ASM
 	db	VERSION_MAJOR	; BIOS revision level  DATE.ASM
-        db      00100100b | (CVDU_8242 << 4)
+        db      00100100b
 				; DMA ch 3 used = 0             7
                                 ; slave 8259 present = 0        6
                                 ; RTC available = 1             5
