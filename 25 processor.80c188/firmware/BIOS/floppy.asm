@@ -242,7 +242,7 @@ ST0_ANY         equ     ST0_EC+ST0_NR   ; Any ST0 error
 fdc_int_control         equ     PIC_I3CON
 
 
-; Standard int 13h stack frame layout is 
+; Standard int 13h stack frame layout is
 ; created by:   PUSHM  ALL,DS,ES
 ;               MOV    BP,SP
 ;
@@ -425,7 +425,7 @@ undefined:
 
 dispatch:
 	dw      fn00    ; Reset Disk System
-	dw      fn01    ; 
+	dw      fn01    ;
 	dw      fn02
 	dw      fn03
 	dw      fn04
@@ -659,7 +659,7 @@ output_byte_to_fdc:
 	mov     dx,FDC_DATA
 	out     dx,al
 	Okay			; C=0, AH=okay
-.8:     
+.8:
 	popm	dx
 	ret                     ; C=0, AH=okay
 ; returns Error or Okay
@@ -675,7 +675,7 @@ input_byte_from_fdc:
 	mov     dx,FDC_DATA
 	in      al,dx
 	Okay			; return Okay
-.9:     
+.9:
 	pop	dx
 	ret                     ;
 ; returns Error, Okay, or Complete
@@ -683,7 +683,7 @@ input_byte_from_fdc:
 
 ;  CX = length of command
 ;  DX:SI = pointer to command (not DS:SI, we'll set this up)
-;  
+;
 	global  output_cmd_to_fdc
 output_cmd_to_fdc:
 	pushm   si,es
@@ -756,7 +756,7 @@ input_result_from_fdc:
 
 %define INT_ENABLE 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 
+;
 ;  Floppy Disk Controller
 ;               Interrupt Handler
 ;
@@ -768,7 +768,7 @@ fdc_interrupt_level:
 %endif
 	pushm   all,ds
 	cld                     ; just be sure
-	
+
 	push    bios_data_seg
 	popm    ds
 %if INT_ENABLE==0
@@ -780,7 +780,7 @@ fdc_interrupt_level:
 ; BUSY is set
 	call    input_result_from_fdc
 	sbb     al,al           ; carry to AL
-	mov     byte [fdc_status],al    ; FF=error, 0=okay 
+	mov     byte [fdc_status],al    ; FF=error, 0=okay
 	jmp     .9              ; we got the results
 
 
@@ -819,7 +819,7 @@ fdc_interrupt_level:
 	mov     dx,PIC_EOI              ; EOI register
 	mov     ax,EOI_NSPEC            ; non-specific
 	out     dx,ax                   ; signal it
-	
+
 	popm    all,ds
 	iret
 
@@ -857,7 +857,7 @@ out_LDOR_mem:
 ;
 	global  fdc_wait_seek_done
 fdc_wait_seek_done:
-.1:     
+.1:
 	call    wait12
 	call    get_msr
 	test    al,0Fh          ; test all the seek bits
@@ -902,8 +902,8 @@ fdc_wait_seek_done:
 ;
 	global  @floppy_init
 @floppy_init:
-	mov     ah,0            ; fn00
-	int     13h
+;	mov     ah,0            ; fn00
+;	int     13h
 	ret
 
 
@@ -1385,7 +1385,7 @@ fn05:
 	global  dma0_interrupt
 dma0_interrupt:
 	pushm   ax,dx,ds
-	
+
 	push    bios_data_seg
 	popm    ds
 
@@ -1414,7 +1414,7 @@ dma0_interrupt:
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  Function 15h         Get Disk Type 
+;  Function 15h         Get Disk Type
 ;
 ;  Enter with:
 ;       AH = 15h
@@ -1481,7 +1481,7 @@ fn16:
 	mov     ah,ERR_disk_removed	; signal disk changed
 .on:
 	ret			; AH=6, Carry will be set
-	
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2088,7 +2088,7 @@ recalibrate:
 	push    ax		; push 2 byte command
 	mov     si,sp           ; form command pointer
 	mov     dx,ss           ; DX:SI points at command
-	mov     cx,2		
+	mov     cx,2
 	call    output_cmd_to_fdc	; output the command
 	jc      .7
 
@@ -2122,7 +2122,7 @@ recalibrate:
 	call    lites
 %endif
 	Okay			;
-	
+
 .7:     pop     si		; Command is still in the stack
 	popm    cx,dx,si	; restore
 	ret
@@ -2142,7 +2142,7 @@ recalibrate:
 ;	Carry = 0	success
 ;
 ;	Carry = 1	error
-;  
+;
 ;  Assumes "motor_on" has done the real unit select in the LDOR (operations register)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Seek:
@@ -2281,7 +2281,7 @@ Check_RW_Status:
 	mov	al,ah			; retain copy in AL
 	and	ah,ST0_IC		; check interrupt code
 	jz	.exit	; Okay is set
-	
+
 	mov	ah,ERR_controller_failure
 	test	al,ST0_EC
 	jnz	.error
@@ -2380,6 +2380,3 @@ read_track_id:
 
 	popm	si,cx,dx
 	ret
-
-
-
