@@ -27,11 +27,6 @@
 
 /* leave a little room for expansion */
 
-/***** start RAC *****/
-#define RAM_spp_inst	18		/* is 2s1p board installed? */
-#define RAM_spp_base	19		/* LSB of base address of board */
-/***** end RAC *****/
-
 #define RAM_checksum	30
 #define RAM_length	31
 

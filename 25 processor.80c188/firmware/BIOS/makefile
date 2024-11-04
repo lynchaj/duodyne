@@ -18,7 +18,7 @@
 SBC188 = 1
 #ROM = 64
 ROM = 32
-ETC = tbasic.hex -d26K font.hex -d18k em187.hex
+ETC = tbasic.hex -d26K  -d18k em187.hex
 CHIP = 64
 #CHIP = 128
 #TRC = -DTRACE=1
@@ -91,11 +91,10 @@ SEP=\
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
 OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj
-OBJECT2 = timers.obj inttrace.obj tests.obj font.obj ppide.obj
+OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj
 OBJECT3 = sdcard.obj idelib.obj int14ser.obj int17par.obj
-OBJECT4 = redbug.obj fpem/em187.obj unasm/unasm.obj
+OBJECT4 = fpem/em187.obj
 OBJECTC1 = cprintf.obj sio.obj nvram.obj strtoul.obj libc.obj debug.obj
-OBJECTC2 = kbd.obj m8563lib.obj vga3lib.obj
 
 OBJECTA = $(OBJECT1) $(OBJECT2) $(OBJECT3) $(OBJECT4)
 OBJECTC = $(OBJECTC1) $(OBJECTC2)
@@ -104,8 +103,7 @@ OBJECTS = rbios.obj $(OBJECTA) $(OBJECTC) copyrght.obj
 
 
 ROMS = bios064.bin bios128.bin bios256.bin
-#ROMS =  bios128.bin bios256.bin		# bios064.bin removed for now
-MISC = COPYING config.asm emm4mem.sys abios.lib cbios.lib
+MISC = COPYING config.asm abios.lib cbios.lib
 
 .EXTENSIONS:
 .EXTENSIONS: .bin .obj .exe .asm .c .h
@@ -118,7 +116,7 @@ MISC = COPYING config.asm emm4mem.sys abios.lib cbios.lib
 	$(CC) $(COPT) $(SIZE) -fo=$@ $*.c
 	$(CLIST)
 
-all:	config.asm emm4mem.sys $(ROMS) .SYMBOLIC
+all:	config.asm  $(ROMS) .SYMBOLIC
 
 test:	1Ah_time.obj
 
@@ -152,7 +150,7 @@ distro: spotless .SYMBOLIC
 	$(CP) ansi.cfg config.asm
 	wmake clean
 	wmake v$(V)ansi.zip
-	$(ZIP) emm4mem emm4mem.sys
+
 # ANSI should be last, leaving 'config.asm' == 'ansi.cfg'
 
 v$(V)wvga3.zip:	$(MISC) $(ROMS)
@@ -187,7 +185,6 @@ roms:   startup.bin rbios.exe makefile .SYMBOLIC
 	$(EXE2ROM) rbios.exe bios256.bin -r $(ROM) -e 256 -s startup.bin
 	$(EXE2ROM) rbios.exe bios128.bin -r $(ROM) -e 128 -s startup.bin
 	$(EXE2ROM) rbios.exe bios_64.bin -r $(ROM) -e 64  -s startup.bin
-#	$(EXE2ROM) rbios.exe bios_32.bin -r $(ROM) -e 32  -s startup.bin
 
 check:  startup.bin rbios.exe makefile .SYMBOLIC
 	$(EXE2ROM) rbios.exe check.bin -s startup.bin -v -e $(CHIP) -r $(ROM) >foo
@@ -197,7 +194,7 @@ check:  startup.bin rbios.exe makefile .SYMBOLIC
 # Strictly for testing
 fdc:	wd37c65.obj fdc8272.obj	.SYMBOLIC
 
-bios064.bin:	rbios.hex tbasic.hex font.hex em187.hex
+bios064.bin:	rbios.hex tbasic.hex em187.hex
 	$(HEX2BIN) -o bios064.bin -R64K rbios.hex $(ETC)
 bios128.bin:	space64.bin bios064.bin
 	$(CAT) space64.bin $(PLUS) bios064.bin $(OUT) bios128.bin
@@ -216,12 +213,10 @@ rbios.exe:     copyrght.obj rbios.obj abios.lib cbios.lib
 
 tbasic.hex:	tbasic.bin
 	$(BIN2HEX) -o tbasic.hex tbasic.bin
-font.hex:	font.bin
-	$(BIN2HEX) -o font.hex font.bin
 
 tbasic.bin:	tbasic.asm $(INCLUDES)
 
-font.bin:	font.asm font_vga.asm font8x8.asm $(INCLUDES)
+
 
 #config.asm:     ansi.cfg wyse.cfg cvdu.cfg wcvdu.cfg vga3.cfg wvga3.cfg
 #	echo GUESSING THAT YOU WANT THE 'ANSI.CFG' COPIED TO 'CONFIG.ASM'
@@ -250,18 +245,18 @@ ppide_sa.obj:      ppide.asm $(INCLUDES)
 wbios.lib:      $(OBJECTS)
         wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
-        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj +redbug.obj
-	wlib -q wbios.lib +debug.obj +strtoul.obj +unasm/unasm.obj +inttrace.obj +tests.obj
-	wlib -q wbios.lib +m8563lib.obj +vga3lib.obj +kbd.obj +font.obj
+        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
+	wlib -q wbios.lib +debug.obj +strtoul.obj  +inttrace.obj +tests.obj
+
 
 abios.lib:	$(OBJECTA)
 	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj
-	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +font.obj +ppide.obj  +sdcard.obj
-	wlib -q    abios.lib  +idelib.obj +redbug.obj +fpem/em187.obj +unasm/unasm.obj
+	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +sdcard.obj
+	wlib -q    abios.lib  +idelib.obj  +fpem/em187.obj
 
 cbios.lib:	$(OBJECTC)
 	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj
-	wlib -q    cbios.lib +m8563lib.obj +vga3lib.obj +kbd.obj
+
 
 uart_det.obj:	uart_det.asm $(INCLUDES)
 	$(NASM) $(NOPT) -DSTANDALONE=1 -f obj -o $@ -l $*.lst  $*.asm
@@ -281,8 +276,6 @@ serial:	ser_util.c
 	wcl386 -DSTANDALONE=1 $<
 	mv ser_util serial
 
-emm4mem.sys:    emm4mem.asm cpuregs.asm makefile
-        $(NASM) $(NOPT) -f bin -l $*.lst -o $@  $*.asm
 
 space64.bin:
 	$(HEX2BIN) -R 64K -o $@
@@ -333,7 +326,7 @@ spotless: clean .SYMBOLIC
 sbc188.h:       mytypes.h
 
 copyrght.obj:	copyrght.asm $(INCLUDES)
-rbios.obj:      rbios.asm $(INCLUDES) memory.asm ds1302.asm ds3uart.asm makefile
+rbios.obj:      rbios.asm $(INCLUDES) memory.asm ds1302.asm makefile
 startup.bin:    startup.asm $(INCLUDES) date.asm post.asm makefile
 timers.obj:     timers.asm $(INCLUDES)
 floppy.obj:     floppy.asm $(INCLUDES)
@@ -342,7 +335,6 @@ int10ser.obj:     int10ser.asm $(INCLUDES) uart_det.asm
 int14ser.obj:	int14ser.asm $(INCLUDES)
 int17par.obj:	int17par.asm $(INCLUDES)
 inttrace.obj:	inttrace.asm $(INCLUDES)
-redbug.obj:     redbug.asm $(INCLUDES)
 misc15.obj:     misc15.asm $(INCLUDES) cassette.asm
 ide.obj:	ide.asm $(INCLUDES)
 ppide.obj:      ppide.asm $(INCLUDES)
@@ -356,9 +348,6 @@ nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc sdcard.h
 libc.obj:	libc.c libc.h
 strtoul.obj:	strtoul.c sbc188.h mytypes.h libc.h
 debug.obj:      debug.c mytypes.h equates.h sio.h debug.h bda.inc
-kbd.obj:	kbd.c mytypes.h sbc188.h equates.h kbd_pc.h kbd_stat.h config.asm
-m8563lib.obj:	m8563lib.c mytypes.h sbc188.h equates.h m8563inc.h ega9a.h
-vga3lib.obj:	vga3lib.c mytypes.h sbc188.h equates.h vga3inc.h v3std.h v3_par1.h vga_def.h
 fdc8272.obj:	fdc8272.c mytypes.h sbc188.h io.h fdc8272.h wd37c65.h
 wd37c65.obj:	wd37c65.c mytypes.h sbc188.h io.h wd37c65.h
 ser_util.obj:	ser_util.c mytypes.h
@@ -374,13 +363,3 @@ int10ser.as1:     int10ser.asm $(INCLUDES) uart_det.asm
 dprintf.obj:	dprintf.c sbc188.h
 uart_id.obj:	uart_id.c
 post.bin:	post.asm	#for testing
-
-font2.obj:	font2.c font_vga.h
-font2.exe:	font2.obj
-	$(LINK) $(LOPT) -k1024 -fe=$@ -fm=$*.map $<
-font2.bin:	font2.exe
-	$(EXE2ROM) font2.exe font2.bin -s $(NULL) -r 32K -e 32K
-font2.hex:	font2.bin
-	$(BIN2HEX) -o font2.hex -S 4k font2.bin
-font2a.bin:	font2.hex
-	$(HEX2BIN) -R 4K -o font2a.bin font2.hex

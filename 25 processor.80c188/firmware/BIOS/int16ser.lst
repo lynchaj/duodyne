@@ -60,189 +60,163 @@
     60                              <1> ; others may get added in the future
     61                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
     62                              <1> ;
-    63                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
-    64                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
-    65                              <1> CVDU	equ	0	; system does not have the CVDU
-    66                              <1> ;
-    67                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
-    68                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
-    69                              <1> ; The default is VGA3=0
-    70                              <1> VGA3    equ     0       ; system does not have the VGA3
-    71                              <1> %if 0
-    72                              <1> 	*/
-    73                              <1> #define VGA3 0
-    74                              <1> /*
-    75                              <1> %endif
-    76                              <1> ;
-    77                              <1> ; Boot up keyboard mode:  20h for NumLock on
-    78                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
-    79                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
-    80                              <1> 
-    81                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
-    82                              <1> ;UART_RATE	equ	0		; 1200
-    83                              <1> ;UART_RATE	equ	1		; 2400
-    84                              <1> ;UART_RATE	equ	2		; 4800
-    85                              <1> UART_RATE	equ	3		; 9600
-    86                              <1> ;UART_RATE	equ	4		; 19200
-    87                              <1> ;UART_RATE	equ	5		; 38400
-    88                              <1> ;UART_RATE	equ	6		; 57600
-    89                              <1> ;UART_RATE	equ	7		; 115200
+    63                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    64                              <1> ;UART_RATE	equ	0		; 1200
+    65                              <1> ;UART_RATE	equ	1		; 2400
+    66                              <1> ;UART_RATE	equ	2		; 4800
+    67                              <1> UART_RATE	equ	3		; 9600
+    68                              <1> ;UART_RATE	equ	4		; 19200
+    69                              <1> ;UART_RATE	equ	5		; 38400
+    70                              <1> ;UART_RATE	equ	6		; 57600
+    71                              <1> ;UART_RATE	equ	7		; 115200
+    72                              <1> 
+    73                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    74                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    75                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    76                              <1> 						; but not ANSI
+    77                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    78                              <1> ; It may be smaller than the actual EPROM in use.
+    79                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    80                              <1> %ifndef ROM
+    81                              <1> ROM             equ     32              ; 64 is the default
+    82                              <1> %endif
+    83                              <1> 
+    84                              <1> ; Define the number of Wait States at which the ROM operates
+    85                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    86                              <1> 
+    87                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    88                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    89                              <1> RAM_DOS         equ     640
     90                              <1> 
-    91                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
-    92                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
-    93                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
-    94                              <1> 						; but not ANSI
-    95                              <1> ; Define the size of the ROM image on the system in Kilobytes
-    96                              <1> ; It may be smaller than the actual EPROM in use.
-    97                              <1> ; The following sizes are supported:  32, 64, 128, and 256
-    98                              <1> %ifndef ROM
-    99                              <1> ROM             equ     32              ; 64 is the default
-   100                              <1> %endif
-   101                              <1> 
-   102                              <1> ; Define the number of Wait States at which the ROM operates
-   103                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
-   104                              <1> 
-   105                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
-   106                              <1> ; This is a desired size and will only be present if a 4MEM board is added
-   107                              <1> RAM_DOS         equ     640
+    91                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    92                              <1> ; the default is 512 kilobytes
+    93                              <1> RAM             equ     512             ; (512 is the default)
+    94                              <1> 
+    95                              <1> ; Define the number of Wait States at which the RAM operates
+    96                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+    97                              <1> 
+    98                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+    99                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+   100                              <1> 
+   101                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+   102                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+   103                              <1> 
+   104                              <1> ; Define the time zone in which we build the Relocatable BIOS
+   105                              <1> %ifndef TIMEZONE
+   106                              <1> %define TIMEZONE "CST"
+   107                              <1> %endif
    108                              <1> 
-   109                              <1> ; Define the size of the low SRAM on the system in Kilobytes
-   110                              <1> ; the default is 512 kilobytes
-   111                              <1> RAM             equ     512             ; (512 is the default)
-   112                              <1> 
-   113                              <1> ; Define the number of Wait States at which the RAM operates
-   114                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
-   115                              <1> 
-   116                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
-   117                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+   109                              <1> ; Has the REDBUG debugger been loaded?
+   110                              <1> %ifndef SOFT_DEBUG
+   111                              <1> %define SOFT_DEBUG 0
+   112                              <1> %endif
+   113                              <1> 
+   114                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   115                              <1> %ifndef TBASIC
+   116                              <1> TBASIC          equ     1		; default is 1
+   117                              <1> %endif
    118                              <1> 
-   119                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
-   120                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
-   121                              <1> 
-   122                              <1> ; Define the time zone in which we build the Relocatable BIOS
-   123                              <1> %ifndef TIMEZONE
-   124                              <1> %define TIMEZONE "CST"
-   125                              <1> %endif
-   126                              <1> 
-   127                              <1> ; Has the REDBUG debugger been loaded?
-   128                              <1> %ifndef SOFT_DEBUG
-   129                              <1> %define SOFT_DEBUG 0
-   130                              <1> %endif
-   131                              <1> 
-   132                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
-   133                              <1> %ifndef TBASIC
-   134                              <1> TBASIC          equ     1		; default is 1
-   135                              <1> %endif
-   136                              <1> 
-   137                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
-   138                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
-   139                              <1> %ifndef FPEM
-   140                              <1> FPEM            equ     1               ; default is 1
-   141                              <1> %endif
-   142                              <1> 
-   143                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   144                              <1> EMM_BOARDS      equ     0
-   145                              <1> 
-   146                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   147                              <1> ; or at locations 0280h..3FFh in low memory?
-   148                              <1> %if SOFT_DEBUG
-   149                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   150                              <1> %else
-   151                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   152                              <1> %endif
+   119                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   120                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   121                              <1> %ifndef FPEM
+   122                              <1> FPEM            equ     1               ; default is 1
+   123                              <1> %endif
+   124                              <1> 
+   125                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   126                              <1> EMM_BOARDS      equ     0
+   127                              <1> 
+   128                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   129                              <1> ; or at locations 0280h..3FFh in low memory?
+   130                              <1> %if SOFT_DEBUG
+   131                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   132                              <1> %else
+   133                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   134                              <1> %endif
+   135                              <1> 
+   136                              <1> ; Define the size of the EPROM that is to be installed on the system
+   137                              <1> ; It may be larger than the actual ROM image to be generated.
+   138                              <1> %ifndef CHIP
+   139                              <1> CHIP            equ     64
+   140                              <1> %endif
+   141                              <1> 
+   142                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   143                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   144                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   145                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   146                              <1> 
+   147                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   148                              <1> ; If the wiring update is installed, or you have a later board, then
+   149                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   150                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   151                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   152                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
    153                              <1> 
-   154                              <1> ; Define the size of the EPROM that is to be installed on the system
-   155                              <1> ; It may be larger than the actual ROM image to be generated.
-   156                              <1> %ifndef CHIP
-   157                              <1> CHIP            equ     64
-   158                              <1> %endif
-   159                              <1> 
-   160                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   161                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   162                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   163                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   164                              <1> 
-   165                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   166                              <1> ; If the wiring update is installed, or you have a later board, then
-   167                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   168                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   169                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   170                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   154                              <1> ; Define the UART oscillator speed
+   155                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   156                              <1> 
+   157                              <1> 
+   158                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   159                              <1> ; end of the User configuration
+   160                              <1> ;       Do Not modify anything below this point
+   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   162                              <1> 
+   163                              <1> ; Define existence of any uart chip
+   164                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   165                              <1> startuplength   equ     512                     ; may be up to 1024
+   166                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   167                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   168                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   169                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   170                              <1> 
    171                              <1> 
-   172                              <1> ; Define the UART oscillator speed
-   173                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
-   174                              <1> 
-   175                              <1> 
-   176                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   177                              <1> ; end of the User configuration
-   178                              <1> ;       Do Not modify anything below this point
-   179                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   180                              <1> 
-   181                              <1> CVDU_8563	equ	CVDU		; separate inits
-   182                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
-   183                              <1> VGA3_6445       equ     VGA3            ; separate inits
-   184                              <1> ; Suppress all UART output in color video Mode 3
-   185                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563
-   186                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
-   187                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
-   188                              <1> 
-   189                              <1> ; Define existence of any uart chip
-   190                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   191                              <1> startuplength   equ     512                     ; may be up to 1024
-   192                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   193                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   194                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   195                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   196                              <1> 
-   197                              <1> 
-   198                              <1> %define ARG(n) [bp+2+(n)*2]
-   199                              <1> 
-   200                              <1> %macro  check   1.nolist
-   201                              <1>  %if (%1)
-   202                              <1>    %error Check Failure: %1
-   203                              <1>  %endif
-   204                              <1> %endm
-   205                              <1> %macro  range   3.nolist
-   206                              <1>  %if (%1)<(%2)
-   207                              <1>    %error Out of Range: %1
-   208                              <1>  %elif (%1)>(%3)
-   209                              <1>    %error Out of Range: %1
-   210                              <1>  %endif
-   211                              <1> %endm
-   212                              <1> _terminal equ UART+CVDU
-   213                              <1>  check   RAM_DOS&15
-   214                              <1>  check   RAM&(RAM-1)
-   215                              <1>  check   ROM&(ROM-1)
-   216                              <1>  range   RAM,32,512
-   217                              <1>  range   ROM,32,256
-   218                              <1>  range   RAM_WS,0,3
-   219                              <1>  range   ROM_WS,0,3
-   220                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   221                              <1>  range   LCL_IO_WS,0,3
-   222                              <1>  range   BUS_IO_WS,0,3
-   223                              <1>  range   UART_OSC,500000,16000000
-   224                              <1>  range   UART_RATE,0,7
-   225                              <1>  range	 UART,0,1
-   226                              <1>  range	 _terminal,1,2
-   227                              <1> 
-   228                              <1> %ifndef SOFT_DEBUG
-   229                              <1> %define SOFT_DEBUG 0
-   230                              <1> %endif
-   231                              <1> 
-   232                              <1> %ifndef TRACE
-   233                              <1> %define TRACE 0
-   234                              <1> %endif
-   235                              <1> 
-   236                              <1> %ifdef MAKE_OBJECT_FILE
-   237                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   238                              <1>         export _ROMsize
-   239                              <1>         export _CHIPsize
-   240                              <1> _ROMsize        dw      ROM
-   241                              <1> _CHIPsize       dw      CHIP
-   242                              <1> %endif
-   243                              <1> ; end of the Hardware configuration file
-   244                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   245                              <1> ;*/
+   172                              <1> %define ARG(n) [bp+2+(n)*2]
+   173                              <1> 
+   174                              <1> %macro  check   1.nolist
+   175                              <1>  %if (%1)
+   176                              <1>    %error Check Failure: %1
+   177                              <1>  %endif
+   178                              <1> %endm
+   179                              <1> %macro  range   3.nolist
+   180                              <1>  %if (%1)<(%2)
+   181                              <1>    %error Out of Range: %1
+   182                              <1>  %elif (%1)>(%3)
+   183                              <1>    %error Out of Range: %1
+   184                              <1>  %endif
+   185                              <1> %endm
+   186                              <1> _terminal equ UART
+   187                              <1>  check   RAM_DOS&15
+   188                              <1>  check   RAM&(RAM-1)
+   189                              <1>  check   ROM&(ROM-1)
+   190                              <1>  range   RAM,32,512
+   191                              <1>  range   ROM,32,256
+   192                              <1>  range   RAM_WS,0,3
+   193                              <1>  range   ROM_WS,0,3
+   194                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   195                              <1>  range   LCL_IO_WS,0,3
+   196                              <1>  range   BUS_IO_WS,0,3
+   197                              <1>  range   UART_OSC,500000,16000000
+   198                              <1>  range   UART_RATE,0,7
+   199                              <1>  range	 UART,0,1
+   200                              <1>  range	 _terminal,1,2
+   201                              <1> 
+   202                              <1> %ifndef SOFT_DEBUG
+   203                              <1> %define SOFT_DEBUG 0
+   204                              <1> %endif
+   205                              <1> 
+   206                              <1> %ifndef TRACE
+   207                              <1> %define TRACE 0
+   208                              <1> %endif
+   209                              <1> 
+   210                              <1> %ifdef MAKE_OBJECT_FILE
+   211                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   212                              <1>         export _ROMsize
+   213                              <1>         export _CHIPsize
+   214                              <1> _ROMsize        dw      ROM
+   215                              <1> _CHIPsize       dw      CHIP
+   216                              <1> %endif
+   217                              <1> ; end of the Hardware configuration file
+   218                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   219                              <1> ;*/
     39                                  %include	"cpuregs.asm"
     40                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     41                              <1> ; CPUREGS.ASM
@@ -1164,317 +1138,163 @@
    261                                  ;;;.1:
    262 000000C1 C3                      	ret
    263                                  
-   264                                  %if CVDU_8242
-   265                                  ;========================================================================
-   266                                  ; cvdu_kbd_int - Color VDU keyboard interrupt	MSDOS messes with this
-   267                                  ; cvdu_kbd_hook - examine keyboard on every timer tick
-   268                                  ;
+   264                                  
+   265                                  
+   266                                  ;========================================================================
+   267                                  ; UART interrupt handler
+   268                                  ; This routine does most of the keyboard driver work
    269                                  ;========================================================================
-   270                                  %if CVDU_USE_KBD_HOOK
-   271                                  	global	cvdu_kbd_hook
-   272                                  cvdu_kbd_hook:
-   273                                  	call	I8242GetValue_
-   274                                  	jnc	.2
-   275                                  	ret
-   276                                  .2:
-   277                                  	pushm	all,ds,es	; save EVERYTHING
-   278                                  .1:
-   279                                  %else
-   280                                  	global	cvdu_kbd_int
-   281                                  cvdu_kbd_int:
-   282                                  	pushm	all,ds,es	; save EVERYTHING
-   283                                  .1:	call	I8242GetValue_
-   284                                  ;;	cmp	ax,-1
-   285                                  ;;	je	.exit
-   286                                  	jc	.exit		; new return in flag
-   287                                  
-   288                                  %endif
-   289                                  %if 1
-   290                                  	mov	AH,4Fh		; keyboard intercept
-   291                                  	stc			; so we can respond with IRET
-   292                                  	int	15h
-   293                                  	jnc	.20		; scancode to be bypassed
-   294                                  %endif
-   295                                  
-   296                                  	push	DGROUP
-   297                                  	popm	ds		; establish addressability
-   298                                  	extern	@I8242process
-   299                                  	call	@I8242process	; convert to scan code // character
-   300                                  
-   301                                  	push	bios_data_seg
-   302                                  	popm	ds
-   303                                  
-   304                                  	or	ax,ax		; test for zero (unknown input)
-   305                                  	jnz	.21
-   306                                  
-   307                                  .20:
-   308                                  	call	I8242GetValue_
-   309                                  	jc	.exit
-   310                                  	jmp	.1
-   311                                  .21:
-   312                                  	cmp	al,0E0h		; enhanced keyboard?
-   313                                  	jne	.3
-   314                                  	xor	al,al		; old PC keyboard
-   315                                  .3:
-   316                                  	cmp	ax,1234h	; Ctrl-Alt-DEL
-   317                                  	jne	.33
-   318                                  %if 1
-   319                                  	int	19h		; re-boot the system
-   320                                  %else
-   321                                  	mov	[warm_boot],ax	; set Warm Boot condition
-   322                                  	jmp	0FFFFh:0000	; re-boot
-   323                                  %endif
+   270                                  	global	uart_int
+   271                                  uart_int:
+   272 000000C2 1E525350                	pushm	ax,bx,dx,ds
+   273 000000C6 6A40                    	push	bios_data_seg
+   274 000000C8 1F                      	popm	ds		; establish addressability
+   275                                  %if SOFT_DEBUG
+   276                                  	push	0xFF
+   277                                  	extern	lites
+   278                                  	call	lites
+   279                                  	hlt
+   280                                  %endif
+   281                                  .1:
+   282 000000C9 BA8506                  	mov	dx,uart_lsr
+   283 000000CC EC                      	in	al,dx
+   284 000000CD 2401                    	and	al,01h		; do we have any data in receive buffer?
+   285 000000CF 742E                    	jz	int_exit
+   286                                  
+   287 000000D1 BA8006                  	mov	dx,uart_rbr
+   288 000000D4 EC                      	in	al,dx		; get next character
+   289                                  
+   290 000000D5 B400                    	mov	ah,0
+   291 000000D7 3C80                    	cmp	al,80h		; the ASCII code =< 80?
+   292 000000D9 73EE                    	jae	.1		; ignore, check for the next character
+   293                                  %if SOFT_DEBUG
+   294                                  	cmp	al,'B' & 01Fh	; ctrl-B
+   295                                  	je	v.redbug
+   296                                  %endif
+   297 000000DB 3C12                    	cmp	al,('R' & 01Fh)	; ctrl-R
+   298 000000DD 750D                    	jne	.20
+   299 000000DF FE061500                	inc	byte [uart_kbd_ctrl_R]
+   300 000000E3 803E150003              	cmp	byte [uart_kbd_ctrl_R], 3	; 3 ctrl-R's will re-boot
+   301 000000E8 7207                    	jb	.2
+   302                                  %if 1
+   303 000000EA CD19                    	int	19h		; does not return
+   304                                  %else
+   305                                  	mov	word [warm_boot],1234h		; signal warm boot
+   306                                  	jmp	0FFFFh:0000h
+   307                                  %endif
+   308                                  .20:
+   309 000000EC C606150000              	mov	byte [uart_kbd_ctrl_R], 0	; zero the re-boot count
+   310                                  .2:
+   311 000000F1 88C3                    	mov	bl,al		; find the scan code
+   312 000000F3 B700                    	mov	bh,0
+   313 000000F5 2E8AA7[0B01]                cs	mov	ah,byte [ascii2scan+bx]
+   314                                  
+   315 000000FA E899FF                      	call	enqueue
+   316                                  
+   317 000000FD EBCA                    	jmp	.1		; check for the next character
+   318                                  
+   319                                  int_exit:
+   320                                  ; signal EOI (End of Interrupt)
+   321 000000FF BA22FF                  	mov	dx,PIC_EOI	; EOI register
+   322 00000102 B80080                  	mov	ax,EOI_NSPEC	; non-specific
+   323 00000105 EF                      	out	dx,ax		; signal it
    324                                  
-   325                                  .33:
-   326                                  	call	enqueue
-   327                                  	mov	byte [uart_kbd_ctrl_R], 0
-   328                                  
-   329                                  .exit:
-   330                                  
-   331                                  %if CVDU_USE_KBD_HOOK
-   332                                  ;   Hook service
-   333                                  	popm	all,ds,es
-   334                                  	ret
-   335                                  %else
-   336                                  ;   Interrupt service
-   337                                  ; signal EOI (End of Interrupt)
-   338                                  	mov	dx,PIC_EOI	; EOI register
-   339                                  	mov	ax,EOI_NSPEC	; non-specific
-   340                                  	out	dx,ax		; signal it
-   341                                  
-   342                                  	popm	all,ds,es
-   343                                  	iret
-   344                                  %endif
-   345                                  %endif
-   346                                  
-   347                                  
-   348                                  ;========================================================================
-   349                                  ; UART interrupt handler
-   350                                  ; This routine does most of the keyboard driver work
-   351                                  ;========================================================================
-   352                                  	global	uart_int
-   353                                  uart_int:
-   354 000000C2 1E525350                	pushm	ax,bx,dx,ds
-   355 000000C6 6A40                    	push	bios_data_seg
-   356 000000C8 1F                      	popm	ds		; establish addressability
-   357                                  %if SOFT_DEBUG
-   358                                  	push	0xFF
-   359                                  	extern	lites
-   360                                  	call	lites
-   361                                  	hlt
-   362                                  %endif
-   363                                  .1:
-   364 000000C9 BA8506                  	mov	dx,uart_lsr
-   365 000000CC EC                      	in	al,dx
-   366 000000CD 2401                    	and	al,01h		; do we have any data in receive buffer?
-   367 000000CF 742E                    	jz	int_exit
-   368                                  
-   369 000000D1 BA8006                  	mov	dx,uart_rbr
-   370 000000D4 EC                      	in	al,dx		; get next character
-   371                                  
-   372 000000D5 B400                    	mov	ah,0
-   373 000000D7 3C80                    	cmp	al,80h		; the ASCII code =< 80?
-   374 000000D9 73EE                    	jae	.1		; ignore, check for the next character
-   375                                  %if SOFT_DEBUG
-   376                                  	cmp	al,'B' & 01Fh	; ctrl-B
-   377                                  	je	v.redbug
-   378                                  %endif
-   379 000000DB 3C12                    	cmp	al,('R' & 01Fh)	; ctrl-R
-   380 000000DD 750D                    	jne	.20
-   381 000000DF FE061500                	inc	byte [uart_kbd_ctrl_R]
-   382 000000E3 803E150003              	cmp	byte [uart_kbd_ctrl_R], 3	; 3 ctrl-R's will re-boot
-   383 000000E8 7207                    	jb	.2
-   384                                  %if 1
-   385 000000EA CD19                    	int	19h		; does not return
-   386                                  %else
-   387                                  	mov	word [warm_boot],1234h		; signal warm boot
-   388                                  	jmp	0FFFFh:0000h
-   389                                  %endif
-   390                                  .20:
-   391 000000EC C606150000              	mov	byte [uart_kbd_ctrl_R], 0	; zero the re-boot count
-   392                                  .2:
-   393 000000F1 88C3                    	mov	bl,al		; find the scan code
-   394 000000F3 B700                    	mov	bh,0
-   395 000000F5 2E8AA7[0B01]                cs	mov	ah,byte [ascii2scan+bx]
+   325 00000106 585B5A1F                	popm	ax,bx,dx,ds
+   326 0000010A CF                      	iret
+   327                                  
+   328                                  ; Debugging code added 10/17/2010 -- JRC
+   329                                  ;  Use ctrl-B (^B) as immediate entry into the debugger
+   330                                  %if SOFT_DEBUG
+   331                                  	extern	redbug
+   332                                  v.redbug:
+   333                                  ; signal EOI (End of Interrupt)
+   334                                  	mov	dx,PIC_EOI	; EOI register
+   335                                  	mov	ax,EOI_NSPEC	; non-specific
+   336                                  	out	dx,ax		; signal it
+   337                                  ; restore the registers
+   338                                  	popm	ax,bx,dx,ds
+   339                                  ; keep the 'iret' block on the stack
+   340                                  	jmp	redbug
+   341                                  %endif
+   342                                  
+   343                                  ascii2scan:
+   344                                  	;	NUL,SOH,STX,ETX,EOT,ENQ,ACL,BEL
+   345 0000010B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
+   346                                  	;	BS, TAB,LF, VT, FF, CR, SO, SI
+   347 00000113 0E0F0000001C0000        	db      0Eh,0Fh,0,  0,  0,  1Ch,0  ,0
+   348                                  	;	DLE,DC1,DC2,DC3,DC4,NAK,SYN,ETB
+   349 0000011B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
+   350                                  	;	CAN,EM, SUB,ESC,FS, GS, RS, US
+   351 00000123 0000000100000000        	db      0,  0,  0,  01h,0,  0,  0,  0,
+   352                                  	;	 ,  !,  ",  #,  $,  %,  &,  '
+   353 0000012B 3902280405060828        	db	39h,02h,28h,04h,05h,06h,08h,28h
+   354                                  	;	(,  ),  *,  +,  ,,  -,  .,  /
+   355 00000133 0A0B090D330C3435        	db	0Ah,0Bh,09h,0Dh,33h,0Ch,34h,35h
+   356                                  	;	0,  1,  2,  3,  4,  5,  6,  7
+   357 0000013B 0B02030405060708        	db	0Bh,02h,03h,04h,05h,06h,07h,08h
+   358                                  	;	8,  9,  :,  ;,  <,  =,  >,  ?
+   359 00000143 090A2727330D3435        	db	09h,0Ah,27h,27h,33h,0Dh,34h,35h
+   360                                  	;	@,  A,  B,  C,  D,  E,  F,  G
+   361 0000014B 031E302E20122122        	db	03h,1Eh,30h,2Eh,20h,12h,21h,22h
+   362                                  	;	H,  I,  J,  K,  L,  M,  N,  O
+   363 00000153 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
+   364                                  	;	P,  Q,  R,  S,  T,  U,  V,  W
+   365 0000015B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
+   366                                  	;	X,  Y,  Z,  [,  \,  ],  ^,  _
+   367 00000163 2D152C1A2B1B070C        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,07h,0Ch
+   368                                  	;	`,  a,  b,  c,  d,  e,  f,  g
+   369 0000016B 291E302E20122122        	db	29h,1Eh,30h,2Eh,20h,12h,21h,22h
+   370                                  	;	h,  i,  j,  k,  l,  m,  n,  o
+   371 00000173 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
+   372                                  	;	p,  q,  r,  s,  t,  u,  v,  w
+   373 0000017B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
+   374                                  	;	x,  y,  z,  {,  |,  },  ~,  DEL
+   375 00000183 2D152C1A2B1B2953        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,29h,53h
+   376                                  
+   377                                  ;========================================================================
+   378                                  ; keyboart_init - initialize keyboard
+   379                                  ;========================================================================
+   380                                  	global	keyboard_init
+   381                                  keyboard_init:
+   382 0000018B 061E60                  	pushm	all,ds,es	; was AX,DS,ES
+   383                                  
+   384                                  
+   385 0000018E 68[ssss]                	push	DGROUP
+   386 00000191 1F                      	popm	ds
+   387                                  
+   388 00000192 6A40                    	push	bios_data_seg
+   389 00000194 1F                      	popm	ds
+   390                                  
+   391 00000195 B81E00                  	mov	ax,kbd_buffer	; setup keyboard buffer
+   392 00000198 A31A00                  	mov	word [kbd_buffer_head],ax
+   393 0000019B A31C00                  	mov	word [kbd_buffer_tail],ax
+   394 0000019E 31C0                    	xor	ax,ax		; clear keyboard flags
+   395 000001A0 A31700                  	mov	word [keyboard_flags_0],ax
    396                                  
-   397 000000FA E899FF                      	call	enqueue
-   398                                  
-   399 000000FD EBCA                    	jmp	.1		; check for the next character
-   400                                  
-   401                                  int_exit:
-   402                                  ; signal EOI (End of Interrupt)
-   403 000000FF BA22FF                  	mov	dx,PIC_EOI	; EOI register
-   404 00000102 B80080                  	mov	ax,EOI_NSPEC	; non-specific
-   405 00000105 EF                      	out	dx,ax		; signal it
-   406                                  
-   407 00000106 585B5A1F                	popm	ax,bx,dx,ds
-   408 0000010A CF                      	iret
+   397                                  %if UART
+   398 000001A3 B001                    	mov	al,01h
+   399 000001A5 BA8106                  	mov	dx,uart_ier
+   400 000001A8 EE                      	out	dx,al		; Enable interrupts on receive
+   401                                  
+   402 000001A9 BA38FF                  	mov	dx,PIC_I0CON	; Int 1 control register
+   403 000001AC ED                      	in	ax,dx
+   404 000001AD 83E0F7                  	and	ax,~08h		; clear the mask bit
+   405 000001B0 EF                      	out	dx,ax
+   406                                  %endif
+   407 000001B1 611F07                  	popm	all,ds,es
+   408 000001B4 C3                      	ret
    409                                  
-   410                                  ; Debugging code added 10/17/2010 -- JRC
-   411                                  ;  Use ctrl-B (^B) as immediate entry into the debugger
-   412                                  %if SOFT_DEBUG
-   413                                  	extern	redbug
-   414                                  v.redbug:
-   415                                  ; signal EOI (End of Interrupt)
-   416                                  	mov	dx,PIC_EOI	; EOI register
-   417                                  	mov	ax,EOI_NSPEC	; non-specific
-   418                                  	out	dx,ax		; signal it
-   419                                  ; restore the registers
-   420                                  	popm	ax,bx,dx,ds
-   421                                  ; keep the 'iret' block on the stack
-   422                                  	jmp	redbug
-   423                                  %endif
-   424                                  
-   425                                  ascii2scan:
-   426                                  	;	NUL,SOH,STX,ETX,EOT,ENQ,ACL,BEL
-   427 0000010B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
-   428                                  	;	BS, TAB,LF, VT, FF, CR, SO, SI
-   429 00000113 0E0F0000001C0000        	db      0Eh,0Fh,0,  0,  0,  1Ch,0  ,0
-   430                                  	;	DLE,DC1,DC2,DC3,DC4,NAK,SYN,ETB
-   431 0000011B 0000000000000000        	db	0,  0,  0,  0,  0,  0,  0,  0,
-   432                                  	;	CAN,EM, SUB,ESC,FS, GS, RS, US
-   433 00000123 0000000100000000        	db      0,  0,  0,  01h,0,  0,  0,  0,
-   434                                  	;	 ,  !,  ",  #,  $,  %,  &,  '
-   435 0000012B 3902280405060828        	db	39h,02h,28h,04h,05h,06h,08h,28h
-   436                                  	;	(,  ),  *,  +,  ,,  -,  .,  /
-   437 00000133 0A0B090D330C3435        	db	0Ah,0Bh,09h,0Dh,33h,0Ch,34h,35h
-   438                                  	;	0,  1,  2,  3,  4,  5,  6,  7
-   439 0000013B 0B02030405060708        	db	0Bh,02h,03h,04h,05h,06h,07h,08h
-   440                                  	;	8,  9,  :,  ;,  <,  =,  >,  ?
-   441 00000143 090A2727330D3435        	db	09h,0Ah,27h,27h,33h,0Dh,34h,35h
-   442                                  	;	@,  A,  B,  C,  D,  E,  F,  G
-   443 0000014B 031E302E20122122        	db	03h,1Eh,30h,2Eh,20h,12h,21h,22h
-   444                                  	;	H,  I,  J,  K,  L,  M,  N,  O
-   445 00000153 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
-   446                                  	;	P,  Q,  R,  S,  T,  U,  V,  W
-   447 0000015B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
-   448                                  	;	X,  Y,  Z,  [,  \,  ],  ^,  _
-   449 00000163 2D152C1A2B1B070C        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,07h,0Ch
-   450                                  	;	`,  a,  b,  c,  d,  e,  f,  g
-   451 0000016B 291E302E20122122        	db	29h,1Eh,30h,2Eh,20h,12h,21h,22h
-   452                                  	;	h,  i,  j,  k,  l,  m,  n,  o
-   453 00000173 2317242526323118        	db	23h,17h,24h,25h,26h,32h,31h,18h
-   454                                  	;	p,  q,  r,  s,  t,  u,  v,  w
-   455 0000017B 1910131F14162F11        	db	19h,10h,13h,1Fh,14h,16h,2Fh,11h
-   456                                  	;	x,  y,  z,  {,  |,  },  ~,  DEL
-   457 00000183 2D152C1A2B1B2953        	db	2Dh,15h,2Ch,1Ah,2Bh,1Bh,29h,53h
-   458                                  
-   459                                  ;========================================================================
-   460                                  ; keyboart_init - initialize keyboard
-   461                                  ;========================================================================
-   462                                  	global	keyboard_init
-   463                                  keyboard_init:
-   464 0000018B 061E60                  	pushm	all,ds,es	; was AX,DS,ES
-   465                                  
-   466                                  %if CVDU_8242
-   467                                  	push	bios_data_seg
-   468                                  	popm	ds
-   469                                  
-   470                                  	mov	word [keyboard_flags_0],CVDU_KEYBOARD_STATUS	; set NumLock Status early
-   471                                  %endif
-   472                                  
-   473 0000018E 68[ssss]                	push	DGROUP
-   474 00000191 1F                      	popm	ds
-   475                                  %if CVDU_8242
-   476                                  
-   477                                  %if  1-CVDU_USE_KBD_HOOK
-   478                                  	mov	dx,PIC_I1CON	; Int 0 control register
-   479                                  	in	ax,dx
-   480                                  ;jrc	or	al,10h		; set Level Trigger Mode
-   481                                  	and	al,~8		; clear mask bit
-   482                                  	out	dx,ax
-   483                                  %endif
-   484                                  
-   485                                  	extern	Init8242_
-   486                                  	call	Init8242_
-   487                                  %endif
-   488                                  
-   489 00000192 6A40                    	push	bios_data_seg
-   490 00000194 1F                      	popm	ds
-   491                                  
-   492 00000195 B81E00                  	mov	ax,kbd_buffer	; setup keyboard buffer
-   493 00000198 A31A00                  	mov	word [kbd_buffer_head],ax
-   494 0000019B A31C00                  	mov	word [kbd_buffer_tail],ax
-   495                                  %if CVDU_8242==0
-   496 0000019E 31C0                    	xor	ax,ax		; clear keyboard flags
-   497 000001A0 A31700                  	mov	word [keyboard_flags_0],ax
-   498                                  %endif
-   499                                  
-   500                                  %if UART
-   501 000001A3 B001                    	mov	al,01h
-   502 000001A5 BA8106                  	mov	dx,uart_ier
-   503 000001A8 EE                      	out	dx,al		; Enable interrupts on receive
-   504                                  
-   505 000001A9 BA38FF                  	mov	dx,PIC_I0CON	; Int 1 control register
-   506 000001AC ED                      	in	ax,dx
-   507 000001AD 83E0F7                  	and	ax,~08h		; clear the mask bit
-   508 000001B0 EF                      	out	dx,ax
-   509                                  %endif
-   510 000001B1 611F07                  	popm	all,ds,es
-   511 000001B4 C3                      	ret
-   512                                  
-   513                                  ;========================================================================
-   514                                  ; uart_getchar - Read char from buffer, wait if empty
-   515                                  ; Input:
-   516                                  ; 	none
-   517                                  ; Output:
-   518                                  ;	AL = character
-   519                                  ;	AH = 0
-   520                                  ;========================================================================
-   521                                  	global	@uart_getchar
-   522                                  @uart_getchar:
-   523 000001B5 B400                    	mov	ah,0
-   524 000001B7 CD16                    	int	16h
-   525 000001B9 B400                    	mov	ah,0
-   526 000001BB C3                      	ret
-   527                                  
-   528                                  
-   529                                  %if CVDU_8242
-   530                                  ;========================================================================
-   531                                  ;  void I8242CommandPut(byte value);
-   532                                  ; Input:
-   533                                  ;	AL = command byte
-   534                                  ; Output:
-   535                                  ;	none
-   536                                  ;========================================================================
-   537                                  	global I8242CommandPut_
-   538                                  I8242CommandPut_:
-   539                                  	push	dx
-   540                                  	mov	ah,al		; save the command byte
-   541                                  .1:	mov	dx,I8242status
-   542                                  	in	al,dx
-   543                                  	test	al,2
-   544                                  	jnz	.1
-   545                                  	mov	dx,I8242command
-   546                                  	mov	al,ah
-   547                                  	out	dx,al
-   548                                  	pop	dx
-   549                                  	ret
-   550                                  
-   551                                  
-   552                                  ;========================================================================
-   553                                  ;  int I8242GetValue(void);
-   554                                  ; Input:
-   555                                  ;	none
-   556                                  ; Output:
-   557                                  ;	AX = -1		no value available (C-flag set)
-   558                                  ;	AX = input byte	if available	   (C-flag clear)
-   559                                  ;
-   560                                  ;========================================================================
-   561                                  	global	I8242GetValue_
-   562                                  I8242GetValue_:
-   563                                  	push	dx
-   564                                  	mov	dx,I8242status
-   565                                  	in	al,dx
-   566                                  	test	al,1
-   567                                  	jz	.7
-   568                                  	mov	dx,I8242data
-   569                                  	in	al,dx
-   570                                  	xor	ah,ah		; clear high byte for 'int' return
-   571                                  	jmp	.9
-   572                                  .7:
-   573                                  	mov	ax,-1
-   574                                  	stc
-   575                                  .9:	pop	dx
-   576                                  	ret
-   577                                  %endif
+   410                                  ;========================================================================
+   411                                  ; uart_getchar - Read char from buffer, wait if empty
+   412                                  ; Input:
+   413                                  ; 	none
+   414                                  ; Output:
+   415                                  ;	AL = character
+   416                                  ;	AH = 0
+   417                                  ;========================================================================
+   418                                  	global	@uart_getchar
+   419                                  @uart_getchar:
+   420 000001B5 B400                    	mov	ah,0
+   421 000001B7 CD16                    	int	16h
+   422 000001B9 B400                    	mov	ah,0
+   423 000001BB C3                      	ret

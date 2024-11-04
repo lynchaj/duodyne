@@ -261,88 +261,6 @@ enqueue:
 ;;;.1:
 	ret
 
-%if CVDU_8242
-;========================================================================
-; cvdu_kbd_int - Color VDU keyboard interrupt	MSDOS messes with this
-; cvdu_kbd_hook - examine keyboard on every timer tick
-;
-;========================================================================
-%if CVDU_USE_KBD_HOOK
-	global	cvdu_kbd_hook
-cvdu_kbd_hook:
-	call	I8242GetValue_
-	jnc	.2
-	ret
-.2:
-	pushm	all,ds,es	; save EVERYTHING
-.1:
-%else
-	global	cvdu_kbd_int
-cvdu_kbd_int:
-	pushm	all,ds,es	; save EVERYTHING
-.1:	call	I8242GetValue_
-;;	cmp	ax,-1
-;;	je	.exit
-	jc	.exit		; new return in flag
-
-%endif
-%if 1
-	mov	AH,4Fh		; keyboard intercept
-	stc			; so we can respond with IRET
-	int	15h
-	jnc	.20		; scancode to be bypassed
-%endif
-
-	push	DGROUP
-	popm	ds		; establish addressability
-	extern	@I8242process
-	call	@I8242process	; convert to scan code // character
-
-	push	bios_data_seg
-	popm	ds
-
-	or	ax,ax		; test for zero (unknown input)
-	jnz	.21
-
-.20:
-	call	I8242GetValue_
-	jc	.exit
-	jmp	.1
-.21:
-	cmp	al,0E0h		; enhanced keyboard?
-	jne	.3
-	xor	al,al		; old PC keyboard
-.3:
-	cmp	ax,1234h	; Ctrl-Alt-DEL
-	jne	.33
-%if 1
-	int	19h		; re-boot the system
-%else
-	mov	[warm_boot],ax	; set Warm Boot condition
-	jmp	0FFFFh:0000	; re-boot
-%endif
-
-.33:
-	call	enqueue
-	mov	byte [uart_kbd_ctrl_R], 0
-
-.exit:
-
-%if CVDU_USE_KBD_HOOK
-;   Hook service
-	popm	all,ds,es
-	ret
-%else
-;   Interrupt service
-; signal EOI (End of Interrupt)
-	mov	dx,PIC_EOI	; EOI register
-	mov	ax,EOI_NSPEC	; non-specific
-	out	dx,ax		; signal it
-
-	popm	all,ds,es
-	iret
-%endif
-%endif
 
 
 ;========================================================================
@@ -463,28 +381,9 @@ ascii2scan:
 keyboard_init:
 	pushm	all,ds,es	; was AX,DS,ES
 
-%if CVDU_8242
-	push	bios_data_seg
-	popm	ds
-
-	mov	word [keyboard_flags_0],CVDU_KEYBOARD_STATUS	; set NumLock Status early
-%endif
 
 	push	DGROUP
 	popm	ds
-%if CVDU_8242
-
-%if  1-CVDU_USE_KBD_HOOK
-	mov	dx,PIC_I1CON	; Int 0 control register
-	in	ax,dx
-;jrc	or	al,10h		; set Level Trigger Mode
-	and	al,~8		; clear mask bit
-	out	dx,ax
-%endif
-
-	extern	Init8242_
-	call	Init8242_
-%endif
 
 	push	bios_data_seg
 	popm	ds
@@ -492,10 +391,8 @@ keyboard_init:
 	mov	ax,kbd_buffer	; setup keyboard buffer
 	mov	word [kbd_buffer_head],ax
 	mov	word [kbd_buffer_tail],ax
-%if CVDU_8242==0
 	xor	ax,ax		; clear keyboard flags
 	mov	word [keyboard_flags_0],ax
-%endif
 
 %if UART
 	mov	al,01h
@@ -524,54 +421,3 @@ keyboard_init:
 	int	16h
 	mov	ah,0
 	ret
-
-
-%if CVDU_8242
-;========================================================================
-;  void I8242CommandPut(byte value);
-; Input:
-;	AL = command byte
-; Output:
-;	none
-;========================================================================
-	global I8242CommandPut_
-I8242CommandPut_:
-	push	dx
-	mov	ah,al		; save the command byte
-.1:	mov	dx,I8242status
-	in	al,dx
-	test	al,2
-	jnz	.1
-	mov	dx,I8242command
-	mov	al,ah
-	out	dx,al
-	pop	dx
-	ret
-
-
-;========================================================================
-;  int I8242GetValue(void);
-; Input:
-;	none
-; Output:
-;	AX = -1		no value available (C-flag set)
-;	AX = input byte	if available	   (C-flag clear)
-;
-;========================================================================
-	global	I8242GetValue_
-I8242GetValue_:
-	push	dx
-	mov	dx,I8242status
-	in	al,dx
-	test	al,1
-	jz	.7
-	mov	dx,I8242data
-	in	al,dx
-	xor	ah,ah		; clear high byte for 'int' return
-	jmp	.9
-.7:
-	mov	ax,-1
-	stc
-.9:	pop	dx
-	ret
-%endif

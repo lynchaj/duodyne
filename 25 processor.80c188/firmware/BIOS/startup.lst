@@ -48,189 +48,163 @@
     48                              <1> ; others may get added in the future
     49                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
     50                              <1> ;
-    51                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
-    52                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
-    53                              <1> CVDU	equ	0	; system does not have the CVDU
-    54                              <1> ;
-    55                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
-    56                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
-    57                              <1> ; The default is VGA3=0
-    58                              <1> VGA3    equ     0       ; system does not have the VGA3
-    59                              <1> %if 0
-    60                              <1> 	*/
-    61                              <1> #define VGA3 0
-    62                              <1> /*
-    63                              <1> %endif
-    64                              <1> ;
-    65                              <1> ; Boot up keyboard mode:  20h for NumLock on
-    66                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
-    67                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
-    68                              <1> 
-    69                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
-    70                              <1> ;UART_RATE	equ	0		; 1200
-    71                              <1> ;UART_RATE	equ	1		; 2400
-    72                              <1> ;UART_RATE	equ	2		; 4800
-    73                              <1> UART_RATE	equ	3		; 9600
-    74                              <1> ;UART_RATE	equ	4		; 19200
-    75                              <1> ;UART_RATE	equ	5		; 38400
-    76                              <1> ;UART_RATE	equ	6		; 57600
-    77                              <1> ;UART_RATE	equ	7		; 115200
+    51                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    52                              <1> ;UART_RATE	equ	0		; 1200
+    53                              <1> ;UART_RATE	equ	1		; 2400
+    54                              <1> ;UART_RATE	equ	2		; 4800
+    55                              <1> UART_RATE	equ	3		; 9600
+    56                              <1> ;UART_RATE	equ	4		; 19200
+    57                              <1> ;UART_RATE	equ	5		; 38400
+    58                              <1> ;UART_RATE	equ	6		; 57600
+    59                              <1> ;UART_RATE	equ	7		; 115200
+    60                              <1> 
+    61                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    62                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    63                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    64                              <1> 						; but not ANSI
+    65                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    66                              <1> ; It may be smaller than the actual EPROM in use.
+    67                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    68                              <1> %ifndef ROM
+    69                              <1> ROM             equ     32              ; 64 is the default
+    70                              <1> %endif
+    71                              <1> 
+    72                              <1> ; Define the number of Wait States at which the ROM operates
+    73                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    74                              <1> 
+    75                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    76                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    77                              <1> RAM_DOS         equ     640
     78                              <1> 
-    79                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
-    80                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
-    81                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
-    82                              <1> 						; but not ANSI
-    83                              <1> ; Define the size of the ROM image on the system in Kilobytes
-    84                              <1> ; It may be smaller than the actual EPROM in use.
-    85                              <1> ; The following sizes are supported:  32, 64, 128, and 256
-    86                              <1> %ifndef ROM
-    87                              <1> ROM             equ     32              ; 64 is the default
-    88                              <1> %endif
-    89                              <1> 
-    90                              <1> ; Define the number of Wait States at which the ROM operates
-    91                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
-    92                              <1> 
-    93                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
-    94                              <1> ; This is a desired size and will only be present if a 4MEM board is added
-    95                              <1> RAM_DOS         equ     640
+    79                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    80                              <1> ; the default is 512 kilobytes
+    81                              <1> RAM             equ     512             ; (512 is the default)
+    82                              <1> 
+    83                              <1> ; Define the number of Wait States at which the RAM operates
+    84                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+    85                              <1> 
+    86                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+    87                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    88                              <1> 
+    89                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+    90                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+    91                              <1> 
+    92                              <1> ; Define the time zone in which we build the Relocatable BIOS
+    93                              <1> %ifndef TIMEZONE
+    94                              <1> %define TIMEZONE "CST"
+    95                              <1> %endif
     96                              <1> 
-    97                              <1> ; Define the size of the low SRAM on the system in Kilobytes
-    98                              <1> ; the default is 512 kilobytes
-    99                              <1> RAM             equ     512             ; (512 is the default)
-   100                              <1> 
-   101                              <1> ; Define the number of Wait States at which the RAM operates
-   102                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
-   103                              <1> 
-   104                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
-   105                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    97                              <1> ; Has the REDBUG debugger been loaded?
+    98                              <1> %ifndef SOFT_DEBUG
+    99                              <1> %define SOFT_DEBUG 0
+   100                              <1> %endif
+   101                              <1> 
+   102                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   103                              <1> %ifndef TBASIC
+   104                              <1> TBASIC          equ     1		; default is 1
+   105                              <1> %endif
    106                              <1> 
-   107                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
-   108                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
-   109                              <1> 
-   110                              <1> ; Define the time zone in which we build the Relocatable BIOS
-   111                              <1> %ifndef TIMEZONE
-   112                              <1> %define TIMEZONE "CST"
-   113                              <1> %endif
-   114                              <1> 
-   115                              <1> ; Has the REDBUG debugger been loaded?
-   116                              <1> %ifndef SOFT_DEBUG
-   117                              <1> %define SOFT_DEBUG 0
-   118                              <1> %endif
-   119                              <1> 
-   120                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
-   121                              <1> %ifndef TBASIC
-   122                              <1> TBASIC          equ     1		; default is 1
-   123                              <1> %endif
-   124                              <1> 
-   125                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
-   126                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
-   127                              <1> %ifndef FPEM
-   128                              <1> FPEM            equ     1               ; default is 1
-   129                              <1> %endif
-   130                              <1> 
-   131                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   132                              <1> EMM_BOARDS      equ     0
-   133                              <1> 
-   134                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   135                              <1> ; or at locations 0280h..3FFh in low memory?
-   136                              <1> %if SOFT_DEBUG
-   137                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   138                              <1> %else
-   139                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   140                              <1> %endif
+   107                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   108                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   109                              <1> %ifndef FPEM
+   110                              <1> FPEM            equ     1               ; default is 1
+   111                              <1> %endif
+   112                              <1> 
+   113                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   114                              <1> EMM_BOARDS      equ     0
+   115                              <1> 
+   116                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   117                              <1> ; or at locations 0280h..3FFh in low memory?
+   118                              <1> %if SOFT_DEBUG
+   119                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   120                              <1> %else
+   121                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   122                              <1> %endif
+   123                              <1> 
+   124                              <1> ; Define the size of the EPROM that is to be installed on the system
+   125                              <1> ; It may be larger than the actual ROM image to be generated.
+   126                              <1> %ifndef CHIP
+   127                              <1> CHIP            equ     64
+   128                              <1> %endif
+   129                              <1> 
+   130                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   131                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   132                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   133                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   134                              <1> 
+   135                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   136                              <1> ; If the wiring update is installed, or you have a later board, then
+   137                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   138                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   139                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   140                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
    141                              <1> 
-   142                              <1> ; Define the size of the EPROM that is to be installed on the system
-   143                              <1> ; It may be larger than the actual ROM image to be generated.
-   144                              <1> %ifndef CHIP
-   145                              <1> CHIP            equ     64
-   146                              <1> %endif
-   147                              <1> 
-   148                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   149                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   150                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   151                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   152                              <1> 
-   153                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   154                              <1> ; If the wiring update is installed, or you have a later board, then
-   155                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   156                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   157                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   158                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   142                              <1> ; Define the UART oscillator speed
+   143                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   144                              <1> 
+   145                              <1> 
+   146                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   147                              <1> ; end of the User configuration
+   148                              <1> ;       Do Not modify anything below this point
+   149                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   150                              <1> 
+   151                              <1> ; Define existence of any uart chip
+   152                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   153                              <1> startuplength   equ     512                     ; may be up to 1024
+   154                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   155                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   156                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   157                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   158                              <1> 
    159                              <1> 
-   160                              <1> ; Define the UART oscillator speed
-   161                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
-   162                              <1> 
-   163                              <1> 
-   164                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   165                              <1> ; end of the User configuration
-   166                              <1> ;       Do Not modify anything below this point
-   167                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   168                              <1> 
-   169                              <1> CVDU_8563	equ	CVDU		; separate inits
-   170                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
-   171                              <1> VGA3_6445       equ     VGA3            ; separate inits
-   172                              <1> ; Suppress all UART output in color video Mode 3
-   173                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563
-   174                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
-   175                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
-   176                              <1> 
-   177                              <1> ; Define existence of any uart chip
-   178                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   179                              <1> startuplength   equ     512                     ; may be up to 1024
-   180                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   181                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   182                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   183                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   184                              <1> 
-   185                              <1> 
-   186                              <1> %define ARG(n) [bp+2+(n)*2]
-   187                              <1> 
-   188                              <1> %macro  check   1.nolist
-   189                              <1>  %if (%1)
-   190                              <1>    %error Check Failure: %1
-   191                              <1>  %endif
-   192                              <1> %endm
-   193                              <1> %macro  range   3.nolist
-   194                              <1>  %if (%1)<(%2)
-   195                              <1>    %error Out of Range: %1
-   196                              <1>  %elif (%1)>(%3)
-   197                              <1>    %error Out of Range: %1
-   198                              <1>  %endif
-   199                              <1> %endm
-   200                              <1> _terminal equ UART+CVDU
-   201                              <1>  check   RAM_DOS&15
-   202                              <1>  check   RAM&(RAM-1)
-   203                              <1>  check   ROM&(ROM-1)
-   204                              <1>  range   RAM,32,512
-   205                              <1>  range   ROM,32,256
-   206                              <1>  range   RAM_WS,0,3
-   207                              <1>  range   ROM_WS,0,3
-   208                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   209                              <1>  range   LCL_IO_WS,0,3
-   210                              <1>  range   BUS_IO_WS,0,3
-   211                              <1>  range   UART_OSC,500000,16000000
-   212                              <1>  range   UART_RATE,0,7
-   213                              <1>  range	 UART,0,1
-   214                              <1>  range	 _terminal,1,2
-   215                              <1> 
-   216                              <1> %ifndef SOFT_DEBUG
-   217                              <1> %define SOFT_DEBUG 0
-   218                              <1> %endif
-   219                              <1> 
-   220                              <1> %ifndef TRACE
-   221                              <1> %define TRACE 0
-   222                              <1> %endif
-   223                              <1> 
-   224                              <1> %ifdef MAKE_OBJECT_FILE
-   225                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   226                              <1>         export _ROMsize
-   227                              <1>         export _CHIPsize
-   228                              <1> _ROMsize        dw      ROM
-   229                              <1> _CHIPsize       dw      CHIP
-   230                              <1> %endif
-   231                              <1> ; end of the Hardware configuration file
-   232                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   233                              <1> ;*/
+   160                              <1> %define ARG(n) [bp+2+(n)*2]
+   161                              <1> 
+   162                              <1> %macro  check   1.nolist
+   163                              <1>  %if (%1)
+   164                              <1>    %error Check Failure: %1
+   165                              <1>  %endif
+   166                              <1> %endm
+   167                              <1> %macro  range   3.nolist
+   168                              <1>  %if (%1)<(%2)
+   169                              <1>    %error Out of Range: %1
+   170                              <1>  %elif (%1)>(%3)
+   171                              <1>    %error Out of Range: %1
+   172                              <1>  %endif
+   173                              <1> %endm
+   174                              <1> _terminal equ UART
+   175                              <1>  check   RAM_DOS&15
+   176                              <1>  check   RAM&(RAM-1)
+   177                              <1>  check   ROM&(ROM-1)
+   178                              <1>  range   RAM,32,512
+   179                              <1>  range   ROM,32,256
+   180                              <1>  range   RAM_WS,0,3
+   181                              <1>  range   ROM_WS,0,3
+   182                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   183                              <1>  range   LCL_IO_WS,0,3
+   184                              <1>  range   BUS_IO_WS,0,3
+   185                              <1>  range   UART_OSC,500000,16000000
+   186                              <1>  range   UART_RATE,0,7
+   187                              <1>  range	 UART,0,1
+   188                              <1>  range	 _terminal,1,2
+   189                              <1> 
+   190                              <1> %ifndef SOFT_DEBUG
+   191                              <1> %define SOFT_DEBUG 0
+   192                              <1> %endif
+   193                              <1> 
+   194                              <1> %ifndef TRACE
+   195                              <1> %define TRACE 0
+   196                              <1> %endif
+   197                              <1> 
+   198                              <1> %ifdef MAKE_OBJECT_FILE
+   199                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   200                              <1>         export _ROMsize
+   201                              <1>         export _CHIPsize
+   202                              <1> _ROMsize        dw      ROM
+   203                              <1> _CHIPsize       dw      CHIP
+   204                              <1> %endif
+   205                              <1> ; end of the Hardware configuration file
+   206                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   207                              <1> ;*/
     27                                  %include        "cpuregs.asm"
     28                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     29                              <1> ; CPUREGS.ASM
@@ -581,18 +555,18 @@
     39                              <1> ;
     40                              <1> ; Definitions for version 3.5-2:
     41                              <1> ;
-    42                              <1> 
+    42                              <1> ; Updated for the Duodyne 80c188 SBC
     43                              <1> 
-    44                              <1> %define DATE_STRING0	"04/29/21"
-    45                              <1> %define DATE_STRING1	"29-Apr-2021"
+    44                              <1> %define DATE_STRING0	"10/27/24"
+    45                              <1> %define DATE_STRING1	"27-Oct-2024"
     46                              <1> 
     47                              <1> %define VERSION_MAJOR		3
     48                              <1> %define VERSION_MINOR		5
-    49                              <1> %define VERSION_REVISION	1
+    49                              <1> %define VERSION_REVISION	2
     50                              <1> %define VERSION_SUFFIX		""
-    51                              <1> %define VERSION_SEQUENCE	55
+    51                              <1> %define VERSION_SEQUENCE	66
     52                              <1> 
-    53                              <1> %define VERSION_STRING		"3.5-1",VERSION_SUFFIX
+    53                              <1> %define VERSION_STRING		"3.5-D",VERSION_SUFFIX
     54                              <1> 
     55                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     56                              <1> ; Revision information:
@@ -609,7 +583,8 @@
     67                              <1> ;	3.5 -- back to 3.3, sequence #51
     68                              <1> ;		change NVRAM battery backup setup to #53
     69                              <1> ;		re-install 3.4 boot fix for FreeDOS
-    70                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    70                              <1> ;       3.5-D  Remove SBC-188 specific items and customize for Duodyne
+    71                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     29                                  
     30                                  warm_boot	equ	72h	; RESET_FLAG, our 'warm_boot' BDA offset
     31                                  
@@ -1115,7 +1090,7 @@
    397                                  start:
    398 000001F0 EA[0000]E0FF                    jmp     startupseg:init0
    399                                  
-   400 000001F5 30342F32392F323100      	db	DATE_STRING0, 0
+   400 000001F5 31302F32372F323400      	db	DATE_STRING0, 0
    401                                  ;  must be at F000:FFFE hex
    402 000001FE FE                      	db	MODEL_BYTE
    403 000001FF FF                      	db	0FFh

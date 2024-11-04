@@ -22,24 +22,6 @@ WYSE    equ     0       ; very smart Wyse series (30, 50, ...)
 ; others may get added in the future
 ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
 ;
-; Does the hardware configuration contain the Color Video Display Unit?
-; Both the 8563 and the 8242 are used.  The default is CVDU=0
-CVDU	equ	0	; system does not have the CVDU
-;
-; Does the hardware configuration contain the VGA3 a/n Video card?
-; The 8563 will be disabled, but the 8242 code is shared with the CVDU
-; The default is VGA3=0
-VGA3    equ     0       ; system does not have the VGA3
-%if 0
-	*/
-#define VGA3 0
-/*
-%endif
-;
-; Boot up keyboard mode:  20h for NumLock on
-;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
-CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
-
 ; Define the UART startup bit rate - 1200-19200 are most common
 ;UART_RATE	equ	0		; 1200
 ;UART_RATE	equ	1		; 2400
@@ -140,14 +122,6 @@ UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
 ;       Do Not modify anything below this point
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-CVDU_8563	equ	CVDU		; separate inits
-CVDU_8242	equ	CVDU|VGA3 	; separate inits
-VGA3_6445       equ     VGA3            ; separate inits
-; Suppress all UART output in color video Mode 3
-UART_MODE3_SUPPRESS	equ	CVDU_8563
-CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
-CVDU_USE_KBD_HOOK		equ	CVDU_8242
-
 ; Define existence of any uart chip
 UART		equ	TTY+DUMB+ANSI+WYSE
 startuplength   equ     512                     ; may be up to 1024
@@ -171,7 +145,7 @@ bios_data_seg   equ     040h            ; segment of BIOS data area
    %error Out of Range: %1
  %endif
 %endm
-_terminal equ UART+CVDU
+_terminal equ UART
  check   RAM_DOS&15
  check   RAM&(RAM-1)
  check   ROM&(ROM-1)

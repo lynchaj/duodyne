@@ -439,14 +439,15 @@ boot_the_OS:
 	popm	ds			; were it should
 	sti
 
-	push	'A'
-	push	ds
-	push	msg_booting
-	call	_cprintf
-	add	sp,6
-
-	mov	dl,0
-	call	boot_drive
+; Disable Drive A for the time being . . .    DDW 11-3-24
+;	push	'A'
+;	push	ds
+;	push	msg_booting
+;	call	_cprintf
+;	add	sp,6
+;
+;	mov	dl,0
+;	call	boot_drive
 
 	push	'C'
 	push	ds
@@ -704,12 +705,7 @@ interrupt_table:
 %endif
 
 	db	0Dh			; INT1- external bus INT
-	%if CVDU_8242 & (1-CVDU_USE_KBD_HOOK)
-	extern	cvdu_kbd_int
-	dw	cvdu_kbd_int
-%else
 	dw	end_of_interrupt
-%endif
 	db	0Fh
 	extern	fdc_interrupt_level
 	dw	fdc_interrupt_level	; INT3 - FDC

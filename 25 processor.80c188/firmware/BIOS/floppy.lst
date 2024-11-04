@@ -47,189 +47,163 @@
     47                              <1> ; others may get added in the future
     48                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
     49                              <1> ;
-    50                              <1> ; Does the hardware configuration contain the Color Video Display Unit?
-    51                              <1> ; Both the 8563 and the 8242 are used.  The default is CVDU=0
-    52                              <1> CVDU	equ	0	; system does not have the CVDU
-    53                              <1> ;
-    54                              <1> ; Does the hardware configuration contain the VGA3 a/n Video card?
-    55                              <1> ; The 8563 will be disabled, but the 8242 code is shared with the CVDU
-    56                              <1> ; The default is VGA3=0
-    57                              <1> VGA3    equ     0       ; system does not have the VGA3
-    58                              <1> %if 0
-    59                              <1> 	*/
-    60                              <1> #define VGA3 0
-    61                              <1> /*
-    62                              <1> %endif
-    63                              <1> ;
-    64                              <1> ; Boot up keyboard mode:  20h for NumLock on
-    65                              <1> ;CVDU_KEYBOARD_STATUS	equ	0	; NumLock OFF
-    66                              <1> CVDU_KEYBOARD_STATUS	equ	20h	; NumLock ON
-    67                              <1> 
-    68                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
-    69                              <1> ;UART_RATE	equ	0		; 1200
-    70                              <1> ;UART_RATE	equ	1		; 2400
-    71                              <1> ;UART_RATE	equ	2		; 4800
-    72                              <1> UART_RATE	equ	3		; 9600
-    73                              <1> ;UART_RATE	equ	4		; 19200
-    74                              <1> ;UART_RATE	equ	5		; 38400
-    75                              <1> ;UART_RATE	equ	6		; 57600
-    76                              <1> ;UART_RATE	equ	7		; 115200
+    50                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    51                              <1> ;UART_RATE	equ	0		; 1200
+    52                              <1> ;UART_RATE	equ	1		; 2400
+    53                              <1> ;UART_RATE	equ	2		; 4800
+    54                              <1> UART_RATE	equ	3		; 9600
+    55                              <1> ;UART_RATE	equ	4		; 19200
+    56                              <1> ;UART_RATE	equ	5		; 38400
+    57                              <1> ;UART_RATE	equ	6		; 57600
+    58                              <1> ;UART_RATE	equ	7		; 115200
+    59                              <1> 
+    60                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    61                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    62                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    63                              <1> 						; but not ANSI
+    64                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    65                              <1> ; It may be smaller than the actual EPROM in use.
+    66                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    67                              <1> %ifndef ROM
+    68                              <1> ROM             equ     32              ; 64 is the default
+    69                              <1> %endif
+    70                              <1> 
+    71                              <1> ; Define the number of Wait States at which the ROM operates
+    72                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    73                              <1> 
+    74                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    75                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    76                              <1> RAM_DOS         equ     640
     77                              <1> 
-    78                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
-    79                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
-    80                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
-    81                              <1> 						; but not ANSI
-    82                              <1> ; Define the size of the ROM image on the system in Kilobytes
-    83                              <1> ; It may be smaller than the actual EPROM in use.
-    84                              <1> ; The following sizes are supported:  32, 64, 128, and 256
-    85                              <1> %ifndef ROM
-    86                              <1> ROM             equ     32              ; 64 is the default
-    87                              <1> %endif
-    88                              <1> 
-    89                              <1> ; Define the number of Wait States at which the ROM operates
-    90                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
-    91                              <1> 
-    92                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
-    93                              <1> ; This is a desired size and will only be present if a 4MEM board is added
-    94                              <1> RAM_DOS         equ     640
+    78                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    79                              <1> ; the default is 512 kilobytes
+    80                              <1> RAM             equ     512             ; (512 is the default)
+    81                              <1> 
+    82                              <1> ; Define the number of Wait States at which the RAM operates
+    83                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+    84                              <1> 
+    85                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+    86                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    87                              <1> 
+    88                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+    89                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+    90                              <1> 
+    91                              <1> ; Define the time zone in which we build the Relocatable BIOS
+    92                              <1> %ifndef TIMEZONE
+    93                              <1> %define TIMEZONE "CST"
+    94                              <1> %endif
     95                              <1> 
-    96                              <1> ; Define the size of the low SRAM on the system in Kilobytes
-    97                              <1> ; the default is 512 kilobytes
-    98                              <1> RAM             equ     512             ; (512 is the default)
-    99                              <1> 
-   100                              <1> ; Define the number of Wait States at which the RAM operates
-   101                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
-   102                              <1> 
-   103                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
-   104                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+    96                              <1> ; Has the REDBUG debugger been loaded?
+    97                              <1> %ifndef SOFT_DEBUG
+    98                              <1> %define SOFT_DEBUG 0
+    99                              <1> %endif
+   100                              <1> 
+   101                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   102                              <1> %ifndef TBASIC
+   103                              <1> TBASIC          equ     1		; default is 1
+   104                              <1> %endif
    105                              <1> 
-   106                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
-   107                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
-   108                              <1> 
-   109                              <1> ; Define the time zone in which we build the Relocatable BIOS
-   110                              <1> %ifndef TIMEZONE
-   111                              <1> %define TIMEZONE "CST"
-   112                              <1> %endif
-   113                              <1> 
-   114                              <1> ; Has the REDBUG debugger been loaded?
-   115                              <1> %ifndef SOFT_DEBUG
-   116                              <1> %define SOFT_DEBUG 0
-   117                              <1> %endif
-   118                              <1> 
-   119                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
-   120                              <1> %ifndef TBASIC
-   121                              <1> TBASIC          equ     1		; default is 1
-   122                              <1> %endif
-   123                              <1> 
-   124                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
-   125                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
-   126                              <1> %ifndef FPEM
-   127                              <1> FPEM            equ     1               ; default is 1
-   128                              <1> %endif
-   129                              <1> 
-   130                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   131                              <1> EMM_BOARDS      equ     0
-   132                              <1> 
-   133                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   134                              <1> ; or at locations 0280h..3FFh in low memory?
-   135                              <1> %if SOFT_DEBUG
-   136                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   137                              <1> %else
-   138                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   139                              <1> %endif
+   106                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   107                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   108                              <1> %ifndef FPEM
+   109                              <1> FPEM            equ     1               ; default is 1
+   110                              <1> %endif
+   111                              <1> 
+   112                              <1> ; Define the maximum number of EMM (4MEM) boards supported
+   113                              <1> EMM_BOARDS      equ     0
+   114                              <1> 
+   115                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   116                              <1> ; or at locations 0280h..3FFh in low memory?
+   117                              <1> %if SOFT_DEBUG
+   118                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   119                              <1> %else
+   120                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   121                              <1> %endif
+   122                              <1> 
+   123                              <1> ; Define the size of the EPROM that is to be installed on the system
+   124                              <1> ; It may be larger than the actual ROM image to be generated.
+   125                              <1> %ifndef CHIP
+   126                              <1> CHIP            equ     64
+   127                              <1> %endif
+   128                              <1> 
+   129                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
+   130                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
+   131                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
+   132                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
+   133                              <1> 
+   134                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
+   135                              <1> ; If the wiring update is installed, or you have a later board, then
+   136                              <1> ; set this to 0.  If you are using the software workaround, then set this
+   137                              <1> ; to 1.  The rev 1.0 board has this fix already.
+   138                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
+   139                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
    140                              <1> 
-   141                              <1> ; Define the size of the EPROM that is to be installed on the system
-   142                              <1> ; It may be larger than the actual ROM image to be generated.
-   143                              <1> %ifndef CHIP
-   144                              <1> CHIP            equ     64
-   145                              <1> %endif
-   146                              <1> 
-   147                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   148                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   149                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   150                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   151                              <1> 
-   152                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   153                              <1> ; If the wiring update is installed, or you have a later board, then
-   154                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   155                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   156                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   157                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
+   141                              <1> ; Define the UART oscillator speed
+   142                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   143                              <1> 
+   144                              <1> 
+   145                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   146                              <1> ; end of the User configuration
+   147                              <1> ;       Do Not modify anything below this point
+   148                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   149                              <1> 
+   150                              <1> ; Define existence of any uart chip
+   151                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   152                              <1> startuplength   equ     512                     ; may be up to 1024
+   153                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   154                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   155                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   156                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   157                              <1> 
    158                              <1> 
-   159                              <1> ; Define the UART oscillator speed
-   160                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
-   161                              <1> 
-   162                              <1> 
-   163                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   164                              <1> ; end of the User configuration
-   165                              <1> ;       Do Not modify anything below this point
-   166                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   167                              <1> 
-   168                              <1> CVDU_8563	equ	CVDU		; separate inits
-   169                              <1> CVDU_8242	equ	CVDU|VGA3 	; separate inits
-   170                              <1> VGA3_6445       equ     VGA3            ; separate inits
-   171                              <1> ; Suppress all UART output in color video Mode 3
-   172                              <1> UART_MODE3_SUPPRESS	equ	CVDU_8563
-   173                              <1> CVDU_USE_MSDOS_KLUDGE	equ	0; CVDU_8242	; bad, bad MSDOS
-   174                              <1> CVDU_USE_KBD_HOOK		equ	CVDU_8242
-   175                              <1> 
-   176                              <1> ; Define existence of any uart chip
-   177                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   178                              <1> startuplength   equ     512                     ; may be up to 1024
-   179                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   180                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   181                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   182                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   183                              <1> 
-   184                              <1> 
-   185                              <1> %define ARG(n) [bp+2+(n)*2]
-   186                              <1> 
-   187                              <1> %macro  check   1.nolist
-   188                              <1>  %if (%1)
-   189                              <1>    %error Check Failure: %1
-   190                              <1>  %endif
-   191                              <1> %endm
-   192                              <1> %macro  range   3.nolist
-   193                              <1>  %if (%1)<(%2)
-   194                              <1>    %error Out of Range: %1
-   195                              <1>  %elif (%1)>(%3)
-   196                              <1>    %error Out of Range: %1
-   197                              <1>  %endif
-   198                              <1> %endm
-   199                              <1> _terminal equ UART+CVDU
-   200                              <1>  check   RAM_DOS&15
-   201                              <1>  check   RAM&(RAM-1)
-   202                              <1>  check   ROM&(ROM-1)
-   203                              <1>  range   RAM,32,512
-   204                              <1>  range   ROM,32,256
-   205                              <1>  range   RAM_WS,0,3
-   206                              <1>  range   ROM_WS,0,3
-   207                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   208                              <1>  range   LCL_IO_WS,0,3
-   209                              <1>  range   BUS_IO_WS,0,3
-   210                              <1>  range   UART_OSC,500000,16000000
-   211                              <1>  range   UART_RATE,0,7
-   212                              <1>  range	 UART,0,1
-   213                              <1>  range	 _terminal,1,2
-   214                              <1> 
-   215                              <1> %ifndef SOFT_DEBUG
-   216                              <1> %define SOFT_DEBUG 0
-   217                              <1> %endif
-   218                              <1> 
-   219                              <1> %ifndef TRACE
-   220                              <1> %define TRACE 0
-   221                              <1> %endif
-   222                              <1> 
-   223                              <1> %ifdef MAKE_OBJECT_FILE
-   224                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   225                              <1>         export _ROMsize
-   226                              <1>         export _CHIPsize
-   227                              <1> _ROMsize        dw      ROM
-   228                              <1> _CHIPsize       dw      CHIP
-   229                              <1> %endif
-   230                              <1> ; end of the Hardware configuration file
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> ;*/
+   159                              <1> %define ARG(n) [bp+2+(n)*2]
+   160                              <1> 
+   161                              <1> %macro  check   1.nolist
+   162                              <1>  %if (%1)
+   163                              <1>    %error Check Failure: %1
+   164                              <1>  %endif
+   165                              <1> %endm
+   166                              <1> %macro  range   3.nolist
+   167                              <1>  %if (%1)<(%2)
+   168                              <1>    %error Out of Range: %1
+   169                              <1>  %elif (%1)>(%3)
+   170                              <1>    %error Out of Range: %1
+   171                              <1>  %endif
+   172                              <1> %endm
+   173                              <1> _terminal equ UART
+   174                              <1>  check   RAM_DOS&15
+   175                              <1>  check   RAM&(RAM-1)
+   176                              <1>  check   ROM&(ROM-1)
+   177                              <1>  range   RAM,32,512
+   178                              <1>  range   ROM,32,256
+   179                              <1>  range   RAM_WS,0,3
+   180                              <1>  range   ROM_WS,0,3
+   181                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   182                              <1>  range   LCL_IO_WS,0,3
+   183                              <1>  range   BUS_IO_WS,0,3
+   184                              <1>  range   UART_OSC,500000,16000000
+   185                              <1>  range   UART_RATE,0,7
+   186                              <1>  range	 UART,0,1
+   187                              <1>  range	 _terminal,1,2
+   188                              <1> 
+   189                              <1> %ifndef SOFT_DEBUG
+   190                              <1> %define SOFT_DEBUG 0
+   191                              <1> %endif
+   192                              <1> 
+   193                              <1> %ifndef TRACE
+   194                              <1> %define TRACE 0
+   195                              <1> %endif
+   196                              <1> 
+   197                              <1> %ifdef MAKE_OBJECT_FILE
+   198                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   199                              <1>         export _ROMsize
+   200                              <1>         export _CHIPsize
+   201                              <1> _ROMsize        dw      ROM
+   202                              <1> _CHIPsize       dw      CHIP
+   203                              <1> %endif
+   204                              <1> ; end of the Hardware configuration file
+   205                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   206                              <1> ;*/
     26                                  %include        "cpuregs.asm"
     27                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     28                              <1> ; CPUREGS.ASM
@@ -1145,7 +1119,7 @@
    242                                  fdc_int_control         equ     PIC_I3CON
    243                                  
    244                                  
-   245                                  ; Standard int 13h stack frame layout is 
+   245                                  ; Standard int 13h stack frame layout is
    246                                  ; created by:   PUSHM  ALL,DS,ES
    247                                  ;               MOV    BP,SP
    248                                  ;
@@ -1327,15 +1301,15 @@
    424                                  
    425                                  
    426                                  dispatch:
-   427 00000034 [8302]                  	dw      fn00    ; Reset Disk System
-   428 00000036 [3100]                  	dw      fn01    ; 
-   429 00000038 [2603]                  	dw      fn02
-   430 0000003A [3003]                  	dw      fn03
-   431 0000003C [3A03]                  	dw      fn04
-   432 0000003E [B603]                  	dw      fn05
+   427 00000034 [7F02]                  	dw      fn00    ; Reset Disk System
+   428 00000036 [3100]                  	dw      fn01    ;
+   429 00000038 [2203]                  	dw      fn02
+   430 0000003A [2C03]                  	dw      fn03
+   431 0000003C [3603]                  	dw      fn04
+   432 0000003E [B203]                  	dw      fn05
    433 00000040 [3100]                  	dw      fn06
    434 00000042 [3100]                  	dw      fn07
-   435 00000044 [EA02]                  	dw      fn08
+   435 00000044 [E602]                  	dw      fn08
    436 00000046 [3100]                  	dw      fn09
    437 00000048 [3100]                  	dw      fn0A
    438 0000004A [3100]                  	dw      fn0B
@@ -1348,10 +1322,10 @@
    445 00000058 [3100]                  	dw      fn12
    446 0000005A [3100]                  	dw      fn13
    447 0000005C [3100]                  	dw      fn14
-   448 0000005E [4604]                  	dw      fn15
-   449 00000060 [5C04]                  	dw      fn16
+   448 0000005E [4204]                  	dw      fn15
+   449 00000060 [5804]                  	dw      fn16
    450 00000062 [3100]                  	dw      fn17
-   451 00000064 [7404]                  	dw      fn18
+   451 00000064 [7004]                  	dw      fn18
    452                                  max     equ     $-dispatch
    453                                  
    454                                  
@@ -1572,7 +1546,7 @@
    659 00000173 BA0106                  	mov     dx,FDC_DATA
    660 00000176 EE                      	out     dx,al
    661 00000177 30E4                    	Okay			; C=0, AH=okay
-   662                                  .8:     
+   662                                  .8:
    663 00000179 5A                      	popm	dx
    664 0000017A C3                      	ret                     ; C=0, AH=okay
    665                                  ; returns Error or Okay
@@ -1588,7 +1562,7 @@
    675 00000183 BA0106                  	mov     dx,FDC_DATA
    676 00000186 EC                      	in      al,dx
    677 00000187 30E4                    	Okay			; return Okay
-   678                                  .9:     
+   678                                  .9:
    679 00000189 5A                      	pop	dx
    680 0000018A C3                      	ret                     ;
    681                                  ; returns Error, Okay, or Complete
@@ -1596,7 +1570,7 @@
    683                                  
    684                                  ;  CX = length of command
    685                                  ;  DX:SI = pointer to command (not DS:SI, we'll set this up)
-   686                                  ;  
+   686                                  ;
    687                                  	global  output_cmd_to_fdc
    688                                  output_cmd_to_fdc:
    689 0000018B 0656                    	pushm   si,es
@@ -1610,7 +1584,7 @@
    697                                    	mov	[fdc_op_start+1],al
    698                                  %endif
    699                                  
-   700 0000018F E82406                  	call	@disable
+   700 0000018F E82006                  	call	@disable
    701                                  .1:
    702 00000192 26AC                      es	lodsb			; note segment override
    703 00000194 E8D2FF                  	call    output_byte_to_fdc  ; returns error or okay
@@ -1622,7 +1596,7 @@
    709                                  
    710 0000019F F9                      .7:	Error			; propagate error
    711                                  
-   712 000001A0 E82206                  .9:	call	@enable
+   712 000001A0 E81E06                  .9:	call	@enable
    713 000001A3 5E07                    	popm	si,es
    714 000001A5 C3                      	ret
    715                                  ; returns Error or Okay
@@ -1634,7 +1608,7 @@
    721                                  	global  input_result_from_fdc
    722                                  input_result_from_fdc:
    723 000001A6 5157                    	pushm   di,cx
-   724 000001A8 E80B06                  	call	@disable	; lock the operation
+   724 000001A8 E80706                  	call	@disable	; lock the operation
    725                                  
    726 000001AB BF4200                  	mov     di,fdc_ctrl_status      ; in BIOS Data Area
    727 000001AE B90800                  	mov     cx,8            ; 7 bytes input, then 'complete'
@@ -1661,7 +1635,7 @@
    748                                  .9:
    749 000001CD F9                      .95:	Error			; return error;
    750                                  
-   751 000001CE E8F405                  .99:	call	@enable		; unlock the operation
+   751 000001CE E8F005                  .99:	call	@enable		; unlock the operation
    752 000001D1 5F59                    	popm	di,cx
    753 000001D3 C3                      	ret
    754                                  ; returns Error, Okay, or Complete
@@ -1669,7 +1643,7 @@
    756                                  
    757                                  %define INT_ENABLE 1
    758                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   759                                  ; 
+   759                                  ;
    760                                  ;  Floppy Disk Controller
    761                                  ;               Interrupt Handler
    762                                  ;
@@ -1681,7 +1655,7 @@
    768                                  %endif
    769 000001D5 1E60                    	pushm   all,ds
    770 000001D7 FC                      	cld                     ; just be sure
-   771                                  	
+   771                                  
    772 000001D8 6A40                    	push    bios_data_seg
    773 000001DA 1F                      	popm    ds
    774                                  %if INT_ENABLE==0
@@ -1693,7 +1667,7 @@
    780                                  ; BUSY is set
    781 000001E2 E8C1FF                  	call    input_result_from_fdc
    782 000001E5 18C0                    	sbb     al,al           ; carry to AL
-   783 000001E7 A24100                  	mov     byte [fdc_status],al    ; FF=error, 0=okay 
+   783 000001E7 A24100                  	mov     byte [fdc_status],al    ; FF=error, 0=okay
    784 000001EA EB2C                    	jmp     .9              ; we got the results
    785                                  
    786                                  
@@ -1732,7 +1706,7 @@
    819 0000021D BA22FF                  	mov     dx,PIC_EOI              ; EOI register
    820 00000220 B80080                  	mov     ax,EOI_NSPEC            ; non-specific
    821 00000223 EF                      	out     dx,ax                   ; signal it
-   822                                  	
+   822                                  
    823 00000224 611F                    	popm    all,ds
    824 00000226 CF                      	iret
    825                                  
@@ -1770,7 +1744,7 @@
    857                                  ;
    858                                  	global  fdc_wait_seek_done
    859                                  fdc_wait_seek_done:
-   860                                  .1:     
+   860                                  .1:
    861 00000245 E8BDFE                  	call    wait12
    862 00000248 E8B3FE                  	call    get_msr
    863 0000024B A80F                    	test    al,0Fh          ; test all the seek bits
@@ -1815,9 +1789,9 @@
    902                                  ;
    903                                  	global  @floppy_init
    904                                  @floppy_init:
-   905 0000027E B400                    	mov     ah,0            ; fn00
-   906 00000280 CD13                    	int     13h
-   907 00000282 C3                      	ret
+   905                                  ;	mov     ah,0            ; fn00
+   906                                  ;	int     13h
+   907 0000027E C3                      	ret
    908                                  
    909                                  
    910                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1830,30 +1804,30 @@
    917                                  ;
    918                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    919                                  fn00:
-   920 00000283 B81700                  	mov     ax,0017h        ; LTM=1, MSK=0, PRI=7    (07h for LTM=0)
-   921 00000286 BA3EFF                  	mov     dx,fdc_int_control
-   922 00000289 EF                      	out     dx,ax           ; enable interrupt controller
-   923 0000028A C606AD0020              	mov	byte [wait12_count],32	; this is about the max.
+   920 0000027F B81700                  	mov     ax,0017h        ; LTM=1, MSK=0, PRI=7    (07h for LTM=0)
+   921 00000282 BA3EFF                  	mov     dx,fdc_int_control
+   922 00000285 EF                      	out     dx,ax           ; enable interrupt controller
+   923 00000286 C606AD0020              	mov	byte [wait12_count],32	; this is about the max.
    924                                  
-   925 0000028F E873FE                  	call    wait12          ; wait 12 microseconds
-   926 00000292 E869FE                  	call    get_msr         ; set BASE mode
-   927 00000295 E86DFE                  	call    wait12          ; wait 12 microseconds
+   925 0000028B E877FE                  	call    wait12          ; wait 12 microseconds
+   926 0000028E E86DFE                  	call    get_msr         ; set BASE mode
+   927 00000291 E871FE                  	call    wait12          ; wait 12 microseconds
    928                                  
-   929 00000298 C6063F0008              	mov     byte [fdc_motor_LDOR],(MODE + RESET + DMAEN)         ; set PC_AT mode
-   930 0000029D E89DFF                  	call    out_LDOR_mem
-   931 000002A0 E862FE                  	call    wait12
+   929 00000294 C6063F0008              	mov     byte [fdc_motor_LDOR],(MODE + RESET + DMAEN)         ; set PC_AT mode
+   930 00000299 E8A1FF                  	call    out_LDOR_mem
+   931 0000029C E866FE                  	call    wait12
    932                                  
    933                                  %if 1
    934                                  ;;; This read may not be necessary, unless Special Mode is set
-   935 000002A3 BA3006                  	mov     dx,FDC_LDCR
-   936 000002A6 EC                      	in      al,dx           ; read a write-only register to latch Mode
+   935 0000029F BA3006                  	mov     dx,FDC_LDCR
+   936 000002A2 EC                      	in      al,dx           ; read a write-only register to latch Mode
    937                                  ;;;;;
    938                                  %endif
-   939 000002A7 E86CFE                  	call	wait1000
+   939 000002A3 E870FE                  	call	wait1000
    940                                  
-   941 000002AA 800E3F000C              	or	byte [fdc_motor_LDOR],(MODE + NO_RESET + DMAEN)      ; remove the RESET
-   942 000002AF E88BFF                  	call    out_LDOR_mem
-   943 000002B2 E850FE                  	call	wait12
+   941 000002A6 800E3F000C              	or	byte [fdc_motor_LDOR],(MODE + NO_RESET + DMAEN)      ; remove the RESET
+   942 000002AB E88FFF                  	call    out_LDOR_mem
+   943 000002AE E854FE                  	call	wait12
    944                                  
    945                                  %if 0
    946                                  	mov     dx,FDC_LDCR
@@ -1861,42 +1835,42 @@
    948                                  	out     dx,al
    949                                  %endif
    950                                  
-   951 000002B5 BACAFF                  	mov	dx,DMA0+DMACW
+   951 000002B1 BACAFF                  	mov	dx,DMA0+DMACW
    952                                  %if 1
-   953 000002B8 B80400                  	mov	ax,4			; set change bit
+   953 000002B4 B80400                  	mov	ax,4			; set change bit
    954                                  %else
    955                                  	in	ax,dx
    956                                  	and	ax,~2			; clear the stop bit
    957                                  	or	ax,4			; set the change bit
    958                                  %endif
-   959 000002BB EF                      	out	dx,ax
+   959 000002B7 EF                      	out	dx,ax
    960                                  
-   961 000002BC BA34FF                  	mov     dx,PIC_DMA0CR
-   962 000002BF B80700                  	mov     ax,0007h        ; MSK=0, PRI=7
-   963 000002C2 EF                      	out     dx,ax           ; enable DMA0 interrupts
+   961 000002B8 BA34FF                  	mov     dx,PIC_DMA0CR
+   962 000002BB B80700                  	mov     ax,0007h        ; MSK=0, PRI=7
+   963 000002BE EF                      	out     dx,ax           ; enable DMA0 interrupts
    964                                  
-   965 000002C3 31C0                    	xor	ax,ax
-   966 000002C5 A24000                  	mov	[fdc_motor_ticks],al	; Zero the timer tick counter
-   967 000002C8 A28B00                  	mov	[fdc_last_rate],al	; force a specify command
+   965 000002BF 31C0                    	xor	ax,ax
+   966 000002C1 A24000                  	mov	[fdc_motor_ticks],al	; Zero the timer tick counter
+   967 000002C4 A28B00                  	mov	[fdc_last_rate],al	; force a specify command
    968                                  
-   969 000002CB 8EC0                    	mov	es,ax
+   969 000002C7 8EC0                    	mov	es,ax
    970                                  	cnop
-   971 000002CD 26A37800                  es	mov	[1Eh*4],ax
-   972 000002D1 26A37A00                  es	mov	[1Eh*4+2],ax		; Zap the parameter pointer
+   971 000002C9 26A37800                  es	mov	[1Eh*4],ax
+   972 000002CD 26A37A00                  es	mov	[1Eh*4+2],ax		; Zap the parameter pointer
    973                                  
-   974 000002D5 C7069400FFFF            	mov	word [fdc_cylinder],-1	; Specify & Recalibration needed
+   974 000002D1 C7069400FFFF            	mov	word [fdc_cylinder],-1	; Specify & Recalibration needed
    975                                  ;***	mov	[fdc_cylinder+1],-1	; done by above instruction
    976                                  
    977                                  ; now allow time for the polling interrupts
-   978 000002DB B90100                  	mov	cx, 102400>>16		; 0.1 seconds
-   979 000002DE 31D2                    	xor	dx,dx			; CX:DX is delay in usec
-   980 000002E0 B486                    	mov	ah,86h			; delay in microseconds
-   981 000002E2 CD15                    	int	15h
+   978 000002D7 B90100                  	mov	cx, 102400>>16		; 0.1 seconds
+   979 000002DA 31D2                    	xor	dx,dx			; CX:DX is delay in usec
+   980 000002DC B486                    	mov	ah,86h			; delay in microseconds
+   981 000002DE CD15                    	int	15h
    982                                  
-   983 000002E4 E8BFFE                  	call	input_result_from_fdc
+   983 000002E0 E8C3FE                  	call	input_result_from_fdc
    984                                  
-   985 000002E7 30E4                    	Okay			; signal good execution
-   986 000002E9 C3                      	ret			; end of FN00
+   985 000002E3 30E4                    	Okay			; signal good execution
+   986 000002E5 C3                      	ret			; end of FN00
    987                                  
    988                                  
    989                                  
@@ -1923,33 +1897,33 @@
   1010                                  ;
   1011                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1012                                  fn08:           ; Get Drive Parameters
-  1013 000002EA A01000                  	mov	al,[equipment_flag]
-  1014 000002ED B401                    	mov	ah,1
-  1015 000002EF 20C4                    	and	ah,al			; any floppies at all?
-  1016 000002F1 7407                    	jz	.2
-  1017 000002F3 C0C002                  	rol	al,2			; at least one
-  1018 000002F6 2403                    	and	al,3
-  1019 000002F8 00C4                    	add	ah,al			; 1..4
+  1013 000002E6 A01000                  	mov	al,[equipment_flag]
+  1014 000002E9 B401                    	mov	ah,1
+  1015 000002EB 20C4                    	and	ah,al			; any floppies at all?
+  1016 000002ED 7407                    	jz	.2
+  1017 000002EF C0C002                  	rol	al,2			; at least one
+  1018 000002F2 2403                    	and	al,3
+  1019 000002F4 00C4                    	add	ah,al			; 1..4
   1020                                  .2:
-  1021 000002FA 88660A                  	mov	[offset_DL+bp],ah		; return # of drives
-  1022 000002FD E8CF01                  	call	check_DL
-  1023 00000300 7221                    	jc	.err_no_drive
-  1024 00000302 E8E101                  	call	get_disk_type
-  1025 00000305 884608                  	mov	[offset_BL+bp],al		; return BL = disk type
-  1026 00000308 E8EA01                  	call	get_media
-  1027 0000030B 2E8A670B                  cs	mov	ah,[DTAB_max_cylinder+bx]
-  1028 0000030F 2E8A4704                  cs	mov	al,[DTAB_EOT_nsect+bx]
-  1029 00000313 89460C                    	mov	[offset_CX+bp],ax		; return CYL | SECT in CX
-  1030 00000316 C6460B01                	mov	byte [offset_DH+bp],1		; head max. always 1
-  1031 0000031A 8C4E12                  	mov	[offset_ES+bp],cs		; return ES  param table
-  1032 0000031D 895E00                  	mov	[offset_DI+bp],bx		; return DI  param table
+  1021 000002F6 88660A                  	mov	[offset_DL+bp],ah		; return # of drives
+  1022 000002F9 E8CF01                  	call	check_DL
+  1023 000002FC 7221                    	jc	.err_no_drive
+  1024 000002FE E8E101                  	call	get_disk_type
+  1025 00000301 884608                  	mov	[offset_BL+bp],al		; return BL = disk type
+  1026 00000304 E8EA01                  	call	get_media
+  1027 00000307 2E8A670B                  cs	mov	ah,[DTAB_max_cylinder+bx]
+  1028 0000030B 2E8A4704                  cs	mov	al,[DTAB_EOT_nsect+bx]
+  1029 0000030F 89460C                    	mov	[offset_CX+bp],ax		; return CYL | SECT in CX
+  1030 00000312 C6460B01                	mov	byte [offset_DH+bp],1		; head max. always 1
+  1031 00000316 8C4E12                  	mov	[offset_ES+bp],cs		; return ES  param table
+  1032 00000319 895E00                  	mov	[offset_DI+bp],bx		; return DI  param table
   1033                                  
-  1034 00000320 30E4                    	xor	ah,ah				; no error
-  1035 00000322 C3                      	ret
+  1034 0000031C 30E4                    	xor	ah,ah				; no error
+  1035 0000031E C3                      	ret
   1036                                  
   1037                                  .err_no_drive:
-  1038 00000323 B401                    	mov	ah,ERR_invalid_command		; error if no floppies
-  1039 00000325 C3                      	ret					; DL is still zero !!!
+  1038 0000031F B401                    	mov	ah,ERR_invalid_command		; error if no floppies
+  1039 00000321 C3                      	ret					; DL is still zero !!!
   1040                                  
   1041                                  
   1042                                  
@@ -2045,10 +2019,10 @@
   1132                                  %endif
   1133                                  
   1134                                  fn02:	; READ
-  1135 00000326 B4E6                    	mov	ah,(CMD_READ_DATA | CMD_MT | CMD_MF | CMD_SK)
-  1136 00000328 BF66A3                  	mov	di,FDC_DMA_READ
-  1137 0000032B BB[D705]                	mov	bx,xfer_read_sector
-  1138 0000032E EB12                    	jmp	rwv_common
+  1135 00000322 B4E6                    	mov	ah,(CMD_READ_DATA | CMD_MT | CMD_MF | CMD_SK)
+  1136 00000324 BF66A3                  	mov	di,FDC_DMA_READ
+  1137 00000327 BB[D305]                	mov	bx,xfer_read_sector
+  1138 0000032A EB12                    	jmp	rwv_common
   1139                                  
   1140                                  %define EXTRA 0
   1141                                  fn03:	; WRITE
@@ -2081,93 +2055,93 @@
   1168                                  
   1169                                  .10:
   1170                                  %endif
-  1171 00000330 B4C5                    	mov	ah,(CMD_WRITE_DATA | CMD_MT | CMD_MF)
-  1172 00000332 BFA617                  	mov	di,FDC_DMA_WRITE
-  1173 00000335 BB[5206]                	mov	bx,xfer_write_sector
-  1174 00000338 EB08                    	jmp	rwv_common
+  1171 0000032C B4C5                    	mov	ah,(CMD_WRITE_DATA | CMD_MT | CMD_MF)
+  1172 0000032E BFA617                  	mov	di,FDC_DMA_WRITE
+  1173 00000331 BB[4E06]                	mov	bx,xfer_write_sector
+  1174 00000334 EB08                    	jmp	rwv_common
   1175                                  
   1176                                  fn04:	; VERIFY
-  1177 0000033A B4E6                    	mov	ah,(CMD_READ_DATA | CMD_MT | CMD_MF | CMD_SK)
-  1178 0000033C BF6683                  	mov	di,FDC_DMA_SCAN
-  1179 0000033F BB[8706]                	mov	bx,xfer_verify_sector
+  1177 00000336 B4E6                    	mov	ah,(CMD_READ_DATA | CMD_MT | CMD_MF | CMD_SK)
+  1178 00000338 BF6683                  	mov	di,FDC_DMA_SCAN
+  1179 0000033B BB[8306]                	mov	bx,xfer_verify_sector
   1180                                  ;;;	jmp	rwv_common
   1181                                  
   1182                                  ;  Common code to READ, WRITE, and VERIFY
   1183                                  rwv_common:
-  1184 00000342 57                      	push	di			; dma control register
-  1185 00000343 53                      	push	bx			; transfer function
-  1186 00000344 83EC08                  	sub	sp,rwv_stack - 8	; 4 words in stack by pushes or Call
-  1187 00000347 50                      	push	ax			; including this push
+  1184 0000033E 57                      	push	di			; dma control register
+  1185 0000033F 53                      	push	bx			; transfer function
+  1186 00000340 83EC08                  	sub	sp,rwv_stack - 8	; 4 words in stack by pushes or Call
+  1187 00000343 50                      	push	ax			; including this push
   1188                                  
-  1189 00000348 E88401                  	call	check_DL		; sets DI
-  1190 0000034B B401                    	mov	ah,ERR_invalid_command
-  1191 0000034D 7263                    	jc	.exit
-  1192 0000034F E89401                  	call	get_disk_type
-  1193 00000352 E8A001                  	call	get_media		; get media pointer to CS:BX
-  1194 00000355 E8A901                  	call	set_media_pointer	; set up Int 1Eh
-  1195 00000358 E81702                  	call	motor_on		; use DI to start motor
+  1189 00000344 E88401                  	call	check_DL		; sets DI
+  1190 00000347 B401                    	mov	ah,ERR_invalid_command
+  1191 00000349 7263                    	jc	.exit
+  1192 0000034B E89401                  	call	get_disk_type
+  1193 0000034E E8A001                  	call	get_media		; get media pointer to CS:BX
+  1194 00000351 E8A901                  	call	set_media_pointer	; set up Int 1Eh
+  1195 00000354 E81702                  	call	motor_on		; use DI to start motor
   1196                                  
-  1197 0000035B E8AD03                  	call	Seek			; use CH to seek to track
+  1197 00000357 E8AD03                  	call	Seek			; use CH to seek to track
   1198                                  					; recalibrate is possible
-  1199 0000035E 7252                    	jc	.exit			; AH is error code
+  1199 0000035A 7252                    	jc	.exit			; AH is error code
   1200                                  
-  1201 00000360 E85D02                  	call	make_head_unit		; AL is next byte
+  1201 0000035C E85D02                  	call	make_head_unit		; AL is next byte
   1202                                  
-  1203 00000363 571E06                  	pushm	es,ds,di
-  1204 00000366 8D7EF2                  	lea	di,[rwv_cmd+1+bp]		; SS override not needed
-  1205 00000369 8D7703                  	lea	si,[DTAB_N_param+bx]
-  1206 0000036C 160E                    	pushm	cs,ss
-  1207 0000036E 1F07                    	popm	ds,es
-  1208 00000370 AA                      	stosb				; store head unit in cmd stream
-  1209 00000371 88E8                    	mov	al,ch			; cylinder
-  1210 00000373 AA                      	stosb
-  1211 00000374 88F0                    	mov	al,dh			; head
-  1212 00000376 AA                      	stosb
-  1213 00000377 88C8                    	mov	al,cl			; sector (R)
-  1214 00000379 AA                      	stosb
-  1215 0000037A AC                      	lodsb				; get N
-  1216 0000037B 88C1                    	mov	cl,al
-  1217 0000037D AA                      	stosb				; store N
-  1218 0000037E A4                      	movsb				; EOT
-  1219 0000037F A4                      	movsb				; GPL
-  1220 00000380 A4                      	movsb				; DTL = FF
-  1221 00000381 8D76F1                  	lea	si,[rwv_cmd+bp]		; get command start
-  1222 00000384 071F5F                  	popm	es,ds,di
+  1203 0000035F 571E06                  	pushm	es,ds,di
+  1204 00000362 8D7EF2                  	lea	di,[rwv_cmd+1+bp]		; SS override not needed
+  1205 00000365 8D7703                  	lea	si,[DTAB_N_param+bx]
+  1206 00000368 160E                    	pushm	cs,ss
+  1207 0000036A 1F07                    	popm	ds,es
+  1208 0000036C AA                      	stosb				; store head unit in cmd stream
+  1209 0000036D 88E8                    	mov	al,ch			; cylinder
+  1210 0000036F AA                      	stosb
+  1211 00000370 88F0                    	mov	al,dh			; head
+  1212 00000372 AA                      	stosb
+  1213 00000373 88C8                    	mov	al,cl			; sector (R)
+  1214 00000375 AA                      	stosb
+  1215 00000376 AC                      	lodsb				; get N
+  1216 00000377 88C1                    	mov	cl,al
+  1217 00000379 AA                      	stosb				; store N
+  1218 0000037A A4                      	movsb				; EOT
+  1219 0000037B A4                      	movsb				; GPL
+  1220 0000037C A4                      	movsb				; DTL = FF
+  1221 0000037D 8D76F1                  	lea	si,[rwv_cmd+bp]		; get command start
+  1222 00000380 071F5F                  	popm	es,ds,di
   1223                                  
-  1224 00000387 B88000                  	mov	ax,128			; minimum sector size
-  1225 0000038A F666F0                  	mul	byte [rwv_AL+bp]	; times number of sectors to transfer
-  1226 0000038D D3E0                    	shl	ax,cl			; shift by N_param
-  1227 0000038F 89C1                    	mov	cx,ax			; CX is byte count of transfer
+  1224 00000383 B88000                  	mov	ax,128			; minimum sector size
+  1225 00000386 F666F0                  	mul	byte [rwv_AL+bp]	; times number of sectors to transfer
+  1226 00000389 D3E0                    	shl	ax,cl			; shift by N_param
+  1227 0000038B 89C1                    	mov	cx,ax			; CX is byte count of transfer
   1228                                  
-  1229 00000391 53                      	pushm	bx			; save DTAB pointer
+  1229 0000038D 53                      	pushm	bx			; save DTAB pointer
   1230                                  
-  1231 00000392 8B4608                  	mov	ax,[offset_BX+bp]	; get Xfer address offset
-  1232 00000395 8CC3                    	mov	bx,es			; segment to AX
-  1233 00000397 89DA                    	mov	dx,bx			; and to DX
-  1234 00000399 C1EB0C                  	shr	bx,12			; high 4 bits of address
-  1235 0000039C C1E204                  	shl	dx,4			; high part of offset from segment
-  1236 0000039F 01D0                    	add	ax,dx			; form low 16 bits of 20-bit address
-  1237 000003A1 83D300                  	adc	bx,0			; and carry into the high bits
+  1231 0000038E 8B4608                  	mov	ax,[offset_BX+bp]	; get Xfer address offset
+  1232 00000391 8CC3                    	mov	bx,es			; segment to AX
+  1233 00000393 89DA                    	mov	dx,bx			; and to DX
+  1234 00000395 C1EB0C                  	shr	bx,12			; high 4 bits of address
+  1235 00000398 C1E204                  	shl	dx,4			; high part of offset from segment
+  1236 0000039B 01D0                    	add	ax,dx			; form low 16 bits of 20-bit address
+  1237 0000039D 83D300                  	adc	bx,0			; and carry into the high bits
   1238                                  
-  1239 000003A4 8CD2                    	mov	dx,ss			; DX:SI points at command start
+  1239 000003A0 8CD2                    	mov	dx,ss			; DX:SI points at command start
   1240                                  
   1241                                  .marker:
   1242                                  ;	BX:AX	transfer 20-bit address in memory
   1243                                  ;	CX	transfer byte count
   1244                                  ;	DX:SI	pointer to 9-byte FDC command
   1245                                  ;
-  1246 000003A6 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts received
+  1246 000003A2 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts received
   1247                                  
-  1248 000003AB FF56FA                  	call	near [rwv_xfer+bp]		;call specific transfer function
+  1248 000003A7 FF56FA                  	call	near [rwv_xfer+bp]		;call specific transfer function
   1249                                  
-  1250 000003AE 5B                      	popm	bx				; restor DTAB pointer (CS:BX)
+  1250 000003AA 5B                      	popm	bx				; restor DTAB pointer (CS:BX)
   1251                                  ;;;	jc	.exit			; AH is set to error code
   1252                                  
-  1253 000003AF E8BD03                  	call	Check_RW_Status		; get final return code
+  1253 000003AB E8BD03                  	call	Check_RW_Status		; get final return code
   1254                                  
   1255                                  .exit:
-  1256 000003B2 8D66FE                  	lea	sp,[rwv_return+bp]
-  1257 000003B5 C3                      	ret
+  1256 000003AE 8D66FE                  	lea	sp,[rwv_return+bp]
+  1257 000003B1 C3                      	ret
   1258                                  
   1259                                  %if SOFT_DEBUG
   1260                                  end_rwv		equ	$
@@ -2208,88 +2182,88 @@
   1295                                  ;
   1296                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1297                                  fn05:
-  1298 000003B6 83EC0A                  	sub	sp,fmt_stack		; allocate stack space
-  1299 000003B9 C746FCA617              	mov	word [fmt_dma+bp],FDC_DMA_FORMAT
+  1298 000003B2 83EC0A                  	sub	sp,fmt_stack		; allocate stack space
+  1299 000003B5 C746FCA617              	mov	word [fmt_dma+bp],FDC_DMA_FORMAT
   1300                                  
-  1301 000003BE E80E01                  	call	check_DL		; sets DI
-  1302 000003C1 B401                    	mov	ah,ERR_invalid_command
-  1303 000003C3 726C                    	jc	.exit
+  1301 000003BA E80E01                  	call	check_DL		; sets DI
+  1302 000003BD B401                    	mov	ah,ERR_invalid_command
+  1303 000003BF 726C                    	jc	.exit
   1304                                  
-  1305 000003C5 06                      	pushm	es		; save ES
-  1306 000003C6 6A00                    	push	0
-  1307 000003C8 07                      	popm	es
-  1308 000003C9 8CCB                    	mov	bx,cs		; get CS segment
-  1309 000003CB 263B1E7A00                es	cmp	bx,[1Eh*4+2]	; check segment is CS
-  1310 000003D0 755F                    	jne	.exit		; (will restore stack)
+  1305 000003C1 06                      	pushm	es		; save ES
+  1306 000003C2 6A00                    	push	0
+  1307 000003C4 07                      	popm	es
+  1308 000003C5 8CCB                    	mov	bx,cs		; get CS segment
+  1309 000003C7 263B1E7A00                es	cmp	bx,[1Eh*4+2]	; check segment is CS
+  1310 000003CC 755F                    	jne	.exit		; (will restore stack)
   1311                                  
-  1312 000003D2 268B1E7800                es	mov	bx,[1Eh*4]	; get CS:BX as disk param table pointer
-  1313 000003D7 07                      	popm	es     		; restore Stack
+  1312 000003CE 268B1E7800                es	mov	bx,[1Eh*4]	; get CS:BX as disk param table pointer
+  1313 000003D3 07                      	popm	es     		; restore Stack
   1314                                  
-  1315 000003D8 E89701                  	call	motor_on		; use DI to start motor
+  1315 000003D4 E89701                  	call	motor_on		; use DI to start motor
   1316                                  
-  1317 000003DB E82D03                  	call	Seek			; use CH to seek to track
+  1317 000003D7 E82D03                  	call	Seek			; use CH to seek to track
   1318                                  					; recalibrate is possible
-  1319 000003DE 7251                    	jc	.exit			; AH is error code
+  1319 000003DA 7251                    	jc	.exit			; AH is error code
   1320                                  
-  1321 000003E0 E8DD01                  	call	make_head_unit		; AL is next byte
-  1322 000003E3 88C4                    	mov	ah,al			; save head/unit in AH
+  1321 000003DC E8DD01                  	call	make_head_unit		; AL is next byte
+  1322 000003DF 88C4                    	mov	ah,al			; save head/unit in AH
   1323                                  
-  1324 000003E5 571E06                  	pushm	es,ds,di
+  1324 000003E1 571E06                  	pushm	es,ds,di
   1325                                  
-  1326 000003E8 160E                    	pushm	cs,ss
-  1327 000003EA 1F07                    	popm	ds,es
-  1328 000003EC 8D7EF6                  	lea	di,[bp+fmt_cmd]
-  1329 000003EF 8D7703                  	lea	si,[bx+DTAB_N_param]
+  1326 000003E4 160E                    	pushm	cs,ss
+  1327 000003E6 1F07                    	popm	ds,es
+  1328 000003E8 8D7EF6                  	lea	di,[bp+fmt_cmd]
+  1329 000003EB 8D7703                  	lea	si,[bx+DTAB_N_param]
   1330                                  
-  1331 000003F2 B00D                    	mov	al,CMD_FORMAT_A_TRACK
-  1332 000003F4 803C00                  	cmp	byte [si],0		; is N==0
-  1333 000003F7 7402                    	je	.2
-  1334 000003F9 0C40                    	or	al,CMD_MF		; MFM recording
+  1331 000003EE B00D                    	mov	al,CMD_FORMAT_A_TRACK
+  1332 000003F0 803C00                  	cmp	byte [si],0		; is N==0
+  1333 000003F3 7402                    	je	.2
+  1334 000003F5 0C40                    	or	al,CMD_MF		; MFM recording
   1335                                  .2:
-  1336 000003FB AB                      	stosw				; AH=head/unit, AL=format cmd
-  1337 000003FC A4                      	movsb				; set N
-  1338 000003FD AC                      	lodsb				; get SC
-  1339 000003FE 88C1                    	mov	cl,al			; save SC in AL
-  1340 00000400 AA                      	stosb				; set SC
-  1341 00000401 83C602                  	add	si,2			; advance to GPL3
-  1342 00000404 A5                      	movsw				; set GPL3 and Fill
+  1336 000003F7 AB                      	stosw				; AH=head/unit, AL=format cmd
+  1337 000003F8 A4                      	movsb				; set N
+  1338 000003F9 AC                      	lodsb				; get SC
+  1339 000003FA 88C1                    	mov	cl,al			; save SC in AL
+  1340 000003FC AA                      	stosb				; set SC
+  1341 000003FD 83C602                  	add	si,2			; advance to GPL3
+  1342 00000400 A5                      	movsw				; set GPL3 and Fill
   1343                                  
-  1344 00000405 8D76F6                  	lea	si,[bp+fmt_cmd]
-  1345 00000408 071F5F                  	popm	es,ds,di    		; restore regs
+  1344 00000401 8D76F6                  	lea	si,[bp+fmt_cmd]
+  1345 00000404 071F5F                  	popm	es,ds,di    		; restore regs
   1346                                  
-  1347 0000040B 30ED                    	xor	ch,ch			; CX = sector count
-  1348 0000040D C1E102                  	shl	cx,2			; CX = byte count of param table
+  1347 00000407 30ED                    	xor	ch,ch			; CX = sector count
+  1348 00000409 C1E102                  	shl	cx,2			; CX = byte count of param table
   1349                                  
-  1350 00000410 53                      	pushm	bx			; save DTAB pointer
+  1350 0000040C 53                      	pushm	bx			; save DTAB pointer
   1351                                  
-  1352 00000411 8B4608                  	mov	ax,[offset_BX+bp]	; get Xfer address offset
-  1353 00000414 8CC3                    	mov	bx,es			; segment to AX
-  1354 00000416 89DA                    	mov	dx,bx			; and to DX
-  1355 00000418 C1EB0C                  	shr	bx,12			; high 4 bits of address
-  1356 0000041B C1E204                  	shl	dx,4			; high part of offset from segment
-  1357 0000041E 01D0                    	add	ax,dx			; form low 16 bits of 20-bit address
-  1358 00000420 83D300                  	adc	bx,0			; and carry into the high bits
+  1352 0000040D 8B4608                  	mov	ax,[offset_BX+bp]	; get Xfer address offset
+  1353 00000410 8CC3                    	mov	bx,es			; segment to AX
+  1354 00000412 89DA                    	mov	dx,bx			; and to DX
+  1355 00000414 C1EB0C                  	shr	bx,12			; high 4 bits of address
+  1356 00000417 C1E204                  	shl	dx,4			; high part of offset from segment
+  1357 0000041A 01D0                    	add	ax,dx			; form low 16 bits of 20-bit address
+  1358 0000041C 83D300                  	adc	bx,0			; and carry into the high bits
   1359                                  
-  1360 00000423 8CD2                    	mov	dx,ss			; DX:SI points at command start
+  1360 0000041F 8CD2                    	mov	dx,ss			; DX:SI points at command start
   1361                                  
   1362                                  ;.marker:
   1363                                  ;	BX:AX	transfer 20-bit address in memory
   1364                                  ;	CX	transfer byte count
   1365                                  ;	DX:SI	pointer to 9-byte FDC command
   1366                                  ;
-  1367 00000425 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts received
+  1367 00000421 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts received
   1368                                  
-  1369 0000042A E82502                  	call	xfer_format_track	; format the track
+  1369 00000426 E82502                  	call	xfer_format_track	; format the track
   1370                                  
-  1371 0000042D 5B                      	popm	bx				; restor DTAB pointer (CS:BX)
+  1371 00000429 5B                      	popm	bx				; restor DTAB pointer (CS:BX)
   1372                                  ;;;	jc	.exit			; AH is set to error code
   1373                                  
-  1374 0000042E E83E03                  	call	Check_RW_Status		; get final return code
+  1374 0000042A E83E03                  	call	Check_RW_Status		; get final return code
   1375                                  
   1376                                  
   1377                                  .exit:
-  1378 00000431 8D66FE                  	lea	sp,[rwv_return+bp]	; restore stack location
-  1379 00000434 C3                      	ret
+  1378 0000042D 8D66FE                  	lea	sp,[rwv_return+bp]	; restore stack location
+  1379 00000430 C3                      	ret
   1380                                  
   1381                                  
   1382                                  
@@ -2297,10 +2271,10 @@
   1384                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1385                                  	global  dma0_interrupt
   1386                                  dma0_interrupt:
-  1387 00000435 1E5250                  	pushm   ax,dx,ds
-  1388                                  	
-  1389 00000438 6A40                    	push    bios_data_seg
-  1390 0000043A 1F                      	popm    ds
+  1387 00000431 1E5250                  	pushm   ax,dx,ds
+  1388                                  
+  1389 00000434 6A40                    	push    bios_data_seg
+  1390 00000436 1F                      	popm    ds
   1391                                  
   1392                                  %if SOFT_DEBUG
   1393                                  	or	byte [fdc_drv_calib],02h		;POST dma interrupt
@@ -2318,16 +2292,16 @@
   1405                                  %endif
   1406                                  
   1407                                  ; signal EOI (End of Interrupt)
-  1408 0000043B BA22FF                  	mov     dx,PIC_EOI              ; EOI register
-  1409 0000043E B80080                  	mov     ax,EOI_NSPEC            ; non-specific
-  1410 00000441 EF                      	out     dx,ax                   ; signal it
+  1408 00000437 BA22FF                  	mov     dx,PIC_EOI              ; EOI register
+  1409 0000043A B80080                  	mov     ax,EOI_NSPEC            ; non-specific
+  1410 0000043D EF                      	out     dx,ax                   ; signal it
   1411                                  
-  1412 00000442 585A1F                  	popm    ax,dx,ds
-  1413 00000445 CF                      	iret
+  1412 0000043E 585A1F                  	popm    ax,dx,ds
+  1413 00000441 CF                      	iret
   1414                                  
   1415                                  
   1416                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  1417                                  ;  Function 15h         Get Disk Type 
+  1417                                  ;  Function 15h         Get Disk Type
   1418                                  ;
   1419                                  ;  Enter with:
   1420                                  ;       AH = 15h
@@ -2348,17 +2322,17 @@
   1435                                  ;
   1436                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1437                                  fn15:
-  1438 00000446 30E4                    	xor	ah,ah			; No drive present
-  1439 00000448 E88400                  	call	check_DL
-  1440 0000044B 7309                    	jnc	.ok
-  1441 0000044D 83FFFF                  	cmp	di,-1
-  1442 00000450 7503E9DCFB              	je	undefined		; DL is really bad
-  1443 00000455 C3                      	ret				; AH=0, no drive present
+  1438 00000442 30E4                    	xor	ah,ah			; No drive present
+  1439 00000444 E88400                  	call	check_DL
+  1440 00000447 7309                    	jnc	.ok
+  1441 00000449 83FFFF                  	cmp	di,-1
+  1442 0000044C 7503E9E0FB              	je	undefined		; DL is really bad
+  1443 00000451 C3                      	ret				; AH=0, no drive present
   1444                                  					; carry will be cleared
   1445                                  .ok:
-  1446 00000456 FEC4                    	inc	ah			; drive ok, no change line support
-  1447 00000458 F8                      	clc
-  1448 00000459 E9CAFB                  	jmp	exit_pops		;
+  1446 00000452 FEC4                    	inc	ah			; drive ok, no change line support
+  1447 00000454 F8                      	clc
+  1448 00000455 E9CEFB                  	jmp	exit_pops		;
   1449                                  
   1450                                  
   1451                                  
@@ -2381,20 +2355,20 @@
   1468                                  ;
   1469                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1470                                  fn16:
-  1471 0000045C E87000                  	call	check_DL
-  1472 0000045F 7303E9CDFB              	jc	undefined
+  1471 00000458 E87000                  	call	check_DL
+  1472 0000045B 7303E9D1FB              	jc	undefined
   1473                                  
-  1474 00000464 89F8                    	mov	ax,di			; AL = 0, 1	AH = 0
+  1474 00000460 89F8                    	mov	ax,di			; AL = 0, 1	AH = 0
   1475                                  ; AH is now 0
-  1476 00000466 FEC0                    	inc	al			; AL = 1, 2
-  1477 00000468 C0C004                  	rol	al,4			; AL = MOEN1 or MOEN2
-  1478 0000046B 84063F00                	test	[fdc_motor_LDOR],al	; test if motor running
-  1479 0000046F 7502                    	jnz     .on
+  1476 00000462 FEC0                    	inc	al			; AL = 1, 2
+  1477 00000464 C0C004                  	rol	al,4			; AL = MOEN1 or MOEN2
+  1478 00000467 84063F00                	test	[fdc_motor_LDOR],al	; test if motor running
+  1479 0000046B 7502                    	jnz     .on
   1480                                  
-  1481 00000471 B406                    	mov     ah,ERR_disk_removed	; signal disk changed
+  1481 0000046D B406                    	mov     ah,ERR_disk_removed	; signal disk changed
   1482                                  .on:
-  1483 00000473 C3                      	ret			; AH=6, Carry will be set
-  1484                                  	
+  1483 0000046F C3                      	ret			; AH=6, Carry will be set
+  1484                                  
   1485                                  
   1486                                  
   1487                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2456,46 +2430,46 @@
   1543                                  ;	4) This function is used by DOS >= 3.2
   1544                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1545                                  fn18:
-  1546 00000474 E85800                  	call	check_DL		; check validity of drive no.
-  1547 00000477 7303E9B5FB              	jc	undefined
+  1546 00000470 E85800                  	call	check_DL		; check validity of drive no.
+  1547 00000473 7303E9B9FB              	jc	undefined
   1548                                  
-  1549 0000047C E86700                  	call	get_disk_type		; get disk type to AL
-  1550 0000047F 3C0B                    	cmp	al,L_table
-  1551 00000481 7327                    	jnb	.alt
-  1552 00000483 88C3                    	mov	bl,al
-  1553 00000485 30FF                    	xor	bh,bh
-  1554 00000487 D1E3                    	shl	bx,1
-  1555 00000489 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
-  1556 0000048E 85DB                    	test	bx,bx
-  1557 00000490 743A                    	jz	.errC
-  1558 00000492 2E384F04                  cs	cmp	[DTAB_EOT_nsect+bx],cl	; check number of sectors
-  1559 00000496 7512                      	jne	.alt			; try alternate
-  1560 00000498 2E386F0B                  cs	cmp	[DTAB_max_cylinder+bx],ch  ; check number of cylinders
-  1561 0000049C 750C                      	jne	.alt
+  1549 00000478 E86700                  	call	get_disk_type		; get disk type to AL
+  1550 0000047B 3C0B                    	cmp	al,L_table
+  1551 0000047D 7327                    	jnb	.alt
+  1552 0000047F 88C3                    	mov	bl,al
+  1553 00000481 30FF                    	xor	bh,bh
+  1554 00000483 D1E3                    	shl	bx,1
+  1555 00000485 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
+  1556 0000048A 85DB                    	test	bx,bx
+  1557 0000048C 743A                    	jz	.errC
+  1558 0000048E 2E384F04                  cs	cmp	[DTAB_EOT_nsect+bx],cl	; check number of sectors
+  1559 00000492 7512                      	jne	.alt			; try alternate
+  1560 00000494 2E386F0B                  cs	cmp	[DTAB_max_cylinder+bx],ch  ; check number of cylinders
+  1561 00000498 750C                      	jne	.alt
   1562                                  .found:
-  1563 0000049E E86000                         	call	set_media_pointer
-  1564 000004A1 895E00                  	mov	[offset_DI+bp],bx
-  1565 000004A4 8C4E12                  	mov	[offset_ES+bp],cs	; return in ES:DI
-  1566 000004A7 30E4                    	xor	ah,ah
-  1567 000004A9 C3                      	ret
+  1563 0000049A E86000                         	call	set_media_pointer
+  1564 0000049D 895E00                  	mov	[offset_DI+bp],bx
+  1565 000004A0 8C4E12                  	mov	[offset_ES+bp],cs	; return in ES:DI
+  1566 000004A3 30E4                    	xor	ah,ah
+  1567 000004A5 C3                      	ret
   1568                                  
   1569                                  .alt:
-  1570 000004AA E84000                  	call	get_disk_alt_type	; get disk type to AL
-  1571 000004AD 3C0B                    	cmp	al,L_table
-  1572 000004AF 731B                    	jnb	.errC
-  1573 000004B1 88C3                    	mov	bl,al
-  1574 000004B3 30FF                    	xor	bh,bh
-  1575 000004B5 D1E3                    	shl	bx,1
-  1576 000004B7 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
-  1577 000004BC 85DB                    	test	bx,bx
-  1578 000004BE 740C                    	jz	.errC
-  1579 000004C0 2E384F04                  cs	cmp	[DTAB_EOT_nsect+bx],cl	; check number of sectors
-  1580 000004C4 7506                      	jne	.errC			; no match?
-  1581 000004C6 2E386F0B                  cs	cmp	[DTAB_max_cylinder+bx],ch  ; check number of cylinders
-  1582 000004CA 74D2                    	je	.found
+  1570 000004A6 E84000                  	call	get_disk_alt_type	; get disk type to AL
+  1571 000004A9 3C0B                    	cmp	al,L_table
+  1572 000004AB 731B                    	jnb	.errC
+  1573 000004AD 88C3                    	mov	bl,al
+  1574 000004AF 30FF                    	xor	bh,bh
+  1575 000004B1 D1E3                    	shl	bx,1
+  1576 000004B3 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
+  1577 000004B8 85DB                    	test	bx,bx
+  1578 000004BA 740C                    	jz	.errC
+  1579 000004BC 2E384F04                  cs	cmp	[DTAB_EOT_nsect+bx],cl	; check number of sectors
+  1580 000004C0 7506                      	jne	.errC			; no match?
+  1581 000004C2 2E386F0B                  cs	cmp	[DTAB_max_cylinder+bx],ch  ; check number of cylinders
+  1582 000004C6 74D2                    	je	.found
   1583                                  
-  1584 000004CC B40C                    .errC:	mov	ah,ERR_media_type_not_found
-  1585 000004CE C3                      	ret
+  1584 000004C8 B40C                    .errC:	mov	ah,ERR_media_type_not_found
+  1585 000004CA C3                      	ret
   1586                                  
   1587                                  
   1588                                  
@@ -2515,17 +2489,17 @@
   1602                                  ;	Carry set
   1603                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1604                                  check_DL:
-  1605 000004CF BFFFFF                  	mov	di,-1				; invalid DI
-  1606 000004D2 80FA02                  	cmp	dl,FLOPPY_MAX
-  1607 000004D5 730D                    	jnb	.err
-  1608 000004D7 89D7                    	mov	di,dx
-  1609 000004D9 83E701                  	and	di,FLOPPY_MAX-1			; clear the carry
-  1610 000004DC F685F8000F              	test	byte [fdc_type+di],0Fh		; drive present?
-  1611 000004E1 7401                    	jz	.err
-  1612 000004E3 C3                      	ret					; carry is clear
+  1605 000004CB BFFFFF                  	mov	di,-1				; invalid DI
+  1606 000004CE 80FA02                  	cmp	dl,FLOPPY_MAX
+  1607 000004D1 730D                    	jnb	.err
+  1608 000004D3 89D7                    	mov	di,dx
+  1609 000004D5 83E701                  	and	di,FLOPPY_MAX-1			; clear the carry
+  1610 000004D8 F685F8000F              	test	byte [fdc_type+di],0Fh		; drive present?
+  1611 000004DD 7401                    	jz	.err
+  1612 000004DF C3                      	ret					; carry is clear
   1613                                  
-  1614 000004E4 F9                      .err:	stc
-  1615 000004E5 C3                      	ret
+  1614 000004E0 F9                      .err:	stc
+  1615 000004E1 C3                      	ret
   1616                                  
   1617                                  
   1618                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2538,9 +2512,9 @@
   1625                                  ;	AL = drive type (0..4)
   1626                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1627                                  get_disk_type:
-  1628 000004E6 8A85F800                	mov	al,[fdc_type+di]	; get type byte
-  1629 000004EA 240F                    	and	al,0Fh			; mask low nibble
-  1630 000004EC C3                      	ret
+  1628 000004E2 8A85F800                	mov	al,[fdc_type+di]	; get type byte
+  1629 000004E6 240F                    	and	al,0Fh			; mask low nibble
+  1630 000004E8 C3                      	ret
   1631                                  
   1632                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1633                                  ;  get_disk_alt_type
@@ -2552,9 +2526,9 @@
   1639                                  ;	AL = drive type (0..4)
   1640                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1641                                  get_disk_alt_type:
-  1642 000004ED 8A85F800                	mov	al,[fdc_type+di]	; get type byte
-  1643 000004F1 C0E804                  	shr	al,4
-  1644 000004F4 C3                      	ret
+  1642 000004E9 8A85F800                	mov	al,[fdc_type+di]	; get type byte
+  1643 000004ED C0E804                  	shr	al,4
+  1644 000004F0 C3                      	ret
   1645                                  
   1646                                  
   1647                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2567,11 +2541,11 @@
   1654                                  ;	CS:BX		pointer to 13-byte disk media table
   1655                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1656                                  get_media:
-  1657 000004F5 88C3                    	mov	bl,al
-  1658 000004F7 30FF                    	xor	bh,bh
-  1659 000004F9 D1E3                    	shl	bx,1
-  1660 000004FB 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
-  1661 00000500 C3                        	ret
+  1657 000004F1 88C3                    	mov	bl,al
+  1658 000004F3 30FF                    	xor	bh,bh
+  1659 000004F5 D1E3                    	shl	bx,1
+  1660 000004F7 2E8B9F[6600]              cs	mov	bx,[D_table+bx]		; get offset of DTAB entry
+  1661 000004FC C3                        	ret
   1662                                  
   1663                                  
   1664                                  
@@ -2590,25 +2564,25 @@
   1677                                  ;	Carry Clear = same media pointer (Specify not needed)
   1678                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1679                                  set_media_pointer:
-  1680 00000501 0651                    	pushm	cx,es			; save for later
-  1681 00000503 6A00                    	push	0			; address interrupt vectors
-  1682 00000505 07                      	pop	es			; **
-  1683 00000506 8CC9                    	mov	cx,cs
-  1684 00000508 26391E7800                es	cmp	word [1Eh*4],bx
-  1685 0000050D 7508                    	jne	.diff
-  1686 0000050F 26390E7A00                es	cmp	word [1Eh*4+2],cx	; segment
-  1687 00000514 F8                      	clc
-  1688 00000515 7410                    	jz	.same
+  1680 000004FD 0651                    	pushm	cx,es			; save for later
+  1681 000004FF 6A00                    	push	0			; address interrupt vectors
+  1682 00000501 07                      	pop	es			; **
+  1683 00000502 8CC9                    	mov	cx,cs
+  1684 00000504 26391E7800                es	cmp	word [1Eh*4],bx
+  1685 00000509 7508                    	jne	.diff
+  1686 0000050B 26390E7A00                es	cmp	word [1Eh*4+2],cx	; segment
+  1687 00000510 F8                      	clc
+  1688 00000511 7410                    	jz	.same
   1689                                  .diff:
-  1690 00000517 26891E7800                es	mov	word [1Eh*4],bx		; offset
-  1691 0000051C 26890E7A00                es	mov	word [1Eh*4+2],cx	; segment
-  1692 00000521 8EC1                    	mov	es,cx
+  1690 00000513 26891E7800                es	mov	word [1Eh*4],bx		; offset
+  1691 00000518 26890E7A00                es	mov	word [1Eh*4+2],cx	; segment
+  1692 0000051D 8EC1                    	mov	es,cx
   1693                                  	cnop
-  1694 00000523 E80400                  	call	Specify			; ES:BX is table pointer
-  1695 00000526 F9                      	stc
+  1694 0000051F E80400                  	call	Specify			; ES:BX is table pointer
+  1695 00000522 F9                      	stc
   1696                                  .same:
-  1697 00000527 5907                    	popm	cx,es			; restore DS
-  1698 00000529 C3                      	ret
+  1697 00000523 5907                    	popm	cx,es			; restore DS
+  1698 00000525 C3                      	ret
   1699                                  
   1700                                  
   1701                                  
@@ -2623,37 +2597,37 @@
   1710                                  ;	Nothing
   1711                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1712                                  Specify:
-  1713 0000052A 56525350                	pushm	ax,bx,dx,si
-  1714 0000052E 83EC04                  	sub	sp,4			; allocate 4 bytes for command
-  1715 00000531 89E6                    	mov	si,sp
+  1713 00000526 56525350                	pushm	ax,bx,dx,si
+  1714 0000052A 83EC04                  	sub	sp,4			; allocate 4 bytes for command
+  1715 0000052D 89E6                    	mov	si,sp
   1716                                  
-  1717 00000533 268A470C                  es	mov	al,[DTAB_control+bx]	; clock bits
-  1718 00000537 C0C002                    	rol	al,2
-  1719 0000053A BA3006                  	mov	dx,FDC_LDCR		; Control Register
-  1720 0000053D EE                      	out	dx,al
+  1717 0000052F 268A470C                  es	mov	al,[DTAB_control+bx]	; clock bits
+  1718 00000533 C0C002                    	rol	al,2
+  1719 00000536 BA3006                  	mov	dx,FDC_LDCR		; Control Register
+  1720 00000539 EE                      	out	dx,al
   1721                                  
-  1722 0000053E B20C                    	mov	dl,12			; 12 usec delay  = T time
-  1723 00000540 08C0                    	or	al,al			; test for hi (00) or lo (80) data rate
-  1724 00000542 7502                    	jnz	.3
-  1725 00000544 D0EA                    	shr	dl,1			; crystal has factor of 2 already
+  1722 0000053A B20C                    	mov	dl,12			; 12 usec delay  = T time
+  1723 0000053C 08C0                    	or	al,al			; test for hi (00) or lo (80) data rate
+  1724 0000053E 7502                    	jnz	.3
+  1725 00000540 D0EA                    	shr	dl,1			; crystal has factor of 2 already
   1726                                  .3:
-  1727 00000546 A0FF00                  	mov	al,[cpu_xtal]		; 2x clock frequency
-  1728 00000549 F6E2                    	mul	dl			; AX = 2xClock * T or 2xclock * T/2 (80 or 00)
-  1729 0000054B 83E82C                  	sub	ax,44			; overhead CPU clocks
-  1730 0000054E B214                    	mov	dl,20			; loop clock count
-  1731 00000550 F6F2                    	div	dl
-  1732 00000552 FEC0                    	inc	al			; for good measure
-  1733 00000554 A2AD00                  	mov	[wait12_count],al	; save count
+  1727 00000542 A0FF00                  	mov	al,[cpu_xtal]		; 2x clock frequency
+  1728 00000545 F6E2                    	mul	dl			; AX = 2xClock * T or 2xclock * T/2 (80 or 00)
+  1729 00000547 83E82C                  	sub	ax,44			; overhead CPU clocks
+  1730 0000054A B214                    	mov	dl,20			; loop clock count
+  1731 0000054C F6F2                    	div	dl
+  1732 0000054E FEC0                    	inc	al			; for good measure
+  1733 00000550 A2AD00                  	mov	[wait12_count],al	; save count
   1734                                  
-  1735 00000557 36C60403                  ss	mov	byte [si],CMD_SPECIFY
-  1736 0000055B 268B07                    es	mov	ax,[DTAB_specify+bx]	; get two specify bytes
-  1737 0000055E 36894401                  ss	mov	word [si+1],ax
-  1738 00000562 8CD2                      	mov	dx,ss
-  1739 00000564 B90300                  	mov	cx,3			; length of command = 3
-  1740 00000567 E821FC                  	call	output_cmd_to_fdc
-  1741 0000056A 83C404                  	add	sp,4
-  1742 0000056D 585B5A5E                	popm	ax,bx,dx,si
-  1743 00000571 C3                      	ret
+  1735 00000553 36C60403                  ss	mov	byte [si],CMD_SPECIFY
+  1736 00000557 268B07                    es	mov	ax,[DTAB_specify+bx]	; get two specify bytes
+  1737 0000055A 36894401                  ss	mov	word [si+1],ax
+  1738 0000055E 8CD2                      	mov	dx,ss
+  1739 00000560 B90300                  	mov	cx,3			; length of command = 3
+  1740 00000563 E825FC                  	call	output_cmd_to_fdc
+  1741 00000566 83C404                  	add	sp,4
+  1742 00000569 585B5A5E                	popm	ax,bx,dx,si
+  1743 0000056D C3                      	ret
   1744                                  
   1745                                  
   1746                                  
@@ -2670,48 +2644,48 @@
   1757                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1758                                  	global	motor_on
   1759                                  motor_on:
-  1760 00000572 525150                  	pushm	ax,cx,dx
-  1761 00000575 89F8                    	mov	ax,di			; drive # to AL
-  1762 00000577 0401                    	add	al,MOEN1>>4		; form MOENx >> 4
-  1763 00000579 C0E004                  	shl	al,4			; form MOENx bitmask
-  1764 0000057C 88C4                    	mov	ah,al			; MOENx -> AH
-  1765 0000057E 01F8                    	add	ax,di			; MOENx + DSELx -> AL
+  1760 0000056E 525150                  	pushm	ax,cx,dx
+  1761 00000571 89F8                    	mov	ax,di			; drive # to AL
+  1762 00000573 0401                    	add	al,MOEN1>>4		; form MOENx >> 4
+  1763 00000575 C0E004                  	shl	al,4			; form MOENx bitmask
+  1764 00000578 88C4                    	mov	ah,al			; MOENx -> AH
+  1765 0000057A 01F8                    	add	ax,di			; MOENx + DSELx -> AL
   1766                                  
-  1767 00000580 B1B6                    	mov	cl,182				;10 seconds
-  1768 00000582 880E4000                  	mov	byte [fdc_motor_ticks],cl	; set long timer = 10 seconds
+  1767 0000057C B1B6                    	mov	cl,182				;10 seconds
+  1768 0000057E 880E4000                  	mov	byte [fdc_motor_ticks],cl	; set long timer = 10 seconds
   1769                                  
-  1770 00000586 84263F00                	test	byte [fdc_motor_LDOR],ah	; motor already on?
-  1771 0000058A 88C5                    	mov	ch,al
-  1772 0000058C 750F                    	jnz	.its_on
+  1770 00000582 84263F00                	test	byte [fdc_motor_LDOR],ah	; motor already on?
+  1771 00000586 88C5                    	mov	ch,al
+  1772 00000588 750F                    	jnz	.its_on
   1773                                  
   1774                                  ; motor is not running
-  1775 0000058E 2E8B470A                  cs	mov	ax,[DTAB_startup+bx]	; get startup delay in 1/8 seconds
-  1776 00000592 98                        	cbw
-  1777 00000593 6BC07D                    	imul	ax,125			; * 125 ms
-  1778 00000596 B236                    	mov	dl,54
-  1779 00000598 F6F2                    	div	dl			; divided by 54ms/tick
-  1780 0000059A 40                      	inc	ax			; one more tick for good measure
-  1781 0000059B 28C1                    	sub	cl,al			; CL is tick to wait for
+  1775 0000058A 2E8B470A                  cs	mov	ax,[DTAB_startup+bx]	; get startup delay in 1/8 seconds
+  1776 0000058E 98                        	cbw
+  1777 0000058F 6BC07D                    	imul	ax,125			; * 125 ms
+  1778 00000592 B236                    	mov	dl,54
+  1779 00000594 F6F2                    	div	dl			; divided by 54ms/tick
+  1780 00000596 40                      	inc	ax			; one more tick for good measure
+  1781 00000597 28C1                    	sub	cl,al			; CL is tick to wait for
   1782                                  
   1783                                  ; if motor was already running, then CL has not been changed
   1784                                  ; Do the select
   1785                                  .its_on:
-  1786 0000059D 322E3F00                	xor	ch,[fdc_motor_LDOR]	; set selected bits
-  1787 000005A1 80E531                  	and	ch,(MOEN_MASK | DSEL_MASK)
-  1788 000005A4 302E3F00                	xor	[fdc_motor_LDOR],ch
-  1789 000005A8 E892FC                  	call	out_LDOR_mem		; Motor Starts here, or continues
-  1790 000005AB EB01                    	jmp	.wait
+  1786 00000599 322E3F00                	xor	ch,[fdc_motor_LDOR]	; set selected bits
+  1787 0000059D 80E531                  	and	ch,(MOEN_MASK | DSEL_MASK)
+  1788 000005A0 302E3F00                	xor	[fdc_motor_LDOR],ch
+  1789 000005A4 E896FC                  	call	out_LDOR_mem		; Motor Starts here, or continues
+  1790 000005A7 EB01                    	jmp	.wait
   1791                                  
-  1792 000005AD F4                      	hlt
-  1793 000005AE 380E4000                .wait:	cmp	[fdc_motor_ticks],cl	; has tick counter expired?
-  1794 000005B2 77F9                    	ja	.wait-1
+  1792 000005A9 F4                      	hlt
+  1793 000005AA 380E4000                .wait:	cmp	[fdc_motor_ticks],cl	; has tick counter expired?
+  1794 000005AE 77F9                    	ja	.wait-1
   1795                                  
   1796                                  ; reduce timer to turn-off delay time
-  1797 000005B4 2E8A4F02                  cs	mov	cl,[DTAB_turnoff_ticks+bx]	; 2 seconds
-  1798 000005B8 880E4000                  	mov	[fdc_motor_ticks],cl
+  1797 000005B0 2E8A4F02                  cs	mov	cl,[DTAB_turnoff_ticks+bx]	; 2 seconds
+  1798 000005B4 880E4000                  	mov	[fdc_motor_ticks],cl
   1799                                  
-  1800 000005BC 58595A                  	popm	ax,cx,dx
-  1801 000005BF C3                      	ret
+  1800 000005B8 58595A                  	popm	ax,cx,dx
+  1801 000005BB C3                      	ret
   1802                                  
   1803                                  
   1804                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2730,14 +2704,14 @@
   1817                                  ;  Assumes "motor_on" has done the real unit select in the LDOR (operations register)
   1818                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1819                                  make_head_unit:
-  1820 000005C0 88F0                    	mov	al,dh			; head number to AL
-  1821 000005C2 A8FE                    	test	al, ~1			; check for head 0 or 1
-  1822 000005C4 F9                      	stc				; set to signal error
-  1823 000005C5 7507                    	jnz	.err
-  1824 000005C7 2401                    	and	al,1			; defensive programming
-  1825 000005C9 C0E002                  	shl	al,2			; shift H to position
-  1826 000005CC 09F8                    	or	ax,di			; clear the carry
-  1827 000005CE C3                      .err:	ret
+  1820 000005BC 88F0                    	mov	al,dh			; head number to AL
+  1821 000005BE A8FE                    	test	al, ~1			; check for head 0 or 1
+  1822 000005C0 F9                      	stc				; set to signal error
+  1823 000005C1 7507                    	jnz	.err
+  1824 000005C3 2401                    	and	al,1			; defensive programming
+  1825 000005C5 C0E002                  	shl	al,2			; shift H to position
+  1826 000005C8 09F8                    	or	ax,di			; clear the carry
+  1827 000005CA C3                      .err:	ret
   1828                                  
   1829                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1830                                  ;  dma_outd		output a double word to a DMA double word register
@@ -2751,14 +2725,14 @@
   1838                                  ;
   1839                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1840                                  dma_outd:
-  1841 000005CF EF                      	out	dx,ax
-  1842 000005D0 42                      	inc	dx
-  1843 000005D1 42                      	inc	dx
-  1844 000005D2 93                      	xchg	ax,bx
-  1845 000005D3 EF                      	out	dx,ax
-  1846 000005D4 42                      	inc	dx
-  1847 000005D5 42                      	inc	dx
-  1848 000005D6 C3                      	ret
+  1841 000005CB EF                      	out	dx,ax
+  1842 000005CC 42                      	inc	dx
+  1843 000005CD 42                      	inc	dx
+  1844 000005CE 93                      	xchg	ax,bx
+  1845 000005CF EF                      	out	dx,ax
+  1846 000005D0 42                      	inc	dx
+  1847 000005D1 42                      	inc	dx
+  1848 000005D2 C3                      	ret
   1849                                  
   1850                                  
   1851                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2771,87 +2745,87 @@
   1858                                  ;
   1859                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1860                                  xfer_read_sector:
-  1861 000005D7 52                      	push	dx
+  1861 000005D3 52                      	push	dx
   1862                                  
   1863                                  ;;;	and	byte [fdc_drv_calib],00h	;POST no interrupts
   1864                                  						; operation is not complete
   1865                                  
   1866                                  ;   BX:AX is the transfer destination address
-  1867 000005D8 BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination
-  1868 000005DB E8F1FF                  	call	dma_outd
+  1867 000005D4 BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination
+  1868 000005D7 E8F1FF                  	call	dma_outd
   1869                                  
-  1870 000005DE 89C8                    	mov	ax,cx			; total byte count
-  1871 000005E0 EF                      	out	dx,ax			; set terminal count
+  1870 000005DA 89C8                    	mov	ax,cx			; total byte count
+  1871 000005DC EF                      	out	dx,ax			; set terminal count
   1872                                  
-  1873 000005E1 31DB                    	xor	bx,bx
-  1874 000005E3 B81006                  	mov	ax,FDC_DACK
+  1873 000005DD 31DB                    	xor	bx,bx
+  1874 000005DF B81006                  	mov	ax,FDC_DACK
   1875                                  ;   BX:AX is the transfer source port
-  1876 000005E6 BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source pointer
-  1877 000005E9 E8E3FF                  	call	dma_outd
+  1876 000005E2 BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source pointer
+  1877 000005E5 E8E3FF                  	call	dma_outd
   1878                                  
-  1879 000005EC 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
-  1880 000005EF BACAFF                  	mov	dx,DMA0+DMACW
-  1881 000005F2 EF                      	out	dx,ax			; starts the DMA
+  1879 000005E8 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
+  1880 000005EB BACAFF                  	mov	dx,DMA0+DMACW
+  1881 000005EE EF                      	out	dx,ax			; starts the DMA
   1882                                  
-  1883 000005F3 5A                      	pop	dx		; reset DX:SI command pointer
+  1883 000005EF 5A                      	pop	dx		; reset DX:SI command pointer
   1884                                  
-  1885 000005F4 B90900                  	mov	cx,9			; 9-byte FDC command
-  1886 000005F7 E891FB                  	call	output_cmd_to_fdc
+  1885 000005F0 B90900                  	mov	cx,9			; 9-byte FDC command
+  1886 000005F3 E895FB                  	call	output_cmd_to_fdc
   1887                                  
   1888                                  
-  1889 000005FA BBC0FF                  	mov	bx,DMA0+DMASPL
-  1890 000005FD B95006                  	mov	cx,FDC_DACK_TC
+  1889 000005F6 BBC0FF                  	mov	bx,DMA0+DMASPL
+  1890 000005F9 B95006                  	mov	cx,FDC_DACK_TC
   1891                                  
   1892                                  xfer_common_wait:
-  1893 00000600 BAC8FF                  	mov	dx,DMA0+DMATC
+  1893 000005FC BAC8FF                  	mov	dx,DMA0+DMATC
   1894                                  .loop1:
-  1895 00000603 803E400000              	cmp	byte [fdc_motor_ticks],0
+  1895 000005FF 803E400000              	cmp	byte [fdc_motor_ticks],0
   1896                                  ;;;	cmp	byte [fdc_motor_ticks],20h	; 2Fh - 0Fh in DTABx entries
-  1897 00000608 7625                    	jbe	.timeout
+  1897 00000604 7625                    	jbe	.timeout
   1898                                  
-  1899 0000060A E8F8FA                  	call	wait12
-  1900 0000060D ED                      	in	ax,dx
-  1901 0000060E 83F80C                  	cmp	ax,THRESHHOLD
-  1902 00000611 73F0                    	jae	.loop1
+  1899 00000606 E8FCFA                  	call	wait12
+  1900 00000609 ED                      	in	ax,dx
+  1901 0000060A 83F80C                  	cmp	ax,THRESHHOLD
+  1902 0000060D 73F0                    	jae	.loop1
   1903                                  
-  1904 00000613 E8A001                  	call	@disable
+  1904 0000060F E8A001                  	call	@disable
   1905                                  .loop2:
-  1906 00000616 90                      	nop
-  1907 00000617 90                      	nop
-  1908 00000618 ED                      	in	ax,dx
-  1909 00000619 83F801                  	cmp	ax,1
-  1910 0000061C 77F8                    	ja	.loop2
+  1906 00000612 90                      	nop
+  1907 00000613 90                      	nop
+  1908 00000614 ED                      	in	ax,dx
+  1909 00000615 83F801                  	cmp	ax,1
+  1910 00000618 77F8                    	ja	.loop2
   1911                                  
-  1912 0000061E 89DA                    	mov	dx,bx	; Source low
-  1913 00000620 89C8                    	mov	ax,cx	; FDC_DACK_TC
-  1914 00000622 EF                      	out	dx,ax
+  1912 0000061A 89DA                    	mov	dx,bx	; Source low
+  1913 0000061C 89C8                    	mov	ax,cx	; FDC_DACK_TC
+  1914 0000061E EF                      	out	dx,ax
   1915                                  
-  1916 00000623 E89F01                  	call	@enable
+  1916 0000061F E89F01                  	call	@enable
   1917                                  
   1918                                  ;;;	mov	ax,100b			; stop the channel
   1919                                  ;;;	mov	dx,DMA0+DMACW			; DMA control word
   1920                                  ;;;	out	dx,ax
   1921                                  
-  1922 00000626 E81100                  	call	wait_operation_complete
-  1923 00000629 720E                    	jc	.99
+  1922 00000622 E81100                  	call	wait_operation_complete
+  1923 00000625 720E                    	jc	.99
   1924                                  
   1925                                  ;;;	mov	ax,100b			; stop the channel
   1926                                  ;;;	mov	dx,DMA0+DMACW			; DMA control word
   1927                                  ;;;	out	dx,ax
   1928                                  
-  1929 0000062B 30E4                    	Okay
-  1930 0000062D EB0A                    	jmp	.99
+  1929 00000627 30E4                    	Okay
+  1930 00000629 EB0A                    	jmp	.99
   1931                                  
   1932                                  .timeout:
   1933                                  ;;;	call	@enable
   1934                                  ; add the following:
-  1935 0000062F B80400                  	mov	ax,100b			; stop the channel
-  1936 00000632 BACAFF                  	mov	dx,DMA0+DMACW			; DMA control word
-  1937 00000635 EF                      	out	dx,ax
+  1935 0000062B B80400                  	mov	ax,100b			; stop the channel
+  1936 0000062E BACAFF                  	mov	dx,DMA0+DMACW			; DMA control word
+  1937 00000631 EF                      	out	dx,ax
   1938                                  
-  1939 00000636 B485                    	mov	ah,ERR_85
-  1940 00000638 F9                      	Error
-  1941 00000639 C3                      .99:	ret
+  1939 00000632 B485                    	mov	ah,ERR_85
+  1940 00000634 F9                      	Error
+  1941 00000635 C3                      .99:	ret
   1942                                  
   1943                                  
   1944                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2865,19 +2839,19 @@
   1952                                  ;	CY = 1		timed out, AH=error code
   1953                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1954                                  wait_operation_complete:
-  1955 0000063A F6063E0001              .1:	test	byte [fdc_drv_calib],01h	; FDC interrupt posted "complete"?
-  1956 0000063F 7509                    	jnz	.okay
-  1957 00000641 803E400000              	cmp	byte [fdc_motor_ticks],0
-  1958 00000646 75F2                    	jne	.1
-  1959 00000648 EB04                    	jmp	.timeout
+  1955 00000636 F6063E0001              .1:	test	byte [fdc_drv_calib],01h	; FDC interrupt posted "complete"?
+  1956 0000063B 7509                    	jnz	.okay
+  1957 0000063D 803E400000              	cmp	byte [fdc_motor_ticks],0
+  1958 00000642 75F2                    	jne	.1
+  1959 00000644 EB04                    	jmp	.timeout
   1960                                  
-  1961 0000064A 30E4                    .okay:	Okay
-  1962 0000064C EB03                    	jmp	.99
+  1961 00000646 30E4                    .okay:	Okay
+  1962 00000648 EB03                    	jmp	.99
   1963                                  
   1964                                  .timeout:
-  1965 0000064E B488                    	mov	ah,ERR_88		; mark timeout
-  1966 00000650 F9                      	Error
-  1967 00000651 C3                      .99:	ret
+  1965 0000064A B488                    	mov	ah,ERR_88		; mark timeout
+  1966 0000064C F9                      	Error
+  1967 0000064D C3                      .99:	ret
   1968                                  
   1969                                  
   1970                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2892,40 +2866,40 @@
   1979                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1980                                  xfer_format_track:
   1981                                  xfer_write_sector:
-  1982 00000652 52                      	push	dx
+  1982 0000064E 52                      	push	dx
   1983                                  
   1984                                  ;   BX:AX is the transfer source address
-  1985 00000653 BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source address
-  1986 00000656 E876FF                  	call	dma_outd
+  1985 0000064F BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source address
+  1986 00000652 E876FF                  	call	dma_outd
   1987                                  
-  1988 00000659 31DB                    	xor	bx,bx
-  1989 0000065B B81006                  	mov	ax,FDC_DACK
+  1988 00000655 31DB                    	xor	bx,bx
+  1989 00000657 B81006                  	mov	ax,FDC_DACK
   1990                                  
   1991                                  ;   BX:AX is the transfer destination port
-  1992 0000065E BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination port
-  1993 00000661 E86BFF                  	call	dma_outd
+  1992 0000065A BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination port
+  1993 0000065D E86BFF                  	call	dma_outd
   1994                                  
-  1995 00000664 89C8                    	mov	ax,cx			; total byte count
-  1996 00000666 EF                      	out	dx,ax			; set terminal count
+  1995 00000660 89C8                    	mov	ax,cx			; total byte count
+  1996 00000662 EF                      	out	dx,ax			; set terminal count
   1997                                  
-  1998 00000667 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
-  1999 0000066A BACAFF                  	mov	dx,DMA0+DMACW
-  2000 0000066D EF                      	out	dx,ax			; starts the DMA
+  1998 00000663 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
+  1999 00000666 BACAFF                  	mov	dx,DMA0+DMACW
+  2000 00000669 EF                      	out	dx,ax			; starts the DMA
   2001                                  
-  2002 0000066E 5A                      	pop	dx		; reset DX:SI command pointer
+  2002 0000066A 5A                      	pop	dx		; reset DX:SI command pointer
   2003                                  
-  2004 0000066F B90900                  	mov	cx,9			; 9-byte FDC command
-  2005 00000672 36F60408                  ss	test	byte [si], 01000b	; test for FORMAT command
-  2006 00000676 7403                      	jz	.4
-  2007 00000678 B90600                  	mov	cx,6			; it is FORMAT
+  2004 0000066B B90900                  	mov	cx,9			; 9-byte FDC command
+  2005 0000066E 36F60408                  ss	test	byte [si], 01000b	; test for FORMAT command
+  2006 00000672 7403                      	jz	.4
+  2007 00000674 B90600                  	mov	cx,6			; it is FORMAT
   2008                                  .4:
-  2009 0000067B E80DFB                  	call	output_cmd_to_fdc
+  2009 00000677 E811FB                  	call	output_cmd_to_fdc
   2010                                  
   2011                                  
-  2012 0000067E BBC4FF                  	mov	bx,DMA0+DMADPL		; Destination to be updated
-  2013 00000681 B95006                  	mov	cx,FDC_DACK_TC
+  2012 0000067A BBC4FF                  	mov	bx,DMA0+DMADPL		; Destination to be updated
+  2013 0000067D B95006                  	mov	cx,FDC_DACK_TC
   2014                                  
-  2015 00000684 E979FF                  	jmp	xfer_common_wait
+  2015 00000680 E979FF                  	jmp	xfer_common_wait
   2016                                  
   2017                                  
   2018                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2938,38 +2912,38 @@
   2025                                  ;
   2026                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2027                                  xfer_verify_sector:
-  2028 00000687 52                      	push	dx
+  2028 00000683 52                      	push	dx
   2029                                  
-  2030 00000688 31DB                    	xor	bx,bx			; BX:AX is transfer address
-  2031 0000068A B84204                  	mov	ax, (bios_data_seg<<4)+fdc_ctrl_status
+  2030 00000684 31DB                    	xor	bx,bx			; BX:AX is transfer address
+  2031 00000686 B84204                  	mov	ax, (bios_data_seg<<4)+fdc_ctrl_status
   2032                                  
   2033                                  ;   BX:AX is the transfer destination address
-  2034 0000068D BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination
-  2035 00000690 E83CFF                  	call	dma_outd
+  2034 00000689 BAC4FF                  	mov	dx,DMA0+DMADPL		; set low destination
+  2035 0000068C E83CFF                  	call	dma_outd
   2036                                  
-  2037 00000693 89C8                    	mov	ax,cx			; total byte count
-  2038 00000695 EF                      	out	dx,ax			; set terminal count
+  2037 0000068F 89C8                    	mov	ax,cx			; total byte count
+  2038 00000691 EF                      	out	dx,ax			; set terminal count
   2039                                  
-  2040 00000696 31DB                    	xor	bx,bx
-  2041 00000698 B81006                  	mov	ax,FDC_DACK
+  2040 00000692 31DB                    	xor	bx,bx
+  2041 00000694 B81006                  	mov	ax,FDC_DACK
   2042                                  ;   BX:AX is the transfer source port
-  2043 0000069B BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source pointer
-  2044 0000069E E82EFF                  	call	dma_outd
+  2043 00000697 BAC0FF                  	mov	dx,DMA0+DMASPL		; set low source pointer
+  2044 0000069A E82EFF                  	call	dma_outd
   2045                                  
-  2046 000006A1 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
-  2047 000006A4 BACAFF                  	mov	dx,DMA0+DMACW
-  2048 000006A7 EF                      	out	dx,ax			; starts the DMA
+  2046 0000069D 8B46FC                  	mov	ax,[rwv_dma+bp]		; get Control register
+  2047 000006A0 BACAFF                  	mov	dx,DMA0+DMACW
+  2048 000006A3 EF                      	out	dx,ax			; starts the DMA
   2049                                  
-  2050 000006A8 5A                      	pop	dx		; reset DX:SI command pointer
+  2050 000006A4 5A                      	pop	dx		; reset DX:SI command pointer
   2051                                  
-  2052 000006A9 B90900                  	mov	cx,9			; 9-byte FDC command
-  2053 000006AC E8DCFA                  	call	output_cmd_to_fdc
+  2052 000006A5 B90900                  	mov	cx,9			; 9-byte FDC command
+  2053 000006A8 E8E0FA                  	call	output_cmd_to_fdc
   2054                                  
   2055                                  
-  2056 000006AF BBC0FF                  	mov	bx,DMA0+DMASPL
-  2057 000006B2 B95006                  	mov	cx,FDC_DACK_TC
+  2056 000006AB BBC0FF                  	mov	bx,DMA0+DMASPL
+  2057 000006AE B95006                  	mov	cx,FDC_DACK_TC
   2058                                  
-  2059 000006B5 E948FF                  	jmp	xfer_common_wait
+  2059 000006B1 E948FF                  	jmp	xfer_common_wait
   2060                                  
   2061                                  
   2062                                  
@@ -2988,57 +2962,57 @@
   2075                                  ;	Carry = 1 -- error
   2076                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2077                                  recalibrate:
-  2078 000006B8 565251                  	pushm   cx,dx,si
+  2078 000006B4 565251                  	pushm   cx,dx,si
   2079                                  
   2080                                  ;;;	call    motor_on
   2081                                  
-  2082 000006BB 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts
+  2082 000006B7 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts
   2083                                  
-  2084 000006C0 B001                    	mov	al,ST0_US	; mask to 2 drives
-  2085 000006C2 21F8                    	and	ax,di		; unit number to AL
-  2086 000006C4 86C4                    	xchg    al,ah		; AH is second byte of command
-  2087 000006C6 B007                    	mov     al,CMD_RECALIBRATE
-  2088 000006C8 50                      	push    ax		; push 2 byte command
-  2089 000006C9 89E6                    	mov     si,sp           ; form command pointer
-  2090 000006CB 8CD2                    	mov     dx,ss           ; DX:SI points at command
-  2091 000006CD B90200                  	mov     cx,2		
-  2092 000006D0 E8B8FA                  	call    output_cmd_to_fdc	; output the command
-  2093 000006D3 7231                    	jc      .7
+  2084 000006BC B001                    	mov	al,ST0_US	; mask to 2 drives
+  2085 000006BE 21F8                    	and	ax,di		; unit number to AL
+  2086 000006C0 86C4                    	xchg    al,ah		; AH is second byte of command
+  2087 000006C2 B007                    	mov     al,CMD_RECALIBRATE
+  2088 000006C4 50                      	push    ax		; push 2 byte command
+  2089 000006C5 89E6                    	mov     si,sp           ; form command pointer
+  2090 000006C7 8CD2                    	mov     dx,ss           ; DX:SI points at command
+  2091 000006C9 B90200                  	mov     cx,2
+  2092 000006CC E8BCFA                  	call    output_cmd_to_fdc	; output the command
+  2093 000006CF 7231                    	jc      .7
   2094                                  
-  2095 000006D5 E862FF                  	call	wait_operation_complete
-  2096 000006D8 722C                    	jc	.7
+  2095 000006D1 E862FF                  	call	wait_operation_complete
+  2096 000006D4 722C                    	jc	.7
   2097                                  
-  2098 000006DA E868FB                  	call    fdc_wait_seek_done
-  2099 000006DD 7227                    	jc      .7
+  2098 000006D6 E86CFB                  	call    fdc_wait_seek_done
+  2099 000006D9 7227                    	jc      .7
   2100                                  
-  2101 000006DF 58                      	pop     ax		; get unit # to AH
-  2102 000006E0 B004                    	mov     al,CMD_SENSE_DRIVE_STATUS
-  2103 000006E2 50                      	push    ax		; push 2 byte command again
-  2104 000006E3 B90200                  	mov     cx,2
-  2105 000006E6 89E6                    	mov     si,sp
-  2106 000006E8 8CD2                    	mov     dx,ss		; DX:SI points at the 2 byte command
-  2107 000006EA E89EFA                  	call    output_cmd_to_fdc
-  2108 000006ED 7217                    	jc      .7
+  2101 000006DB 58                      	pop     ax		; get unit # to AH
+  2102 000006DC B004                    	mov     al,CMD_SENSE_DRIVE_STATUS
+  2103 000006DE 50                      	push    ax		; push 2 byte command again
+  2104 000006DF B90200                  	mov     cx,2
+  2105 000006E2 89E6                    	mov     si,sp
+  2106 000006E4 8CD2                    	mov     dx,ss		; DX:SI points at the 2 byte command
+  2107 000006E6 E8A2FA                  	call    output_cmd_to_fdc
+  2108 000006E9 7217                    	jc      .7
   2109                                  
-  2110 000006EF E889FA                  	call    input_byte_from_fdc	; get ST3
-  2111 000006F2 7212                    	jc      .7
-  2112 000006F4 88859000                	mov     [fdc_disk_state+di],al	; save ST3 for drive
-  2113 000006F8 B487                    	mov	ah,ERR_87		; not on track 0
-  2114 000006FA A810                    	test    al,ST3_TR00
-  2115 000006FC F9                      	Error				; signal error
-  2116 000006FD 7407                    	jz      .7                      ; Not on Track 00, C=1 error
+  2110 000006EB E88DFA                  	call    input_byte_from_fdc	; get ST3
+  2111 000006EE 7212                    	jc      .7
+  2112 000006F0 88859000                	mov     [fdc_disk_state+di],al	; save ST3 for drive
+  2113 000006F4 B487                    	mov	ah,ERR_87		; not on track 0
+  2114 000006F6 A810                    	test    al,ST3_TR00
+  2115 000006F8 F9                      	Error				; signal error
+  2116 000006F9 7407                    	jz      .7                      ; Not on Track 00, C=1 error
   2117                                  
-  2118 000006FF C685940000              	mov	byte [fdc_cylinder+di],0	; set present cylinder
+  2118 000006FB C685940000              	mov	byte [fdc_cylinder+di],0	; set present cylinder
   2119                                  
   2120                                  %if SOFT_DEBUG > 1
   2121                                  	push    -1
   2122                                  	call    lites
   2123                                  %endif
-  2124 00000704 30E4                    	Okay			;
-  2125                                  	
-  2126 00000706 5E                      .7:     pop     si		; Command is still in the stack
-  2127 00000707 595A5E                  	popm    cx,dx,si	; restore
-  2128 0000070A C3                      	ret
+  2124 00000700 30E4                    	Okay			;
+  2125                                  
+  2126 00000702 5E                      .7:     pop     si		; Command is still in the stack
+  2127 00000703 595A5E                  	popm    cx,dx,si	; restore
+  2128 00000706 C3                      	ret
   2129                                  
   2130                                  
   2131                                  
@@ -3055,59 +3029,59 @@
   2142                                  ;	Carry = 0	success
   2143                                  ;
   2144                                  ;	Carry = 1	error
-  2145                                  ;  
+  2145                                  ;
   2146                                  ;  Assumes "motor_on" has done the real unit select in the LDOR (operations register)
   2147                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2148                                  Seek:
-  2149 0000070B 565251                  	pushm	cx,dx,si
+  2149 00000707 565251                  	pushm	cx,dx,si
   2150                                  
   2151                                  ; check for a recalibration needed
-  2152 0000070E 8A859400                	mov	al,[fdc_cylinder+di]	; get present cylinder (0FFh forces recalibrate)
-  2153 00000712 2E3A470B                 cs	cmp	al,[DTAB_max_cylinder+bx]	; compare to maximum
-  2154 00000716 760E                    	jbe	.no_recal
+  2152 0000070A 8A859400                	mov	al,[fdc_cylinder+di]	; get present cylinder (0FFh forces recalibrate)
+  2153 0000070E 2E3A470B                 cs	cmp	al,[DTAB_max_cylinder+bx]	; compare to maximum
+  2154 00000712 760E                    	jbe	.no_recal
   2155                                  
-  2156 00000718 BE0200                  	mov	si,2			; two recalibrates max.
+  2156 00000714 BE0200                  	mov	si,2			; two recalibrates max.
   2157                                  .rerecal:
-  2158 0000071B E89AFF                  	call	recalibrate
-  2159 0000071E 7306                    	jnc	.no_recal
-  2160 00000720 4E                      	dec	si
-  2161 00000721 F9                      	Error
-  2162 00000722 7442                    	jz	.exit			; two have failed
-  2163 00000724 EBF5                    	jmp	.rerecal		; try again
+  2158 00000717 E89AFF                  	call	recalibrate
+  2159 0000071A 7306                    	jnc	.no_recal
+  2160 0000071C 4E                      	dec	si
+  2161 0000071D F9                      	Error
+  2162 0000071E 7442                    	jz	.exit			; two have failed
+  2163 00000720 EBF5                    	jmp	.rerecal		; try again
   2164                                  
   2165                                  .no_recal:
-  2166 00000726 3AAD9400                	cmp	ch,[fdc_cylinder+di]	; sought : present cylinder
-  2167 0000072A 7438                    	je	.okay
+  2166 00000722 3AAD9400                	cmp	ch,[fdc_cylinder+di]	; sought : present cylinder
+  2167 00000726 7438                    	je	.okay
   2168                                  
   2169                                  ; we are not on the cylinder we want
   2170                                  
-  2171 0000072C 2E3A6F0B                  cs	cmp	ch,[DTAB_max_cylinder+bx]  ; validate cylinder number
-  2172 00000730 7738                    	ja	.invalid
+  2171 00000728 2E3A6F0B                  cs	cmp	ch,[DTAB_max_cylinder+bx]  ; validate cylinder number
+  2172 0000072C 7738                    	ja	.invalid
   2173                                  
   2174                                  .valid:
-  2175 00000732 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts
+  2175 0000072E 80263E0000              	and	byte [fdc_drv_calib],00h	;POST no interrupts
   2176                                  
-  2177 00000737 86CD                    	xchg	cl,ch			; cylinder to CL
-  2178 00000739 51                      	push	cx			; CL = sought cylinder
-  2179 0000073A E883FE                  	call	make_head_unit
-  2180 0000073D B40F                    	mov	ah,CMD_SEEK		; command byte
-  2181 0000073F 86C4                    	xchg	al,ah			; command byte must be first in stack
-  2182 00000741 50                      	push	ax			; push 3 byte command
-  2183 00000742 89E6                    	mov	si,sp
-  2184 00000744 8CD2                    	mov	dx,ss			; DX:SI points at command
-  2185 00000746 B90300                  	mov	cx,3			; 3 byte command
-  2186 00000749 E83FFA                  	call	output_cmd_to_fdc
-  2187 0000074C 5E59                    	popm	si,cx			; fix stack; get CL=seek to cylinder
-  2188 0000074E 86CD                    	xchg	cl,ch			; CH=seek to cylinder
-  2189 00000750 7214                    	jc	.exit
+  2177 00000733 86CD                    	xchg	cl,ch			; cylinder to CL
+  2178 00000735 51                      	push	cx			; CL = sought cylinder
+  2179 00000736 E883FE                  	call	make_head_unit
+  2180 00000739 B40F                    	mov	ah,CMD_SEEK		; command byte
+  2181 0000073B 86C4                    	xchg	al,ah			; command byte must be first in stack
+  2182 0000073D 50                      	push	ax			; push 3 byte command
+  2183 0000073E 89E6                    	mov	si,sp
+  2184 00000740 8CD2                    	mov	dx,ss			; DX:SI points at command
+  2185 00000742 B90300                  	mov	cx,3			; 3 byte command
+  2186 00000745 E843FA                  	call	output_cmd_to_fdc
+  2187 00000748 5E59                    	popm	si,cx			; fix stack; get CL=seek to cylinder
+  2188 0000074A 86CD                    	xchg	cl,ch			; CH=seek to cylinder
+  2189 0000074C 7214                    	jc	.exit
   2190                                  
-  2191 00000752 E8E5FE                  	call	wait_operation_complete
-  2192 00000755 720F                    	jc	.exit
+  2191 0000074E E8E5FE                  	call	wait_operation_complete
+  2192 00000751 720F                    	jc	.exit
   2193                                  
   2194                                  ;;;	mov	[fdc_cylinder+di],ch	; set new cylinder number
   2195                                  
-  2196 00000757 E8EBFA                  	call	fdc_wait_seek_done	; AH=error code if C=1
-  2197 0000075A 720A                    	jc	.exit
+  2196 00000753 E8EFFA                  	call	fdc_wait_seek_done	; AH=error code if C=1
+  2197 00000756 720A                    	jc	.exit
   2198                                  
   2199                                  %if 0
   2200                                  ; probably have to skip the following during Format
@@ -3115,25 +3089,25 @@
   2202                                  	jc	.exit
   2203                                  %endif
   2204                                  
-  2205 0000075C B440                    	mov	ah,ERR_seek_failed
-  2206 0000075E 3AAD9400                	cmp	ch,[fdc_cylinder+di]	; PCN filled in
-  2207 00000762 7508                    	jne	.err
+  2205 00000758 B440                    	mov	ah,ERR_seek_failed
+  2206 0000075A 3AAD9400                	cmp	ch,[fdc_cylinder+di]	; PCN filled in
+  2207 0000075E 7508                    	jne	.err
   2208                                  ;;;	mov	ah,ERR_8A
   2209                                  ;;;	cmp	ch,[fdc_ctrl_status+3]	; read cylinder number
   2210                                  ;;;	jne	.err
   2211                                  
   2212                                  
   2213                                  .okay:
-  2214 00000764 30E4                    	Okay
+  2214 00000760 30E4                    	Okay
   2215                                  .exit:
-  2216 00000766 595A5E                  	popm	cx,dx,si
-  2217 00000769 C3                      	ret
+  2216 00000762 595A5E                  	popm	cx,dx,si
+  2217 00000765 C3                      	ret
   2218                                  
   2219                                  .invalid:
   2220                                  ; error -- the cylinder requested is invalid for this drive
-  2221 0000076A B486                    	mov	ah,ERR_86
-  2222 0000076C F9                      .err:	Error
-  2223 0000076D EBF7                    	jmp	.exit		  	; jump WAY out
+  2221 00000766 B486                    	mov	ah,ERR_86
+  2222 00000768 F9                      .err:	Error
+  2223 00000769 EBF7                    	jmp	.exit		  	; jump WAY out
   2224                                  
   2225                                  
   2226                                  
@@ -3152,7 +3126,7 @@
   2239                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2240                                   	global	Check_RW_Status
   2241                                  Check_RW_Status:
-  2242 0000076F 061E56525153            	pushm	bx,cx,dx,si,ds,es
+  2242 0000076B 061E56525153            	pushm	bx,cx,dx,si,ds,es
   2243                                  
   2244                                  %if SOFT_DEBUG & DUMP
   2245                                  	xchg	al,ah			; error code to AL
@@ -3178,50 +3152,50 @@
   2265                                  %endif
   2266                                  
   2267                                  %if 1
-  2268 00000775 7309                    	jnc	.no_err
+  2268 00000771 7309                    	jnc	.no_err
   2269                                  
-  2270 00000777 C6460E00                	mov	byte [offset_AL+bp],0	; say nothing transferred
+  2270 00000773 C6460E00                	mov	byte [offset_AL+bp],0	; say nothing transferred
   2271                                  
   2272                                  ; Carry is set, what happened?
-  2273 0000077B 80FC81                  	cmp	ah,ERR_81		; first of our new error codes
+  2273 00000777 80FC81                  	cmp	ah,ERR_81		; first of our new error codes
   2274                                  	;;;
-  2275 0000077E EB2E                    	jmp	.error		; for now
+  2275 0000077A EB2E                    	jmp	.error		; for now
   2276                                  %endif
   2277                                  
   2278                                  
   2279                                  .no_err:
-  2280 00000780 8A264200                	mov	ah,[fdc_ctrl_status]	; get ST0 to AH
-  2281 00000784 88E0                    	mov	al,ah			; retain copy in AL
-  2282 00000786 80E4C0                  	and	ah,ST0_IC		; check interrupt code
-  2283 00000789 7424                    	jz	.exit	; Okay is set
-  2284                                  	
-  2285 0000078B B420                    	mov	ah,ERR_controller_failure
-  2286 0000078D A810                    	test	al,ST0_EC
-  2287 0000078F 751D                    	jnz	.error
+  2280 0000077C 8A264200                	mov	ah,[fdc_ctrl_status]	; get ST0 to AH
+  2281 00000780 88E0                    	mov	al,ah			; retain copy in AL
+  2282 00000782 80E4C0                  	and	ah,ST0_IC		; check interrupt code
+  2283 00000785 7424                    	jz	.exit	; Okay is set
+  2284                                  
+  2285 00000787 B420                    	mov	ah,ERR_controller_failure
+  2286 00000789 A810                    	test	al,ST0_EC
+  2287 0000078B 751D                    	jnz	.error
   2288                                  
-  2289 00000791 A04300                  	mov	al,[fdc_ctrl_status+1]	; get ST1 to AL
-  2290 00000794 B402                    	mov	ah,ERR_address_mark_not_found
-  2291 00000796 A801                    	test	al,ST1_MA		; test Missing Address mark
-  2292 00000798 7514                    	jnz	.error
+  2289 0000078D A04300                  	mov	al,[fdc_ctrl_status+1]	; get ST1 to AL
+  2290 00000790 B402                    	mov	ah,ERR_address_mark_not_found
+  2291 00000792 A801                    	test	al,ST1_MA		; test Missing Address mark
+  2292 00000794 7514                    	jnz	.error
   2293                                  
-  2294 0000079A FEC4                    	inc	ah			; Write Protect
-  2295 0000079C A802                    	test	al,ST1_NW		;
-  2296 0000079E 750E                    	jnz	.error
+  2294 00000796 FEC4                    	inc	ah			; Write Protect
+  2295 00000798 A802                    	test	al,ST1_NW		;
+  2296 0000079A 750E                    	jnz	.error
   2297                                  
-  2298 000007A0 FEC4                    	inc	ah			; Sector not Found
-  2299 000007A2 A804                    	test	al,ST1_ND		; No Data
-  2300 000007A4 7508                    	jnz	.error
+  2298 0000079C FEC4                    	inc	ah			; Sector not Found
+  2299 0000079E A804                    	test	al,ST1_ND		; No Data
+  2300 000007A0 7508                    	jnz	.error
   2301                                  
-  2302 000007A6 B410                    	mov	ah,ERR_uncorrectable_CRC_error
-  2303 000007A8 A820                    	test	al,ST1_DE
-  2304 000007AA 7502                    	jnz	.error
+  2302 000007A2 B410                    	mov	ah,ERR_uncorrectable_CRC_error
+  2303 000007A4 A820                    	test	al,ST1_DE
+  2304 000007A6 7502                    	jnz	.error
   2305                                  
-  2306 000007AC B48F                    	mov	ah,ERR_unknown		; may be in ST2
+  2306 000007A8 B48F                    	mov	ah,ERR_unknown		; may be in ST2
   2307                                  
-  2308 000007AE F9                      .error:	Error				; code is in AH
+  2308 000007AA F9                      .error:	Error				; code is in AH
   2309                                  .exit:
-  2310 000007AF 5B595A5E1F07            	popm	bx,cx,dx,si,ds,es
-  2311 000007B5 C3                      	ret
+  2310 000007AB 5B595A5E1F07            	popm	bx,cx,dx,si,ds,es
+  2311 000007B1 C3                      	ret
   2312                                  
   2313                                  
   2314                                  %if SOFT_DEBUG & DUMP
@@ -3240,28 +3214,28 @@
   2327                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2328                                  	global	@enable, @disable
   2329                                  @disable:
-  2330 000007B6 1E50                    	pushm	ax,ds
-  2331 000007B8 9F                      	lahf				; save user flags
-  2332 000007B9 6A40                    	push	bios_data_seg		; universal addressing
-  2333 000007BB 1F                      	popm	ds
-  2334 000007BC FA                      	cli				; guarantee locked operation
-  2335 000007BD FE06AE00                	inc	byte [lock_count]
-  2336 000007C1 9E                      	sahf				; restore user flags
-  2337 000007C2 581F                    	popm	ax,ds
-  2338 000007C4 C3                      	ret
+  2330 000007B2 1E50                    	pushm	ax,ds
+  2331 000007B4 9F                      	lahf				; save user flags
+  2332 000007B5 6A40                    	push	bios_data_seg		; universal addressing
+  2333 000007B7 1F                      	popm	ds
+  2334 000007B8 FA                      	cli				; guarantee locked operation
+  2335 000007B9 FE06AE00                	inc	byte [lock_count]
+  2336 000007BD 9E                      	sahf				; restore user flags
+  2337 000007BE 581F                    	popm	ax,ds
+  2338 000007C0 C3                      	ret
   2339                                  
   2340                                  @enable:
-  2341 000007C5 1E50                    	pushm	ax,ds
-  2342 000007C7 9F                      	lahf				; save user flags
-  2343 000007C8 6A40                    	push	bios_data_seg
-  2344 000007CA 1F                      	popm	ds
-  2345 000007CB FE0EAE00                	dec	byte [lock_count]	; test the lock count
-  2346 000007CF 7501                    	jnz	.5
-  2347 000007D1 FB                      	sti				; lock count went to zero, re-enable
+  2341 000007C1 1E50                    	pushm	ax,ds
+  2342 000007C3 9F                      	lahf				; save user flags
+  2343 000007C4 6A40                    	push	bios_data_seg
+  2344 000007C6 1F                      	popm	ds
+  2345 000007C7 FE0EAE00                	dec	byte [lock_count]	; test the lock count
+  2346 000007CB 7501                    	jnz	.5
+  2347 000007CD FB                      	sti				; lock count went to zero, re-enable
   2348                                  .5:
-  2349 000007D2 9E                      	sahf				; restore user flags
-  2350 000007D3 581F                    	popm	ax,ds
-  2351 000007D5 C3                      	ret
+  2349 000007CE 9E                      	sahf				; restore user flags
+  2350 000007CF 581F                    	popm	ax,ds
+  2351 000007D1 C3                      	ret
   2352                                  
   2353                                  
   2354                                  
@@ -3275,24 +3249,21 @@
   2362                                  ;
   2363                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   2364                                  read_track_id:
-  2365 000007D6 525156                  	pushm	si,cx,dx
+  2365 000007D2 525156                  	pushm	si,cx,dx
   2366                                  
-  2367 000007D9 C6063E0000              	mov	byte [fdc_drv_calib],0	; clear interrupt flags
+  2367 000007D5 C6063E0000              	mov	byte [fdc_drv_calib],0	; clear interrupt flags
   2368                                  
-  2369 000007DE E8DFFD                  	call	make_head_unit		; head/un
-  2370 000007E1 88C4                    	mov	ah,al			; move to AH (second byte of command)
-  2371 000007E3 B04A                    	mov	al,CMD_READ_ID | CMD_MF
-  2372 000007E5 50                      	push	ax			; push the 2-byte command
-  2373 000007E6 89E6                    	mov	si,sp
-  2374 000007E8 8CD2                    	mov	dx,ss			; DX:SI points at command
-  2375 000007EA B90200                  	mov	cx,2			; 2 bytes to READ_ID
-  2376 000007ED E89BF9                  	call 	output_cmd_to_fdc	; issue the command
-  2377 000007F0 58                      	pop	ax			; discard word in stack
+  2369 000007DA E8DFFD                  	call	make_head_unit		; head/un
+  2370 000007DD 88C4                    	mov	ah,al			; move to AH (second byte of command)
+  2371 000007DF B04A                    	mov	al,CMD_READ_ID | CMD_MF
+  2372 000007E1 50                      	push	ax			; push the 2-byte command
+  2373 000007E2 89E6                    	mov	si,sp
+  2374 000007E4 8CD2                    	mov	dx,ss			; DX:SI points at command
+  2375 000007E6 B90200                  	mov	cx,2			; 2 bytes to READ_ID
+  2376 000007E9 E89FF9                  	call 	output_cmd_to_fdc	; issue the command
+  2377 000007EC 58                      	pop	ax			; discard word in stack
   2378                                  
-  2379 000007F1 E846FE                  	call	wait_operation_complete
+  2379 000007ED E846FE                  	call	wait_operation_complete
   2380                                  
-  2381 000007F4 5E595A                  	popm	si,cx,dx
-  2382 000007F7 C3                      	ret
-  2383                                  
-  2384                                  
-  2385                                  
+  2381 000007F0 5E595A                  	popm	si,cx,dx
+  2382 000007F3 C3                      	ret

@@ -1089,14 +1089,12 @@ set_attributes:
 ;	none
 ;========================================================================
 uart_out:
-%if UART_MODE3_SUPPRESS
 	push	ds
 	push	bios_data_seg
 	popm	ds
 	cmp	byte [video_mode],3
 	popm	ds
 	je	.9		; skip output in mode 3 (color)
-%endif
 ;;;	global	uart_out_	; used in debugging mode (C-callable)
 ;;;uart_out_:			; **** label .9 cannot reach if un-commented
 	push	dx

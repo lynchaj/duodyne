@@ -129,7 +129,7 @@ speed_setup:
 ; @timer_init
 ;
 ;       Start the 18.2 Hz clock ticks by initializing
-;       timers 0 & 2    
+;       timers 0 & 2
 ;                               [1 & 2 on prototype boards]
 ;   Call with Xtal frequency in AX
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -145,13 +145,13 @@ speed_setup:
 
         pop     ax
         mov     di,13731
-        
+
         test    al,1            ; test for odd frequency
         jnz     .1
 ; even frequency
         shr     ax,1            ; halve the Xtal frequency
         jmp     .2
-.1:     ; odd 
+.1:     ; odd
         shr     di,1            ; halve the divisor
 .2:
         mov     dx,TIM2+CMPA    ; set the timer 2 max count A
@@ -200,7 +200,7 @@ timer_table:
 
         db_lo   timer0+TCON       ; control register
         dw      tc_EN+tc_nINH+tc_INT+tc_P+tc_CONT
-                                ; EN=1, /INH=1, INT=1, 
+                                ; EN=1, /INH=1, INT=1,
                                 ; RTG=0, P=1, EXT=0, ALT=0, CONT=1
 
 
@@ -217,7 +217,7 @@ timer_table:
 
         db_lo   timer1+TCON       ; control register
         dw      tc_nINH+tc_P+tc_CONT+tc_EXT+tc_INT
-                                ; EN=0, /INH=1, INT=1, 
+                                ; EN=0, /INH=1, INT=1,
                                 ; RTG=0, P=1, EXT=1, ALT=0, CONT=1
 
         db      0               ; end of the table
@@ -262,7 +262,7 @@ timer0_interrupt:	; true timer 0 18.2Hz interrupt
 
 ;%if (ONE_DAY < 0FFFFFFh) && ( ONE_DAY & 255 )
 %if 1
-                
+
         call    fdc_timer_hook
 
 ; the strategy below is that the most frequently travelled path
@@ -274,19 +274,6 @@ timer0_interrupt:	; true timer 0 18.2Hz interrupt
 .9:
 	int	1Ch			; User timer tick interrupt
 
-%if  CVDU_USE_MSDOS_KLUDGE
-	extern	cvdu_kbd_int	; external reference
-	xor	ax,ax
-	mov	ds,ax		; patch the keyboard interrupt vector
-				; on every timer tick!!!
-	mov	word [0Ch*4],cvdu_kbd_int
-	mov	word [0Ch*4+2],cs
-%endif
-
-%if CVDU_USE_KBD_HOOK
-	extern	cvdu_kbd_hook
-	call	cvdu_kbd_hook
-%endif
 
 ; signal EOI (End of Interrupt)
         mov     dx,PIC_EOI              ; EOI register
@@ -335,7 +322,7 @@ timer0_interrupt:	; true timer 0 18.2Hz interrupt
 ;               0Ah     get day count [PS/2]
 ;               0Bh     set day count [PS/2]
 ;               80h     set sound source [PC only]
-;               
+;
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 offset_BP       equ     0
@@ -388,14 +375,14 @@ set_carry:
         jmp     popall
 good_exit:
         and     byte [bp+offset_FLAGS],~1       ; clear the carry
-popall: pop     bp              
+popall: pop     bp
         pop     bx              ; register restores
         pop     ax
         popm    ds
 BIOS_call_1Ch:
         iret
 
-; update CMOS 
+; update CMOS
 ;       AL = ram address (0..29)
 ;       DL = new contents of address
 ;
@@ -428,7 +415,7 @@ updateCMOS:
 ;
 write_enable:
         pushm   ax,dx
-        mov     ax,7            ; 
+        mov     ax,7            ;
         mov     dl,0
         call    rtc_set_loc
         popm    ax,dx
@@ -438,7 +425,7 @@ write_enable:
 ;
 write_protect:
         pushm   ax,dx
-        mov     ax,7            ; 
+        mov     ax,7            ;
         mov     dl,80h
         call    rtc_set_loc
         popm    ax,dx
@@ -541,7 +528,7 @@ fn3:
         mov     dl,dh           ; start the clock
         call    rtc_set_loc
 
-       
+
         mov     ax,8000h | RAM_bits        ; RAM_bits location (4)
         call    rtc_get_loc
         and     al,0FFh^RAM_bits_DST         ; RAM_bits_DST zeroed

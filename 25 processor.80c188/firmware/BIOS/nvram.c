@@ -48,11 +48,6 @@
 #define BCD(x) (byte)((x)<100?(((x)/10)<<4)|((x)%10):0xFF)
 #define toupper(a) ((a)>='a'&&(a)<='z'?(a)-('a'-'A'):(a))
 
-int setup_spp (int ninst);
-byte setup_spp_b (byte baddr);
-void __cdecl spp_init(word base, word divisor);
-
-
 enum {NO_disk=0, PPI_type=2, DIDE0_type=4, DIDE1_type=6, DSD_type=8,
 	V3IDE8_type=10, DISKIO_type=12, MFPIC_type=14 };
 
@@ -267,72 +262,6 @@ void Time(void)
 }
 
 
-/***** start RAC *****/
-int setup_spp (int ninst)
-{
-   char line[20];
-   int okay;
-
-   do {
-      printf("Number (0..1) of 2S1P Multiport IO Boards [%d]: ", ninst);
-      GETLINE(line);
-      if (line[0]) ninst = atoi(line);
-      okay = (ninst >= 0  &&  ninst <= 1);
-   } while (!okay);
-
-   return ninst;
-}
-
-
-byte setup_spp_b (byte baddr)
-{
-	int i;
-#if 0
-static const char * const base_addr[8] = {"00", "20", "40", "60", "80", "A0", "C0", "E0"};
-/* N.B.  device 0x400 is the EMM4MEM board */
-
-	byte line[10];
-
-	while (1) {
-		printf ("2S1P Base address (in hex) [%s]: ", base_addr[baddr]);
-		GETLINE(line);
-#if 1
-		if (line[0] == '\0') return baddr;
-
-		i = strtoul(line, NULL, 16);
-		if (i & 0x1F) i = 0;  /* zero is the EMM4MEM board(s) */
-
-		i = (i & 0xFF)>>5;
-		if (i>0 && i<8) break;
-#else
-		if (line[0] == '\0')
-			break;
-		for (i = 0; i < 8; i++) {
-			if (!strcasecmp (line, base_addr[i])) {
-				baddr = i;
-				break;
-			}
-		}
-		if (i != 8)
-			break;
-#endif
-		{
-			printf ("Invalid selection, supported values are:");
-			for (i = 0; i < 8; i++)
-				printf (" %s", base_addr[i]);
-			printf ("\n");
-		}
-	}
-#else
-	i = 6;
-#endif
-	printf("2S1P board base address set to 0x%04X\n", (i<<5)+0x400);
-	return i;
-}
-/***** end RAC *****/
-
-
-
 
 const char * const rates[8] = {"1200", "2400", "4800", "9600", "19200", "38400", "57600", "115200"};
 
@@ -439,6 +368,8 @@ int __fastcall nvram_check(void)
 		checksum = stepCRC7(chr, checksum);
 	}
 	chr = rtc_get_loc(RAM_checksum | RAM);
+
+   printf("Checksum=%d(%d)\n\r",checksum,chr);
 
 	return checksum != chr;
 }
@@ -813,32 +744,6 @@ void __fastcall nvram_apply(void)
 	} num_disk;
 
 	printf("\n");
-/***** start RAC *****/
-/* this might be a good spot to retrieve the 2S1P configuration and initialize*/
-/* the board. It's not a perfect test, but the only options are 0 (no boards) */
-/* or 1 (one board) so it works. Port number is stored as an array index, not */
-/* a port number. */
-	spp_enab = rtc_get_loc(RAM_spp_inst | RAM);
-	if (spp_enab){
-		b_divisor = BAUD_DIVISOR;
-		spp_port = (rtc_get_loc(RAM_spp_base | RAM) * 0x20) + 0x400;
-		printf("SPP Base address 0x%04x\n", spp_port);
-		printf("SPP Divisor 0x%04x\n", b_divisor);
-		bios_data_area_ptr->serial_ports[0] = spp_port;
-		bios_data_area_ptr->serial_ports[1] = spp_port + 8;
-		bios_data_area_ptr->parallel_ports[0] = spp_port + 0x10;
-		bios_data_area_ptr->equipment_flag.com_ports = 2;
-		bios_data_area_ptr->equipment_flag.printers = 1;
-
-		spp_init(spp_port, b_divisor);
-
-		spp_port += 8;			// initialize port 2
-		spp_init(spp_port, b_divisor);
-		printf("SPP Initialized\n\n");
-
-	// not sure if initializing the LP is required...
-	}
-/***** end RAC *****/
 
 #ifdef FLAG
 /* print the equipment flag */
@@ -970,11 +875,6 @@ void __fastcall nvram_setup(void)
     Date(ram);		/* RAM[1] is the century in BCD; e.g., 0x19 or 0x20 */
     Time();		/* show/set the time */
     ram[RAM_trickle] = set_battery(0);	/* RAM[0] is the state of the trickle charger */
-
-/***** start RAC *****/
-    ram[RAM_spp_inst] = i = setup_spp(ram[RAM_spp_inst]);
-    ram[RAM_spp_base] = i>0 ? setup_spp_b(ram[RAM_spp_base]) : 0;
-/***** end RAC *****/
 
     Floppy(ram);
 	 printf("   Fixed Disk Setup\n");
