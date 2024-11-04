@@ -1,0 +1,213 @@
+Open Watcom Linker Version 1.9
+Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
+Created on:       24/11/03 18:14:25
+Executable Image: rbios.exe
+creating a DOS executable
+
+
+                        +------------+
+                        |   Groups   |
+                        +------------+
+
+Group                           Address              Size
+=====                           =======              ====
+
+DGROUP                          0488:000e            000009c2
+
+
+
+                        +--------------+
+                        |   Segments   |
+                        +--------------+
+
+Segment                Class          Group          Address         Size
+=======                =====          =====          =======         ====
+
+_TEXT                  CODE           AUTO           0000:0000       0000488d
+CONST                  DATA           DGROUP         0488:000e       00000936
+CONST2                 DATA           DGROUP         051c:0004       00000080
+_DATA                  DATA           DGROUP         0525:0000       00000000
+_BSS                   BSS            DGROUP         0525:0000       00000000
+
+
+                        +----------------+
+                        |   Memory Map   |
+                        +----------------+
+
+* = unreferenced symbol
++ = symbol only referenced locally
+
+Address        Symbol
+=======        ======
+
+Module: copyrght.obj(copyrght.asm)
+0000:0000*     begin_here
+0000:0003      ident2
+0000:0132      _unique
+0000:00f0*     FPEM_segment
+Module: rbios.obj(rbios.asm)
+0000:0150      cold_boot
+0000:03da*     get_vector
+0000:03ed*     set_vector
+0000:0402      cpu_table_init
+0000:041c      @divLS
+0000:0433      @remLS
+0000:0446      @mulLS
+0000:0459*     @microsecond
+0000:045b      microsecond
+0000:0461*     ticktime
+0000:06d0      @rtc_get_loc
+0000:06d0      rtc_get_loc
+0000:0701      @rtc_set_loc
+0000:0701      rtc_set_loc
+0000:0732*     lites
+0488:013c      _bios_data_area_ptr
+Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/cprintf.c)
+0000:0920*     nstring_
+0000:0952      _cprintf
+Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/nvram.c)
+0488:09a0+     _rates
+0000:0c62+     set_battery_
+0000:0d94+     idow_
+0000:0e94+     Date_
+0000:1140+     Time_
+0000:1306+     setup_serial_
+0000:13c6+     floppy_ask_
+0000:1441+     Floppy_
+0000:149d      @nvram_check
+0000:1513+     @compute_nvram_checksum
+0000:155a+     setup_ppide_
+0000:1598+     setup_fixed_boot_
+0000:162c+     setup_boot_sig_check_
+0000:16a8+     putstring_
+0000:1724+     p_bda_fx_
+0000:1776+     @setup_fixed_disk
+0000:1a44+     put_char_array_
+0000:1a6b+     sd_info_
+0000:1d20+     @setup_SD_card
+0000:1d4c      @nvram_apply
+0000:1f80      @nvram_setup
+0000:2063      @nvram_get_video
+Module: abios.lib(int10ser.asm)
+0000:2082      BIOS_call_10h
+0000:25c6      video_init
+0000:281d      @VIDEO_putchar
+0000:281d      @uart_putchar
+Module: abios.lib(int16ser.asm)
+0000:282a      BIOS_call_16h
+0000:28ec      uart_int
+0000:29b5      keyboard_init
+0000:29df      @uart_getchar
+Module: abios.lib(timers.asm)
+0000:29e6      _cpu_speed
+0000:2a14      @timer_init
+0000:2a58*     timer2_interrupt
+0000:2a5d      timer1_interrupt
+0000:2a60      timer0_interrupt
+0000:2aa4      BIOS_call_1Ah
+0000:2adf      BIOS_call_1Ch
+Module: abios.lib(floppy.asm)
+0000:2c0e      BIOS_call_13h
+0000:2c8e*     undefined
+0000:2d5b*     get_msr
+0000:2d62*     wait12
+0000:2d7c*     fdc_ready_for_command
+0000:2da1*     fdc_ready_for_result
+0000:2dc6*     output_byte_to_fdc
+0000:2dd8*     input_byte_from_fdc
+0000:2de8*     output_cmd_to_fdc
+0000:2e12*     input_result_from_fdc
+0000:2e40      fdc_interrupt_level
+0000:2e95      fdc_timer_hook
+0000:2eb3*     fdc_wait_seek_done
+0000:2eec      @floppy_init
+0000:2efb*     fn00
+0000:2fe1*     fn02
+0000:2feb*     fn03
+0000:2ff5*     fn04
+0000:2ffd*     rwv_common
+0000:3065*     rwv_common.marker
+0000:3075*     end_rwv
+0000:30fa      dma0_interrupt
+0000:319b*     check_DL
+0000:31b2*     get_disk_type
+0000:31c1*     get_media
+0000:31cd*     set_media_pointer
+0000:31f8*     Specify
+0000:3240*     motor_on
+0000:32a5*     xfer_read_sector
+0000:3320*     xfer_format_track
+0000:3320*     xfer_write_sector
+0000:3355*     xfer_verify_sector
+0000:3386*     recalibrate
+0000:33d9*     Seek
+0000:343d*     Check_RW_Status
+0000:353c*     @disable
+0000:354d*     @enable
+Module: abios.lib(ide.asm)
+0000:3582      FIXED_BIOS_call_13h
+0000:35b5*     FIXED_timeout
+0000:35b9*     FIXED_error
+0000:35bb*     FIXED_exit_AH
+0000:35c5*     _get_IDE_num
+0000:35c5      get_IDE_num
+0000:35e0*     fixed_device_code
+Module: abios.lib(int14ser.asm)
+0000:35e8      BIOS_call_14h
+0000:36b8*     _spp_init
+Module: abios.lib(misc15.asm)
+0000:3700      BIOS_call_15h
+0000:37cf*     set_count
+0000:386f      rtc_interrupt
+Module: abios.lib(int17par.asm)
+0000:38aa      BIOS_call_17h
+Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/libc.c)
+0000:390e      strlen_
+0000:3921*     strchr_
+0000:3948      atoi_
+0000:396e      _small_code_
+0000:396f      log2_
+Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/sio.c)
+0000:399a+     putchar_
+0000:39bb+     putline_
+0000:39cf+     getchar_
+0000:3a01      getline_
+0488:09c2+     _uart_echo
+Module: abios.lib(sdcard.asm)
+0000:3ac8*     SDcard_BIOS_call_13h
+0000:3ad2*     DSD_entry
+0000:3b75*     SDputchar
+0000:3b8a*     SDgetchar
+0000:3c2c*     @SDinit
+0000:3c38      @SDinitcard
+0000:3d68      _DSDgetInfo
+0000:3ddc*     stepCRC7
+0000:3ddc      @stepCRC7
+0000:3e5a*     verify_crc
+0000:3fe1*     crc16
+0000:4233      _SDcsd
+Module: abios.lib(ppide.asm)
+0000:4436      _PPIDE_READ_ID
+0000:446c*     _PPIDE_READ_SECTOR
+0000:44d5*     _PPIDE_WRITE_SECTOR
+0000:4613*     PPIDE_BIOS_call_13h
+0000:461d      PPIDE_entry
+Warning! W1014: stack segment not found
+
+
+                        +--------------------+
+                        |   Libraries Used   |
+                        +--------------------+
+
+abios.lib
+cbios.lib
+
+
+                        +-----------------------+
+                        |   Linker Statistics   |
+                        +-----------------------+
+
+Stack size:  0400 (1024.)
+Memory size:  5250 (21072.)
+Entry point address: 0000:0000
+Link time: 00:00.05

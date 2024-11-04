@@ -8,6 +8,9 @@ Based on the Retrobew Computer SBC-188 board by John Coffman
 ### BIOS
  The firmware in the BIOS folder is a subset of the SBC-188 firmware.   It currently runs MS-DOS 3.3 and supports PPIDE drives on the Duodyne Disk IO card.  It requires a RAMROM card and can be used as a primary or secondary CPU.   The RAMROM RTC is supported.
  
+ Disk IO P9 must be jumpered for DREQ0 and J7 for EIRQx (TBD)
+ UART must be jumpered for EIRQx (tbd)
+ 
 #### BIOS ToDo:
 * DiskIO Floppy Drive Support
 * Checksum Bug.
@@ -74,7 +77,7 @@ There are also two test roms provided.
          J7 i2c IRQ Selection
         
          J8 UART IRQ Selection
-            (BIOS Requires INT0)
+            (BIOS Requires INTx - tbd)
       
 ## BOM (V0.80)      
 Qty|Reference(s)|Value

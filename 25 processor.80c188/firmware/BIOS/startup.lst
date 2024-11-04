@@ -510,15 +510,15 @@
    212                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    213                              <1> ; Floppy controller (Duodyne Disk IO)
    214                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   215                              <1> FDC	        equ	IO_BASE+0200H
+   215                              <1> FDC	        equ	IO_BASE+0080H
    216                              <1> FDC_MSR         equ     FDC
-   217                              <1> FDC_DATA        equ     FDC_MSR+1
-   218                              <1> FDC_DACK        equ	FDC+10H
-   219                              <1> FDC_LDOR	equ	FDC+20H
-   220                              <1> FDC_LDCR	equ	FDC+30H
-   221                              <1> FDC_TC	        equ	FDC+40H
-   222                              <1> FDC_RES	        equ	FDC+40H
-   223                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+   217                              <1> FDC_DATA        equ     FDC+1
+   218                              <1> FDC_TC	        equ	FDC+2
+   219                              <1> FDC_RES	        equ	FDC+3
+   220                              <1> FDC_LDCR	equ	FDC+5
+   221                              <1> FDC_LDOR	equ	FDC+6
+   222                              <1> FDC_DACK        equ	FDC+6
+   223                              <1> FDC_DACK_TC     equ     FDC+7
    224                              <1> 
    225                              <1> 
    226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -741,9 +741,9 @@
     75 000000A2 EE                      	out	dx,al
     76                                  %endif
     77                                  
-    78 000000A3 B606                    init1:	mov	dh,FDC>>8		; Local I/O byte setup
+    78 000000A3 B606                    init1:	mov	dh,CTRL259>>8		; Local I/O byte setup
     79 000000A5 BE[6701]                	mov	si,table1
-    80 000000A8 B90D00                  	mov	cx,table1_len
+    80 000000A8 B90C00                  	mov	cx,table1_len
     81                                  init1_loop:
     82 000000AB AC                      	lodsb
     83 000000AC 88C2                    	mov	dl,al
@@ -773,7 +773,7 @@
    107 000000C0 BE1800                  	mov	si,0x18
    108 000000C3 B90080                  	mov	cx,len_test0		; word count
    109 000000C6 BD[CC00]                	mov	bp,.1ret
-   110 000000C9 E9C200                  	jmp	testmem00		; return through BP
+   110 000000C9 E9C000                  	jmp	testmem00		; return through BP
    111                                  .1ret:
    112 000000CC 7272                    	jc	stop
    113                                  
@@ -785,7 +785,7 @@
    119 000000D7 BE1C00                  	mov	si,0x1C
    120 000000DA B90080                  	mov	cx,len_test0		; word count
    121 000000DD BD[E300]                	mov	bp,.2ret
-   122 000000E0 E9AB00                  	jmp	testmem00
+   122 000000E0 E9A900                  	jmp	testmem00
    123                                  .2ret:
    124 000000E3 725B                    	jc	stop
    125                                  
@@ -809,7 +809,7 @@
    143 000000FC 8EC0                    	mov	es,ax
    144 000000FE B80100                  	mov	ax,0001
    145 00000101 B90080                  	mov	cx,len_test0
-   146 00000104 E88600                  	call	testmem0
+   146 00000104 E88400                  	call	testmem0
    147                                  %if 0
    148                                  	mov	bp,.3ret
    149                                  	jmp	testmem00
@@ -840,7 +840,7 @@
    174                                  
    175                                  .9:
    176 0000011E B6FF                            mov     dh,cpu_umcs>>8          ; high byte of I/O address
-   177 00000120 BE[8101]                        mov     si,table2               ; address of setup table
+   177 00000120 BE[7F01]                        mov     si,table2               ; address of setup table
    178 00000123 8CC8                            mov     ax,cs                   ; get Code Segment
    179 00000125 8ED8                            mov     ds,ax                   ; for LODS
    180 00000127 B90400                          mov     cx,table2_len           ; count of table items
@@ -959,142 +959,138 @@
     95 0000016F 3C                  <1>  db (%1)&255
    279 00000170 01                      		db	1	; use UART oscillator
    280                                  
-   281                                  		db_lo	FDC_RES
-    95 00000171 40                  <1>  db (%1)&255
-   282 00000172 01                      		db	1	; reset is active high
-   283                                  
-   284                                  ; now add the default (9600bps/8250 UART setup)
-   285                                  		db_lo	uart_ier
-    95 00000173 81                  <1>  db (%1)&255
-   286 00000174 00                      		db	0	; disable all interrupts
+   281                                  ; now add the default (9600bps/8250 UART setup)
+   282                                  		db_lo	uart_ier
+    95 00000171 81                  <1>  db (%1)&255
+   283 00000172 00                      		db	0	; disable all interrupts
+   284                                  
+   285                                  		db_lo	uart_lcr
+    95 00000173 83                  <1>  db (%1)&255
+   286 00000174 80                      		db	80h	; DLAB latch access
    287                                  
-   288                                  		db_lo	uart_lcr
-    95 00000175 83                  <1>  db (%1)&255
-   289 00000176 80                      		db	80h	; DLAB latch access
+   288                                  		db_lo	uart_dll
+    95 00000175 80                  <1>  db (%1)&255
+   289 00000176 0C                      		db	12	; divisor of 12 == 9600bps
    290                                  
-   291                                  		db_lo	uart_dll
-    95 00000177 80                  <1>  db (%1)&255
-   292 00000178 0C                      		db	12	; divisor of 12 == 9600bps
+   291                                  		db_lo	uart_dlm
+    95 00000177 81                  <1>  db (%1)&255
+   292 00000178 00                      		db	0	; high order divisor
    293                                  
-   294                                  		db_lo	uart_dlm
-    95 00000179 81                  <1>  db (%1)&255
-   295 0000017A 00                      		db	0	; high order divisor
+   294                                  		db_lo	uart_lcr
+    95 00000179 83                  <1>  db (%1)&255
+   295 0000017A 07                      		db	7	; disable DLAB, 8n2 char. mode
    296                                  
-   297                                  		db_lo	uart_lcr
-    95 0000017B 83                  <1>  db (%1)&255
-   298 0000017C 07                      		db	7	; disable DLAB, 8n2 char. mode
+   297                                  		db_lo	uart_fcr
+    95 0000017B 82                  <1>  db (%1)&255
+   298 0000017C 07                      		db	7	; FIFO enable, FIFOs reset
    299                                  
-   300                                  		db_lo	uart_fcr
-    95 0000017D 82                  <1>  db (%1)&255
-   301 0000017E 07                      		db	7	; FIFO enable, FIFOs reset
-   302                                  
-   303                                  		db_lo	uart_mcr
-    95 0000017F 84                  <1>  db (%1)&255
-   304 00000180 0B                      		db	0Bh	; OUT2, nOUT1, RTS, DTR
-   305                                  		;		RESET, CLK LO, RTS, DATA HI
+   300                                  		db_lo	uart_mcr
+    95 0000017D 84                  <1>  db (%1)&255
+   301 0000017E 0B                      		db	0Bh	; OUT2, nOUT1, RTS, DTR
+   302                                  		;		RESET, CLK LO, RTS, DATA HI
+   303                                  
+   304                                  table1_len	equ	($-table1)/2
+   305                                  
    306                                  
-   307                                  table1_len	equ	($-table1)/2
-   308                                  
+   307                                  ; the setup for the SBC v1/v2 memory selects
+   308                                  ;
    309                                  
-   310                                  ; the setup for the SBC v1/v2 memory selects
-   311                                  ;
-   312                                  
-   313                                  table2:
-   314                                  %if L_RAM>0
-   315                                          db_lo   cpu_lmcs
-    95 00000181 A2                  <1>  db (%1)&255
-   316 00000182 FC3F                            dw      00038h | (L_RAM*64-1)&3FC0h | RAM_WS&3 | Ignore
-   317                                  %endif
+   310                                  table2:
+   311                                  %if L_RAM>0
+   312                                          db_lo   cpu_lmcs
+    95 0000017F A2                  <1>  db (%1)&255
+   313 00000180 FC3F                            dw      00038h | (L_RAM*64-1)&3FC0h | RAM_WS&3 | Ignore
+   314                                  %endif
+   315                                  
+   316                                  	db_lo	cpu_umcs		; set Config.asm wait states
+    95 00000182 A0                  <1>  db (%1)&255
+   317 00000183 3DF0                    	dw      0C038h | (256-CHIP)*64 | ROM_WS&3 | Ignore
    318                                  
-   319                                  	db_lo	cpu_umcs		; set Config.asm wait states
-    95 00000184 A0                  <1>  db (%1)&255
-   320 00000185 3DF0                    	dw      0C038h | (256-CHIP)*64 | ROM_WS&3 | Ignore
+   319                                          db_lo   cpu_mmcs
+    95 00000185 A6                  <1>  db (%1)&255
+   320 00000186 FC41                            dw      001F8h | (L_RAM*64) | RAM_WS&3 | Ignore
    321                                  
-   322                                          db_lo   cpu_mmcs
-    95 00000187 A6                  <1>  db (%1)&255
-   323 00000188 FC41                            dw      001F8h | (L_RAM*64) | RAM_WS&3 | Ignore
+   322                                          db_lo   cpu_mpcs
+    95 00000188 A8                  <1>  db (%1)&255
+   323 00000189 BDA0                            dw      080B8h | (M_RAM*32) | LCL_IO_WS&3 | Ignore
    324                                  
-   325                                          db_lo   cpu_mpcs
-    95 0000018A A8                  <1>  db (%1)&255
-   326 0000018B BDA0                            dw      080B8h | (M_RAM*32) | LCL_IO_WS&3 | Ignore
+   325                                  table2_len      equ     ($-table2)/3
+   326                                  
    327                                  
-   328                                  table2_len      equ     ($-table2)/3
+   328                                  
    329                                  
    330                                  
-   331                                  
-   332                                  
-   333                                  
-   334                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   335                                  ; testmem0 -- simple test of memory
-   336                                  ;
-   337                                  ;  Enter with:
-   338                                  ;	AX	16-bit pattern
-   339                                  ;	DS:SI	start address to test
-   340                                  ;	CX	word count to test
-   341                                  ;
-   342                                  ;  Exit with:
-   343                                  ;	Carry clear on no error
-   344                                  ;	Carry set if there is an error
-   345                                  ;
-   346                                  ;	CX,SI,  DS,SS are preserved
-   347                                  ;
-   348                                  ;  Registers trashed:
-   349                                  ;	direction flag is cleared
-   350                                  ;	BP	used for return
-   351                                  ;	ES
-   352                                  ;	AX
-   353                                  ;	BX
-   354                                  ;	DX
-   355                                  ;	DI
-   356                                  ;
-   357                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   358                                  testmem0:
-   359 0000018D 5D                      	pop	bp		; may use call if stack is set up
-   360                                  testmem00:			; entry if there is no stack
-   361 0000018E FC                      	cld
-   362 0000018F 8CDA                    	mov	dx,ds		; make sure ES==DS
-   363 00000191 8EC2                    	mov	es,dx		; **
-   364 00000193 89C2                    	mov	dx,ax
-   365 00000195 89CB                    	mov	bx,cx		; save word count
-   366 00000197 89F7                    	mov	di,si		; save start pointer
-   367 00000199 F8                      	clc			; always clear the carry
-   368                                  .1:
-   369 0000019A AB                      	stosw	; ES:[DI]	; store a word
-   370 0000019B D1D0                    	rcl	ax,1		; rotate 17-bit pattern
-   371 0000019D E2FB                    	loop	.1		; count through words
-   372                                  
-   373 0000019F 89D9                    	mov	cx,bx		; restore count
-   374 000001A1 89F7                    	mov	di,si		; restore start address
-   375 000001A3 F8                      	clc			; clear the carry
-   376                                  ; for the compare, the pattern is in DX and Carry
-   377                                  .2:
-   378 000001A4 9F                      	lahf			; save state of the Carry
-   379 000001A5 3B14                    	cmp	dx,[si]		; compare
-   380 000001A7 750C                    	jne	short .3	; exit on error
-   381 000001A9 46                      	inc	si
-   382 000001AA 46                      	inc	si
-   383 000001AB 9E                      	sahf			; restore the carry
-   384 000001AC D1D2                    	rcl	dx,1		; rotate 17-bit pattern
-   385 000001AE E2F4                    	loop	.2
-   386                                  
-   387 000001B0 F8                      	clc			; no error
-   388 000001B1 89FE                    	mov	si,di		; restore SI
-   389 000001B3 FFE5                    	jmp	bp
-   390                                  .3:
-   391 000001B5 F9                      	stc			; error return
-   392 000001B6 FFE5                    	jmp	bp	; SI is error word, DX is expected value
-   393                                  
-   394                                  
-   395                                  
-   396 000001B8 FF<rep 38h>                     setloc  startuplength-16
-   397                                  start:
-   398 000001F0 EA[0000]E0FF                    jmp     startupseg:init0
-   399                                  
-   400 000001F5 31302F32372F323400      	db	DATE_STRING0, 0
-   401                                  ;  must be at F000:FFFE hex
-   402 000001FE FE                      	db	MODEL_BYTE
-   403 000001FF FF                      	db	0FFh
-   404                                  
-   405                                  
-   406                                  
-   407                                  ; At power up or reset, execution starts at label 'start'.
+   331                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   332                                  ; testmem0 -- simple test of memory
+   333                                  ;
+   334                                  ;  Enter with:
+   335                                  ;	AX	16-bit pattern
+   336                                  ;	DS:SI	start address to test
+   337                                  ;	CX	word count to test
+   338                                  ;
+   339                                  ;  Exit with:
+   340                                  ;	Carry clear on no error
+   341                                  ;	Carry set if there is an error
+   342                                  ;
+   343                                  ;	CX,SI,  DS,SS are preserved
+   344                                  ;
+   345                                  ;  Registers trashed:
+   346                                  ;	direction flag is cleared
+   347                                  ;	BP	used for return
+   348                                  ;	ES
+   349                                  ;	AX
+   350                                  ;	BX
+   351                                  ;	DX
+   352                                  ;	DI
+   353                                  ;
+   354                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   355                                  testmem0:
+   356 0000018B 5D                      	pop	bp		; may use call if stack is set up
+   357                                  testmem00:			; entry if there is no stack
+   358 0000018C FC                      	cld
+   359 0000018D 8CDA                    	mov	dx,ds		; make sure ES==DS
+   360 0000018F 8EC2                    	mov	es,dx		; **
+   361 00000191 89C2                    	mov	dx,ax
+   362 00000193 89CB                    	mov	bx,cx		; save word count
+   363 00000195 89F7                    	mov	di,si		; save start pointer
+   364 00000197 F8                      	clc			; always clear the carry
+   365                                  .1:
+   366 00000198 AB                      	stosw	; ES:[DI]	; store a word
+   367 00000199 D1D0                    	rcl	ax,1		; rotate 17-bit pattern
+   368 0000019B E2FB                    	loop	.1		; count through words
+   369                                  
+   370 0000019D 89D9                    	mov	cx,bx		; restore count
+   371 0000019F 89F7                    	mov	di,si		; restore start address
+   372 000001A1 F8                      	clc			; clear the carry
+   373                                  ; for the compare, the pattern is in DX and Carry
+   374                                  .2:
+   375 000001A2 9F                      	lahf			; save state of the Carry
+   376 000001A3 3B14                    	cmp	dx,[si]		; compare
+   377 000001A5 750C                    	jne	short .3	; exit on error
+   378 000001A7 46                      	inc	si
+   379 000001A8 46                      	inc	si
+   380 000001A9 9E                      	sahf			; restore the carry
+   381 000001AA D1D2                    	rcl	dx,1		; rotate 17-bit pattern
+   382 000001AC E2F4                    	loop	.2
+   383                                  
+   384 000001AE F8                      	clc			; no error
+   385 000001AF 89FE                    	mov	si,di		; restore SI
+   386 000001B1 FFE5                    	jmp	bp
+   387                                  .3:
+   388 000001B3 F9                      	stc			; error return
+   389 000001B4 FFE5                    	jmp	bp	; SI is error word, DX is expected value
+   390                                  
+   391                                  
+   392                                  
+   393 000001B6 FF<rep 3Ah>                     setloc  startuplength-16
+   394                                  start:
+   395 000001F0 EA[0000]E0FF                    jmp     startupseg:init0
+   396                                  
+   397 000001F5 31302F32372F323400      	db	DATE_STRING0, 0
+   398                                  ;  must be at F000:FFFE hex
+   399 000001FE FE                      	db	MODEL_BYTE
+   400 000001FF FF                      	db	0FFh
+   401                                  
+   402                                  
+   403                                  
+   404                                  ; At power up or reset, execution starts at label 'start'.

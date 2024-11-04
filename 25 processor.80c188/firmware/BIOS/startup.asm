@@ -75,7 +75,7 @@ init0_loop:
 	out	dx,al
 %endif
 
-init1:	mov	dh,FDC>>8		; Local I/O byte setup
+init1:	mov	dh,CTRL259>>8		; Local I/O byte setup
 	mov	si,table1
 	mov	cx,table1_len
 init1_loop:
@@ -277,9 +277,6 @@ table1:
 
 		db_lo	T1OSC18
 		db	1	; use UART oscillator
-
-		db_lo	FDC_RES
-		db	1	; reset is active high
 
 ; now add the default (9600bps/8250 UART setup)
 		db_lo	uart_ier

@@ -518,15 +518,15 @@
    220                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    221                              <1> ; Floppy controller (Duodyne Disk IO)
    222                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   223                              <1> FDC	        equ	IO_BASE+0200H
+   223                              <1> FDC	        equ	IO_BASE+0080H
    224                              <1> FDC_MSR         equ     FDC
-   225                              <1> FDC_DATA        equ     FDC_MSR+1
-   226                              <1> FDC_DACK        equ	FDC+10H
-   227                              <1> FDC_LDOR	equ	FDC+20H
-   228                              <1> FDC_LDCR	equ	FDC+30H
-   229                              <1> FDC_TC	        equ	FDC+40H
-   230                              <1> FDC_RES	        equ	FDC+40H
-   231                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+   225                              <1> FDC_DATA        equ     FDC+1
+   226                              <1> FDC_TC	        equ	FDC+2
+   227                              <1> FDC_RES	        equ	FDC+3
+   228                              <1> FDC_LDCR	equ	FDC+5
+   229                              <1> FDC_LDOR	equ	FDC+6
+   230                              <1> FDC_DACK        equ	FDC+6
+   231                              <1> FDC_DACK_TC     equ     FDC+7
    232                              <1> 
    233                              <1> 
    234                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2731,7 +2731,7 @@
   1197 000005F9 546869732042494F53-             db      "This BIOS copy was built at ",__TIME__," ",TIMEZONE
   1197 00000602 20636F707920776173-
   1197 0000060B 206275696C74206174-
-  1197 00000614 2031363A31383A3336-
+  1197 00000614 2031393A32353A3539-
   1197 0000061D 20435354           
   1198 00000621 206F6E20323032342D-             db      " on ", __DATE__
   1198 0000062A 31312D3033         
