@@ -704,11 +704,16 @@ interrupt_table:
 	dw	end_of_interrupt
 %endif
 
-	db	0Dh			; INT1- external bus INT
-	dw	end_of_interrupt
-	db	0Fh
+	db	0Dh			; INT1- FDC
 	extern	fdc_interrupt_level
-	dw	fdc_interrupt_level	; INT3 - FDC
+	dw	fdc_interrupt_level	; INT1
+
+	db	0Eh			; INT1-
+	dw	end_of_interrupt
+
+	db	0Fh
+	dw	end_of_interrupt
+
 
 	db	10h			; BIOS - Video display services
 	extern	BIOS_call_10h

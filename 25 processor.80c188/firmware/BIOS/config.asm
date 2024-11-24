@@ -84,9 +84,6 @@ TBASIC          equ     1		; default is 1
 FPEM            equ     1               ; default is 1
 %endif
 
-; Define the maximum number of EMM (4MEM) boards supported
-EMM_BOARDS      equ     0
-
 ; Should the Floating Point Emulator use temporary storage in the EBDA
 ; or at locations 0280h..3FFh in low memory?
 %if SOFT_DEBUG
@@ -100,18 +97,6 @@ FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
 %ifndef CHIP
 CHIP            equ     64
 %endif
-
-; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-; Set to 1 for the SBC-188 v1.0 and later production boards
-;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-
-; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-; If the wiring update is installed, or you have a later board, then
-; set this to 0.  If you are using the software workaround, then set this
-; to 1.  The rev 1.0 board has this fix already.
-NEED_TIMER_FIX  equ     0               ; have revised hardware
-;NEED_TIMER_FIX  equ     1               ; use workaround
 
 ; Define the UART oscillator speed
 UART_OSC        equ     1843200         ; 1.8432 Mhz is specified

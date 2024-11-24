@@ -122,101 +122,86 @@
    122                              <1> FPEM            equ     1               ; default is 1
    123                              <1> %endif
    124                              <1> 
-   125                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   126                              <1> EMM_BOARDS      equ     0
-   127                              <1> 
-   128                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   129                              <1> ; or at locations 0280h..3FFh in low memory?
-   130                              <1> %if SOFT_DEBUG
-   131                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   132                              <1> %else
-   133                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   134                              <1> %endif
-   135                              <1> 
-   136                              <1> ; Define the size of the EPROM that is to be installed on the system
-   137                              <1> ; It may be larger than the actual ROM image to be generated.
-   138                              <1> %ifndef CHIP
-   139                              <1> CHIP            equ     64
-   140                              <1> %endif
+   125                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   126                              <1> ; or at locations 0280h..3FFh in low memory?
+   127                              <1> %if SOFT_DEBUG
+   128                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   129                              <1> %else
+   130                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   131                              <1> %endif
+   132                              <1> 
+   133                              <1> ; Define the size of the EPROM that is to be installed on the system
+   134                              <1> ; It may be larger than the actual ROM image to be generated.
+   135                              <1> %ifndef CHIP
+   136                              <1> CHIP            equ     64
+   137                              <1> %endif
+   138                              <1> 
+   139                              <1> ; Define the UART oscillator speed
+   140                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
    141                              <1> 
-   142                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   143                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   144                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   145                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   146                              <1> 
-   147                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   148                              <1> ; If the wiring update is installed, or you have a later board, then
-   149                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   150                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   151                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   152                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
-   153                              <1> 
-   154                              <1> ; Define the UART oscillator speed
-   155                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   142                              <1> 
+   143                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   144                              <1> ; end of the User configuration
+   145                              <1> ;       Do Not modify anything below this point
+   146                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   147                              <1> 
+   148                              <1> ; Define existence of any uart chip
+   149                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   150                              <1> startuplength   equ     512                     ; may be up to 1024
+   151                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   152                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   153                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   154                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   155                              <1> 
    156                              <1> 
-   157                              <1> 
-   158                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   159                              <1> ; end of the User configuration
-   160                              <1> ;       Do Not modify anything below this point
-   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   162                              <1> 
-   163                              <1> ; Define existence of any uart chip
-   164                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   165                              <1> startuplength   equ     512                     ; may be up to 1024
-   166                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   167                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   168                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   169                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   170                              <1> 
-   171                              <1> 
-   172                              <1> %define ARG(n) [bp+2+(n)*2]
-   173                              <1> 
-   174                              <1> %macro  check   1.nolist
-   175                              <1>  %if (%1)
-   176                              <1>    %error Check Failure: %1
-   177                              <1>  %endif
-   178                              <1> %endm
-   179                              <1> %macro  range   3.nolist
-   180                              <1>  %if (%1)<(%2)
-   181                              <1>    %error Out of Range: %1
-   182                              <1>  %elif (%1)>(%3)
-   183                              <1>    %error Out of Range: %1
-   184                              <1>  %endif
-   185                              <1> %endm
-   186                              <1> _terminal equ UART
-   187                              <1>  check   RAM_DOS&15
-   188                              <1>  check   RAM&(RAM-1)
-   189                              <1>  check   ROM&(ROM-1)
-   190                              <1>  range   RAM,32,512
-   191                              <1>  range   ROM,32,256
-   192                              <1>  range   RAM_WS,0,3
-   193                              <1>  range   ROM_WS,0,3
-   194                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   195                              <1>  range   LCL_IO_WS,0,3
-   196                              <1>  range   BUS_IO_WS,0,3
-   197                              <1>  range   UART_OSC,500000,16000000
-   198                              <1>  range   UART_RATE,0,7
-   199                              <1>  range	 UART,0,1
-   200                              <1>  range	 _terminal,1,2
-   201                              <1> 
-   202                              <1> %ifndef SOFT_DEBUG
-   203                              <1> %define SOFT_DEBUG 0
-   204                              <1> %endif
-   205                              <1> 
-   206                              <1> %ifndef TRACE
-   207                              <1> %define TRACE 0
-   208                              <1> %endif
-   209                              <1> 
-   210                              <1> %ifdef MAKE_OBJECT_FILE
-   211                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   212                              <1>         export _ROMsize
-   213                              <1>         export _CHIPsize
-   214                              <1> _ROMsize        dw      ROM
-   215                              <1> _CHIPsize       dw      CHIP
-   216                              <1> %endif
-   217                              <1> ; end of the Hardware configuration file
-   218                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   219                              <1> ;*/
+   157                              <1> %define ARG(n) [bp+2+(n)*2]
+   158                              <1> 
+   159                              <1> %macro  check   1.nolist
+   160                              <1>  %if (%1)
+   161                              <1>    %error Check Failure: %1
+   162                              <1>  %endif
+   163                              <1> %endm
+   164                              <1> %macro  range   3.nolist
+   165                              <1>  %if (%1)<(%2)
+   166                              <1>    %error Out of Range: %1
+   167                              <1>  %elif (%1)>(%3)
+   168                              <1>    %error Out of Range: %1
+   169                              <1>  %endif
+   170                              <1> %endm
+   171                              <1> _terminal equ UART
+   172                              <1>  check   RAM_DOS&15
+   173                              <1>  check   RAM&(RAM-1)
+   174                              <1>  check   ROM&(ROM-1)
+   175                              <1>  range   RAM,32,512
+   176                              <1>  range   ROM,32,256
+   177                              <1>  range   RAM_WS,0,3
+   178                              <1>  range   ROM_WS,0,3
+   179                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   180                              <1>  range   LCL_IO_WS,0,3
+   181                              <1>  range   BUS_IO_WS,0,3
+   182                              <1>  range   UART_OSC,500000,16000000
+   183                              <1>  range   UART_RATE,0,7
+   184                              <1>  range	 UART,0,1
+   185                              <1>  range	 _terminal,1,2
+   186                              <1> 
+   187                              <1> %ifndef SOFT_DEBUG
+   188                              <1> %define SOFT_DEBUG 0
+   189                              <1> %endif
+   190                              <1> 
+   191                              <1> %ifndef TRACE
+   192                              <1> %define TRACE 0
+   193                              <1> %endif
+   194                              <1> 
+   195                              <1> %ifdef MAKE_OBJECT_FILE
+   196                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   197                              <1>         export _ROMsize
+   198                              <1>         export _CHIPsize
+   199                              <1> _ROMsize        dw      ROM
+   200                              <1> _CHIPsize       dw      CHIP
+   201                              <1> %endif
+   202                              <1> ; end of the Hardware configuration file
+   203                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   204                              <1> ;*/
     39                                  %include	"cpuregs.asm"
     40                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     41                              <1> ; CPUREGS.ASM
@@ -366,193 +351,191 @@
     68                              <1> ;
     69                              <1> ; IBM model byte -- must be less than a 286
     70                              <1> ;
-    71                              <1> ;MODEL_BYTE		equ	0FEh	; PC-XT
-    72                              <1> ;SUBMODEL_BYTE		equ	0FFh	; not used
-    73                              <1> 
-    74                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
-    75                              <1> SUBMODEL_BYTE		equ	00h	;  "
-    76                              <1> 
-    77                              <1> 
-    78                              <1> ; 80188 peripheral control register block address
-    79                              <1> CPU_CSCR	        equ	0FF00h
+    71                              <1> 
+    72                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    73                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    74                              <1> 
+    75                              <1> 
+    76                              <1> ; 80188 peripheral control register block address
+    77                              <1> CPU_CSCR	        equ	0FF00h
+    78                              <1> 
+    79                              <1> ; Compatible Mode registers
     80                              <1> 
-    81                              <1> ; Compatible Mode registers
+    81                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
     82                              <1> 
-    83                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    83                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
     84                              <1> 
-    85                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
-    86                              <1> 
-    87                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
-    88                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
-    89                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
-    90                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
-    91                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    85                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    86                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    87                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    88                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    89                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    90                              <1> 
+    91                              <1> ; Enhanced Mode registers
     92                              <1> 
-    93                              <1> ; Enhanced Mode registers
-    94                              <1> 
-    95                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
-    96                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
-    97                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
-    98                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
-    99                              <1> 
-   100                              <1> 
-   101                              <1> ; On-board internal peripheral equates
-   102                              <1> ; Programmable Interrupt Controller
-   103                              <1> PIC	        equ	CPU_CSCR+020H
-   104                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
-   105                              <1> PIC_POLLR	equ	PIC+4
-   106                              <1> PIC_POLLSR	equ	PIC+6
-   107                              <1> PIC_IMASK	equ	PIC+8
-   108                              <1> PIC_PMREG	equ	PIC+0AH
-   109                              <1> PIC_SRVR	equ	PIC+0CH
-   110                              <1> PIC_IRQR	equ	PIC+0EH
-   111                              <1> PIC_IRQSR	equ	PIC+10H
-   112                              <1> PIC_TCR	        equ	PIC+12H
-   113                              <1> PIC_DMA0CR	equ	PIC+14H
-   114                              <1> PIC_DMA1CR	equ	PIC+16H
-   115                              <1> PIC_I0CON	equ	PIC+18H
-   116                              <1> PIC_I1CON	equ	PIC+1AH
-   117                              <1> PIC_I2CON	equ	PIC+1CH
-   118                              <1> PIC_I3CON	equ	PIC+1EH
+    93                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    94                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    95                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+    96                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+    97                              <1> 
+    98                              <1> 
+    99                              <1> ; On-board internal peripheral equates
+   100                              <1> ; Programmable Interrupt Controller
+   101                              <1> PIC	        equ	CPU_CSCR+020H
+   102                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+   103                              <1> PIC_POLLR	equ	PIC+4
+   104                              <1> PIC_POLLSR	equ	PIC+6
+   105                              <1> PIC_IMASK	equ	PIC+8
+   106                              <1> PIC_PMREG	equ	PIC+0AH
+   107                              <1> PIC_SRVR	equ	PIC+0CH
+   108                              <1> PIC_IRQR	equ	PIC+0EH
+   109                              <1> PIC_IRQSR	equ	PIC+10H
+   110                              <1> PIC_TCR	        equ	PIC+12H
+   111                              <1> PIC_DMA0CR	equ	PIC+14H
+   112                              <1> PIC_DMA1CR	equ	PIC+16H
+   113                              <1> PIC_I0CON	equ	PIC+18H
+   114                              <1> PIC_I1CON	equ	PIC+1AH
+   115                              <1> PIC_I2CON	equ	PIC+1CH
+   116                              <1> PIC_I3CON	equ	PIC+1EH
+   117                              <1> 
+   118                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
    119                              <1> 
-   120                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
-   121                              <1> 
-   122                              <1> ; Interrupt masks (Master Mode)
-   123                              <1> ;
-   124                              <1> mask_timer_all          equ     0001h
-   125                              <1> mask_dma0               equ     0004h
-   126                              <1> mask_dma1               equ     0008h
-   127                              <1> mask_int0               equ     0010h
-   128                              <1> mask_int1               equ     0020h
-   129                              <1> mask_int2               equ     0040h
-   130                              <1> mask_int3               equ     0080h
+   120                              <1> ; Interrupt masks (Master Mode)
+   121                              <1> ;
+   122                              <1> mask_timer_all          equ     0001h
+   123                              <1> mask_dma0               equ     0004h
+   124                              <1> mask_dma1               equ     0008h
+   125                              <1> mask_int0               equ     0010h
+   126                              <1> mask_int1               equ     0020h
+   127                              <1> mask_int2               equ     0040h
+   128                              <1> mask_int3               equ     0080h
+   129                              <1> 
+   130                              <1> 
    131                              <1> 
-   132                              <1> 
-   133                              <1> 
-   134                              <1> ; Timers
-   135                              <1> TIM0	        equ	CPU_CSCR+050H
-   136                              <1> TIM1	        equ	CPU_CSCR+058H
-   137                              <1> TIM2	        equ	CPU_CSCR+060H
-   138                              <1> 
-   139                              <1> TCNT	        equ	0	; count register
-   140                              <1> CMPA	        equ	2	; max count A
-   141                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
-   142                              <1> TCON	        equ	6	; mode/control word
-   143                              <1> 
-   144                              <1> ; Timer control bits:
-   145                              <1> tc_EN           equ     8000h   ; Enable bit
-   146                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
-   147                              <1> tc_INT          equ     2000h   ; Interrupt Enable
-   148                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
-   149                              <1> tc_MC           equ     0020h   ; Maximum Count reached
-   150                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
-   151                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
-   152                              <1> tc_EXT          equ     0004h   ; External clock
-   153                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
-   154                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   132                              <1> ; Timers
+   133                              <1> TIM0	        equ	CPU_CSCR+050H
+   134                              <1> TIM1	        equ	CPU_CSCR+058H
+   135                              <1> TIM2	        equ	CPU_CSCR+060H
+   136                              <1> 
+   137                              <1> TCNT	        equ	0	; count register
+   138                              <1> CMPA	        equ	2	; max count A
+   139                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   140                              <1> TCON	        equ	6	; mode/control word
+   141                              <1> 
+   142                              <1> ; Timer control bits:
+   143                              <1> tc_EN           equ     8000h   ; Enable bit
+   144                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   145                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   146                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   147                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   148                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   149                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   150                              <1> tc_EXT          equ     0004h   ; External clock
+   151                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   152                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   153                              <1> 
+   154                              <1> 
    155                              <1> 
    156                              <1> 
-   157                              <1> 
-   158                              <1> 
-   159                              <1> ; DMA
-   160                              <1> DMA0	        equ	CPU_CSCR+0C0H
-   161                              <1> DMA1	        equ	CPU_CSCR+0D0H
-   162                              <1> DMASPL	        equ	0	; source pointer low
-   163                              <1> DMASPU	        equ	2	; source pointer high
-   164                              <1> DMADPL	        equ	4	; destination pointer low
-   165                              <1> DMADPU	        equ	6	; destination pointer high
-   166                              <1> DMATC	        equ	8	; terminal count
-   167                              <1> DMACW	        equ	0AH	; control word
+   157                              <1> ; DMA
+   158                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   159                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   160                              <1> DMASPL	        equ	0	; source pointer low
+   161                              <1> DMASPU	        equ	2	; source pointer high
+   162                              <1> DMADPL	        equ	4	; destination pointer low
+   163                              <1> DMADPU	        equ	6	; destination pointer high
+   164                              <1> DMATC	        equ	8	; terminal count
+   165                              <1> DMACW	        equ	0AH	; control word
+   166                              <1> 
+   167                              <1> 
    168                              <1> 
    169                              <1> 
    170                              <1> 
-   171                              <1> 
-   172                              <1> 
-   173                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   171                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   172                              <1> ;
+   173                              <1> ;       SBC-188 external devices
    174                              <1> ;
-   175                              <1> ;       SBC-188 external devices
-   176                              <1> ;
-   177                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   175                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   176                              <1> 
+   177                              <1> IO_BASE			equ	0400h
    178                              <1> 
-   179                              <1> IO_BASE			equ	0400h
+   179                              <1> 
    180                              <1> 
-   181                              <1> 
-   182                              <1> 
+   181                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   182                              <1> ; The UART registers (Duodyne SBC 80c188 Console port)
    183                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   184                              <1> ; The UART registers (Duodyne SBC 80c188 Console port)
-   185                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   186                              <1> 
-   187                              <1> uart_base               equ     IO_BASE+0280h
-   188                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
-   189                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
-   190                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
-   191                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
-   192                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
-   193                              <1> uart_lcr                equ     uart_base+3     ;Line Control
-   194                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
-   195                              <1> uart_lsr                equ     uart_base+5     ;Line Status
-   196                              <1> uart_msr                equ     uart_base+6     ;Modem Status
-   197                              <1> uart_sr			equ	uart_base+7	;Scratch
-   198                              <1> 
-   199                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
-   200                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
-   201                              <1> 
+   184                              <1> 
+   185                              <1> uart_base               equ     IO_BASE+0280h
+   186                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   187                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   188                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   189                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   190                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   191                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   192                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   193                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   194                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   195                              <1> uart_sr			equ	uart_base+7	;Scratch
+   196                              <1> 
+   197                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   198                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   199                              <1> 
+   200                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   201                              <1> ; CONTROL LS259 PORT  (DuoDyne 80C188)
    202                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   203                              <1> ; CONTROL LS259 PORT  (DuoDyne 80C188)
-   204                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   205                              <1> CTRL259		equ	IO_BASE+0238H
-   206                              <1> ; LEDS are at addresses 0..3
-   207                              <1> ; other control ports on 4..7
-   208                              <1> LED0		equ	CTRL259+0
-   209                              <1> LED1		equ	LED0+1
-   210                              <1> LED2		equ	LED0+2
-   211                              <1> LED3		equ	LED0+3
-   212                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
-   213                              <1> ;unused		equ	CTRL259+5
-   214                              <1> ;unused		equ	CTRL259+6
-   215                              <1> ;unused		equ	CTRL259+7
-   216                              <1> 
+   203                              <1> CTRL259		equ	IO_BASE+0238H
+   204                              <1> ; LEDS are at addresses 0..3
+   205                              <1> ; other control ports on 4..7
+   206                              <1> LED0		equ	CTRL259+0
+   207                              <1> LED1		equ	LED0+1
+   208                              <1> LED2		equ	LED0+2
+   209                              <1> LED3		equ	LED0+3
+   210                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
+   211                              <1> ;unused		equ	CTRL259+5
+   212                              <1> ;unused		equ	CTRL259+6
+   213                              <1> ;unused		equ	CTRL259+7
+   214                              <1> 
+   215                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   216                              <1> ; Front Panel Connector  (DuoDyne 80C188)
    217                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   218                              <1> ; Front Panel Connector  (DuoDyne 80C188)
-   219                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   220                              <1> FRONT_PANEL_LED	equ	IO_BASE+0230H
+   218                              <1> FRONT_PANEL_LED	equ	IO_BASE+0230H
+   219                              <1> 
+   220                              <1> 
    221                              <1> 
-   222                              <1> 
-   223                              <1> 
+   222                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   223                              <1> ; Floppy controller (Duodyne Disk IO)
    224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   225                              <1> ; Floppy controller (Duodyne Disk IO)
-   226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   227                              <1> FDC	        equ	IO_BASE+0080H
-   228                              <1> FDC_MSR         equ     FDC
-   229                              <1> FDC_DATA        equ     FDC+1
-   230                              <1> FDC_TC	        equ	FDC+2
-   231                              <1> FDC_RES	        equ	FDC+3
-   232                              <1> FDC_LDCR	equ	FDC+5
-   233                              <1> FDC_LDOR	equ	FDC+6
-   234                              <1> FDC_DACK        equ	FDC+6
-   235                              <1> FDC_DACK_TC     equ     FDC+7
-   236                              <1> 
-   237                              <1> 
+   225                              <1> FDC	        equ	IO_BASE+0080H
+   226                              <1> FDC_MSR         equ     FDC
+   227                              <1> FDC_DATA        equ     FDC+1
+   228                              <1> FDC_TC	        equ	FDC+2
+   229                              <1> FDC_RES	        equ	FDC+3
+   230                              <1> FDC_LDCR	equ	FDC+5
+   231                              <1> FDC_LDOR	equ	FDC+6
+   232                              <1> FDC_DACK        equ	FDC+6
+   233                              <1> FDC_DACK_TC     equ     FDC+7
+   234                              <1> 
+   235                              <1> 
+   236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   237                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
    238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   239                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
-   240                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   241                              <1> RTC	equ	IO_BASE+0094H
-   242                              <1> 
+   239                              <1> RTC	equ	IO_BASE+0094H
+   240                              <1> 
+   241                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   242                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
    243                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   244                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
-   245                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   246                              <1> PPI	        equ	IO_BASE+0088H
-   247                              <1> 
-   248                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   249                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   250                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   251                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   252                              <1> 
-   253                              <1> portA           equ     PPI+0   ;
-   254                              <1> portB           equ     PPI+1   ;
-   255                              <1> portC           equ     PPI+2   ;
-   256                              <1> 
-   257                              <1> ; end CPUREGS.ASM
+   244                              <1> PPI	        equ	IO_BASE+0088H
+   245                              <1> 
+   246                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   247                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   248                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   249                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   250                              <1> 
+   251                              <1> portA           equ     PPI+0   ;
+   252                              <1> portB           equ     PPI+1   ;
+   253                              <1> portC           equ     PPI+2   ;
+   254                              <1> 
+   255                              <1> ; end CPUREGS.ASM
     40                                  %include	"equates.asm"
     41                              <1> ;========================================================================
     42                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS

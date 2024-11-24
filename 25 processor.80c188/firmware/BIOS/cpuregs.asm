@@ -29,8 +29,6 @@
 ;
 ; IBM model byte -- must be less than a 286
 ;
-;MODEL_BYTE		equ	0FEh	; PC-XT
-;SUBMODEL_BYTE		equ	0FFh	; not used
 
 MODEL_BYTE		equ	0FEh	; PC-XT
 SUBMODEL_BYTE		equ	00h	;  "

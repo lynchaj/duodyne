@@ -29,15 +29,9 @@
 %include        "equates.asm"
 
 
-%if NEED_TIMER_FIX
-; swap the timers in the intiialization table
-timer0          equ     TIM1
-timer1          equ     TIM0
-%else
-; timers are their true selves in the initialization table
+
 timer0          equ     TIM0
 timer1          equ     TIM1
-%endif
 
 
 	SEGMENT	_TEXT
@@ -557,7 +551,7 @@ fn86:		; BP,AX,BX,DX,DS already saved
 
 	global	rtc_interrupt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  rtc_interrupt             (timer0, if NEED_TIMER_FIX)
+;  rtc_interrupt
 ;
 ;       This is the 1024 Hz timer tick from INT 70h
 ;
