@@ -490,63 +490,8 @@ fn0A:
 ;========================================================================
 fn0E:
 	pushm	ax,dx		; preserve AX, too
-	mov	bx,word [offset_BX+bp]
-	mov	bl,bh
-	mov	bh,0
-	shl	bx,1
-	mov	dx,word [video_cursor_pos+bx]
 %if UART
-	cmp	al,07h
-	je	.bell		; BEL code
-	cmp	al,08h
-	je	.bs		; BS code
-	cmp	al,0Ah
-	je	.lf		; Line feed code
-	cmp	al,0Dh
-	je	.cr		; Carriage return
-	cmp	al,20h
-	jb	.exit		; some other control character - ignore
-	cmp	al,7Fh
-	je	.exit		; DEL code - ignore
-
 	call	uart_out	; we've got a regular character
-	inc	dl		; move cursor to the next column
-	cmp	dl,byte [video_columns]
-	jb	.exit
-
-	mov	al,0Dh
-	call	uart_out
-	mov	al,0Ah
-	call	uart_out
-	mov	dl,0		; set cursor to the beggining of the next line
-	cmp	dh,MAX_ROWS
-	jae	.exit		; already on 25th row, no need to move further
-	inc	dh		; move cursor to the next line
-	jmp	.exit
-
-.bell:
-	call	uart_out	; just output it
-	jmp 	.exit		; no need to change cursor position
-
-.bs:
-	or	dl,dl		; already on the first column?
-	jz	.exit
-	call	uart_out
-	dec	dl		; move cursor to the previous column
-	jmp	.exit
-
-.lf:
-	call	uart_out
-	cmp	dh,24		; assume 25 rows
-	jae	.exit
-	inc	dh
-	jmp	.exit
-
-.cr:
-	call	uart_out
-	mov	dl,0		; set cursor to the first column
-
-.exit:
 %endif
 	popm	ax,dx		; restore AX also
 	jmp	exit
@@ -1089,14 +1034,6 @@ set_attributes:
 ;	none
 ;========================================================================
 uart_out:
-	push	ds
-	push	bios_data_seg
-	popm	ds
-	cmp	byte [video_mode],3
-	popm	ds
-	je	.9		; skip output in mode 3 (color)
-;;;	global	uart_out_	; used in debugging mode (C-callable)
-;;;uart_out_:			; **** label .9 cannot reach if un-commented
 	push	dx
 	push	ax
 %if UART_DSR_PROTOCOL
@@ -1123,7 +1060,6 @@ BIT_DSR         equ     1<<5
 	mov	dx,uart_thr
 	out	dx,al		; write character
 	pop	dx
-.9:
 	ret
 
 

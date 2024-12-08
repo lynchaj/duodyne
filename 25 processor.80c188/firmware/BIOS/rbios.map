@@ -1,6 +1,6 @@
 Open Watcom Linker Version 1.9
 Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
-Created on:       24/12/08 04:01:15
+Created on:       24/12/08 17:41:30
 Executable Image: rbios.exe
 creating a DOS executable
 
@@ -12,7 +12,7 @@ creating a DOS executable
 Group                           Address              Size
 =====                           =======              ====
 
-DGROUP                          03dd:000e            00000942
+DGROUP                          03d7:0000            00000940
 
 
 
@@ -23,11 +23,11 @@ DGROUP                          03dd:000e            00000942
 Segment                Class          Group          Address         Size
 =======                =====          =====          =======         ====
 
-_TEXT                  CODE           AUTO           0000:0000       00003dde
-CONST                  DATA           DGROUP         03dd:000e       000008b4
-CONST2                 DATA           DGROUP         0469:0002       00000080
-_DATA                  DATA           DGROUP         0472:0000       00000000
-_BSS                   BSS            DGROUP         0472:0000       00000000
+_TEXT                  CODE           AUTO           0000:0000       00003d70
+CONST                  DATA           DGROUP         03d7:0000       000008b4
+CONST2                 DATA           DGROUP         0462:0004       00000080
+_DATA                  DATA           DGROUP         046b:0000       00000000
+_BSS                   BSS            DGROUP         046b:0000       00000000
 
 
                         +----------------+
@@ -61,12 +61,12 @@ Module: rbios.obj(rbios.asm)
 0000:070c      @rtc_set_loc
 0000:070c      rtc_set_loc
 0000:073d*     lites
-03dd:013c      _bios_data_area_ptr
+03d7:012e      _bios_data_area_ptr
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/cprintf.c)
 0000:0910*     nstring_
 0000:0942      _cprintf
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/nvram.c)
-03dd:091e+     _rates
+03d7:0910+     _rates
 0000:0c52+     set_battery_
 0000:0d81+     idow_
 0000:0e81+     Date_
@@ -88,68 +88,68 @@ Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/f
 0000:1d3b      @nvram_get_video
 Module: abios.lib(int10ser.asm)
 0000:1d5a      BIOS_call_10h
-0000:229e      video_init
-0000:24f5      @VIDEO_putchar
-0000:24f5      @uart_putchar
+0000:2230      video_init
+0000:2487      @VIDEO_putchar
+0000:2487      @uart_putchar
 Module: abios.lib(int16ser.asm)
-0000:2502      BIOS_call_16h
-0000:25c4      uart_int
-0000:268d      keyboard_init
-0000:26b7      @uart_getchar
+0000:2494      BIOS_call_16h
+0000:2556      uart_int
+0000:261f      keyboard_init
+0000:2649      @uart_getchar
 Module: abios.lib(timers.asm)
-0000:26be      _cpu_speed
-0000:26ec      @timer_init
-0000:2730*     timer2_interrupt
-0000:2735      timer1_interrupt
-0000:2738      timer0_interrupt
-0000:277c      BIOS_call_1Ah
-0000:27b7      BIOS_call_1Ch
+0000:2650      _cpu_speed
+0000:267e      @timer_init
+0000:26c2*     timer2_interrupt
+0000:26c7      timer1_interrupt
+0000:26ca      timer0_interrupt
+0000:270e      BIOS_call_1Ah
+0000:2749      BIOS_call_1Ch
 Module: abios.lib(floppy.asm)
-0000:28e6      BIOS_call_13h
-0000:29f9      wait12
-0000:2ac4      fdc_timer_hook
-0000:2ada      @floppy_init
-0000:2d76*     motor_on
+0000:2878      BIOS_call_13h
+0000:298b      wait12
+0000:2a56      fdc_timer_hook
+0000:2a6c      @floppy_init
+0000:2d08*     motor_on
 Module: abios.lib(ide.asm)
-0000:2e62      FIXED_BIOS_call_13h
-0000:2e95*     FIXED_timeout
-0000:2e99*     FIXED_error
-0000:2e9b*     FIXED_exit_AH
-0000:2ea5*     _get_IDE_num
-0000:2ea5      get_IDE_num
-0000:2ec0*     fixed_device_code
+0000:2df4      FIXED_BIOS_call_13h
+0000:2e27*     FIXED_timeout
+0000:2e2b*     FIXED_error
+0000:2e2d*     FIXED_exit_AH
+0000:2e37*     _get_IDE_num
+0000:2e37      get_IDE_num
+0000:2e52*     fixed_device_code
 Module: abios.lib(int14ser.asm)
-0000:2ec8      BIOS_call_14h
-0000:2f98*     _spp_init
+0000:2e5a      BIOS_call_14h
+0000:2f2a*     _spp_init
 Module: abios.lib(misc15.asm)
-0000:2fe0      BIOS_call_15h
-0000:30af*     set_count
-0000:314f      rtc_interrupt
+0000:2f72      BIOS_call_15h
+0000:3041*     set_count
+0000:30e1      rtc_interrupt
 Module: abios.lib(int17par.asm)
-0000:318a      BIOS_call_17h
+0000:311c      BIOS_call_17h
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/libc.c)
-0000:31ee      strlen_
-0000:3201*     strchr_
-0000:3228      atoi_
-0000:324e      _small_code_
-0000:324f*     log2_
+0000:3180      strlen_
+0000:3193*     strchr_
+0000:31ba      atoi_
+0000:31e0      _small_code_
+0000:31e1*     log2_
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/sio.c)
-0000:327a+     putchar_
-0000:329b+     putline_
-0000:32af+     getchar_
-0000:32e1      getline_
-03dd:0940+     _uart_echo
+0000:320c+     putchar_
+0000:322d+     putline_
+0000:3241+     getchar_
+0000:3273      getline_
+03d7:0932+     _uart_echo
 Module: abios.lib(ppide.asm)
-0000:33a8      _PPIDE_READ_ID
-0000:33de*     _PPIDE_READ_SECTOR
-0000:3447*     _PPIDE_WRITE_SECTOR
-0000:3585*     PPIDE_BIOS_call_13h
-0000:358f      PPIDE_entry
+0000:333a      _PPIDE_READ_ID
+0000:3370*     _PPIDE_READ_SECTOR
+0000:33d9*     _PPIDE_WRITE_SECTOR
+0000:3517*     PPIDE_BIOS_call_13h
+0000:3521      PPIDE_entry
 Module: abios.lib(usb.asm)
-0000:3800      _USB_READ_ID
-0000:38a3*     _USB_READ_SECTOR
-0000:3986*     _USB_WRITE_SECTOR
-0000:39e3      USB_entry
+0000:3792      _USB_READ_ID
+0000:3835*     _USB_READ_SECTOR
+0000:3918*     _USB_WRITE_SECTOR
+0000:3975      USB_entry
 Warning! W1014: stack segment not found
 
 
@@ -166,6 +166,6 @@ cbios.lib
                         +-----------------------+
 
 Stack size:  0400 (1024.)
-Memory size:  4720 (18208.)
+Memory size:  46b0 (18096.)
 Entry point address: 0000:0000
-Link time: 00:00.05
+Link time: 00:00.06
