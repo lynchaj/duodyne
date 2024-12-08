@@ -368,10 +368,10 @@ int setup_usb(int nfixed)
    int okay;
 
    do {
-      printf("Number (0..2) of Duodyne USB fixed disks [%d]: ", nfixed);
+      printf("Number (0..1) of Duodyne Multi-io USB disks [%d]: ", nfixed);
       GETLINE(line);
       if (line[0]) nfixed = atoi(line);
-      okay = (nfixed >= 0  &&  nfixed <= 2);
+      okay = (nfixed >= 0  &&  nfixed <= 1);
    } while (!okay);
 
    return nfixed;

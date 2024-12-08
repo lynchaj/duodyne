@@ -8,23 +8,29 @@ Based on the Retrobew Computer SBC-188 board by John Coffman
 ### BIOS
  The firmware in the BIOS folder is a subset of the SBC-188 firmware.   It currently runs MS-DOS 3.3 and supports PPIDE drives on the Duodyne Disk IO card.  It requires a RAMROM card and can be used as a primary or secondary CPU.   The RAMROM RTC is supported.
  
- Disk IO P9 must be jumpered for DREQ0 and J7 for EIRQx (TBD)
  UART must be jumpered for EIRQx (tbd)
  
 #### BIOS ToDo:
 * DiskIO Floppy Drive Support
 * Checksum Bug.
 * Better Console Support (fix backspace key, etc.) 
-* BIOS Support for the 8259 Interrupt Controller
 * BIOS Support for the PCF 8584
 * Better Front Panel Support
 * Support for other DuoDyne Hardware
  1.Media
  1.Voice
  1.DualESP
- 1.MultiIO
- * Support for Xenix 86
+* Support for Xenix 86
 * Support for CPM 86
+* IMPROPERLY FAILS WHEN NO USB DEVICE IS ATTACHED
+* various video bios bugs
+* multi-io serial support missing
+* Missing multi-io Parallel Support
+* Missing multi-io SD Support
+* Missing multi-io Keyboard Support
+* Missing multi-io Mouse Support
+* Missing Disk-io SD Support
+* Missing Disk-io Network Support
 
 ### Monitor
 This is a simple monitor "Mon88" originally by Hans Tiggeler - http://www.ht-lab.com

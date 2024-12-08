@@ -1107,7 +1107,7 @@ Routine Size: 65 bytes,    Routine Base: _TEXT + 0865
 08D6                          L$110:
 08D6    85 F6                     test        si,si 
 08D8    7C D6                     jl          L$109 
-08DA    83 FE 02                  cmp         si,0x0002 
+08DA    83 FE 01                  cmp         si,0x0001 
 08DD    7F D1                     jg          L$109 
 08DF    EB BD                     jmp         L$106 
 
@@ -1161,7 +1161,7 @@ Routine Size: 59 bytes,    Routine Base: _TEXT + 08A6
 0941    57                        push        di 
 0942    56                        push        si 
 0943    1E                        push        ds 
-0944    68 04 04                  push        offset DGROUP:L$249 
+0944    68 07 04                  push        offset DGROUP:L$249 
 0947    E8 00 00                  call        _cprintf 
 094A    83 C4 08                  add         sp,0x0008 
 094D    BB 14 00                  mov         bx,0x0014 
@@ -1201,16 +1201,16 @@ Routine Size: 148 bytes,    Routine Base: _TEXT + 08E1
 098B    85 F6                     test        si,si 
 098D    74 05                     je          L$120 
 098F                          L$119:
-098F    BA 2A 04                  mov         dx,offset DGROUP:L$250 
+098F    BA 2D 04                  mov         dx,offset DGROUP:L$250 
 0992    EB 03                     jmp         L$121 
 0994                          L$120:
-0994    BA 2E 04                  mov         dx,offset DGROUP:L$251 
+0994    BA 31 04                  mov         dx,offset DGROUP:L$251 
 0997                          L$121:
 0997    8C D8                     mov         ax,ds 
 0999    50                        push        ax 
 099A    52                        push        dx 
 099B    1E                        push        ds 
-099C    68 32 04                  push        offset DGROUP:L$252 
+099C    68 35 04                  push        offset DGROUP:L$252 
 099F    E8 00 00                  call        _cprintf 
 09A2    83 C4 08                  add         sp,0x0008 
 09A5    BB 14 00                  mov         bx,0x0014 
@@ -1312,7 +1312,7 @@ Routine Size: 124 bytes,    Routine Base: _TEXT + 0975
 0A5E    57                        push        di 
 0A5F    53                        push        bx 
 0A60    1E                        push        ds 
-0A61    68 52 04                  push        offset DGROUP:L$253 
+0A61    68 55 04                  push        offset DGROUP:L$253 
 0A64    E8 00 00                  call        _cprintf 
 0A67    83 C4 08                  add         sp,0x0008 
 0A6A    E9 BD F7                  jmp         L$36 
@@ -1375,21 +1375,21 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0AD9    50                        push        ax 
 0ADA    80 FB 02                  cmp         bl,0x02 
 0ADD    75 05                     jne         L$138 
-0ADF    BA 55 04                  mov         dx,offset DGROUP:L$254 
+0ADF    BA 58 04                  mov         dx,offset DGROUP:L$254 
 0AE2    EB 0D                     jmp         L$140 
 0AE4                          L$138:
 0AE4    80 FB 04                  cmp         bl,0x04 
 0AE7    75 05                     jne         L$139 
-0AE9    BA 5B 04                  mov         dx,offset DGROUP:L$255 
+0AE9    BA 5E 04                  mov         dx,offset DGROUP:L$255 
 0AEC    EB 03                     jmp         L$140 
 0AEE                          L$139:
-0AEE    BA 5F 04                  mov         dx,offset DGROUP:L$256 
+0AEE    BA 62 04                  mov         dx,offset DGROUP:L$256 
 0AF1                          L$140:
 0AF1    8C D8                     mov         ax,ds 
 0AF3    50                        push        ax 
 0AF4    52                        push        dx 
 0AF5    1E                        push        ds 
-0AF6    68 67 04                  push        offset DGROUP:L$257 
+0AF6    68 6A 04                  push        offset DGROUP:L$257 
 0AF9    E8 00 00                  call        _cprintf 
 0AFC    83 C4 0C                  add         sp,0x000c 
 0AFF    80 7E FC 02               cmp         byte ptr -0x4[bp],0x02 
@@ -1415,7 +1415,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0B2C    83 C4 06                  add         sp,0x0006 
 0B2F                          L$142:
 0B2F    1E                        push        ds 
-0B30    68 87 04                  push        offset DGROUP:L$258 
+0B30    68 8A 04                  push        offset DGROUP:L$258 
 0B33    E8 00 00                  call        _cprintf 
 0B36    83 C4 04                  add         sp,0x0004 
 0B39    BB 28 00                  mov         bx,0x0028 
@@ -1423,7 +1423,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0B3E    8D 86 22 FE               lea         ax,-0x1de[bp] 
 0B42    E8 00 00                  call        putstring_ 
 0B45    1E                        push        ds 
-0B46    68 8F 04                  push        offset DGROUP:L$259 
+0B46    68 92 04                  push        offset DGROUP:L$259 
 0B49    E8 00 00                  call        _cprintf 
 0B4C    83 C4 04                  add         sp,0x0004 
 0B4F    BB 14 00                  mov         bx,0x0014 
@@ -1431,7 +1431,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0B54    8D 86 00 FE               lea         ax,-0x200[bp] 
 0B58    E8 00 00                  call        putstring_ 
 0B5B    1E                        push        ds 
-0B5C    68 99 04                  push        offset DGROUP:L$260 
+0B5C    68 9C 04                  push        offset DGROUP:L$260 
 0B5F    E8 00 00                  call        _cprintf 
 0B62    83 C4 04                  add         sp,0x0004 
 0B65    BB 08 00                  mov         bx,0x0008 
@@ -1443,7 +1443,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0B78    BA A9 00                  mov         dx,offset DGROUP:L$225 
 0B7B    EB 03                     jmp         L$144 
 0B7D                          L$143:
-0B7D    BA A5 04                  mov         dx,offset DGROUP:L$261 
+0B7D    BA A8 04                  mov         dx,offset DGROUP:L$261 
 0B80                          L$144:
 0B80    8C D8                     mov         ax,ds 
 0B82    50                        push        ax 
@@ -1452,7 +1452,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0B88    FF B6 F2 FD               push        word ptr -0x20e[bp] 
 0B8C    FF B6 EE FD               push        word ptr -0x212[bp] 
 0B90    1E                        push        ds 
-0B91    68 A9 04                  push        offset DGROUP:L$262 
+0B91    68 AC 04                  push        offset DGROUP:L$262 
 0B94    E8 00 00                  call        _cprintf 
 0B97    83 C4 0E                  add         sp,0x000e 
 0B9A    FF B6 60 FE               push        word ptr -0x1a0[bp] 
@@ -1461,13 +1461,13 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0BA6    FF B6 5A FE               push        word ptr -0x1a6[bp] 
 0BAA    FF B6 58 FE               push        word ptr -0x1a8[bp] 
 0BAE    1E                        push        ds 
-0BAF    68 D4 04                  push        offset DGROUP:L$263 
+0BAF    68 D7 04                  push        offset DGROUP:L$263 
 0BB2    E8 00 00                  call        _cprintf 
 0BB5    83 C4 0E                  add         sp,0x000e 
 0BB8    FF B6 66 FE               push        word ptr -0x19a[bp] 
 0BBC    FF B6 64 FE               push        word ptr -0x19c[bp] 
 0BC0    1E                        push        ds 
-0BC1    68 FA 04                  push        offset DGROUP:L$264 
+0BC1    68 FD 04                  push        offset DGROUP:L$264 
 0BC4    E8 00 00                  call        _cprintf 
 0BC7    83 C4 08                  add         sp,0x0008 
 0BCA    FF B6 B6 FE               push        word ptr -0x14a[bp] 
@@ -1475,7 +1475,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0BD2    FF B6 BA FE               push        word ptr -0x146[bp] 
 0BD6    FF B6 B8 FE               push        word ptr -0x148[bp] 
 0BDA    1E                        push        ds 
-0BDB    68 0C 05                  push        offset DGROUP:L$265 
+0BDB    68 0F 05                  push        offset DGROUP:L$265 
 0BDE    E8 00 00                  call        _cprintf 
 0BE1    83 C4 0C                  add         sp,0x000c 
 0BE4    8A 46 F8                  mov         al,byte ptr -0x8[bp] 
@@ -1618,7 +1618,7 @@ Routine Size: 82 bytes,    Routine Base: _TEXT + 0A6D
 0D62    FF 76 EE                  push        word ptr -0x12[bp] 
 0D65    57                        push        di 
 0D66    1E                        push        ds 
-0D67    68 26 05                  push        offset DGROUP:L$266 
+0D67    68 29 05                  push        offset DGROUP:L$266 
 0D6A    E8 00 00                  call        _cprintf 
 0D6D    83 C4 0E                  add         sp,0x000e 
 0D70                          L$158:
@@ -1709,7 +1709,7 @@ Routine Size: 39 bytes,    Routine Base: _TEXT + 0DAB
 0E16    05 41 00                  add         ax,0x0041 
 0E19    50                        push        ax 
 0E1A    1E                        push        ds 
-0E1B    68 57 05                  push        offset DGROUP:L$267 
+0E1B    68 5A 05                  push        offset DGROUP:L$267 
 0E1E    E8 00 00                  call        _cprintf 
 0E21    83 C4 08                  add         sp,0x0008 
 0E24    46                        inc         si 
@@ -1780,7 +1780,7 @@ Routine Size: 39 bytes,    Routine Base: _TEXT + 0DAB
 0EC7    57                        push        di 
 0EC8    FF 76 FA                  push        word ptr -0x6[bp] 
 0ECB    1E                        push        ds 
-0ECC    68 6B 05                  push        offset DGROUP:L$268 
+0ECC    68 6E 05                  push        offset DGROUP:L$268 
 0ECF    E8 00 00                  call        _cprintf 
 0ED2    83 C4 0C                  add         sp,0x000c 
 0ED5    1E                        push        ds 
@@ -1879,7 +1879,7 @@ Routine Size: 39 bytes,    Routine Base: _TEXT + 0DAB
 0FBE    EB D5                     jmp         L$179 
 0FC0                          L$180:
 0FC0    1E                        push        ds 
-0FC1    68 93 05                  push        offset DGROUP:L$269 
+0FC1    68 96 05                  push        offset DGROUP:L$269 
 0FC4    E8 00 00                  call        _cprintf 
 0FC7    83 C4 04                  add         sp,0x0004 
 0FCA    C7 46 FE 00 00            mov         word ptr -0x2[bp],0x0000 
@@ -1890,14 +1890,14 @@ Routine Size: 39 bytes,    Routine Base: _TEXT + 0DAB
 0FDB    30 E4                     xor         ah,ah 
 0FDD    50                        push        ax 
 0FDE    1E                        push        ds 
-0FDF    68 A5 05                  push        offset DGROUP:L$270 
+0FDF    68 A8 05                  push        offset DGROUP:L$270 
 0FE2    E8 00 00                  call        _cprintf 
 0FE5    83 C4 06                  add         sp,0x0006 
 0FE8    FF 46 FE                  inc         word ptr -0x2[bp] 
 0FEB    83 7E FE 04               cmp         word ptr -0x2[bp],0x0004 
 0FEF    7C DE                     jl          L$181 
 0FF1    1E                        push        ds 
-0FF2    68 AB 05                  push        offset DGROUP:L$271 
+0FF2    68 AE 05                  push        offset DGROUP:L$271 
 0FF5    E8 00 00                  call        _cprintf 
 0FF8    83 C4 04                  add         sp,0x0004 
 0FFB    C9                        leave       
@@ -1914,7 +1914,7 @@ Routine Size: 557 bytes,    Routine Base: _TEXT + 0DD2
 1007    85 C0                     test        ax,ax 
 1009    74 1C                     je          L$183 
 100B    1E                        push        ds 
-100C    68 AE 05                  push        offset DGROUP:L$272 
+100C    68 B1 05                  push        offset DGROUP:L$272 
 100F    E8 00 00                  call        _cprintf 
 1012    83 C4 04                  add         sp,0x0004 
 1015    31 F6                     xor         si,si 
@@ -1927,7 +1927,7 @@ Routine Size: 557 bytes,    Routine Base: _TEXT + 0DD2
 1025    EB 1D                     jmp         L$185 
 1027                          L$183:
 1027    1E                        push        ds 
-1028    68 C9 05                  push        offset DGROUP:L$273 
+1028    68 CC 05                  push        offset DGROUP:L$273 
 102B    E8 00 00                  call        _cprintf 
 102E    83 C4 04                  add         sp,0x0004 
 1031    31 F6                     xor         si,si 
@@ -1949,7 +1949,7 @@ Routine Size: 557 bytes,    Routine Base: _TEXT + 0DD2
 1051    EB 04                     jmp         L$187 
 1053                          L$186:
 1053    1E                        push        ds 
-1054    68 E2 05                  push        offset DGROUP:L$274 
+1054    68 E5 05                  push        offset DGROUP:L$274 
 1057                          L$187:
 1057    E8 00 00                  call        _cprintf 
 105A    83 C4 04                  add         sp,0x0004 
@@ -1967,7 +1967,7 @@ Routine Size: 557 bytes,    Routine Base: _TEXT + 0DD2
 107A    E8 00 00                  call        set_battery_ 
 107D    88 46 E0                  mov         byte ptr -0x20[bp],al 
 1080    1E                        push        ds 
-1081    68 F9 05                  push        offset DGROUP:L$275 
+1081    68 FC 05                  push        offset DGROUP:L$275 
 1084    E8 00 00                  call        _cprintf 
 1087    83 C4 04                  add         sp,0x0004 
 108A    8A 46 E6                  mov         al,byte ptr -0x1a[bp] 
@@ -2038,7 +2038,7 @@ Routine Size: 31 bytes,    Routine Base: _TEXT + 10E9
 
 No disassembly errors
 
-Segment: CONST WORD USE16 0000060E bytes
+Segment: CONST WORD USE16 00000611 bytes
 0000                          L$193:
 0000    53 75 6E 00                                     Sun.
 0004                          L$194:
@@ -2194,84 +2194,85 @@ Segment: CONST WORD USE16 0000060E bytes
 03BB    50 50 49 44 45 20 66 69 78 65 64 20 64 69 73 6B PPIDE fixed disk
 03CB    73 20 5B 25 64 5D 3A 20 00                      s [%d]: .
 03D4                          L$248:
-03D4    4E 75 6D 62 65 72 20 28 30 2E 2E 32 29 20 6F 66 Number (0..2) of
-03E4    20 44 75 6F 64 79 6E 65 20 55 53 42 20 66 69 78  Duodyne USB fix
-03F4    65 64 20 64 69 73 6B 73 20 5B 25 64 5D 3A 20 00 ed disks [%d]: .
-0404                          L$249:
-0404    4D 61 6B 65 20 64 69 73 6B 20 5B 31 2E 2E 25 64 Make disk [1..%d
-0414    5D 20 74 68 65 20 43 3A 20 64 72 69 76 65 20 5B ] the C: drive [
-0424    25 64 5D 3A 20 00                               %d]: .
-042A                          L$250:
-042A    59 2F 6E 00                                     Y/n.
-042E                          L$251:
-042E    4E 2F 79 00                                     N/y.
-0432                          L$252:
-0432    43 68 65 63 6B 20 44 4F 53 20 62 6F 6F 74 20 73 Check DOS boot s
-0442    69 67 6E 61 74 75 72 65 20 5B 25 73 5D 3A 20 00 ignature [%s]: .
-0452                          L$253:
-0452    25 73 00                                        %s.
-0455                          L$254:
-0455    50 50 49 44 45 00                               PPIDE.
-045B                          L$255:
-045B    55 53 42 00                                     USB.
-045F                          L$256:
-045F    55 4E 4B 4E 4F 57 4E 00                         UNKNOWN.
-0467                          L$257:
-0467    20 20 20 25 73 20 66 69 78 65 64 20 64 69 73 6B    %s fixed disk
-0477    20 25 63 3A 20 20 20 20 28 30 78 25 78 29 0A 00  %c:    (0x%x)..
-0487                          L$258:
-0487    4D 6F 64 65 6C 3A 20 00                         Model: .
-048F                          L$259:
-048F    0A 53 65 72 69 61 6C 3A 20 00                   .Serial: .
-0499                          L$260:
-0499    0A 46 69 72 6D 77 61 72 65 3A 20 00             .Firmware: .
-04A5                          L$261:
-04A5    6F 75 74 00                                     out.
-04A9                          L$262:
-04A9    0A 47 65 6F 6D 65 74 72 79 3A 20 20 25 75 3A 25 .Geometry:  %u:%
-04B9    75 3A 25 75 20 20 20 77 69 74 68 25 73 20 4C 42 u:%u   with%s LB
-04C9    41 20 73 75 70 70 6F 72 74 0A 00                A support..
-04D4                          L$263:
-04D4    43 75 72 72 65 6E 74 3A 20 20 20 25 75 3A 25 75 Current:   %u:%u
-04E4    3A 25 75 20 20 20 63 61 70 61 63 69 74 79 3A 20 :%u   capacity: 
-04F4    20 25 6C 75 0A 00                                %lu..
-04FA                          L$264:
-04FA    4C 42 41 20 53 65 63 74 6F 72 73 3A 20 20 25 6C LBA Sectors:  %l
-050A    75 00                                           u.
-050C                          L$265:
-050C    20 20 20 28 34 38 2D 62 69 74 29 3A 20 20 30 78    (48-bit):  0x
-051C    25 6C 78 25 30 38 6C 78 0A 00                   %lx%08lx..
-0526                          L$266:
-0526    54 72 61 6E 73 6C 61 74 65 64 20 67 65 6F 6D 65 Translated geome
-0536    74 72 79 3A 20 20 25 75 3A 25 75 3A 25 75 20 20 try:  %u:%u:%u  
-0546    20 63 61 70 61 63 69 74 79 3A 20 20 25 6C 64 0A  capacity:  %ld.
-0556    00                                              .
-0557                          L$267:
-0557    46 6C 6F 70 70 79 20 25 63 3A 20 74 79 70 65 20 Floppy %c: type 
-0567    25 64 0A 00                                     %d..
-056B                          L$268:
-056B    0A 50 50 49 3D 25 64 20 20 55 53 42 3D 25 64 20 .PPI=%d  USB=%d 
-057B    20 55 6E 69 74 73 3D 25 64 20 20 20 62 64 69 73  Units=%d   bdis
-058B    6B 3D 25 30 32 78 0A 00                         k=%02x..
-0593                          L$269:
-0593    0A 46 69 78 65 64 5F 44 69 73 6B 5F 54 61 62 3A .Fixed_Disk_Tab:
-05A3    20 00                                            .
-05A5                          L$270:
-05A5    20 25 30 32 78 00                                %02x.
-05AB                          L$271:
-05AB    0A 0A 00                                        ...
-05AE                          L$272:
-05AE    4E 56 52 41 4D 20 63 68 65 63 6B 73 75 6D 20 69 NVRAM checksum i
-05BE    73 20 69 6E 76 61 6C 69 64 0A 00                s invalid..
-05C9                          L$273:
-05C9    4E 56 52 41 4D 20 63 68 65 63 6B 73 75 6D 20 69 NVRAM checksum i
-05D9    73 20 76 61 6C 69 64 0A 00                      s valid..
-05E2                          L$274:
-05E2    54 68 65 20 63 6C 6F 63 6B 20 69 73 20 72 75 6E The clock is run
-05F2    6E 69 6E 67 2E 0A 00                            ning...
-05F9                          L$275:
-05F9    20 20 20 46 69 78 65 64 20 44 69 73 6B 20 53 65    Fixed Disk Se
-0609    74 75 70 0A 00                                  tup..
+03D4    4E 75 6D 62 65 72 20 28 30 2E 2E 31 29 20 6F 66 Number (0..1) of
+03E4    20 44 75 6F 64 79 6E 65 20 4D 75 6C 74 69 2D 69  Duodyne Multi-i
+03F4    6F 20 55 53 42 20 64 69 73 6B 73 20 5B 25 64 5D o USB disks [%d]
+0404    3A 20 00                                        : .
+0407                          L$249:
+0407    4D 61 6B 65 20 64 69 73 6B 20 5B 31 2E 2E 25 64 Make disk [1..%d
+0417    5D 20 74 68 65 20 43 3A 20 64 72 69 76 65 20 5B ] the C: drive [
+0427    25 64 5D 3A 20 00                               %d]: .
+042D                          L$250:
+042D    59 2F 6E 00                                     Y/n.
+0431                          L$251:
+0431    4E 2F 79 00                                     N/y.
+0435                          L$252:
+0435    43 68 65 63 6B 20 44 4F 53 20 62 6F 6F 74 20 73 Check DOS boot s
+0445    69 67 6E 61 74 75 72 65 20 5B 25 73 5D 3A 20 00 ignature [%s]: .
+0455                          L$253:
+0455    25 73 00                                        %s.
+0458                          L$254:
+0458    50 50 49 44 45 00                               PPIDE.
+045E                          L$255:
+045E    55 53 42 00                                     USB.
+0462                          L$256:
+0462    55 4E 4B 4E 4F 57 4E 00                         UNKNOWN.
+046A                          L$257:
+046A    20 20 20 25 73 20 66 69 78 65 64 20 64 69 73 6B    %s fixed disk
+047A    20 25 63 3A 20 20 20 20 28 30 78 25 78 29 0A 00  %c:    (0x%x)..
+048A                          L$258:
+048A    4D 6F 64 65 6C 3A 20 00                         Model: .
+0492                          L$259:
+0492    0A 53 65 72 69 61 6C 3A 20 00                   .Serial: .
+049C                          L$260:
+049C    0A 46 69 72 6D 77 61 72 65 3A 20 00             .Firmware: .
+04A8                          L$261:
+04A8    6F 75 74 00                                     out.
+04AC                          L$262:
+04AC    0A 47 65 6F 6D 65 74 72 79 3A 20 20 25 75 3A 25 .Geometry:  %u:%
+04BC    75 3A 25 75 20 20 20 77 69 74 68 25 73 20 4C 42 u:%u   with%s LB
+04CC    41 20 73 75 70 70 6F 72 74 0A 00                A support..
+04D7                          L$263:
+04D7    43 75 72 72 65 6E 74 3A 20 20 20 25 75 3A 25 75 Current:   %u:%u
+04E7    3A 25 75 20 20 20 63 61 70 61 63 69 74 79 3A 20 :%u   capacity: 
+04F7    20 25 6C 75 0A 00                                %lu..
+04FD                          L$264:
+04FD    4C 42 41 20 53 65 63 74 6F 72 73 3A 20 20 25 6C LBA Sectors:  %l
+050D    75 00                                           u.
+050F                          L$265:
+050F    20 20 20 28 34 38 2D 62 69 74 29 3A 20 20 30 78    (48-bit):  0x
+051F    25 6C 78 25 30 38 6C 78 0A 00                   %lx%08lx..
+0529                          L$266:
+0529    54 72 61 6E 73 6C 61 74 65 64 20 67 65 6F 6D 65 Translated geome
+0539    74 72 79 3A 20 20 25 75 3A 25 75 3A 25 75 20 20 try:  %u:%u:%u  
+0549    20 63 61 70 61 63 69 74 79 3A 20 20 25 6C 64 0A  capacity:  %ld.
+0559    00                                              .
+055A                          L$267:
+055A    46 6C 6F 70 70 79 20 25 63 3A 20 74 79 70 65 20 Floppy %c: type 
+056A    25 64 0A 00                                     %d..
+056E                          L$268:
+056E    0A 50 50 49 3D 25 64 20 20 55 53 42 3D 25 64 20 .PPI=%d  USB=%d 
+057E    20 55 6E 69 74 73 3D 25 64 20 20 20 62 64 69 73  Units=%d   bdis
+058E    6B 3D 25 30 32 78 0A 00                         k=%02x..
+0596                          L$269:
+0596    0A 46 69 78 65 64 5F 44 69 73 6B 5F 54 61 62 3A .Fixed_Disk_Tab:
+05A6    20 00                                            .
+05A8                          L$270:
+05A8    20 25 30 32 78 00                                %02x.
+05AE                          L$271:
+05AE    0A 0A 00                                        ...
+05B1                          L$272:
+05B1    4E 56 52 41 4D 20 63 68 65 63 6B 73 75 6D 20 69 NVRAM checksum i
+05C1    73 20 69 6E 76 61 6C 69 64 0A 00                s invalid..
+05CC                          L$273:
+05CC    4E 56 52 41 4D 20 63 68 65 63 6B 73 75 6D 20 69 NVRAM checksum i
+05DC    73 20 76 61 6C 69 64 0A 00                      s valid..
+05E5                          L$274:
+05E5    54 68 65 20 63 6C 6F 63 6B 20 69 73 20 72 75 6E The clock is run
+05F5    6E 69 6E 67 2E 0A 00                            ning...
+05FC                          L$275:
+05FC    20 20 20 46 69 78 65 64 20 44 69 73 6B 20 53 65    Fixed Disk Se
+060C    74 75 70 0A 00                                  tup..
 
 Segment: CONST2 WORD USE16 0000007E bytes
 0000                          _dpm0:
