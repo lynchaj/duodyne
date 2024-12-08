@@ -107,7 +107,7 @@ ide_ERR_AMNF       	equ	0x01
 
 
 
-; Standard int 13h stack frame layout is 
+; Standard int 13h stack frame layout is
 ; created by:   PUSHM  ALL,DS,ES
 ;               MOV    BP,SP
 ;

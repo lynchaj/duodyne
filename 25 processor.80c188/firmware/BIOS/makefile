@@ -91,8 +91,8 @@ SEP=\
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
 OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj
-OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj
-OBJECT3 = sdcard.obj idelib.obj int14ser.obj int17par.obj
+OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj usb.obj
+OBJECT3 = idelib.obj int14ser.obj int17par.obj
 OBJECT4 = fpem/em187.obj
 OBJECTC1 = cprintf.obj sio.obj nvram.obj strtoul.obj libc.obj debug.obj
 
@@ -196,10 +196,13 @@ fdc:	wd37c65.obj fdc8272.obj	.SYMBOLIC
 
 bios064.bin:	rbios.hex tbasic.hex em187.hex
 	$(HEX2BIN) -o bios064.bin -R64K rbios.hex $(ETC)
+	$(CP) bios064.bin ../../bin/bios064.bin
 bios128.bin:	space64.bin bios064.bin
 	$(CAT) space64.bin $(PLUS) bios064.bin $(OUT) bios128.bin
+	$(CP) bios128.bin ../../bin/bios128.bin
 bios256.bin:	space64.bin bios128.bin
 	$(CAT) space64.bin $(PLUS) space64.bin $(PLUS) bios128.bin $(OUT) bios256.bin
+	$(CP) bios256.bin ../../bin/bios256.bin
 
 rbios.hex:	rbios.bin
 	$(BIN2HEX) -o rbios.hex rbios.bin
@@ -242,8 +245,12 @@ fpem/em187.obj:	 fpem/makefile
 ppide_sa.obj:      ppide.asm $(INCLUDES)
 	$(NASM) $(NOPT) -DSTANDALONE -f obj -o $@ -l ppide_sa.lst ppide.asm
 
+usb_sa.obj:      usb.asm $(INCLUDES)
+	$(NASM) $(NOPT) -DSTANDALONE -f obj -o $@ -l usb_sa.lst usb.asm
+
+
 wbios.lib:      $(OBJECTS)
-        wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj
+        wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
         wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
 	wlib -q wbios.lib +debug.obj +strtoul.obj  +inttrace.obj +tests.obj
@@ -251,7 +258,7 @@ wbios.lib:      $(OBJECTS)
 
 abios.lib:	$(OBJECTA)
 	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj
-	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +sdcard.obj
+	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +usb.obj
 	wlib -q    abios.lib  +idelib.obj  +fpem/em187.obj
 
 cbios.lib:	$(OBJECTC)
@@ -338,13 +345,13 @@ inttrace.obj:	inttrace.asm $(INCLUDES)
 misc15.obj:     misc15.asm $(INCLUDES) cassette.asm
 ide.obj:	ide.asm $(INCLUDES)
 ppide.obj:      ppide.asm $(INCLUDES)
+usb.obj:        usb.asm $(INCLUDES)
 idelib.obj:	idelib.asm $(INCLUDES)
-sdcard.obj:	sdcard.asm sdcard.inc crc16tab.inc $(INCLUDES)
 1Ah_time.obj:	1Ah_time.asm $(INCLUDES)
 
 cprintf.obj:    cprintf.c sbc188.h
 sio.obj:	sio.c sbc188.h sio.h
-nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc sdcard.h libc.h
+nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc libc.h
 libc.obj:	libc.c libc.h
 strtoul.obj:	strtoul.c sbc188.h mytypes.h libc.h
 debug.obj:      debug.c mytypes.h equates.h sio.h debug.h bda.inc

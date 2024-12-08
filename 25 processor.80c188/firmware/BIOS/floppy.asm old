@@ -588,20 +588,38 @@ fdc_ready_for_command:
 	push cx
 
 .0:
-	mov cx, 1000
-.1: call wait12
-	call get_msr
-	test al, RQM
-	loopz .1
-	; try to compensate for MSDOS anomaly with a BUSY test
-	jnz .req
-	test al, BUSY                ; How does MSDOS manage this???
+	mov cx, 1000	; SETUP FOR 1000 ITERATIONS
+.1:
+	call wait12	; WAIT 12ms
+	call get_msr	; get MSR
+
+	%if SOFT_DEBUG
+	push dx
+	mov dx, FRONT_PANEL_LED
+	out dx, al
+	pop dx
+	%endif
+
+	test al, RQM	; if rqm set, clear zero flag
+	loopz .1 	; cx--, loop while cx>0 and zero flag set (so loop while not RQM and timeout)
+
+	jnz .req	; if there was not a timeout, go to req
+	test al, BUSY   ; is the busy flag?, if not loop some more
 	jz .0
 	mov ah, ERR_89
 	jmp .err
 
 .req:
-	test al, DIO                 ; C=0, clear the carry
+
+	%if SOFT_DEBUG
+	push dx
+	mov dx, FRONT_PANEL_LED
+	out dx, al
+	pop dx
+	%endif
+
+
+	test al, DIO                 ; if DIO =0 then
 	jz .2                        ; ready for input?
 	call get_data
 	%if SOFT_DEBUG & DUMP
@@ -618,7 +636,8 @@ fdc_ready_for_command:
 	%endif
 	jmp .1
 	;;mov ah, ERR_81 ; not ready for input
-.err: Error                   ; C=1, signal error
+.err:
+    	Error                   ; C=1, signal error
 	jmp .99
 
 .2:
@@ -773,6 +792,7 @@ input_result_from_fdc:
 	;________________________________________________________________________________________________________________________________
 	;
 CHECKINT:
+	push 	cx
 
 	%if SOFT_DEBUG & DUMP
 	pushm f                      ;, ax, bx, cx, dx, es
@@ -1143,6 +1163,19 @@ fn00:
 	int 15h
 
 	call input_result_from_fdc
+
+	mov di,00
+	call motor_on                ; use DI to start motor
+	call recalibrate
+	mov  ch,39
+	call Seek
+	call recalibrate
+	mov  ch,39
+	call Seek
+	call recalibrate
+	mov  ch,39
+	call Seek
+	call recalibrate
 
 	Okay                         ; signal good execution
 	ret                          ; end of FN00
@@ -2159,19 +2192,19 @@ recalibrate:
 
 	call motor_on
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 12h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bh, 12h
+	mov bl, [fdc_cylinder + di]
+	push bx
+	push cs                      ; far pointer to ...
+	push fnseek                  ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
 
 	and byte [fdc_drv_calib], 00h ;POST no interrupts
 
@@ -2186,22 +2219,38 @@ recalibrate:
 	call output_cmd_to_fdc       ; output the command
 	jc .7
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 13h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bh, 13h
+	mov bl, [fdc_cylinder + di]
+	push bx
+	push cs                      ; far pointer to ...
+	push fnseek                  ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
 
-	call wait_operation_complete
-	jc .7
+
+.5:
+	call wait12
+	call CHECKINT
+	call get_msr                           ; READ SEEK STATUS
+
+	%if SOFT_DEBUG
+	push dx
+	mov dx, FRONT_PANEL_LED
+	out dx, al
+	pop dx
+	%endif
+
+	test al,0fh                         ; ANY DRIVES SEEKING?
+	jnz .5			 ; YES, WAIT FOR THEM
+
+	;call wait_operation_complete
+	;jc .7
 
 ;	%if SOFT_DEBUG & DUMP
 ;	pushm f                      ;, ax, bx, cx, dx, es
@@ -2216,23 +2265,23 @@ recalibrate:
 ;	add sp, 6
 ;	popm f                       ;, ax, bx, cx, dx, es
 ;	%endif
-;
-	call fdc_wait_seek_done
-	jc .7
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 15h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
+;	call fdc_wait_seek_done
+;	jc .7
+
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bh, 15h
+	mov bl, [fdc_cylinder + di]
+	push bx
+	push cs                      ; far pointer to ...
+	push fnseek                  ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
 
 	pop ax                       ; get unit # to AH
 	mov al, CMD_SENSE_DRIVE_STATUS
@@ -2243,42 +2292,28 @@ recalibrate:
 	call output_cmd_to_fdc
 	jc .7
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 16h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bh, 16h
+	mov bl, [fdc_cylinder + di]
+	push bx
+	push cs                      ; far pointer to ...
+	push fnseek                  ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
 
 	call input_byte_from_fdc     ; get ST3
 	jc .7
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 17h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
 	mov [fdc_disk_state + di], al ; save ST3 for drive
-	mov ah, ERR_87               ; not on track 0
-	test al, ST3_TR00
-	Error                        ; signal error
-	jz .7                        ; Not on Track 00, C=1 error
+;	mov ah, ERR_87               ; not on track 0
+;	test al, ST3_TR00
+;	Error                        ; signal error
+;	jz .7                        ; Not on Track 00, C=1 error
 
 	mov byte [fdc_cylinder + di], 0 ; set present cylinder
 
@@ -2428,8 +2463,24 @@ Seek:
 	xchg cl, ch                  ; CH=seek to cylinder
 	jc .exit
 
-	call wait_operation_complete
-	jc .exit
+;	call wait_operation_complete
+;	jc .exit
+
+.5:
+	call wait12
+	call CHECKINT
+	call get_msr                           ; READ SEEK STATUS
+
+	%if SOFT_DEBUG
+	push dx
+	mov dx, FRONT_PANEL_LED
+	out dx, al
+	pop dx
+	%endif
+
+	test al,0fh                         ; ANY DRIVES SEEKING?
+	jnz .5			 ; YES, WAIT FOR THEM
+
 
 	%if SOFT_DEBUG & DUMP
 	pushm f                      ;, ax, bx, cx, dx, es
@@ -2448,8 +2499,8 @@ Seek:
 
 	;;; mov [fdc_cylinder + di], ch ; set new cylinder number
 
-	call fdc_wait_seek_done      ; AH=error code if C=1
-	jc .exit
+	;call fdc_wait_seek_done      ; AH=error code if C=1
+	;jc .exit
 
 	%if SOFT_DEBUG & DUMP
 	pushm f                      ;, ax, bx, cx, dx, es
@@ -2472,9 +2523,9 @@ Seek:
 	jc .exit
 	%endif
 
-	mov ah, ERR_seek_failed
-	cmp ch, [fdc_cylinder + di]  ; PCN filled in
-	jne .err
+	;mov ah, ERR_seek_failed
+	;cmp ch, [fdc_cylinder + di]  ; PCN filled in
+	;jne .err
 	;;; mov ah, ERR_8A
 	;;; cmp ch, [fdc_ctrl_status + 3] ; read cylinder number
 	;;; jne .err

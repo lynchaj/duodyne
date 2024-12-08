@@ -41,7 +41,7 @@ FIXED_BIOS_call_13h:
 dispatch:
 	dw	FIXED_error	; NO_disk
 	dw	PPIDE_entry	; PPI_type
-	dw	DIDE0_entry	; DIDE0_type
+	dw	USB_entry	; DIDE0_type
 	dw	DIDE1_entry	; DIDE1_type
 	dw	DSD_entry	; DSD_type
 	dw	IDE8_entry	; V3IDE8 type
@@ -87,6 +87,7 @@ FIXED_exit_AH:
 ;  External references
 
 	extern	PPIDE_entry
+	extern	USB_entry
 
 DIDE0_entry	equ	FIXED_error
 DIDE1_entry	equ	FIXED_error

@@ -503,27 +503,33 @@
    220                              <1> FDC_DACK        equ	FDC+6
    221                              <1> FDC_DACK_TC     equ     FDC+7
    222                              <1> 
-   223                              <1> 
-   224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   225                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
-   226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   227                              <1> RTC	equ	IO_BASE+0094H
+   223                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   224                              <1> ; CH376 controller (Duodyne Multi IO)
+   225                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   226                              <1> CH376	        equ	IO_BASE+004EH
+   227                              <1> 
    228                              <1> 
-   229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   230                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> PPI	        equ	IO_BASE+0088H
-   233                              <1> 
-   234                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   235                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   236                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   237                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   238                              <1> 
-   239                              <1> portA           equ     PPI+0   ;
-   240                              <1> portB           equ     PPI+1   ;
-   241                              <1> portC           equ     PPI+2   ;
-   242                              <1> 
-   243                              <1> ; end CPUREGS.ASM
+   229                              <1> 
+   230                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   231                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   232                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   233                              <1> RTC	equ	IO_BASE+0094H
+   234                              <1> 
+   235                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   236                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   237                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   238                              <1> PPI	        equ	IO_BASE+0088H
+   239                              <1> 
+   240                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   241                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   242                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   243                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   244                              <1> 
+   245                              <1> portA           equ     PPI+0   ;
+   246                              <1> portB           equ     PPI+1   ;
+   247                              <1> portC           equ     PPI+2   ;
+   248                              <1> 
+   249                              <1> ; end CPUREGS.ASM
     28                                  %include	"equates.asm"
     29                              <1> ;========================================================================
     30                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
@@ -679,7 +685,7 @@
    121 00000016 ??                  <2> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
    122                              <2> ;;---------------[Keyboard data area]------------;
    123 00000017 ????                <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
-   124                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+   124                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
    125 00000019 ??                  <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
    126 0000001A ????                <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
    127 0000001C ????                <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
@@ -753,7 +759,7 @@
    195                              <2> ;;---------------[RTC/timer1 data]---------------------;
    196 00000098 ????????            <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
    197 0000009C ????????            <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
-   198 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   198 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
    199                              <2> ;;---------------[Cassette I/O stuff]------------------;
    200 000000A1 ??                  <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
    201 000000A2 ????                <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
@@ -792,13 +798,13 @@
    234 000000F4 ????                <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
    235 000000F6 ????                <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
    236                              <2> 
-   237 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   237 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
    238                              <2> 
    239 000000FA ????????            <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
    240                              <2> 
    241 000000FE ??                  <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
    242                              <2> 
-   243 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   243 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
    244                              <2> ;								   CPU clock is half of this
    245                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    246                              <2> ;
@@ -816,31 +822,11 @@
    258                              <2> %define PPIDE_driver 1
    259                              <2> %endif
    260                              <2> %if 0				;*/
-   261                              <2> #define DIDE_driver 0		/*
+   261                              <2> #define USB_driver 1		/*
    262                              <2> %else
-   263                              <2> %define DIDE_driver 0
+   263                              <2> %define USB_driver 1
    264                              <2> %endif
-   265                              <2> %if 0				;*/
-   266                              <2> #define DISKIO_driver 1		/*
-   267                              <2> %else
-   268                              <2> %define DISKIO_driver 1
-   269                              <2> %endif
-   270                              <2> %if 0				;*/
-   271                              <2> #define MFPIC_driver 1		/*
-   272                              <2> %else
-   273                              <2> %define MFPIC_driver 1
-   274                              <2> %endif
-   275                              <2> %if 0				;*/
-   276                              <2> #define DSD_driver 1		/*
-   277                              <2> %else
-   278                              <2> %define DSD_driver 1
-   279                              <2> %endif
-   280                              <2> %if 0				;*/
-   281                              <2> #define V3IDE8_driver (SBC188==3)		/*
-   282                              <2> %else
-   283                              <2> %define V3IDE8_driver (SBC188==3)
-   284                              <2> %endif
-   285                              <2> 				;*/
+   265                              <2> 				;*/
     77                              <1> 
     78                              <1> ;  this must be the same in EQUATES.H */
     79                              <1> %if SOFT_DEBUG
@@ -1057,18 +1043,18 @@
     88                                  
     89                                  
     90                                  	SEGMENT	_TEXT
-    91                                  	
-    92                                  ;------------------------------------------------------------------------------------		
+    91                                  
+    92                                  ;------------------------------------------------------------------------------------
     93                                  ; Parallel port IDE driver
-    94                                  ;	
+    94                                  ;
     95                                  ;
-    96                                  	
+    96                                  
     97                                  
     98                                  
     99                                  
-   100                                  ; -----------------------------------------------------------------------------	
+   100                                  ; -----------------------------------------------------------------------------
    101                                  ;  IDE_READ_ID
-   102                                  ; -----------------------------------------------------------------------------	
+   102                                  ; -----------------------------------------------------------------------------
    103                                  ; Read the 512 byte ID information from the attached drive
    104                                  ;
    105                                  ;  int IDE_READ_ID(far byte *buffer, byte slave);
@@ -1101,10 +1087,10 @@
    132 00000027 C3                      	ret
    133                                  
    134                                  
-   135                                  	
-   136                                  ; -----------------------------------------------------------------------------	
+   135                                  
+   136                                  ; -----------------------------------------------------------------------------
    137                                  ;  IDE_READ_SECTOR
-   138                                  ; -----------------------------------------------------------------------------	
+   138                                  ; -----------------------------------------------------------------------------
    139                                  	;read a sector, specified by the 4 bytes in "lba",
    140                                  	;Return, acc is zero on success, non-zero for an error
    141                                  ;
@@ -1128,7 +1114,7 @@
    159 00000041 8B560A                          mov     dx,ARG(4)
    160 00000044 8B4E0C                          mov     cx,ARG(5)
    161 00000047 E82101                  	call	wr_lba					;tell it which sector we want
-   162                                  ;	mvi		a, ide_command			;select IDE register 
+   162                                  ;	mvi		a, ide_command			;select IDE register
    163                                  ;	mvi		c, ide_cmd_read
    164 0000004A B00F                            mov     al,ide_command
    165 0000004C B320                            mov     bl,ide_cmd_read
@@ -1145,9 +1131,9 @@
    176 0000005F C3                      	ret
    177                                  
    178                                  
-   179                                  ; -----------------------------------------------------------------------------	
+   179                                  ; -----------------------------------------------------------------------------
    180                                  ;  IDE_VERIFY_SECTOR
-   181                                  ; -----------------------------------------------------------------------------	
+   181                                  ; -----------------------------------------------------------------------------
    182                                  	;read a sector, specified by the 4 bytes in "lba",
    183                                  	;Return, acc is zero on success, non-zero for an error
    184                                  ;
@@ -1171,7 +1157,7 @@
    202 00000075 8B5606                          mov     dx,ARG(2)
    203 00000078 8B4E08                          mov     cx,ARG(3)
    204 0000007B E8ED00                  	call	wr_lba					;tell it which sector we want
-   205                                  ;	mvi		a, ide_command			;select IDE register 
+   205                                  ;	mvi		a, ide_command			;select IDE register
    206                                  ;	mvi		c, ide_cmd_read
    207 0000007E B00F                            mov     al,ide_command
    208 00000080 B320                            mov     bl,ide_cmd_read
@@ -1227,7 +1213,7 @@
    258 000000C3 E82E00                  	call	ide_wait_not_busy	;wait until the write is complete
    259                                  ;	mvi		a,0					;signal success
    260 000000C6 31C0                            xor     ax,ax
-   261                                          
+   261                                  
    262 000000C8 075B                            popm    es,bx
    263 000000CA C9                              leave
    264 000000CB C3                      	ret
@@ -1244,7 +1230,7 @@
    275                                  ;  Exit with:
    276                                  ;       AX and DX are destroyed
    277                                  ;
-   278                                  ;-------------------------------------------------------------------------------------------	
+   278                                  ;-------------------------------------------------------------------------------------------
    279                                  ide_hard_reset:
    280 000000CC 51                              pushm   cx
    281                                  
@@ -1265,11 +1251,11 @@
    296                                  
    297                                  
    298                                  ;------------------------------------------------------------------------------
-   299                                  ; IDE INTERNAL SUBROUTINES 
+   299                                  ; IDE INTERNAL SUBROUTINES
    300                                  ;------------------------------------------------------------------------------
    301                                  
    302                                  
-   303                                  	
+   303                                  
    304                                  ;----------------------------------------------------------------------------
    305                                  ;  Get Error code
    306                                  ;
@@ -1300,7 +1286,7 @@
    331                                  ;	mvi		a, 255
    332 000000ED 7502                            jnz     .1
    333 000000EF FEC8                            dec     al      ; error code of 0 returned as 255
-   334                                  .1:     
+   334                                  .1:
    335 000000F1 5B5A                            popm    bx,dx
    336 000000F3 C3                      	ret
    337                                  
@@ -1345,8 +1331,8 @@
    376 00000106 B00F                            mov     al,ide_status           ; read status
    377 00000108 E89200                  	call	ide_read
    378                                  ;	mov		a,c
-   379                                  ;	ani		%11000000			
-   380                                  ;	xri		%01000000	
+   379                                  ;	ani		%11000000
+   380                                  ;	xri		%01000000
    381 0000010B 88D8                            mov     al,bl
    382 0000010D 24C0                            and     al,11000000b            ;Mask off busy and ready bits
    383 0000010F 3440                            xor     al,01000000b            ;We want Busy(7) to be 0 and Ready(6) to be 1
@@ -1465,7 +1451,7 @@
    496                                  ;	mvi		b,0
    497 00000156 B90001                          mov     cx,256          ; 512 bytes = 256 words
    498 00000159 89DE                            mov     si,bx           ; use SI for the loads
-   499                                  wrblk2: 
+   499                                  wrblk2:
    500                                  ;	push	b
    501                                  ;	mov		c, m	; lsb
    502                                  ;	inx		h
@@ -1518,14 +1504,14 @@
    549 00000179 08C3                            or      bl,al           ; Select Master/Slave
    550 0000017B B00E                            mov     al,ide_head
    551 0000017D E83800                  	call	ide_write
-   552                                  	
+   552                                  
    553                                  ;	lda		IDE_LBA0+2
    554                                  ;	mov		c,a
    555                                  ;	mvi		a,ide_cyl_msb
    556 00000180 5B                              pop     bx              ; get DL to BL
    557 00000181 B00D                            mov     al,ide_cyl_msb
    558 00000183 E83200                  	call	ide_write
-   559                                  	
+   559                                  
    560                                  ;	lda		IDE_LBA0+1
    561                                  ;	mov		c,a
    562                                  ;	mvi		a,ide_cyl_lsb
@@ -1534,22 +1520,22 @@
    565 00000188 88FB                            mov     bl,bh
    566 0000018A B00C                            mov     al,ide_cyl_lsb
    567 0000018C E82900                  	call	ide_write
-   568                                  	
+   568                                  
    569                                  ;	lda		IDE_LBA0+0			; LSB
    570                                  ;	mov		c,a
    571                                  ;	mvi		a,ide_sector
    572 0000018F 5B                              pop     bx              ; get LSB to BL
    573 00000190 B00B                            mov     al,ide_sector
    574 00000192 E82300                  	call	ide_write
-   575                                  	
+   575                                  
    576                                  ;	mvi		c,1
    577                                  ;	mvi		a,ide_sec_cnt
    578 00000195 B301                            mov     bl,1
    579 00000197 B00A                            mov     al,ide_sec_cnt
    580 00000199 E81C00                  	call	ide_write
-   581                                  	
+   581                                  
    582 0000019C C3                      	ret
-   583                                  	
+   583                                  
    584                                  ;-------------------------------------------------------------------------------
    585                                  
    586                                  ; Low Level I/O to the drive.  These are the routines that talk
@@ -1571,7 +1557,7 @@
    602 0000019D 50                              push    ax              ; save register address
    603 0000019E E82E00                  	call	set_ppi_rd		; setup for a read cycle
    604 000001A1 58                              pop     ax
-   605                                  	
+   605                                  
    606 000001A2 B28A                            mov     dl,IDECTL & 255
    607 000001A4 EE                              out     dx,al                   ; drive address onto control lines
    608 000001A5 0C40                            or      al,ide_rd_line          ; assert RD pin
@@ -1582,7 +1568,7 @@
    613 000001AB ED                              in      ax,dx                   ; retrieve LSB and MSB
    614 000001AC 89C3                            mov     bx,ax                   ; return in BX
    615                                  
-   616                                  	
+   616                                  
    617 000001AE 58                              pop     ax                      ; restore register value
    618 000001AF 3440                            xor     al,ide_rd_line          ; deassert RD signal
    619 000001B1 B28A                            mov     dl,IDECTL & 255
@@ -1592,7 +1578,7 @@
    623                                  
    624 000001B7 C3                      	ret
    625                                  
-   626                                  	
+   626                                  
    627                                  
    628                                  
    629                                  ; Do a write bus cycle to the drive, via the 8255
@@ -1631,14 +1617,14 @@
    662 000001CE C3                      	ret
    663                                  
    664                                  
-   665                                  ;-----------------------------------------------------------------------------------	
+   665                                  ;-----------------------------------------------------------------------------------
    666                                  ; ppi setup routine to configure the appropriate PPI mode
    667                                  ;
    668                                  ; NOTE: these are the only two routines that set DH!!!!
    669                                  ;------------------------------------------------------------------------------------
    670                                  
    671                                  set_ppi_rd:
-   672                                  ;	mvi	a,rd_ide_8255			
+   672                                  ;	mvi	a,rd_ide_8255
    673                                  ;	out	PIO1CONT			;config 8255 chip, read mode
    674 000001CF B092                            mov     al,rd_ide_8255
    675 000001D1 BA8B04                          mov     dx,PIO1CONT
@@ -1646,22 +1632,22 @@
    677 000001D5 C3                      	ret
    678                                  
    679                                  set_ppi_wr:
-   680                                  ;	mvi	a,wr_ide_8255			
+   680                                  ;	mvi	a,wr_ide_8255
    681                                  ;	out	PIO1CONT			;config 8255 chip, write mode
    682 000001D6 B080                            mov     al,wr_ide_8255
    683 000001D8 BA8B04                          mov     dx,PIO1CONT
    684 000001DB EE                              out     dx,al                   ; configure 8255 chip, write mode
    685 000001DC C3                      	ret
-   686                                  	
+   686                                  
    687                                  
    688                                  
    689                                  ;-----------------------------------------------------------------------------
    690                                  ; End of PPIDE disk driver
    691                                  ;
    692                                  ; Begin SBC-188 BIOS code
-   693                                  ;------------------------------------------------------------------------------------	
+   693                                  ;------------------------------------------------------------------------------------
    694                                  %ifndef STANDALONE
-   695                                  	
+   695                                  
    696                                  
    697                                  
    698                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1763,7 +1749,7 @@
    794                                  
    795                                  dispatch:
    796 0000021F [CE02]                          dw      fn00    ; Reset Disk System
-   797 00000221 [0602]                          dw      fn01    ; 
+   797 00000221 [0602]                          dw      fn01    ;
    798 00000223 [D902]                          dw      fn02
    799 00000225 [D902]                          dw      fn03
    800 00000227 [D902]                          dw      fn04
@@ -1951,7 +1937,7 @@
    982                                  
    983                                  ; Enter here on Read, Write, Verify or
    984                                  ;     extended  Read, Write, Verify, Seek
-   985                                  RWV: 
+   985                                  RWV:
    986 000002E8 FEC5                            inc     ch                      ; zero is valid for no transfer
    987 000002EA EB30                            jmp     .6              ; enter loop at the bottom
    988                                  ; the read/write/verify loop
@@ -1984,7 +1970,7 @@
   1015                                  ; CHS call is required
   1016 00000322 E8E1FE                  .7:     call    undefined
   1017                                  
-  1018                                  .8:     
+  1018                                  .8:
   1019 00000325 30E4                            xor     ah,ah
   1020 00000327 E9DEFE                          jmp     exit_sequence
   1021                                  
@@ -2032,7 +2018,7 @@
   1063 0000034E E9B7FE                          jmp     exit_sequence
   1064                                  
   1065                                  
-  1066                                          
+  1066                                  
   1067                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1068                                  ; fn15 -- Get Disk Type
   1069                                  ;
@@ -2143,7 +2129,7 @@
   1174 000003D6 E90FFF                          jmp     RWV             ; common read/write/verify code
   1175                                  
   1176                                  
-  1177                                          
+  1177                                  
   1178                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1179                                  ; fn48 -- Get Drive Parameters
   1180                                  ;
@@ -2179,16 +2165,16 @@
   1210 00000404 26C747020300               es   mov     word [bx + pkt_info], 000011b   ; DMA bound/ Geom OK
   1211                                  
   1212 0000040A 8B4409                          mov     ax,[fx_phys_cylinders - fx80 + si]      ; cylinders
-  1213 0000040D 26894704                   es   mov     [bx + pkt_phys_cyl],ax  
+  1213 0000040D 26894704                   es   mov     [bx + pkt_phys_cyl],ax
   1214 00000411 26894F06                   es   mov     [bx + pkt_phys_cyl+2],cx
   1215                                  
   1216 00000415 8A440B                          mov     al,[fx_phys_heads - fx80 + si]          ; heads
   1217 00000418 88EC                            mov     ah,ch
-  1218 0000041A 26894708                   es   mov     [bx + pkt_phys_hds],ax  
+  1218 0000041A 26894708                   es   mov     [bx + pkt_phys_hds],ax
   1219 0000041E 26894F0A                   es   mov     [bx + pkt_phys_hds+2],cx
   1220                                  
   1221 00000422 8A4404                          mov     al,[fx_phys_sectors - fx80 + si]        ; sectors
-  1222 00000425 2689470C                   es   mov     [bx + pkt_phys_spt],ax  
+  1222 00000425 2689470C                   es   mov     [bx + pkt_phys_spt],ax
   1223 00000429 26894F0E                   es   mov     [bx + pkt_phys_spt+2],cx
   1224                                  
   1225 0000042D 8B440C                          mov     ax,[fx_LBA_low - fx80 + si]             ; total LBA sectors
@@ -2203,7 +2189,7 @@
   1234                                  
   1235                                  
   1236                                  
-  1237                                          
+  1237                                  
   1238                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   1239                                  ; fn4E -- set hardware configuration
   1240                                  ;
@@ -2230,5 +2216,3 @@
   1261                                  
   1262                                  
   1263                                  %endif  ; STANDALONE
-  1264                                  
-  1265                                  

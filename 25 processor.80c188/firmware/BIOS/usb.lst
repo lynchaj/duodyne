@@ -1,0 +1,2261 @@
+     1                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     2                                  	; USB.ASM - - CH376S USB Module Fixed Disk Driver
+     3                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     4                                  	; This version is for assembly by NASM 0.98.39 or later
+     5                                  	;
+     6                                  	; This program is free software: you can redistribute it and / or modify
+     7                                  	; it under the terms of the GNU General Public License as published by
+     8                                  	; the Free Software Foundation, either version 3 of the License, or
+     9                                  	; (at your option) any later version.
+    10                                  	;
+    11                                  	; This program is distributed in the hope that it will be useful,
+    12                                  	; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    13                                  	; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    14                                  	; GNU General Public License for more details.
+    15                                  	;
+    16                                  	; You should have received a copy of the GNU General Public License
+    17                                  	; along with this program. If not, see <http: / / www.gnu.org / licenses / >.
+    18                                  	;
+    19                                  	; https: / / www.wch - ic.com /
+    20                                  	;
+    21                                  	; Thanks and credit to Alan Cox. Much of this driver is based on
+    22                                  	; his code in FUZIX (https: / / github.com / EtchedPixels / FUZIX),
+    23                                  	; and the code in the RomWBW CH37X driver.
+    24                                  	;
+    25                                  	; This file is the core driver file for the CH37x devices. The
+    26                                  	; CH376 supports both a USB Drive interface and an SD Card interface,
+    27                                  	; however this code only supports the USB interface (for now).
+    28                                  	; The USB support is implemented as pure raw sector I / O. The CH376
+    29                                  	; file - level support is not utilized.
+    30                                  	;
+    31                                  	; NOTES:
+    32                                  	; - There seem to be compatibility issues with older USB thumb drives.
+    33                                  	; Such drives will complete DISK_INIT successfully, but then return
+    34                                  	; an error attempting to do any I / O. The error is 17h indicating
+    35                                  	; the CH37x encountered an overflow during communication with the
+    36                                  	; device. It seems that adding a DISK_MOUNT command (only possible
+    37                                  	; on CH376) resolved the issue for some devices, so that has been
+    38                                  	; added to the RESET routine when using CH376.
+    39                                  	;
+    40                                  	;
+    41                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    42                                  	%include "config.asm"
+    43                              <1> ;/*
+    44                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    45                              <1> ; ANSI.CFG
+    46                              <1> ;   Copied to CONFIG.ASM for general release.
+    47                              <1> ;
+    48                              <1> ;       Modify the parameters below to reflect your system
+    49                              <1> ;
+    50                              <1> ;
+    51                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    52                              <1> ;
+    53                              <1> ;   Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    54                              <1> ;   Provided for hobbyist use on the N8VEM SBC-188 board.
+    55                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    56                              <1> ;
+    57                              <1> ; Define the serial terminal that the Video BIOS must emulate
+    58                              <1> ; Set one of the following to 1
+    59                              <1> ; If you have no idea what to choose, set TTY to 1
+    60                              <1> TTY     equ     0       ; hardcopy -- cannot position the cursor
+    61                              <1> DUMB    equ     0       ; dumb CRT -- ^H, ^J, ^K, ^L can move the cursor
+    62                              <1> ANSI    equ     1       ; very smart, like a VT-100
+    63                              <1> WYSE    equ     0       ; very smart Wyse series (30, 50, ...)
+    64                              <1> ; others may get added in the future
+    65                              <1> ;  ONE OF THE ABOVE must BE SET TO 1!!!!!
+    66                              <1> ;
+    67                              <1> ; Define the UART startup bit rate - 1200-19200 are most common
+    68                              <1> ;UART_RATE	equ	0		; 1200
+    69                              <1> ;UART_RATE	equ	1		; 2400
+    70                              <1> ;UART_RATE	equ	2		; 4800
+    71                              <1> UART_RATE	equ	3		; 9600
+    72                              <1> ;UART_RATE	equ	4		; 19200
+    73                              <1> ;UART_RATE	equ	5		; 38400
+    74                              <1> ;UART_RATE	equ	6		; 57600
+    75                              <1> ;UART_RATE	equ	7		; 115200
+    76                              <1> 
+    77                              <1> ; Does the serial terminal use the DSR/DTR protocol for flow control?
+    78                              <1> ;UART_DSR_PROTOCOL	equ		1	; Yes!
+    79                              <1> UART_DSR_PROTOCOL       equ             WYSE    ; Wyse always uses it
+    80                              <1> 						; but not ANSI
+    81                              <1> ; Define the size of the ROM image on the system in Kilobytes
+    82                              <1> ; It may be smaller than the actual EPROM in use.
+    83                              <1> ; The following sizes are supported:  32, 64, 128, and 256
+    84                              <1> %ifndef ROM
+    85                              <1> ROM             equ     32              ; 64 is the default
+    86                              <1> %endif
+    87                              <1> 
+    88                              <1> ; Define the number of Wait States at which the ROM operates
+    89                              <1> ROM_WS          equ     1               ; 0..3  (1 is the default)
+    90                              <1> 
+    91                              <1> ; Define the size in Kilobytes of DOS RAM (low SRAM plus EMM allocate RAM)
+    92                              <1> ; This is a desired size and will only be present if a 4MEM board is added
+    93                              <1> RAM_DOS         equ     640
+    94                              <1> 
+    95                              <1> ; Define the size of the low SRAM on the system in Kilobytes
+    96                              <1> ; the default is 512 kilobytes
+    97                              <1> RAM             equ     512             ; (512 is the default)
+    98                              <1> 
+    99                              <1> ; Define the number of Wait States at which the RAM operates
+   100                              <1> RAM_WS          equ     0               ; 0..3  (0 is the default)
+   101                              <1> 
+   102                              <1> ; Define the number of Wait States for Local Peripheral devices (600-7FF)
+   103                              <1> LCL_IO_WS       equ     1               ; 0..3  (1 is the default)
+   104                              <1> 
+   105                              <1> ; Define the number of Wait States for ECB BUS peripheral devices (4xx)
+   106                              <1> BUS_IO_WS       equ     3               ; 0..3  (3 is the default)
+   107                              <1> 
+   108                              <1> ; Define the time zone in which we build the Relocatable BIOS
+   109                              <1> %ifndef TIMEZONE
+   110                              <1> %define TIMEZONE "CST"
+   111                              <1> %endif
+   112                              <1> 
+   113                              <1> ; Has the REDBUG debugger been loaded?
+   114                              <1> %ifndef SOFT_DEBUG
+   115                              <1> %define SOFT_DEBUG 0
+   116                              <1> %endif
+   117                              <1> 
+   118                              <1> ; Should the BIOS include "Tiny BASIC" in the image?
+   119                              <1> %ifndef TBASIC
+   120                              <1> TBASIC          equ     1		; default is 1
+   121                              <1> %endif
+   122                              <1> 
+   123                              <1> ; Should the BIOS include the Floating Point Emulator?  The 80188 does
+   124                              <1> ; not allow a floating point co-processor, so this is probably a good idea.
+   125                              <1> %ifndef FPEM
+   126                              <1> FPEM            equ     1               ; default is 1
+   127                              <1> %endif
+   128                              <1> 
+   129                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   130                              <1> ; or at locations 0280h..3FFh in low memory?
+   131                              <1> %if SOFT_DEBUG
+   132                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   133                              <1> %else
+   134                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   135                              <1> %endif
+   136                              <1> 
+   137                              <1> ; Define the size of the EPROM that is to be installed on the system
+   138                              <1> ; It may be larger than the actual ROM image to be generated.
+   139                              <1> %ifndef CHIP
+   140                              <1> CHIP            equ     64
+   141                              <1> %endif
+   142                              <1> 
+   143                              <1> ; Define the UART oscillator speed
+   144                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   145                              <1> 
+   146                              <1> 
+   147                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   148                              <1> ; end of the User configuration
+   149                              <1> ;       Do Not modify anything below this point
+   150                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   151                              <1> 
+   152                              <1> ; Define existence of any uart chip
+   153                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   154                              <1> startuplength   equ     512                     ; may be up to 1024
+   155                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   156                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   157                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   158                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   159                              <1> 
+   160                              <1> 
+   161                              <1> %define ARG(n) [bp+2+(n)*2]
+   162                              <1> 
+   163                              <1> %macro  check   1.nolist
+   164                              <1>  %if (%1)
+   165                              <1>    %error Check Failure: %1
+   166                              <1>  %endif
+   167                              <1> %endm
+   168                              <1> %macro  range   3.nolist
+   169                              <1>  %if (%1)<(%2)
+   170                              <1>    %error Out of Range: %1
+   171                              <1>  %elif (%1)>(%3)
+   172                              <1>    %error Out of Range: %1
+   173                              <1>  %endif
+   174                              <1> %endm
+   175                              <1> _terminal equ UART
+   176                              <1>  check   RAM_DOS&15
+   177                              <1>  check   RAM&(RAM-1)
+   178                              <1>  check   ROM&(ROM-1)
+   179                              <1>  range   RAM,32,512
+   180                              <1>  range   ROM,32,256
+   181                              <1>  range   RAM_WS,0,3
+   182                              <1>  range   ROM_WS,0,3
+   183                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   184                              <1>  range   LCL_IO_WS,0,3
+   185                              <1>  range   BUS_IO_WS,0,3
+   186                              <1>  range   UART_OSC,500000,16000000
+   187                              <1>  range   UART_RATE,0,7
+   188                              <1>  range	 UART,0,1
+   189                              <1>  range	 _terminal,1,2
+   190                              <1> 
+   191                              <1> %ifndef SOFT_DEBUG
+   192                              <1> %define SOFT_DEBUG 0
+   193                              <1> %endif
+   194                              <1> 
+   195                              <1> %ifndef TRACE
+   196                              <1> %define TRACE 0
+   197                              <1> %endif
+   198                              <1> 
+   199                              <1> %ifdef MAKE_OBJECT_FILE
+   200                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   201                              <1>         export _ROMsize
+   202                              <1>         export _CHIPsize
+   203                              <1> _ROMsize        dw      ROM
+   204                              <1> _CHIPsize       dw      CHIP
+   205                              <1> %endif
+   206                              <1> ; end of the Hardware configuration file
+   207                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   208                              <1> ;*/
+    43                                  	%include "cpuregs.asm"
+    44                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    45                              <1> ; CPUREGS.ASM
+    46                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    47                              <1> ;
+    48                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    49                              <1> ;
+    50                              <1> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    51                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    52                              <1> ;
+    53                              <1> ; This program is free software: you can redistribute it and/or modify
+    54                              <1> ; it under the terms of the GNU General Public License as published by
+    55                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    56                              <1> ; (at your option) any later version.
+    57                              <1> ;
+    58                              <1> ; This program is distributed in the hope that it will be useful,
+    59                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    60                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    61                              <1> ; GNU General Public License for more details.
+    62                              <1> ;
+    63                              <1> ; You should have received a copy of the GNU General Public License
+    64                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    65                              <1> ;
+    66                              <1> ; Updated for the Duodyne 80c188 SBC
+    67                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    68                              <1> %include	"macros.inc"
+    69                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    70                              <2> ; MACROS.INC  
+    71                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    72                              <2> ;
+    73                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+    74                              <2> ;
+    75                              <2> ; Copyright (C) 2010,2011 John R. Coffman.  All rights reserved.
+    76                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    77                              <2> ;
+    78                              <2> ; This program is free software: you can redistribute it and/or modify
+    79                              <2> ; it under the terms of the GNU General Public License as published by
+    80                              <2> ; the Free Software Foundation, either version 3 of the License, or
+    81                              <2> ; (at your option) any later version.
+    82                              <2> ;
+    83                              <2> ; This program is distributed in the hope that it will be useful,
+    84                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    85                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    86                              <2> ; GNU General Public License for more details.
+    87                              <2> ;
+    88                              <2> ; You should have received a copy of the GNU General Public License
+    89                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    90                              <2> ;
+    91                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    92                              <2> 
+    93                              <2> ; general macros for the SBC188 BIOS ASSEMBLY
+    94                              <2> ;
+    95                              <2> ;
+    96                              <2> %ifndef __MACROS_DEFINED_
+    97                              <2> %define __MACROS_DEFINED_ 1
+    98                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    99                              <2> ;
+   100                              <2> ; some useful macros:
+   101                              <2> ;
+   102                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   103                              <2> ;
+   104                              <2> 	cpu	186
+   105                              <2> 
+   106                              <2> %imacro setloc  1.nolist
+   107                              <2>  times   (%1-($-$$)) db 0FFh
+   108                              <2> %endm
+   109                              <2> 
+   110                              <2> %imacro db_lo   1
+   111                              <2>  db (%1)&255
+   112                              <2> %endm
+   113                              <2> 
+   114                              <2> %imacro cnop    0.nolist
+   115                              <2> %if SOFT_DEBUG
+   116                              <2>         nop
+   117                              <2> %endif
+   118                              <2> %endm
+   119                              <2> 
+   120                              <2> %imacro popm 1-*.nolist
+   121                              <2> %rep %0
+   122                              <2> %ifidni %1,ALL
+   123                              <2>  popa
+   124                              <2> %elifidni %1,F
+   125                              <2>  popf
+   126                              <2> %else
+   127                              <2>  pop %1
+   128                              <2> %ifidni %1,DS
+   129                              <2>  cnop
+   130                              <2> %elifidni %1,ES
+   131                              <2>  cnop
+   132                              <2> %endif
+   133                              <2> %endif
+   134                              <2> %rotate 1
+   135                              <2> %endrep
+   136                              <2> %endm
+   137                              <2> 
+   138                              <2> %imacro pushm 1-*.nolist
+   139                              <2> %rep %0
+   140                              <2> %rotate -1
+   141                              <2> %ifidni %1,ALL
+   142                              <2>  pusha
+   143                              <2> %elifidni %1,F
+   144                              <2>  pushf
+   145                              <2> %else
+   146                              <2>  push %1
+   147                              <2> %endif
+   148                              <2> %endrep
+   149                              <2> %endm
+   150                              <2> 
+   151                              <2> ;
+   152                              <2> ; added from the 386EX project
+   153                              <2> ;
+   154                              <2> 
+   155                              <2> ; call arguments
+   156                              <2> %define ARG(n) [bp+2+(n)*2]
+   157                              <2> 
+   158                              <2> ;
+   159                              <2> ; format of the BYTE initialization table:  address, byte
+   160                              <2> ;
+   161                              <2> %imacro  binit 2
+   162                              <2>         dw      %1
+   163                              <2>         db      %2
+   164                              <2> %endmacro
+   165                              <2> ; end with DW -1
+   166                              <2> 
+   167                              <2> ;
+   168                              <2> ; format of the WORD initialization table:  address, word
+   169                              <2> ;
+   170                              <2> %imacro  winit 2
+   171                              <2>         dw      %1
+   172                              <2>         dw      %2
+   173                              <2> %endmacro
+   174                              <2> ; end with DW -1
+   175                              <2> 
+   176                              <2> 
+   177                              <2> ; get the BIOS Data Area segment pointer to a [segment] register
+   178                              <2> %imacro get_bda	1.nolist
+   179                              <2> 	push	0x0040
+   180                              <2> 	pop	%1
+   181                              <2> 	cnop
+   182                              <2> %endm
+   183                              <2> 
+   184                              <2> 
+   185                              <2> %endif
+    69                              <1> 
+    70                              <1> 	cpu     186
+    71                              <1> ;
+    72                              <1> ;
+    73                              <1> ; IBM model byte -- must be less than a 286
+    74                              <1> ;
+    75                              <1> 
+    76                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    77                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    78                              <1> 
+    79                              <1> 
+    80                              <1> ; 80188 peripheral control register block address
+    81                              <1> CPU_CSCR	        equ	0FF00h
+    82                              <1> 
+    83                              <1> ; Compatible Mode registers
+    84                              <1> 
+    85                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    86                              <1> 
+    87                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
+    88                              <1> 
+    89                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    90                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    91                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    92                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    93                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    94                              <1> 
+    95                              <1> ; Enhanced Mode registers
+    96                              <1> 
+    97                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    98                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    99                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+   100                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+   101                              <1> 
+   102                              <1> 
+   103                              <1> ; On-board internal peripheral equates
+   104                              <1> ; Programmable Interrupt Controller
+   105                              <1> PIC	        equ	CPU_CSCR+020H
+   106                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+   107                              <1> PIC_POLLR	equ	PIC+4
+   108                              <1> PIC_POLLSR	equ	PIC+6
+   109                              <1> PIC_IMASK	equ	PIC+8
+   110                              <1> PIC_PMREG	equ	PIC+0AH
+   111                              <1> PIC_SRVR	equ	PIC+0CH
+   112                              <1> PIC_IRQR	equ	PIC+0EH
+   113                              <1> PIC_IRQSR	equ	PIC+10H
+   114                              <1> PIC_TCR	        equ	PIC+12H
+   115                              <1> PIC_DMA0CR	equ	PIC+14H
+   116                              <1> PIC_DMA1CR	equ	PIC+16H
+   117                              <1> PIC_I0CON	equ	PIC+18H
+   118                              <1> PIC_I1CON	equ	PIC+1AH
+   119                              <1> PIC_I2CON	equ	PIC+1CH
+   120                              <1> PIC_I3CON	equ	PIC+1EH
+   121                              <1> 
+   122                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
+   123                              <1> 
+   124                              <1> ; Interrupt masks (Master Mode)
+   125                              <1> ;
+   126                              <1> mask_timer_all          equ     0001h
+   127                              <1> mask_dma0               equ     0004h
+   128                              <1> mask_dma1               equ     0008h
+   129                              <1> mask_int0               equ     0010h
+   130                              <1> mask_int1               equ     0020h
+   131                              <1> mask_int2               equ     0040h
+   132                              <1> mask_int3               equ     0080h
+   133                              <1> 
+   134                              <1> 
+   135                              <1> 
+   136                              <1> ; Timers
+   137                              <1> TIM0	        equ	CPU_CSCR+050H
+   138                              <1> TIM1	        equ	CPU_CSCR+058H
+   139                              <1> TIM2	        equ	CPU_CSCR+060H
+   140                              <1> 
+   141                              <1> TCNT	        equ	0	; count register
+   142                              <1> CMPA	        equ	2	; max count A
+   143                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   144                              <1> TCON	        equ	6	; mode/control word
+   145                              <1> 
+   146                              <1> ; Timer control bits:
+   147                              <1> tc_EN           equ     8000h   ; Enable bit
+   148                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   149                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   150                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   151                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   152                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   153                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   154                              <1> tc_EXT          equ     0004h   ; External clock
+   155                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   156                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   157                              <1> 
+   158                              <1> 
+   159                              <1> 
+   160                              <1> 
+   161                              <1> ; DMA
+   162                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   163                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   164                              <1> DMASPL	        equ	0	; source pointer low
+   165                              <1> DMASPU	        equ	2	; source pointer high
+   166                              <1> DMADPL	        equ	4	; destination pointer low
+   167                              <1> DMADPU	        equ	6	; destination pointer high
+   168                              <1> DMATC	        equ	8	; terminal count
+   169                              <1> DMACW	        equ	0AH	; control word
+   170                              <1> 
+   171                              <1> 
+   172                              <1> 
+   173                              <1> 
+   174                              <1> 
+   175                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   176                              <1> ;
+   177                              <1> ;       SBC-188 external devices
+   178                              <1> ;
+   179                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   180                              <1> 
+   181                              <1> IO_BASE			equ	0400h
+   182                              <1> 
+   183                              <1> 
+   184                              <1> 
+   185                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   186                              <1> ; The UART registers (Duodyne SBC 80c188 Console port)
+   187                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   188                              <1> 
+   189                              <1> uart_base               equ     IO_BASE+0280h
+   190                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   191                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   192                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   193                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   194                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   195                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   196                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   197                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   198                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   199                              <1> uart_sr			equ	uart_base+7	;Scratch
+   200                              <1> 
+   201                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   202                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   203                              <1> 
+   204                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   205                              <1> ; CONTROL LS259 PORT  (DuoDyne 80C188)
+   206                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   207                              <1> CTRL259		equ	IO_BASE+0238H
+   208                              <1> ; LEDS are at addresses 0..3
+   209                              <1> ; other control ports on 4..7
+   210                              <1> LED0		equ	CTRL259+0
+   211                              <1> LED1		equ	LED0+1
+   212                              <1> LED2		equ	LED0+2
+   213                              <1> LED3		equ	LED0+3
+   214                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
+   215                              <1> ;unused		equ	CTRL259+5
+   216                              <1> ;unused		equ	CTRL259+6
+   217                              <1> ;unused		equ	CTRL259+7
+   218                              <1> 
+   219                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   220                              <1> ; Front Panel Connector  (DuoDyne 80C188)
+   221                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   222                              <1> FRONT_PANEL_LED	equ	IO_BASE+0230H
+   223                              <1> 
+   224                              <1> 
+   225                              <1> 
+   226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   227                              <1> ; Floppy controller (Duodyne Disk IO)
+   228                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   229                              <1> FDC	        equ	IO_BASE+0080H
+   230                              <1> FDC_MSR         equ     FDC
+   231                              <1> FDC_DATA        equ     FDC+1
+   232                              <1> FDC_TC	        equ	FDC+2
+   233                              <1> FDC_RES	        equ	FDC+3
+   234                              <1> FDC_LDCR	equ	FDC+5
+   235                              <1> FDC_LDOR	equ	FDC+6
+   236                              <1> FDC_DACK        equ	FDC+6
+   237                              <1> FDC_DACK_TC     equ     FDC+7
+   238                              <1> 
+   239                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   240                              <1> ; CH376 controller (Duodyne Multi IO)
+   241                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   242                              <1> CH376	        equ	IO_BASE+004EH
+   243                              <1> 
+   244                              <1> 
+   245                              <1> 
+   246                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   247                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   248                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   249                              <1> RTC	equ	IO_BASE+0094H
+   250                              <1> 
+   251                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   252                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   253                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   254                              <1> PPI	        equ	IO_BASE+0088H
+   255                              <1> 
+   256                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   257                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   258                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   259                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   260                              <1> 
+   261                              <1> portA           equ     PPI+0   ;
+   262                              <1> portB           equ     PPI+1   ;
+   263                              <1> portC           equ     PPI+2   ;
+   264                              <1> 
+   265                              <1> ; end CPUREGS.ASM
+    44                                  	%include "equates.asm"
+    45                              <1> ;========================================================================
+    46                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
+    47                              <1> ;========================================================================
+    48                              <1> ;   for the N8VEM SBC-188 v.00.4 and 00.5
+    49                              <1> ;
+    50                              <1> ;   This version is for assembly by  NASM 0.98.39 or later
+    51                              <1> ;
+    52                              <1> ; Copyright (C) 2010 John R. Coffman.  All rights reserved.
+    53                              <1> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    54                              <1> ;
+    55                              <1> ; This program is free software: you can redistribute it and/or modify
+    56                              <1> ; it under the terms of the GNU General Public License as published by
+    57                              <1> ; the Free Software Foundation, either version 3 of the License, or
+    58                              <1> ; (at your option) any later version.
+    59                              <1> ;
+    60                              <1> ; This program is distributed in the hope that it will be useful,
+    61                              <1> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    62                              <1> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    63                              <1> ; GNU General Public License for more details.
+    64                              <1> ;
+    65                              <1> ; You should have received a copy of the GNU General Public License
+    66                              <1> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    67                              <1> ;
+    68                              <1> ;========================================================================
+    69                              <1> 
+    70                              <1>         global  FPEM_segment
+    71                              <1> 
+    72                              <1> 
+    73                              <1> %include "segdef.asm"
+    74                              <2> ;========================================================================
+    75                              <2> ; SEGDEF.ASM -- Lots of Defintions for Relocatable BIOS
+    76                              <2> ;========================================================================
+    77                              <2> ;   for the N8VEM SBC-188 v.00.4 and 00.5
+    78                              <2> ;
+    79                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+    80                              <2> ;
+    81                              <2> ; Copyright (C) 2010 John R. Coffman.  All rights reserved.
+    82                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+    83                              <2> ;
+    84                              <2> ; This program is free software: you can redistribute it and/or modify
+    85                              <2> ; it under the terms of the GNU General Public License as published by
+    86                              <2> ; the Free Software Foundation, either version 3 of the License, or
+    87                              <2> ; (at your option) any later version.
+    88                              <2> ;
+    89                              <2> ; This program is distributed in the hope that it will be useful,
+    90                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    91                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    92                              <2> ; GNU General Public License for more details.
+    93                              <2> ;
+    94                              <2> ; You should have received a copy of the GNU General Public License
+    95                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    96                              <2> ;
+    97                              <2> ;========================================================================
+    98                              <2> 
+    99                              <2> %ifndef __SEGDEF_
+   100                              <2> %define __SEGDEF_
+   101                              <2> 
+   102                              <2> 	SEGMENT  _TEXT ALIGN=2 PUBLIC CLASS=CODE
+   103                              <2>         SEGMENT  CONST ALIGN=2 PUBLIC CLASS=DATA
+   104                              <2>         SEGMENT  CONST2 ALIGN=2 PUBLIC CLASS=DATA
+   105                              <2> 	SEGMENT  _DATA ALIGN=16 PUBLIC CLASS=DATA
+   106                              <2> 	SEGMENT  _BSS  ALIGN=2 PUBLIC CLASS=BSS
+   107                              <2> ;;;        SEGMENT  _BASIC ALIGN=16 PUBLIC CLASS=BASIC
+   108                              <2> 
+   109                              <2> 	GROUP	DGROUP CONST CONST2 _DATA _BSS
+   110                              <2> 
+   111                              <2> %endif
+   112                              <2> 
+    74                              <1> %include "ascii.asm"
+    75                              <2> ; ascii.asm
+    76                              <2> ;
+    77                              <2> CTRL            equ     1Fh     ; masks a character to CTRL-x
+    78                              <2> 
+    79                              <2> NUL     equ     00h
+    80                              <2> BEL     equ     (CTRL & 'G')
+    81                              <2> BS      equ     08h		; ^H
+    82                              <2> HT      equ     09h		; ^I
+    83                              <2> LF	equ	0Ah		; ^J
+    84                              <2> NL      equ     LF
+    85                              <2> VT	equ	0Bh		; ^K
+    86                              <2> FWD	equ	0Ch		; ^L
+    87                              <2> CR	equ	0Dh
+    88                              <2> XON     equ     (CTRL & 'Q')
+    89                              <2> XOFF    equ     (CTRL & 'S')
+    90                              <2> DC1     equ     XON
+    91                              <2> DC3     equ     XOFF
+    92                              <2> ESC     equ	1Bh
+    93                              <2> 
+    94                              <2> 
+    75                              <1> 
+    76                              <1> 
+    77                              <1> ; POST error codes. Presently one byte but can expand to word.
+    78                              <1> ER_BIOS equ	01h		; Bad ROM bios checksum, patch last byte
+    79                              <1> ER_RAM	equ	02h		; Bad RAM in main memory, replace
+    80                              <1> ER_CRT	equ	04h		; Bad RAM in video card, replace
+    81                              <1> ER_FDC	equ	08h		; Bad FDC
+    82                              <1> ER_UNK1	equ	10h		; {unassigned}
+    83                              <1> ER_MEM	equ	20h		; Bad RAM in vector area, replace
+    84                              <1> ER_ROM	equ	40h		; Bad ROM in expansion area, bad checksum
+    85                              <1> ER_UNK2	equ	80h		; {unassigned}
+    86                              <1> 
+    87                              <1> 
+    88                              <1> 
+    89                              <1> ;; ************************ BIOS Data Segment ******************************
+    90                              <1> ;; BIOS data segment - not all will  be used
+    91                              <1> ;                struc   BIOS_DATA_AREA  ; at 0040:0000
+    92                              <1> %include "bda.inc"
+    93                              <2> ;/*======================================================================
+    94                              <2> ; bda.inc -- BIOS data area definitions
+    95                              <2> ;========================================================================
+    96                              <2> ;   for the N8VEM SBC-188
+    97                              <2> ;
+    98                              <2> ;   This version is for assembly by  NASM 0.98.39 or later
+    99                              <2> ;
+   100                              <2> ; Copyright (C) 2013 John R. Coffman.  All rights reserved.
+   101                              <2> ; Provided for hobbyist use on the N8VEM SBC-188 board.
+   102                              <2> ;
+   103                              <2> ; This program is free software: you can redistribute it and/or modify
+   104                              <2> ; it under the terms of the GNU General Public License as published by
+   105                              <2> ; the Free Software Foundation, either version 3 of the License, or
+   106                              <2> ; (at your option) any later version.
+   107                              <2> ;
+   108                              <2> ; This program is distributed in the hope that it will be useful,
+   109                              <2> ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+   110                              <2> ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   111                              <2> ; GNU General Public License for more details.
+   112                              <2> ;
+   113                              <2> ; You should have received a copy of the GNU General Public License
+   114                              <2> ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   115                              <2> ;
+   116                              <2> ;========================================================================
+   117                              <2> 
+   118                              <2> 			;*/ extern				/*
+   119                              <2> 	ABSOLUTE  0	;*/ struct BDA {			/*
+   120 00000000 ????????????????    <2> serial_ports    resw    4	;*/	word	serial_ports[4];	/*
+   121 00000008 ????????????????    <2> parallel_ports  resw    4	;*/	word	parallel_ports[4];	/*
+   122 00000010 ????                <2> equipment_flag  resw    1	;*/	EQFL	equipment_flag;		/*
+   123                              <2> ;	dw	?		; 40:10 	; Equipment present word
+   124                              <2> ;  						;  = (1 iff floppies) *     1.
+   125                              <2> ;                                               ;  + (1 iff 187     ) *     2.
+   126                              <2> ;  						;  + (#+1 64K sys ram) *    4.
+   127                              <2> ;  						;  + (init crt mode ) *    16.
+   128                              <2> ;  						;  + (# of floppies ) *    64.
+   129                              <2> ;  						;  + (# serial ports) *   512.
+   130                              <2> ;  						;  + (1 iff toy port) *  4096.
+   131                              <2> ;                                               ;  + (1 iff modem   ) *  8192.
+   132                              <2> ;  						;  + (# parallel LPT) * 16384.
+   133 00000012 ??                  <2> mfg_test_flags  resb    1	;*/	byte	mfg_test_flags;	/* 40:12 unused by us
+   134 00000013 ????                <2> memory_size     resw    1	;*/	word	memory_size;	/* 40:13 kilobytes
+   135                              <2> uart_kbd_ctrl_R	equ	$	;*/				/*** JRC: count of ctrl-R's for reboot
+   136 00000015 ??                  <2> IPL_errors      resb    1	;*/	byte	IPL_errors;	/* 40:15 IPL errors<-table/scratchpad
+   137 00000016 ??                  <2> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
+   138                              <2> ;;---------------[Keyboard data area]------------;
+   139 00000017 ????                <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
+   140                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
+   141 00000019 ??                  <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
+   142 0000001A ????                <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
+   143 0000001C ????                <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
+   144 0000001E <res 20h>           <2> kbd_buffer      resw    16	;*/	word	kbd_buffer[16];	/* 40:1E Keyboard Buffer (Scan,Value)
+   145                              <2> kbd_buffer_last	equ	$	;*/				/*
+   146                              <2> ;;---------------[Diskette data area]------------;
+   147 0000003E ??                  <2> fdc_drv_calib   resb    1	;*/	byte	fdc_drive_calib;   /* 40:3E
+   148 0000003F ??                  <2> fdc_motor_LDOR  resb    1	;*/	byte	fdc_motor_LDOR;	   /* 40:3F Motor, DMA, select control
+   149 00000040 ??                  <2> fdc_motor_ticks resb    1	;*/	byte	fdc_motor_ticks;   /* 40:40 ticks til motor off
+   150 00000041 ??                  <2> fdc_status      resb    1	;*/	byte	fdc_status;	   /* 40:41
+   151                              <2> ;				Floppy return code stat byte
+   152                              <2> ;				;  1 = bad ic 765 command req.
+   153                              <2> ;				;  2 = address mark not found
+   154                              <2> ;				;  3 = write to protected disk
+   155                              <2> ;				;  4 = sector not found
+   156                              <2> ;				;  8 = data late (DMA overrun)
+   157                              <2> ;				;  9 = DMA failed 64K page end
+   158                              <2> ;				; 16 = bad CRC on floppy read
+   159                              <2> ;				; 32 = bad NEC 765 controller
+   160                              <2> ;				; 64 = seek operation failed
+   161                              <2> ;				;128 = disk drive timed out
+   162 00000042 ??????????????      <2> fdc_ctrl_status resb    7	;*/	byte	fdc_ctrl_status[7];  /* 40:42 Status bytes from NEC 765
+   163                              <2> ;;---------------[Video display area]------------;
+   164 00000049 ??                  <2> video_mode      resb    1	;*/	byte	video_mode;	/* 40:49
+   165                              <2> ;			 	; Current CRT mode  (software)
+   166                              <2> ;				;  0 = 40 x 25 text (no color)
+   167                              <2> ;				;  1 = 40 x 25 text (16 color)
+   168                              <2> ;				;  2 = 80 x 25 text (no color)
+   169                              <2> ;				;  3 = 80 x 25 text (16 color)
+   170                              <2> ;				;  4 = 320 x 200 grafix 4 color
+   171                              <2> ;				;  5 = 320 x 200 grafix 0 color
+   172                              <2> ;				;  6 = 640 x 200 grafix 0 color
+   173                              <2> ;				;  7 = 80 x 25 text (mono card)
+   174 0000004A ????                <2> video_columns   resw    1	;*/	word video_columns;	/* 40:4A Columns on CRT screen
+   175 0000004C ????                <2> video_regen_bytes  resw 1	;*/	word video_regen_bytes;	/* 40:4C Bytes in the regen region
+   176 0000004E ????                <2> video_regen_offset resw 1	;*/	word video_regen_offset;/* 40:4E Byte offset in regen region
+   177 00000050 <res 10h>           <2> video_cursor_pos  resw  8	;*/	word video_cursor_pos[8];  /* 40:50 Cursor pos for up to 8 pages
+   178 00000060 ????                <2> video_cursor_mode resw  1	;*/	word video_cursor_mode;	/* 40:60 Current cursor mode setting
+   179 00000062 ??                  <2> video_page      resb    1	;*/	byte video_page;	/* 40:62 Current page on display
+   180 00000063 ????                <2> video_base_seg  resw    1	;*/	word video_base_seg;	/* 40:63 Base address (B000h or B800h)
+   181 00000065 ??                  <2> video_hw_mode   resb    1	;*/	byte video_hw_mode;	/* 40:65 ic 6845 mode reg. (hardware)
+   182 00000066 ??                  <2> video_cga_palette resb  1	;*/	byte video_cga_palette;	/* 40:66 Current CGA palette
+   183                              <2> ;;---------------[Used to setup ROM]-------------;
+   184 00000067 ????????            <2> eprom_address   resd    1	;*/	dword eprom_address;	/* 40:67 Eprom base Offset,Segment
+   185 0000006B ??                  <2> spurious_irq    resb    1	;*/	byte spurious_irq;	/* 40:6B Last spurious interrupt IRQ
+   186                              <2> ;;---------------[Timer data area]---------------;
+   187 0000006C ????????            <2> timer_ticks     resd    1	;*/	dword timer_ticks;	/* 40:6C Ticks since midnight (lo,hi)
+   188 00000070 ??                  <2> timer_new_day   resb    1	;*/	byte timer_new_day;	/* 40:70 Non-zero if new day
+   189                              <2> ;;---------------[System data area]--------------;
+   190 00000071 ??                  <2> break_flag      resb    1	;*/	byte break_flag;	/* 40:71 Sign bit set iff break
+   191 00000072 ????                <2> warm_boot       resw    1	;*/	word warm_boot;		/* 40:72 Warm boot iff==1234h
+   192                              <2> ;;---------------[Hard disk scratchpad]----------;
+   193 00000074 ????????            <2> hdd_scratch     resd    1	;*/	word hdd_scratch[2];	/* 40:74
+   194                              <2> ;;---------------[Timout areas/PRT/LPT]----------;
+   195 00000078 ????????            <2> lpt_timeout     resb    4	;*/	byte lpt_timeout[4];	/* 40:78 Ticks for LPT 1-4 timeouts
+   196 0000007C ????????            <2> com_timeout     resb    4	;*/	byte com_timeout[4];	/* 40:7C Ticks for COM 1-4 timeouts
+   197                              <2> ;;---obsolete----[Keyboard buf start/end]---jrc--;
+   198 00000080 ????                <2> kbd_buffer_start resw   1	;*/	word kbd_buffer_start;	/* 40:80 KBD buffer head (PC/AT)
+   199 00000082 ????                <2> kbd_buffer_end  resw    1	;*/	word kbd_buffer_end;	/* 40:82 KBD buffer tail (PC/AT)
+   200                              <2> ;;---------------[EGA stuff]---------------------;
+   201 00000084 ??????????????      <2> EGA_stuff	resb	7	;*/	byte EGA_stuff[7];	/* 40:84 Unspecified EGA data
+   202                              <2> ;;---------------[Floppy/Fixed Media Info]-------------;
+   203 0000008B ??                  <2> fdc_last_rate	resb	1	;*/	byte fdc_last_rate;	/* 40:8B Last floppy step rate/data rate?
+   204 0000008C ????????            <2> fx_misc_unused	resb	4	;*/	byte fx_misc_unused[4];	/* 40:8C Fixed disk miscellaneous ???
+   205 00000090 ????                <2> fdc_disk_state	resb	2	;*/	byte fdc_disk_state[2];	/* 40:90 Floppy disk state
+   206 00000092 ????                <2> fdc_op_start	resb	2	;*/	byte fdc_op_start[2];	/* 40:92 Floppy operation start state machine
+   207 00000094 ????                <2> fdc_cylinder	resb	2	;*/	byte fdc_cylinder[2];	/* 40:94 Floppy present cylinder
+   208                              <2> ;;---------------[Additional KBD flags]----------------;
+   209 00000096 ??                  <2> kbd_flag_3	resb	1	;*/	byte kbd_flag_3;	/* 40:96 kbd ???
+   210 00000097 ??                  <2> kbd_flag_2	resb	1	;*/	byte kbd_flag_2;	/* 40:97 kbd ???
+   211                              <2> ;;---------------[RTC/timer1 data]---------------------;
+   212 00000098 ????????            <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
+   213 0000009C ????????            <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
+   214 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
+   215                              <2> ;;---------------[Cassette I/O stuff]------------------;
+   216 000000A1 ??                  <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
+   217 000000A2 ????                <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
+   218                              <2> ;									Post Acknowleged=00;
+   219 000000A4 ??                  <2> EGA_data	resb	1	;*/	byte EGA_data;		/* 40:A4 Various usage
+   220 000000A5 ????                <2> SDstatus	resb	2	;*/	byte SDstatus[2];	/* 40:A5 Status byte from command
+   221 000000A7 ????                <2> SDcardtype	resb	2	;*/	byte SDcardtype[2];	/* 40:A7 SDcard type SDSC=2, HC=3, ...
+   222                              <2> ;
+   223 000000A9 ????????            <2> fixed_disk_tab	resb	4	;*/	byte fixed_disk_tab[4];	/* dispatch table to fixed disk drivers
+   224 000000AD ??                  <2> wait12_count	resb	1	;*/	byte wait12_count;	/* 40:AD 12usec CX count
+   225 000000AE ??                  <2> lock_count	resb	1	;*/	byte lock_count;	/* 40:AE lock level counter
+   226 000000AF ??                  <2> EMS_start       resb    1	;*/	byte EMS_start;		/* start EMS allocation from here
+   227                              <2> fx80		equ	$	;*/	struct EDD_disk fx80;	/* fixed disk parameter area 0
+   228 000000B0 ????                <2> fx_log_cylinders resw   1	;	word fx_log_cylinders;	 logical number of cylinders
+   229 000000B2 ??                  <2> fx_log_heads    resb    1	;	byte fx_log_heads;	 logical number of heads
+   230 000000B3 ??                  <2> fx_signature	resb	1	;	byte fx_signature;	 A0h signature = translated geom
+   231 000000B4 ??                  <2> fx_phys_sectors	resb    1       ;	byte fx_phys_sectors;	 physical number of sectors per track
+   232 000000B5 ????                <2> fx_LBA_high     resw    1       ;	word fx_LBA_high;	 high word of LBA28 number of sectors
+   233 000000B7 ??                  <2> fx_reserved	resb	1	;	byte fx_reserved;	 reserved for future use
+   234 000000B8 ??                  <2> fx_drive_control resb   1       ;	byte fx_drive_control;	 flag bits for IDE head register
+   235 000000B9 ????                <2> fx_phys_cylinders resw	1	;	word fx_phys_cylinders;	 physical number of cylinders
+   236 000000BB ??                  <2> fx_phys_heads	resb	1	;	byte fx_phys_heads;	 physical number of heads
+   237 000000BC ????                <2> fx_LBA_low	resw	1	;	word fx_LBA_low;	 low word of LBA28 number of sectors
+   238 000000BE ??                  <2> fx_log_sectors	resb	1	;	byte fx_log_sectors;	 logical number of sectors per track
+   239 000000BF ??                  <2> fx_checksum	resb	1	;	byte fx_checksum;	 checksum, dunno how to compute
+   240 000000C0 <res 10h>           <2> fx81            resb    16	;*/	struct EDD_disk fx81;	/* fixed disk parameter area 1
+   241 000000D0 <res 10h>           <2> fx82            resb    16	;*/	struct EDD_disk fx82;	/* fixed disk parameter area 2
+   242 000000E0 <res 10h>           <2> fx83            resb    16	;*/	struct EDD_disk fx83;	/* fixed disk parameter area 3
+   243                              <2> ;
+   244                              <2> ;
+   245                              <2> 
+   246 000000F0 ????                <2> FPEM_segment    resw    1       ;*/	word FPEM_segment;	/* FPEM data segment
+   247                              <2> 
+   248 000000F2 ????                <2> EBDA_paragraph  resw    1       ;*/	word EBDA_paragraph;	/* lowest EBDA paragraph
+   249                              <2> 
+   250 000000F4 ????                <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
+   251 000000F6 ????                <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
+   252                              <2> 
+   253 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
+   254                              <2> 
+   255 000000FA ????????            <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
+   256                              <2> 
+   257 000000FE ??                  <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
+   258                              <2> 
+   259 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
+   260                              <2> ;								   CPU clock is half of this
+   261                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   262                              <2> ;
+   263                              <2> ;  System configuration stuff below
+   264                              <2> ;	c.f., CONFIG.ASM (ANSI.CFG, CVDU.CFG, etc.), User configuration stuff
+   265                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   266                              <2> %if 0				;*/
+   267                              <2> #define FIXED_DISK_MAX 4		/*
+   268                              <2> %else
+   269                              <2> %define FIXED_DISK_MAX 4
+   270                              <2> %endif
+   271                              <2> %if 0				;*/
+   272                              <2> #define PPIDE_driver 1		/*
+   273                              <2> %else
+   274                              <2> %define PPIDE_driver 1
+   275                              <2> %endif
+   276                              <2> %if 0				;*/
+   277                              <2> #define USB_driver 1		/*
+   278                              <2> %else
+   279                              <2> %define USB_driver 1
+   280                              <2> %endif
+   281                              <2> 				;*/
+    93                              <1> 
+    94                              <1> ;  this must be the same in EQUATES.H */
+    95                              <1> %if SOFT_DEBUG
+    96                              <1> %define NBREAK  8
+    97                              <1> %endif
+    98                              <1> 
+    99                              <1> 
+   100                              <1> %if 0
+   101                              <1>         segment _TEXT
+   102                              <1> ;; *************************************************************************
+   103                              <1> 
+   104                              <1> 
+   105                              <1> 
+   106                              <1> 
+   107                              <1> ;; ************************ DOS Data Segment *******************************
+   108                              <1> ;dosdir	SEGMENT at 50h				; Boot disk directory from IPL
+   109                              <1> ;xerox	label	byte				;  0 if Print Screen idle
+   110                              <1> ;						;  1 if PrtSc xeroxing screen
+   111                              <1> ;						;255 if PrtSc error in xerox
+   112                              <1> ;						;  ...non-grafix PrtSc in bios
+   113                              <1> ;	db	200h dup(?)			; PC-DOS bootstrap procedure
+   114                              <1> ;						;  ...IBMBIO.COM buffers the
+   115                              <1> ;						;  ...directory of the boot
+   116                              <1> ;						;  ...device here at IPL time
+   117                              <1> ;						;  ...when locating the guts
+   118                              <1> ;						;  ...of the operating system
+   119                              <1> ;						;  ...filename "IBMDOS.COM"
+   120                              <1> ;dosdir	ends
+   121                              <1> ;; *************************************************************************
+   122                              <1> ;; ************************ DOS IPL Segment ********************************
+   123                              <1> ;dosseg	SEGMENT at 70h				; "Kernel" of PC-DOS op sys
+   124                              <1> ;;IBMBIO.COM file loaded by boot block. Device Drivers/Bootstrap. CONTIGUOUS<---
+   125                              <1> ;;IBMDOS.COM operating system nucleus immediately follows IBMBIO.COM and       !
+   126                              <1> ;;     doesn`t have to be contiguous.  The IBMDOS operating system nucleus     !
+   127                              <1> ;;     binary image is loaded by transient code in IBMBIO binary image	      !
+   128                              <1> ;dosseg	ends					;			      !
+   129                              <1> ;iplseg	SEGMENT at 0h				; Segment for boot block      !
+   130                              <1> ;;The following boot block is loaded with 512 bytes on the first sector of     !
+   131                              <1> ;;the bootable device by code resident in the ROM-resident bios.  Control is   !
+   132                              <1> ;;then transferred to the first word 0000:7C00 of the disk-resident bootstrap  !
+   133                              <1> ;	ORG	07C00h				;  ..offset for boot block    !
+   134                              <1> ;boot	db	200h dup(?)			;  ..start disk resident boot--
+   135                              <1> ;iplseg	ends
+   136                              <1> 
+   137                              <1> %endif
+    45                                  	%include "disk.inc"
+    46                              <1> ; disk.inc
+    47                              <1> 
+    48                              <1> 
+    49                              <1> ; Standard int 13h stack frame layout is 
+    50                              <1> ; created by:   PUSHM  ALL,DS,ES
+    51                              <1> ;               MOV    BP,SP
+    52                              <1> ;
+    53                              <1> offset_DI       equ     0
+    54                              <1> offset_SI       equ     offset_DI+2
+    55                              <1> offset_BP       equ     offset_SI+2
+    56                              <1> offset_SP       equ     offset_BP+2
+    57                              <1> offset_BX       equ     offset_SP+2
+    58                              <1> offset_DX       equ     offset_BX+2
+    59                              <1> offset_CX       equ     offset_DX+2
+    60                              <1> offset_AX       equ     offset_CX+2
+    61                              <1> offset_DS       equ     offset_AX+2
+    62                              <1> offset_ES       equ     offset_DS+2
+    63                              <1> offset_IP       equ     offset_ES+2
+    64                              <1> offset_CS       equ     offset_IP+2
+    65                              <1> offset_FLAGS    equ     offset_CS+2
+    66                              <1> 
+    67                              <1> ; The byte registers in the stack
+    68                              <1> offset_AL       equ     offset_AX
+    69                              <1> offset_AH       equ     offset_AX+1
+    70                              <1> offset_BL       equ     offset_BX
+    71                              <1> offset_BH       equ     offset_BX+1
+    72                              <1> offset_CL       equ     offset_CX
+    73                              <1> offset_CH       equ     offset_CX+1
+    74                              <1> offset_DL       equ     offset_DX
+    75                              <1> offset_DH       equ     offset_DX+1
+    76                              <1> 
+    77                              <1> ; FDC error codes (returned in AH)
+    78                              <1> ;
+    79                              <1> ERR_no_error            equ     0       ; no error (return Carry clear)
+    80                              <1> ;   everything below returns with the Carry set to indicate an error
+    81                              <1> ERR_invalid_command     equ     1
+    82                              <1> ERR_address_mark_not_found      equ     2
+    83                              <1> ERR_write_protect       equ     3
+    84                              <1> ERR_sector_not_found    equ     4
+    85                              <1> ERR_disk_removed        equ     6
+    86                              <1> ERR_dma_overrun         equ     8
+    87                              <1> ERR_dma_crossed_64k     equ     9
+    88                              <1> ERR_media_type_not_found        equ     12
+    89                              <1> ERR_uncorrectable_CRC_error     equ     10h
+    90                              <1> ERR_controller_failure  equ     20h
+    91                              <1> ERR_seek_failed         equ     40h
+    92                              <1> ERR_disk_timeout        equ     80h
+    93                              <1> 
+    94                              <1> 
+    95                              <1> ; Packet call offsets
+    96                              <1> ;
+    97                              <1> pkt_size        equ     0       ; byte, size of packet (==16)
+    98                              <1> pkt_reserved1   equ     1       ; byte, reserved, must be zero
+    99                              <1> pkt_blocks      equ     2       ; byte, number of blocks to transfer
+   100                              <1>                                 ; max is 127 (7Fh); 0 means no transfer
+   101                              <1> pkt_reserved3   equ     3       ; byte; reserved, must be zero
+   102                              <1> pkt_address     equ     4       ; dword; segment:offset of transfer
+   103                              <1> pkt_LBA         equ     8       ; qword; LBA of transfer
+   104                              <1> ; for convenience:
+   105                              <1> pkt_LBA0        equ     8       ; word
+   106                              <1> pkt_LBA1        equ     10      ; word
+   107                              <1> pkt_LBA2        equ     12      ; word          ; MBZ
+   108                              <1> pkt_LBA3        equ     14      ; word          ; MBZ
+   109                              <1> 
+   110                              <1> ; Parameter Packet returns:
+   111                              <1> ;
+   112                              <1> ;pkt_size       equ     0       ; word
+   113                              <1> pkt_info        equ     2       ; word, information bits
+   114                              <1>         ; bit   usage
+   115                              <1>         ;  0    DMA boundary errors are handled transparently
+   116                              <1>         ;  1    Geometry valid (bytes 8-12)
+   117                              <1>         ;  2    Removable device (no)
+   118                              <1>         ;  3    Supports Write with Verify (no)
+   119                              <1>         ;  4    change line support (no)
+   120                              <1>         ;  5    removable & lockable (no)
+   121                              <1>         ;  6    max. geometry for a removable drive (no)
+   122                              <1>         ;  7-15  MBZ
+   123                              <1> pkt_phys_cyl    equ     4       ; dword, physical cylinders
+   124                              <1> pkt_phys_hds    equ     8       ; dword, physical heads
+   125                              <1> pkt_phys_spt    equ     12      ; dword, sectors per track
+   126                              <1> pkt_sectors     equ     16      ; qword, total number of sectors
+   127                              <1> pkt_bytes       equ     24      ; word, bytes per sector
+   128                              <1> pkt_ptr         equ     26      ; dword, EDD configuration paramter pointer
+   129                              <1>                                 ; FFFF:FFFF means invalid pointer
+   130                              <1> 
+   131                              <1> 
+   132                              <1> 				
+   133                              <1> ;------------------------------------------------------------------
+   134                              <1> ;   Specific to the IDE drivers
+   135                              <1> ; More symbolic constants... these should not be changed, unless of
+   136                              <1> ; course the IDE drive interface changes, perhaps when drives get
+   137                              <1> ; to 128G and the PC industry will do yet another kludge.
+   138                              <1> 
+   139                              <1> ;IDE Command Constants.  These should never change.
+   140                              <1> ide_cmd_recal		equ	10H
+   141                              <1> ide_cmd_read		equ	20H
+   142                              <1> ide_cmd_write		equ	30H
+   143                              <1> ide_cmd_init		equ	91H
+   144                              <1> ide_cmd_dma_read	equ	0C8h
+   145                              <1> ide_cmd_dma_write	equ	0CAh
+   146                              <1> ide_cmd_spindown	equ	0E0h
+   147                              <1> ide_cmd_spinup		equ	0E1h
+   148                              <1> ide_cmd_ident		equ	0ECh
+   149                              <1> ide_cmd_set_feature	equ	0EFh
+   150                              <1> 
+   151                              <1> 
+   152                              <1> ; end disk.inc
+   153                              <1> 
+   154                              <1> 
+    46                                  
+    47                                  	; CHUSB DEVICE STATUS
+    48                                  	;
+    49                                  	CHUSB_STOK equ 0
+    50                                  	CHUSB_STNOMEDIA equ - 1
+    51                                  	CHUSB_STCMDERR equ - 2
+    52                                  	CHUSB_STIOERR equ - 3
+    53                                  	CHUSB_STTO equ - 4
+    54                                  	CHUSB_STNOTSUP equ - 5
+    55                                  	;
+    56                                  	;
+    57                                  	; CH MODE MANAGEMENT
+    58                                  	;
+    59                                  	CH_MODE_UNK equ 0            ; CURRENT MODE UNKNOWN
+    60                                  	CH_MODE_USB equ 1            ; CURRENT MODE = USB
+    61                                  	CH_MODE_SD equ 2             ; CURRENT MODE = SD
+    62                                  	;
+    63                                  	; CH375 / 376 COMMANDS
+    64                                  	;
+    65                                  	CH_CMD_VER equ 01h           ; GET IC VER
+    66                                  	CH_CMD_RESET equ 05h         ; FULL CH37X RESET
+    67                                  	CH_CMD_EXIST equ 06h         ; CHECK EXISTS
+    68                                  	CH_CMD_MAXLUN equ 0Ah        ; GET MAX LUN NUMBER
+    69                                  	CH_CMD_PKTSEC equ 0Bh        ; SET PACKETS PER SECTOR
+    70                                  	CH_CMD_SETRETRY equ 0Bh      ; SET RETRIES
+    71                                  	CH_CMD_FILESIZE equ 0Ch      ; GET FILE SIZE (376)
+    72                                  	CH_CMD_MODE equ 15h          ; SET USB MODE
+    73                                  	CH_CMD_TSTCON equ 16h        ; TEST CONNECT
+    74                                  	CH_CMD_ABRTNAK equ 17h       ; ABORT DEVICE NAK RETRIES
+    75                                  	CH_CMD_STAT equ 22h          ; GET STATUS
+    76                                  	CH_CMD_RD6 equ 27h           ; READ USB DATA (375 & 376)
+    77                                  	CH_CMD_RD5 equ 28h           ; READ USB DATA (375)
+    78                                  	CH_CMD_WR5 equ 2Bh           ; WRITE USB DATA (375)
+    79                                  	CH_CMD_WR6 equ 2Ch           ; WRITE USB DATA (376)
+    80                                  	CH_CMD_WRREQDAT equ 2Dh      ; WRITE REQUESTED DATA (376)
+    81                                  	CH_CMD_SET_FN equ 2Fh        ; SET FILENAME (376)
+    82                                  	CH_CMD_DSKMNT equ 31h        ; DISK MOUNT
+    83                                  	CH_CMD_FOPEN equ 32h         ; FILE OPEN (376)
+    84                                  	CH_CMD_FCREAT equ 34h        ; FILE CREATE (376)
+    85                                  	CH_CMD_BYTE_LOC equ 39h      ; BYTE LOCATE
+    86                                  	CH_CMD_BYTERD equ 3Ah        ; BYTE READ
+    87                                  	CH_CMD_BYTERDGO equ 3Bh      ; BYTE READ GO
+    88                                  	CH_CMD_BYTEWR equ 3Ch        ; BYTE WRITE
+    89                                  	CH_CMD_BYTEWRGO equ 3Dh      ; BYTE WRITE GO
+    90                                  	CH_CMD_DSKCAP equ 3Eh        ; DISK CAPACITY
+    91                                  	CH_CMD_AUTOSET equ 4Dh       ; USB AUTO SETUP
+    92                                  	CH_CMD_DSKINIT equ 51h       ; DISK INIT
+    93                                  	CH_CMD_DSKRES equ 52h        ; DISK RESET
+    94                                  	CH_CMD_DSKSIZ equ 53h        ; DISK SIZE
+    95                                  	CH_CMD_DSKRD equ 54h         ; DISK READ
+    96                                  	CH_CMD_DSKRDGO equ 55h       ; CONTINUE DISK READ
+    97                                  	CH_CMD_DSKWR equ 56h         ; DISK WRITE
+    98                                  	CH_CMD_DSKWRGO equ 57h       ; CONTINUE DISK WRITE
+    99                                  	CH_CMD_DSKINQ equ 58h        ; DISK INQUIRY
+   100                                  	CH_CMD_DSKRDY equ 59h        ; DISK READY
+   101                                  
+   102                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   103                                  	; Error, Okay, Complete status conditions
+   104                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   105                                  
+   106                                  	%define Error stc
+   107                                  	; test with:
+   108                                  	; JC xxx (jump on error)
+   109                                  	; JNC xxx (jump on no error)
+   110                                  
+   111                                  	%define Okay xor ah, ah
+   112                                  	; test with:
+   113                                  	; JZ xxx (jump okay)
+   114                                  	; JNZ xxx (jump not okay)
+   115                                  
+   116                                  	%define Complete or ah, 3
+   117                                  	; test with:
+   118                                  	; JA xxx (jump complete AND no error)
+   119                                  	; JNZ xxx (jump complete)
+   120                                  	; JZ xxx (jump not complete)
+   121                                  
+   122                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   123                                  
+   124                                  
+   125                                  	global _USB_WRITE_SECTOR
+   126                                  	global _USB_READ_SECTOR
+   127                                  	global _USB_READ_ID
+   128                                  	extern @mulLS
+   129                                  	extern microsecond
+   130                                  	extern wait12
+   131                                  
+   132                                  
+   133                                  
+   134                                  	SEGMENT _TEXT
+   135                                  
+   136                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   137                                  	; CH376S USB Module Fixed Disk Driver
+   138                                  	;
+   139                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   140                                  	; USB_READ_ID
+   141                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   142                                  	; Read the ID information from the attached drive
+   143                                  	;
+   144                                  	; int USB_READ_ID(far byte * buffer, byte slave);
+   145                                  	;
+   146                                  	;
+   147                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   148                                  _USB_READ_ID:
+   149 00000000 55                      	push bp
+   150 00000001 89E5                    	mov bp, sp
+   151 00000003 5306                    	pushm es, bx
+   152                                  
+   153                                  	;mov cx, ARG(3) ; select unit 0=usb / 1=sd
+   154                                  
+   155 00000005 C45E04                  	les bx, ARG(1)               ; CLEAR OUT DATA AREA
+   156 00000008 89DF                    	mov di, bx
+   157 0000000A B90002                  	mov cx, 512
+   158                                  .1:
+   159 0000000D 26C60500                	es mov byte [di], 0
+   160 00000011 47                      	inc di
+   161 00000012 E2F9                    	loop .1
+   162                                  
+   163 00000014 E8D904                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
+   164                                  
+   165 00000017 E84305                  	call CHUSB_DSKMNT            ; TRY MOUNT
+   166                                  	; read the 36 byte data structure that is returned
+   167                                  	; id.ModelNumber[40] 27 - 46
+   168 0000001A E88E04                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+   169 0000001D E85604                  	call CH_RD                   ; READ DATA BLOCK LENGTH
+   170 00000020 30E4                    	xor ah, ah
+   171 00000022 50                      	push ax
+   172 00000023 B90800                  	mov cx, 8                    ; ignore the first 8 bytes of data structure
+   173                                  .2:
+   174 00000026 E84D04                  	call CH_RD
+   175 00000029 E2FB                    	loop .2
+   176 0000002B C45E04                  	les bx, ARG(1)
+   177 0000002E 89DF                    	mov di, bx
+   178 00000030 83C736                  	add di, 54
+   179 00000033 58                      	pop ax
+   180 00000034 2C08                    	sub al, 8
+   181 00000036 89C1                    	mov cx, ax
+   182                                  .3:
+   183 00000038 E83B04                  	call CH_RD
+   184 0000003B 88C4                    	mov ah, al
+   185 0000003D 30C0                    	xor al, al
+   186 0000003F 49                      	dec cx
+   187 00000040 7403                    	jz .3a
+   188 00000042 E83104                  	call CH_RD
+   189                                  	.3a
+   189          ******************       warning: label alone on a line without a colon might be in error [-w+label-orphan]
+   190 00000045 268905                  	es mov word [di], ax
+   191 00000048 47                      	inc di
+   192 00000049 47                      	inc di
+   193 0000004A E2EC                    	loop .3
+   194                                  
+   195 0000004C C45E04                  	les bx, ARG(1)
+   196 0000004F 89DF                    	mov di, bx
+   197 00000051 E81A05                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
+   198                                  
+   199 00000054 26C7456C0000            	es mov word [di + 108], 00   ; id.NumberOfCurrentCylinders
+   200 0000005A 2689556E                	es mov [di + 110], dx        ; id.NumberOfCurrentHeads
+   201 0000005E 26894D70                	es mov [di + 112], cx        ; id.CurrentSectorsPerTrack
+   202                                  
+   203 00000062 26894D72                	es mov [di + 114], cx        ; id.CurrentSectorCapacity
+   204 00000066 26895574                	es mov [di + 116], dx
+   205                                  
+   206 0000006A 26894D78                	es mov [di + 120], cx        ; id.UserAddressableSectors 60 - 61
+   207 0000006E 2689557A                	es mov [di + 122], dx
+   208                                  
+   209 00000072 88D6                    	mov dh, dl
+   210 00000074 88EA                    	mov dl, ch
+   211 00000076 26895502                	es mov [di + 2], dx          ; id.NumCylinders
+   212 0000007A 26C6450610              	es mov byte [di + 6], 16     ; id.NumHeads
+   213 0000007F 26C6450C10              	es mov byte [di + 12], 16    ; id.NumSectorsPerTrack
+   214                                  
+   215                                  
+   216 00000084 C45E04                  	les bx, ARG(1)
+   217 00000087 89DF                    	mov di, bx
+   218 00000089 26C745620002            	es mov word [di + 98], 0000001000000000b
+   219 0000008F 31C0                    	xor ax, ax
+   220 00000091 075B                    	popm es, bx
+   221 00000093 C9                      	leave
+   222 00000094 C3                      	ret
+   223                                  
+   224                                  
+   225                                  
+   226                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   227                                  	; USB_READ_SECTOR
+   228                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   229                                  	;read a sector, specified by the 4 bytes in "lba",
+   230                                  	;Return, acc is zero on success, non - zero for an error
+   231                                  	;
+   232                                  	; int IDE_READ_SECTOR(far byte * buffer, long lba_sector, byte slave);
+   233                                  	;
+   234                                  	;
+   235                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   236                                  @USB_READ_SECTOR:
+   237 00000095 5152500653              	pushm bx, es, ax, dx, cx
+   238 0000009A E80600                  	call _USB_READ_SECTOR
+   239 0000009D 5B07585A59              	popm  bx, es, ax, dx, cx
+   240 000000A2 C3                      	ret
+   241                                  
+   242                                  _USB_READ_SECTOR:
+   243 000000A3 55                      	push bp
+   244 000000A4 89E5                    	mov bp, sp
+   245 000000A6 575306                  	pushm es, bx, di
+   246                                  
+   247 000000A9 B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
+   248 000000AB E82104                  	call CH_SETMODE              ; DO IT
+   249 000000AE 7303E92205              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   250                                  
+   251 000000B3 8B4E08                  	mov cx, ARG(3)
+   252 000000B6 8B560A                  	mov dx, ARG(4)
+   253 000000B9 B054                    	mov al, CH_CMD_DSKRD         ; DISK READ COMMAND
+   254 000000BB E81504                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   255                                  
+   256 000000BE C45E04                  	les bx, ARG(1)
+   257 000000C1 89DF                            mov di,bx
+   258                                  	;
+   259                                  	; READ THE SECTOR IN 64 BYTE CHUNKS
+   260 000000C3 B90800                  	mov cx, 8                    ; 8 CHUNKS OF 64 FOR 512 BYTE SECTOR
+   261                                  CHUSB_READ1:
+   262 000000C6 E8BB03                  	call CH_POLL                 ; WAIT FOR DATA READY
+   263 000000C9 3C1D                    	cmp al, 1Dh                  ; DATA READY TO READ?
+   264 000000CB 7403E90905              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   265 000000D0 E8D803                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+   266 000000D3 E8A003                  	call CH_RD                   ; READ DATA BLOCK LENGTH
+   267 000000D6 3C40                    	cmp al, 64                   ; AS EXPECTED?
+   268 000000D8 7403E9FC04              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   269                                  	;
+   270                                  	; BYTE READ LOOP
+   271 000000DD 51                      	push cx                      ; SAVE LOOP CONTROL
+   272 000000DE B94000                  	mov cx, 64                   ; READ 64 BYTES
+   273                                  CHUSB_READ2:
+   274 000000E1 E89203                  	call CH_RD                   ; GET NEXT BYTE
+   275 000000E4 268805                  	es mov [di], al
+   276 000000E7 83C701                  	add di, 1
+   277 000000EA E2F5                    	loop CHUSB_READ2             ; LOOP AS NEEDED
+   278 000000EC 59                      	pop cx                       ; RESTORE LOOP CONTROL
+   279                                  
+   280                                  	;
+   281                                  	; PREPARE FOR NEXT CHUNK
+   282 000000ED B055                    	mov Al, CH_CMD_DSKRDGO       ; CONTINUE DISK READ
+   283 000000EF E87303                  	call CH_CMD                  ; SEND IT
+   284 000000F2 E2D2                    	loop CHUSB_READ1             ; LOOP TILL DONE
+   285                                  	;
+   286                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
+   287 000000F4 E88D03                  	call CH_POLL                 ; WAIT FOR COMPLETION
+   288 000000F7 3C14                    	cmp al, 14h                  ; SUCCESS?
+   289 000000F9 7403E9DB04              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   290                                  
+   291 000000FE 31C0                    	xor ax, ax
+   292 00000100 075B5F                  	popm es, bx, di
+   293 00000103 C9                      	leave
+   294 00000104 C3                      	ret
+   295                                  
+   296                                  
+   297                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   298                                  	; IDE_VERIFY_SECTOR
+   299                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   300                                  	;read a sector, specified by the 4 bytes in "lba",
+   301                                  	;Return, acc is zero on success, non - zero for an error
+   302                                  	;
+   303                                  	; int IDE_VERIFY_SECTOR(long lba_sector, byte slave);
+   304                                  	;
+   305                                  	;
+   306                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   307                                  @USB_VERIFY_SECTOR:
+   308 00000105 515250                  	pushm ax, dx, cx
+   309 00000108 E80400                  	call _USB_VERIFY_SECTOR
+   310 0000010B 585A59                  	popm ax, dx, cx
+   311 0000010E C3                      	ret
+   312                                  
+   313                                  _USB_VERIFY_SECTOR:
+   314 0000010F 55                      	push bp
+   315 00000110 89E5                    	mov bp, sp
+   316 00000112 575306                  	pushm es, bx, di
+   317                                  
+   318 00000115 B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
+   319 00000117 E8B503                  	call CH_SETMODE              ; DO IT
+   320 0000011A 7303E9B604              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   321                                  
+   322 0000011F 8B4E08                  	mov cx, ARG(3)
+   323 00000122 8B560A                  	mov dx, ARG(4)
+   324 00000125 B054                    	mov al, CH_CMD_DSKRD         ; DISK READ COMMAND
+   325 00000127 E8A903                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   326                                  
+   327 0000012A C45E04                  	les bx, ARG(1)
+   328 0000012D 89DF                            mov di,bx
+   329                                  	;
+   330                                  	; READ THE SECTOR IN 64 BYTE CHUNKS
+   331 0000012F B90800                  	mov cx, 8                    ; 8 CHUNKS OF 64 FOR 512 BYTE SECTOR
+   332                                  CHUSB_VERIFY1:
+   333 00000132 E84F03                  	call CH_POLL                 ; WAIT FOR DATA READY
+   334 00000135 3C1D                    	cmp al, 1Dh                  ; DATA READY TO READ?
+   335 00000137 7403E99D04              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   336 0000013C E86C03                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+   337 0000013F E83403                  	call CH_RD                   ; READ DATA BLOCK LENGTH
+   338 00000142 3C40                    	cmp al, 64                   ; AS EXPECTED?
+   339 00000144 7403E99004              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   340                                  	;
+   341                                  	; BYTE READ LOOP
+   342 00000149 51                      	push cx                      ; SAVE LOOP CONTROL
+   343 0000014A B94000                  	mov cx, 64                   ; READ 64 BYTES
+   344                                  CHUSB_VERIFY2:
+   345 0000014D E82603                  	call CH_RD                   ; GET NEXT BYTE
+   346 00000150 268A25                  	es mov ah,[di]
+   347 00000153 83C701                  	add di, 1
+   348 00000156 38C4                            cmp ah,al
+   349 00000158 7403E97C04                      jne CHUSB_IOERR
+   350 0000015D E2EE                    	loop CHUSB_VERIFY2             ; LOOP AS NEEDED
+   351 0000015F 59                      	pop cx                       ; RESTORE LOOP CONTROL
+   352                                  
+   353                                  	;
+   354                                  	; PREPARE FOR NEXT CHUNK
+   355 00000160 B055                    	mov Al, CH_CMD_DSKRDGO       ; CONTINUE DISK READ
+   356 00000162 E80003                  	call CH_CMD                  ; SEND IT
+   357 00000165 E2CB                    	loop CHUSB_VERIFY1             ; LOOP TILL DONE
+   358                                  	;
+   359                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
+   360 00000167 E81A03                  	call CH_POLL                 ; WAIT FOR COMPLETION
+   361 0000016A 3C14                    	cmp al, 14h                  ; SUCCESS?
+   362 0000016C 7403E96804              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   363                                  
+   364 00000171 31C0                    	xor ax, ax
+   365 00000173 075B5F                  	popm es, bx, di
+   366 00000176 C9                      	leave
+   367 00000177 C3                      	ret
+   368                                  
+   369                                  
+   370                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   371                                  	; IDE_WRITE_SECTOR
+   372                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   373                                  	;write a sector, specified by the 4 bytes in "lba",
+   374                                  	;whatever is in the buffer gets written to the drive!
+   375                                  	;Return, acc is zero on success, non - zero for an error
+   376                                  	;
+   377                                  	; int IDE_WRITE_SECTOR(far byte * buffer, long lba_sector, byte slave);
+   378                                  	;
+   379                                  	;
+   380                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   381                                  @USB_WRITE_SECTOR:
+   382 00000178 5152500653              	pushm bx, es, ax, dx, cx
+   383 0000017D E80600                  	call _USB_WRITE_SECTOR
+   384 00000180 5B07585A59              	popm bx, es, ax, dx, cx
+   385 00000185 C3                      	ret
+   386                                  
+   387                                  _USB_WRITE_SECTOR:
+   388 00000186 55                      	push bp
+   389 00000187 89E5                    	mov bp, sp
+   390 00000189 575306                  	pushm es, bx, di
+   391                                  
+   392 0000018C B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
+   393 0000018E E83E03                  	call CH_SETMODE              ; DO IT
+   394 00000191 7303E93F04              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   395                                  
+   396 00000196 8B4E08                  	mov cx, ARG(3)
+   397 00000199 8B560A                  	mov dx, ARG(4)
+   398 0000019C B056                    	mov al, CH_CMD_DSKWR         ; DISK WRITE COMMAND
+   399 0000019E E83203                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   400                                  
+   401 000001A1 C45E04                  	les bx, ARG(1)
+   402 000001A4 89DF                            mov di,bx
+   403                                  	;
+   404                                  	; WRITE THE SECTOR IN 64 BYTE CHUNKS
+   405 000001A6 B90800                  	mov cx, 8                    ; 8 CHUNKS OF 64 FOR 512 BYTE SECTOR
+   406                                  CHUSB_WRITE1:
+   407 000001A9 E8D802                  	call CH_POLL                 ; WAIT FOR DATA READY
+   408 000001AC 3C1E                    	cmp al, 1Eh                  ; DATA READY TO WRITE
+   409 000001AE 7403E92604              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   410 000001B3 E8F902                  	call CH_CMD_WR               ; SEND WRITE USB DATA CMD
+   411 000001B6 B040                    	mov al, 64                   ; 64 BYTE CHUNK
+   412 000001B8 E8C202                  	call CH_WR                   ; SEND DATA BLOCK LENGTH
+   413                                  	;
+   414                                  	; BYTE WRITE LOOP
+   415 000001BB 51                      	push cx                      ; SAVE LOOP CONTROL
+   416 000001BC B94000                  	mov cx, 64                   ; WRITE 64 BYTES
+   417                                  CHUSB_WRITE2:
+   418 000001BF 268A05                  	es mov al, [di]              ; GET NEXT BYTE
+   419 000001C2 83C701                  	add di, 1
+   420 000001C5 E8B502                  	call CH_WR                   ; WRITE NEXT BYTE
+   421 000001C8 E2F5                    	loop CHUSB_WRITE2            ; LOOP AS NEEDED
+   422 000001CA 59                      	pop cx                       ; RESTORE LOOP CONTROL
+   423                                  	;
+   424                                  	; PREPARE FOR NEXT CHUNK
+   425 000001CB B057                    	mov al, CH_CMD_DSKWRGO       ; CONTINUE DISK READ
+   426 000001CD E89502                  	call CH_CMD                  ; SEND IT
+   427 000001D0 E2D7                    	loop CHUSB_WRITE1            ; LOOP TILL DONE
+   428                                  	;
+   429                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
+   430 000001D2 E8AF02                  	call CH_POLL                 ; WAIT FOR COMPLETION
+   431 000001D5 3C14                    	cmp al, 14h                  ; SUCCESS?
+   432 000001D7 7403E9FD03              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   433                                  
+   434 000001DC 31C0                    	xor ax, ax
+   435                                  
+   436 000001DE 075B5F                  	popm es, bx, di
+   437 000001E1 C9                      	leave
+   438 000001E2 C3                      	ret
+   439                                  
+   440                                  
+   441                                  	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   442                                  
+   443                                  
+   444                                  
+   445                                  	global USB_entry
+   446                                  USB_entry:
+   447 000001E3 30FF                    	xor bh, bh                   ; zero extend byte
+   448 000001E5 88E3                    	mov bl, ah                   ; set to index into dispatch table
+   449 000001E7 80FC19                  	cmp ah, max / 2
+   450 000001EA 7307                    	jae try_extended
+   451 000001EC D1E3                    	shl bx, 1                    ; index words
+   452                                  
+   453 000001EE 2EFFA7[1B02]            	cs jmp near [dispatch + bx]
+   454                                  
+   455                                  try_extended:
+   456 000001F3 80EB41                  	sub bl, 41h                  ; start of extended calls
+   457 000001F6 80FB0E                  	cmp bl, max41 / 2
+   458 000001F9 7307                    	jae undefined
+   459 000001FB D1E3                    	shl bx, 1                    ; index word addresses
+   460 000001FD 2EFFA7[4D02]            	cs jmp near [dispatch41 + bx]
+   461                                  
+   462                                  
+   463                                  	;fn00: ; Reset Disk System
+   464                                  fn01:                         ; Get Disk System Status
+   465                                  	;fn02: ; Read Sector
+   466                                  	;fn03: ; Write Sector
+   467                                  	;fn04: ; Verify Sector
+   468                                  fn05:                         ; Format Track
+   469                                  fn06:                         ; Format Bad Track (fixed disk) [PC]
+   470                                  fn07:                         ; Format Drive (fixed disk) [PC]
+   471                                  	;fn08: ; Get Drive Parameters
+   472                                  fn09:                         ; Initialize Fixed Disk Characteristics [PC, AT, PS / 2]
+   473                                  fn0A:                         ; Read Sector Long (fixed disk) [PC, AT, PS / 2]
+   474                                  fn0B:                         ; Write Sector Long (fixed disk) [PC, AT, PS / 2]
+   475                                  fn0C:                         ; Seek (fixed disk)
+   476                                  fn0D:                         ; Reset Fixed Disk System
+   477                                  fn0E:                         ; Read Sector Buffer (fixed disk) [PC only]
+   478                                  fn0F:                         ; Write Sector Buffer (fixed disk) [PC only]
+   479                                  fn10:                         ; Get Drive Status (fixed disk)
+   480                                  fn11:                         ; Recalibrate Drive (fixed disk)
+   481                                  fn12:                         ; Controller RAM Diagnostic (fixed disk) [PC / XT]
+   482                                  fn13:                         ; Controller Drive Diagnostic (fixed disk) [PC / XT]
+   483                                  fn14:                         ; Controller Internal Diagnostic (fixed disk) [PC, AT, PS / 2]
+   484                                  	;fn15: ; Get Disk Type [AT]
+   485                                  fn16:                         ; Get Disk Change Status (floppy)
+   486                                  fn17:                         ; Set Disk Type (floppy)
+   487                                  fn18:                         ; Set Media Type for Format (floppy)
+   488                                  
+   489                                  	;fn41: ; Check Extensions Present
+   490                                  	;fn42: ; Extended Read
+   491                                  	;fn43: ; Extended Write
+   492                                  	;fn44: ; Extended Verify
+   493                                  fn45:                         ; Lock / Unlock Drive
+   494                                  fn46:                         ; Eject Drive
+   495                                  	;fn47: ; Extended Seek
+   496                                  	;fn48: ; Get Drive Parameters
+   497                                  fn49:                         ; Get Extended Disk Change Status
+   498                                  	;fn4E: ; Set Hardware Configuration
+   499                                  
+   500                                  	;;; global undefined
+   501                                  undefined:
+   502                                  	%if SOFT_DEBUG
+   503                                  	int 0
+   504                                  	%endif
+   505 00000202 B401                    	mov AH, 01h                  ; Invalid command
+   506                                  
+   507                                  exit_sequence:
+   508 00000204 88660F                  	mov [bp + offset_AH], ah     ; set the error code
+   509                                  	;;; mov [fdc_status], ah ; save error code
+   510 00000207 08E4                    	or ah, ah
+   511 00000209 7506                    	jnz error_exit
+   512                                  good_exit:
+   513 0000020B 806618FE                	and byte [bp + offset_FLAGS], ~1 ; clear the carry
+   514 0000020F EB04                    	jmp exit_pops
+   515                                  error_exit:
+   516 00000211 804E1801                	or byte [bp + offset_FLAGS], 1 ; set the carry
+   517                                  exit_pops:
+   518 00000215 89EC                    	mov sp, bp
+   519 00000217 611F07                  	popm ALL, ds, es
+   520 0000021A CF                      	iret
+   521                                  
+   522                                  
+   523                                  dispatch:
+   524 0000021B [CA02]                  	dw fn00                      ; Reset Disk System
+   525 0000021D [0202]                  	dw fn01                      ;
+   526 0000021F [D502]                  	dw fn02
+   527 00000221 [D502]                  	dw fn03
+   528 00000223 [D502]                  	dw fn04
+   529 00000225 [0202]                  	dw fn05
+   530 00000227 [0202]                  	dw fn06
+   531 00000229 [0202]                  	dw fn07
+   532 0000022B [2603]                  	dw fn08
+   533 0000022D [0202]                  	dw fn09
+   534 0000022F [0202]                  	dw fn0A
+   535 00000231 [0202]                  	dw fn0B
+   536 00000233 [0202]                  	dw fn0C
+   537 00000235 [0202]                  	dw fn0D
+   538 00000237 [0202]                  	dw fn0E
+   539 00000239 [0202]                  	dw fn0F
+   540 0000023B [0202]                  	dw fn10
+   541 0000023D [0202]                  	dw fn11
+   542 0000023F [0202]                  	dw fn12
+   543 00000241 [0202]                  	dw fn13
+   544 00000243 [0202]                  	dw fn14
+   545 00000245 [4D03]                  	dw fn15
+   546 00000247 [0202]                  	dw fn16
+   547 00000249 [0202]                  	dw fn17
+   548 0000024B [0202]                  	dw fn18
+   549                                  	max equ $ - dispatch
+   550                                  
+   551                                  dispatch41:
+   552 0000024D [7103]                  	dw fn41
+   553 0000024F [9803]                  	dw fn42
+   554 00000251 [9803]                  	dw fn43
+   555 00000253 [9803]                  	dw fn44
+   556 00000255 [0202]                  	dw fn45
+   557 00000257 [0202]                  	dw fn46
+   558 00000259 [9803]                  	dw fn47
+   559 0000025B [D503]                  	dw fn48
+   560 0000025D [0202]                  	dw fn49
+   561 0000025F [0202]                  	dw undefined                 ; 4A
+   562 00000261 [0202]                  	dw undefined                 ; 4B
+   563 00000263 [0202]                  	dw undefined                 ; 4C
+   564 00000265 [0202]                  	dw undefined                 ; 4D
+   565 00000267 [4A04]                  	dw fn4E
+   566                                  	max41 equ $ - dispatch41
+   567                                  
+   568                                  
+   569                                  
+   570                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   571                                  	; integrity: Check integrity of fixed disk table
+   572                                  	;
+   573                                  	; Call with:
+   574                                  	; DL = device code (80 or 81)
+   575                                  	; DS set to BIOS data area
+   576                                  	;
+   577                                  	; Exit with:
+   578                                  	; DS:SI points at the fixed disk table
+   579                                  	;
+   580                                  	; Error Exit:
+   581                                  	; If the disk table checksum is bad, give immediate error return
+   582                                  	;
+   583                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   584                                  integrity:
+   585 00000269 5150                    	pushm ax, cx
+   586                                  	%if 0
+   587                                  	mov al, 7Fh
+   588                                  	and al, dl                   ; mask out the high bit
+   589                                  	cmp al, [n_fixed_disks]
+   590                                  	%else
+   591                                  	extern get_IDE_num
+   592 0000026B E8(0000)                	call get_IDE_num             ; get number of IDE disks total
+   593 0000026E 88C4                    	mov ah, al
+   594 00000270 B07F                    	mov al, 7Fh
+   595 00000272 20D0                    	and al, dl                   ; mask out the high bit
+   596 00000274 38E0                    	cmp al, ah                   ; compare against max
+   597                                  	%endif
+   598 00000276 738A                    	jae undefined                ; harsh error exit
+   599 00000278 BEB000                  	mov si, fx80
+   600 0000027B B91000                  	mov cx, fx81 - fx80          ; size of fixed disk table
+   601 0000027E 84C0                    	test al, al
+   602 00000280 7406                    	jz .1
+   603 00000282 01CE                    .0: add si, cx                ; point at fx81
+   604 00000284 FEC8                    	dec al
+   605 00000286 75FA                    	jnz .0
+   606                                  .1:
+   607 00000288 56                      	push si
+   608 00000289 B800EE                  	mov ax, 0EE00h               ; error code and zero checksum
+   609                                  
+   610 0000028C 0204                    .2: add al, [si]              ; compute checksum
+   611 0000028E 46                      	inc si
+   612 0000028F E2FB                    	loop .2                      ; loop back
+   613                                  
+   614 00000291 5E                      	pop si
+   615 00000292 08C0                    	or al, al                    ; test AL for zero
+   616 00000294 7403E978FF              	jnz error_exit               ; BIOS data area clobbered
+   617                                  
+   618 00000299 5859                    	popm ax, cx
+   619 0000029B C3                      	ret
+   620                                  
+   621                                  
+   622                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   623                                  	; cv_lba Convert CHS in CX & DX to LBA address in DX:AX
+   624                                  	;
+   625                                  	; Call with:
+   626                                  	; DS:SI points to fixed disk table
+   627                                  	; CX & DX are CHS input parameters
+   628                                  	;
+   629                                  	; Exit with:
+   630                                  	; DX:AX is the corresponding LBA address
+   631                                  	; BX and CX are modified
+   632                                  	;
+   633                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   634                                  cv_lba:
+   635 0000029C 89C8                    	mov ax, cx                   ; cylinder info to AX
+   636 0000029E C0C002                  	rol al, 2                    ; position high 2 bits
+   637 000002A1 2403                    	and al, 3                    ; mask 2 bits
+   638 000002A3 86C4                    	xchg al, ah                  ; AX = cylinder number
+   639 000002A5 C1EA08                  	shr dx, 8                    ; heads to DL DH=0
+   640                                  
+   641 000002A8 89D3                    	mov bx, dx                   ; heads to BX
+   642 000002AA 8A5402                  	mov dl, [fx_log_heads - fx80 + si] ; may be 0, meaning 256
+   643 000002AD FECA                    	dec dl
+   644 000002AF 42                      	inc dx                       ; recover 256 !!!
+   645                                  
+   646 000002B0 F7E2                    	mul dx
+   647 000002B2 01D8                    	add ax, bx                   ; add in the head number
+   648 000002B4 83D200                  	adc dx, 0                    ; * *
+   649                                  
+   650 000002B7 8A5C0E                  	mov bl, [fx_log_sectors - fx80 + si] ; BH is already 0
+   651 000002BA 51                      	push cx
+   652 000002BB E8(0000)                	call @mulLS                  ; DX:AX = DX:AX * BX
+   653 000002BE 59                      	pop cx
+   654 000002BF FEC9                    	dec cl                       ; sector address is from 1, not 0
+   655 000002C1 83E13F                  	and cx, 63
+   656 000002C4 01C8                    	add ax, cx                   ; add in sector number
+   657 000002C6 83D200                  	adc dx, 0                    ; * *
+   658 000002C9 C3                      	ret
+   659                                  
+   660                                  
+   661                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   662                                  	; fn00 - - Reset the Disk Subsystem
+   663                                  	;
+   664                                  	; Call with:
+   665                                  	; AH = 0 function code
+   666                                  	;
+   667                                  	; Exit with:
+   668                                  	; Nothing
+   669                                  	;
+   670                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   671                                  fn00:
+   672 000002CA E89CFF                  	call integrity               ; perhaps no subsystem
+   673 000002CD E88601                  	call usb_hard_reset          ; do the dirty
+   674 000002D0 B400                    	mov ah, 0
+   675 000002D2 E92FFF                  	jmp exit_sequence
+   676                                  
+   677                                  
+   678                                  
+   679                                  
+   680                                  
+   681                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   682                                  	; fn02 - - Disk Read
+   683                                  	; fn03 - - Disk Write
+   684                                  	; fn04 - - Disk Verify
+   685                                  	;
+   686                                  	; Enter with:
+   687                                  	; AH = 2 (read)
+   688                                  	; AH = 3 (write)
+   689                                  	; AH = 4 (verify)
+   690                                  	; AL = number of sectors to transfer
+   691                                  	; CH = low 8 bits of cylinder number
+   692                                  	; CL = sector number & high 2 bits of sector number
+   693                                  	; DH = head number
+   694                                  	; DL = device code
+   695                                  	; ES:BX = buffer to receive / provide the data (except on verify)
+   696                                  	;
+   697                                  	; Exit with:
+   698                                  	; AH = success(0) or error code
+   699                                  	; Carry flag set, if error; clear otherwise
+   700                                  	;
+   701                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   702                                  fn02:
+   703                                  fn03:
+   704                                  fn04:
+   705 000002D5 E891FF                  	call integrity               ; set pointer to Fixed Disk Table in SI
+   706 000002D8 E8C1FF                  	call cv_lba                  ; convert to LBA address in DX:AX
+   707 000002DB 8A4C08                  	mov cl, [fx_drive_control - fx80 + si]
+   708 000002DE 8A6E0E                  	mov ch, [bp + offset_AL]     ; get sector count
+   709 000002E1 8B5E08                  	mov bx, [bp + offset_BX]     ; get transfer address
+   710                                  
+   711                                  	; Enter here on Read, Write, Verify or
+   712                                  	; extended Read, Write, Verify, Seek
+   713                                  RWV:
+   714 000002E4 FEC5                    	inc ch                       ; zero is valid for no transfer
+   715 000002E6 EB30                    	jmp .6                       ; enter loop at the bottom
+   716                                  	; the read / write / verify loop
+   717                                  .1:
+   718 000002E8 F6C140                  	test cl, 40h                 ; test LBA bit in drive control
+   719 000002EB 7431                    	jz .7
+   720                                  	; LBA call is okay
+   721 000002ED F6460F04                	test byte [bp + offset_AH], 04h ; Seek / Verify?
+   722 000002F1 7510                    	jnz .4
+   723 000002F3 F6460F01                	test byte [bp + offset_AH], 01h ; Write?
+   724 000002F7 7505                    	jnz .3
+   725 000002F9 E899FD                  .2: call @USB_READ_SECTOR
+   726 000002FC EB08                    	jmp .5
+   727 000002FE E877FE                  .3: call @USB_WRITE_SECTOR
+   728 00000301 EB03                    	jmp .5
+   729 00000303 E8FFFD                  .4: call @USB_VERIFY_SECTOR
+   730                                  
+   731                                  .5:
+   732 00000306 83C001                  	add ax, 1                    ; increment the LBA address
+   733 00000309 83D200                  	adc dx, 0                    ; * *
+   734 0000030C 80C702                  	add bh, 2                    ; add 512 == 200h to the BX
+   735 0000030F 7307                    	jnc .6
+   736 00000311 8CC7                    	mov di, es
+   737 00000313 83C710                  	add di, 10h
+   738 00000316 8EC7                    	mov es, di                   ; update the segment register
+   739 00000318 FECD                    .6: dec ch
+   740 0000031A 75CC                    	jnz .1
+   741 0000031C EB03                    	jmp .8
+   742                                  
+   743                                  	; CHS call is required
+   744 0000031E E8E1FE                  .7: call undefined
+   745                                  
+   746                                  .8:
+   747 00000321 30E4                    	xor ah, ah
+   748 00000323 E9DEFE                  	jmp exit_sequence
+   749                                  
+   750                                  
+   751                                  
+   752                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   753                                  	; fn08 - - Get Drive Parameters
+   754                                  	;
+   755                                  	; Call with:
+   756                                  	; AH = 8 function code
+   757                                  	; DL = drive code (80h, 81h, ...)
+   758                                  	;
+   759                                  	; Exit with:
+   760                                  	; CH = maximum cylinder number (low 8 bits)
+   761                                  	; CL = max. sector number; max. cyl in high 2 bits
+   762                                  	; DH = maximum head number
+   763                                  	; DL = number of fixed disks
+   764                                  
+   765                                  	; AH = 0 and Carry is clear on success
+   766                                  	; AH = error code; Carry set on error
+   767                                  	;
+   768                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   769                                  fn08:                         ; Get Drive Parameters
+   770 00000326 C6460A00                	mov byte [bp + offset_DL], 0 ; say no fixed disks
+   771                                  
+   772 0000032A E83CFF                  	call integrity               ; bad device code or no fixed disks
+   773                                  
+   774 0000032D 8B04                    	mov ax, [fx_log_cylinders - fx80 + si]
+   775 0000032F 48                      	dec ax
+   776 00000330 C0E406                  	shl ah, 6
+   777 00000333 0A640E                  	or ah, [fx_log_sectors - fx80 + si]
+   778 00000336 86C4                    	xchg al, ah
+   779 00000338 89460C                  	mov [bp + offset_CX], ax
+   780 0000033B 8A7402                  	mov dh, [fx_log_heads - fx80 + si]
+   781 0000033E FECE                    	dec dh
+   782                                  	%if 0
+   783                                  	mov dl, [n_fixed_disks]      ; return parameter
+   784                                  	%else
+   785 00000340 E81001                  	call get_usb_num             ; get number of IDE disks
+   786 00000343 88C2                    	mov dl, al
+   787                                  	%endif
+   788 00000345 89560A                  	mov [bp + offset_DX], dx
+   789                                  
+   790 00000348 30E4                    	xor ah, ah
+   791 0000034A E9B7FE                  	jmp exit_sequence
+   792                                  
+   793                                  
+   794                                  
+   795                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   796                                  	; fn15 - - Get Disk Type
+   797                                  	;
+   798                                  	; Call With:
+   799                                  	; AH = 15 function code
+   800                                  	; DL = device code (80h or 81h)
+   801                                  	;
+   802                                  	; Exit With:
+   803                                  	; If successful, Carry is clear
+   804                                  	; AH = 3 indicating a hard disk
+   805                                  	; CX:DX number of hard disk sectors
+   806                                  	;
+   807                                  	; If unsuccessful, Carry is set
+   808                                  	;
+   809                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   810                                  fn15:
+   811 0000034D E819FF                  	call integrity               ; sets DS:SI
+   812 00000350 8B04                    	mov ax, [fx_log_cylinders - fx80 + si]
+   813 00000352 8A5C02                  	mov bl, [fx_log_heads - fx80 + si]
+   814 00000355 30FF                    	xor bh, bh
+   815 00000357 FECB                    	dec bl                       ; 00 means 256
+   816 00000359 43                      	inc bx                       ; do the conversion
+   817 0000035A F7E3                    	mul bx                       ; cyls * heads
+   818 0000035C 8A5C0E                  	mov bl, [fx_log_sectors - fx80 + si]
+   819 0000035F 30FF                    	xor bh, bh
+   820 00000361 E8(0000)                	call @mulLS                  ; cyls * heads * sectors
+   821 00000364 89560C                  	mov word [bp + offset_CX], dx ; high order
+   822 00000367 89460A                  	mov word [bp + offset_DX], ax ; low order word
+   823 0000036A C6460F03                	mov byte [bp + offset_AH], 3 ; code for HARD DISK
+   824 0000036E E99AFE                  	jmp good_exit
+   825                                  
+   826                                  
+   827                                  
+   828                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   829                                  	; fn41 - - Check Extensions Present
+   830                                  	;
+   831                                  	; Call With:
+   832                                  	; AH = 41h function code
+   833                                  	; BX = 55AAh magic number
+   834                                  	; DL = drive code (80h or 81h)
+   835                                  	;
+   836                                  	; Exit With:
+   837                                  	; carry clear
+   838                                  	; AH = 21h version 1.1 support
+   839                                  	; BX = AA55h magic number II
+   840                                  	; CX = 0001b bit0=packet support; bit2=EDD drive support
+   841                                  	;
+   842                                  	; carry set
+   843                                  	; AH = 01h Invalid Command
+   844                                  	;
+   845                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   846                                  fn41:
+   847 00000371 E8F5FE                  	call integrity               ; test drive number (sets DS:SI)
+   848 00000374 817E08AA55              	cmp word [offset_BX + bp], 55AAh
+   849 00000379 7403E984FE              	jne undefined
+   850 0000037E F6440840                	test byte [fx_drive_control - fx80 + si], 40h ; test LBA bit
+   851 00000382 7503E97BFE              	jz undefined
+   852                                  
+   853 00000387 C6460F21                	mov byte [offset_AH + bp], 21h ; version 1.1
+   854 0000038B C7460855AA              	mov word [offset_BX + bp], 0AA55h ; magic number II
+   855 00000390 C7460C0500              	mov word [offset_CX + bp], 00000101b ; packet calls & EDD i / f
+   856 00000395 E973FE                  	jmp good_exit
+   857                                  
+   858                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   859                                  	; fn42 - - Extended Read
+   860                                  	; fn43 - - Extended Write
+   861                                  	; fn44 - - Extended Verify
+   862                                  	; fn47 - - Extended Seek (implement as Verify)
+   863                                  	;
+   864                                  	; Call With:
+   865                                  	; AH = function code
+   866                                  	; AL = 0, 1 write with no verify; 2 write with verify
+   867                                  	; not used for Read or Verify
+   868                                  	; DL = drive number (80h or 81h)
+   869                                  	; [DS:SI] was disk packet address; will be used in ES:BX
+   870                                  	;
+   871                                  	; Exit With:
+   872                                  	; AH = 0 (no error) and Carry Clear
+   873                                  	; AH = error code and Carry Set
+   874                                  	; The block count field is updated with the number of blocks
+   875                                  	; correctly transferred / verified before the error occurred.
+   876                                  	;
+   877                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   878                                  fn42:
+   879                                  fn43:
+   880                                  fn44:
+   881                                  fn47:
+   882 00000398 E8CEFE                  	call integrity               ; set pointer to Fixed Disk Table in SI
+   883 0000039B 8E4610                  	mov es, [bp + offset_DS]     ; packet pointer
+   884 0000039E 8B5E02                  	mov bx, [bp + offset_SI]     ; * *
+   885 000003A1 26803F10                	es cmp byte [bx + pkt_size], 16 ; check for correct size
+   886 000003A5 7303E958FE              	jb undefined
+   887                                  
+   888 000003AA 268B470E                	es mov ax, [bx + pkt_LBA3]   ; LBA address
+   889 000003AE 260B470C                	es or ax, [bx + pkt_LBA2]    ; LBA address
+   890 000003B2 7403E94BFE              	jnz undefined
+   891 000003B7 268B4708                	es mov ax, [bx + pkt_LBA0]   ; LBA address
+   892 000003BB 268B570A                	es mov dx, [bx + pkt_LBA1]   ; LBA address hi
+   893                                  
+   894 000003BF B501                    	mov ch, 1                    ; assume Seek
+   895 000003C1 807E0F47                	cmp byte [offset_AH + bp], 47h ; Seek?
+   896 000003C5 7404                    	je .7
+   897 000003C7 268A6F02                	es mov ch, [bx + pkt_blocks] ; sector count
+   898                                  .7:
+   899 000003CB 8A4C08                  	mov cl, [fx_drive_control - fx80 + si]
+   900 000003CE 26C45F04                	es les bx, [bx + pkt_address] ; get transfer address
+   901                                  
+   902 000003D2 E90FFF                  	jmp RWV                      ; common read / write / verify code
+   903                                  
+   904                                  
+   905                                  
+   906                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   907                                  	; fn48 - - Get Drive Parameters
+   908                                  	;
+   909                                  	; Call With:
+   910                                  	; AH = 48h function code
+   911                                  	; DL = drive number
+   912                                  	; DS:SI = pointer to return buffer (26 or 30 bytes)
+   913                                  	;
+   914                                  	; Exit With:
+   915                                  	; AH = 0 and carry clear
+   916                                  	; results in the buffer
+   917                                  	;
+   918                                  	; AH = error code and carry set
+   919                                  	;
+   920                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   921                                  fn48:
+   922 000003D5 E891FE                  	call integrity               ; set DS:SI
+   923 000003D8 8E4610                  	mov es, [bp + offset_DS]     ; packet pointer
+   924 000003DB 8B5E02                  	mov bx, [bp + offset_SI]     ; * *
+   925 000003DE B9FFFF                  	mov cx, 0FFFFh               ; CX = - 1 (FFFFh)
+   926 000003E1 B81A00                  	mov ax, pkt_ptr              ; AX = 26
+   927 000003E4 263907                  	es cmp [bx + pkt_size], ax   ; check for correct size = 26
+   928 000003E7 7303E916FE              	jb undefined
+   929 000003EC 83C004                  	add ax, 4
+   930 000003EF 263907                  	es cmp [bx + pkt_size], ax   ; check for correct size = 30
+   931 000003F2 7208                    	jb .1
+   932 000003F4 26894F1A                	es mov [bx + pkt_ptr], cx    ; flag invalid pointer
+   933 000003F8 26894F1C                	es mov [bx + pkt_ptr + 2], cx ; * *
+   934                                  .1:
+   935 000003FC 268907                  	es mov [bx + pkt_size], ax   ; set the returned size
+   936                                  
+   937 000003FF 41                      	inc cx                       ; CX = 0
+   938 00000400 26C747020300            	es mov word [bx + pkt_info], 000011b ; DMA bound / Geom OK
+   939                                  
+   940 00000406 8B4409                  	mov ax, [fx_phys_cylinders - fx80 + si] ; cylinders
+   941 00000409 26894704                	es mov [bx + pkt_phys_cyl], ax
+   942 0000040D 26894F06                	es mov [bx + pkt_phys_cyl + 2], cx
+   943                                  
+   944 00000411 8A440B                  	mov al, [fx_phys_heads - fx80 + si] ; heads
+   945 00000414 88EC                    	mov ah, ch
+   946 00000416 26894708                	es mov [bx + pkt_phys_hds], ax
+   947 0000041A 26894F0A                	es mov [bx + pkt_phys_hds + 2], cx
+   948                                  
+   949 0000041E 8A4404                  	mov al, [fx_phys_sectors - fx80 + si] ; sectors
+   950 00000421 2689470C                	es mov [bx + pkt_phys_spt], ax
+   951 00000425 26894F0E                	es mov [bx + pkt_phys_spt + 2], cx
+   952                                  
+   953 00000429 8B440C                  	mov ax, [fx_LBA_low - fx80 + si] ; total LBA sectors
+   954 0000042C 26894710                	es mov [bx + pkt_sectors], ax ; total sectors
+   955 00000430 8B4405                  	mov ax, [fx_LBA_high - fx80 + si] ; * *
+   956 00000433 26894712                	es mov [bx + pkt_sectors + 2], ax ; * *
+   957 00000437 26894F14                	es mov [bx + pkt_sectors + 4], cx ; * *
+   958 0000043B 26894F16                	es mov [bx + pkt_sectors + 6], cx ; * *
+   959 0000043F 26C747180002            	es mov word [bx + pkt_bytes], 512 ; sector size
+   960 00000445 B400                    	mov ah, 0
+   961 00000447 E9BAFD                  	jmp exit_sequence
+   962                                  
+   963                                  
+   964                                  
+   965                                  
+   966                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   967                                  	; fn4E - - set hardware configuration
+   968                                  	;
+   969                                  	; Call With:
+   970                                  	; AH = 4Eh function code
+   971                                  	; AL = hardware function sub - code
+   972                                  	; DL = drive number
+   973                                  	;
+   974                                  	; Exit With:
+   975                                  	; AH = 0 carry is clear
+   976                                  	; AL = 1 other devices affected
+   977                                  	;
+   978                                  	; AH = error code and carry is set
+   979                                  	;
+   980                                  	; This operation is a complete No - Op for the PPIDE
+   981                                  	;
+   982                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   983                                  fn4E:
+   984 0000044A E81CFE                  	call integrity
+   985 0000044D B80100                  	mov ax, 0001h
+   986 00000450 E9B1FD                  	jmp exit_sequence
+   987                                  
+   988                                  	; get number of IDE disks (result in al)
+   989                                  get_usb_num:
+   990 00000453 B001                    	mov al, 1
+   991 00000455 C3                      	ret
+   992                                  
+   993                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   994                                  	;
+   995                                  	; Reset and initialize USB Subsystem
+   996                                  	; GLOBAL CH37X INITIALIZATION
+   997                                  	;
+   998                                  	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   999                                  usb_hard_reset:
+  1000                                  	;
+  1001 00000456 E86300                  	call CH_DETECT               ; DETECT CHIP PRESENCE
+  1002 00000459 7302                    	jnc CH_INIT3                 ; GO AHEAD IF CHIP FOUND
+  1003 0000045B F9                      	Error
+  1004 0000045C C3                      	ret
+  1005                                  	;
+  1006                                  CH_INIT3:
+  1007 0000045D E89000                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
+  1008 00000460 7302                    	jnc CH_INIT3A                ; GO AHEAD IF CHIP FOUND
+  1009 00000462 F9                      	Error
+  1010 00000463 C3                      	ret                          ; ABORT ON FAILURE
+  1011                                  
+  1012                                  CH_INIT3A:
+  1013 00000464 C3                      	ret
+  1014                                  	;
+  1015                                  	;
+  1016                                  	; SEND COMMAND IN AL
+  1017                                  	;
+  1018                                  CH_CMD:
+  1019 00000465 52                      	push dx
+  1020 00000466 BA4F04                  	mov dx, CH376 + 1            ; CMD PORT
+  1021 00000469 EE                      	out dx, al                   ; SEND COMMAND
+  1022 0000046A E8(0000)                	call wait12                  ; * DEBUG *
+  1023 0000046D 5A                      	pop dx
+  1024 0000046E C3                      	ret
+  1025                                  	;
+  1026                                  	; GET STATUS
+  1027                                  	;
+  1028                                  CH_STAT:
+  1029 0000046F 52                      	push dx
+  1030 00000470 BA4F04                  	mov dx, CH376 + 1            ; CMD PORT
+  1031 00000473 EC                      	in al, dx                    ; GET STATUS
+  1032 00000474 5A                      	pop dx
+  1033 00000475 C3                      	ret
+  1034                                  	;
+  1035                                  	; READ A BYTE FROM DATA PORT
+  1036                                  	;
+  1037                                  CH_RD:
+  1038 00000476 52                      	push dx
+  1039 00000477 BA4E04                  	mov dx, CH376                ; BASE PORT
+  1040 0000047A EC                      	in al, dx                    ; GET DATA
+  1041 0000047B 5A                      	pop dx
+  1042 0000047C C3                      	ret
+  1043                                  	;
+  1044                                  	; WRITE A BYTE TO DATA PORT
+  1045                                  	;
+  1046                                  CH_WR:
+  1047 0000047D 52                      	push dx
+  1048 0000047E BA4E04                  	mov dx, CH376                ; BASE PORT
+  1049 00000481 EE                      	out dx, al                   ; SEND DATA
+  1050 00000482 5A                      	pop dx
+  1051 00000483 C3                      	ret
+  1052                                  
+  1053                                  	;
+  1054                                  	; POLL WAITING FOR INTERRUPT
+  1055                                  	;
+  1056                                  CH_POLL:
+  1057 00000484 515253                  	pushm bx, dx, cx
+  1058 00000487 E8(0000)                	call wait12
+  1059                                  CH_POLL0:
+  1060 0000048A B90080                  	mov cx, 8000h                ; PRIMARY LOOP COUNTER
+  1061                                  CH_POLL1:
+  1062 0000048D E8DFFF                  	call CH_STAT                 ; GET INT STATUS
+  1063 00000490 A880                    	test al, 80h
+  1064 00000492 7408                    	jz CH_POLL2                  ; IF ZERO, MOVE ON
+  1065 00000494 E2F7                    	loop CH_POLL1
+  1066 00000496 5B5A59                  	popm bx, dx, cx
+  1067 00000499 B0FF                    	mov al, 0ffh                 ; timeout
+  1068 0000049B C3                      	ret                          ; AND RETURN
+  1069                                  CH_POLL2:
+  1070 0000049C B022                    	mov al, CH_CMD_STAT          ; GET STATUS
+  1071 0000049E E8C4FF                  	call CH_CMD                  ; SEND IT
+  1072 000004A1 E8(0000)                	call wait12                  ; SMALL DELAY
+  1073 000004A4 E8CFFF                  	call CH_RD                   ; GET RESULT
+  1074 000004A7 5B5A59                  	popm bx, dx, cx
+  1075 000004AA C3                      	ret                          ; AND RETURN
+  1076                                  
+  1077                                  	;
+  1078                                  	; SEND READ USB DATA COMMAND
+  1079                                  	; USING BEST OPCODE FOR DEVICE
+  1080                                  	;
+  1081                                  CH_CMD_RD:
+  1082                                  	; SEND CH376 READ USB DATA CMD
+  1083 000004AB B027                    	mov al, CH_CMD_RD6
+  1084 000004AD EBB6                    	jmp CH_CMD
+  1085                                  	;
+  1086                                  	; SEND WRITE USB DATA COMMAND
+  1087                                  	; USING BEST OPCODE FOR DEVICE
+  1088                                  	;
+  1089                                  CH_CMD_WR:
+  1090                                  	; SEND CH376 WRITE USB DATA CMD
+  1091 000004AF B02C                    	mov al, CH_CMD_WR6
+  1092 000004B1 EBB2                    	jmp CH_CMD
+  1093                                  
+  1094                                  	;
+  1095                                  	; EMPTY THE CH37X OUTPUT QUEUE OF GARBAGE
+  1096                                  	;
+  1097                                  CH_FLUSH:
+  1098 000004B3 B98000                  	mov cx, 80h
+  1099                                  CH_FLUSH1:
+  1100 000004B6 E8BDFF                  	call CH_RD
+  1101 000004B9 E2FB                    	loop CH_FLUSH1
+  1102 000004BB C3                      	ret
+  1103                                  	;
+  1104                                  	;
+  1105                                  	;
+  1106                                  CH_DETECT:
+  1107 000004BC B006                    	mov al, CH_CMD_EXIST         ; LOAD COMMAND
+  1108 000004BE E8A4FF                  	call CH_CMD                  ; SEND COMMAND
+  1109 000004C1 B0AA                    	mov al, 0AAh                 ; LOAD CHECK PATTERN
+  1110 000004C3 E8B7FF                  	call CH_WR                   ; SEND IT
+  1111 000004C6 E8(0000)                	call wait12                  ; SMALL DELAY
+  1112 000004C9 E8AAFF                  	call CH_RD                   ; GET ECHO
+  1113 000004CC 3C55                    	cmp al, 55h                  ; SHOULD BE INVERTED
+  1114 000004CE C3                      	ret                          ; RETURN
+  1115                                  	;
+  1116                                  	; SET MODE TO VALUE IN A
+  1117                                  	; AVOID CHANGING MODES IF CURRENT MODE = NEW MODE
+  1118                                  	; THE CH376 DOES NOT SEEM TO MAINTAIN SEPARATE OPERATING CONTEXTS FOR
+  1119                                  	; THE USB AND SD DEVICES. IF BOTH ARE IN OPERATION, THEN A MODE
+  1120                                  	; SWITCH REQUIRES A COMPLETE REINITIALIZATION OF THE REQUESTED
+  1121                                  	; DEVICE. THIS WHOLE MESS IS ONLY NEEDED IF BOTH CHSD AND CHUSB
+  1122                                  	; ARE ENDABLED, SO IT IS CONDITIONAL.
+  1123                                  	;
+  1124                                  CH_SETMODE:
+  1125                                  CH_SETMODE_USB:
+  1126 000004CF E81E00                  	call CHUSB_RESET             ; FULL USB STACK RESET
+  1127 000004D2 C3                      	ret                          ; DONE
+  1128                                  
+  1129                                  
+  1130                                  	;
+  1131                                  	; INITIATE A DISK SECTOR READ / WRITE OPERATION
+  1132                                  	; A: READ OR WRITE OPCODE
+  1133                                  	;
+  1134                                  CHUSB_RWSTART:
+  1135 000004D3 E88FFF                  	call CH_CMD                  ; SEND R / W COMMAND
+  1136                                  	;
+  1137                                  	; SEND LBA, 4 BYTES, LITTLE ENDIAN
+  1138 000004D6 88C8                    	mov al, cl
+  1139 000004D8 E8A2FF                  	call CH_WR                   ; SEND BYTE
+  1140 000004DB 88E8                    	mov al, ch
+  1141 000004DD E89DFF                  	call CH_WR                   ; SEND BYTE
+  1142 000004E0 88D0                    	mov al, dl
+  1143 000004E2 E898FF                  	call CH_WR                   ; SEND BYTE
+  1144 000004E5 88F0                    	mov al, dh
+  1145 000004E7 E893FF                  	call CH_WR                   ; SEND BYTE
+  1146                                  	;
+  1147                                  	; REQUEST 1 SECTOR
+  1148 000004EA B001                    	mov al, 1                    ; 1 SECTOR
+  1149 000004EC E88EFF                  	call CH_WR                   ; SEND IT
+  1150 000004EF C3                      	ret
+  1151                                  	;
+  1152                                  	;
+  1153                                  	;
+  1154                                  	; RESET THE INTERFACE AND REDISCOVER MEDIA
+  1155                                  	;
+  1156                                  CHUSB_RESET:
+  1157                                  	;
+  1158                                  	; RESET THE BUS
+  1159 000004F0 B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
+  1160 000004F2 E870FF                  	call CH_CMD                  ; SEND IT
+  1161 000004F5 B007                    	mov al, 7                    ; RESET BUS
+  1162 000004F7 E883FF                  	call CH_WR                   ; SEND IT
+  1163 000004FA E8(0000)                	call wait12                  ; SMALL WAIT
+  1164 000004FD E876FF                  	call CH_RD                   ; GET RESULT
+  1165 00000500 E8(0000)                	call wait12                  ; SMALL WAIT
+  1166                                  	;
+  1167                                  	; ACTIVATE USB MODE
+  1168 00000503 B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
+  1169 00000505 E85DFF                  	call CH_CMD                  ; SEND IT
+  1170 00000508 B006                    	mov al, 6                    ; USB ENABLED, SEND SOF
+  1171 0000050A E870FF                  	call CH_WR                   ; SEND IT
+  1172 0000050D E8(0000)                	call wait12                  ; SMALL WAIT
+  1173 00000510 E863FF                  	call CH_RD                   ; GET RESULT
+  1174 00000513 E8(0000)                	call wait12                  ; SMALL WAIT
+  1175                                  	;
+  1176 00000516 B001                    	mov al, CH_MODE_USB          ; WE ARE NOW IN USB MODE
+  1177                                  	;
+  1178                                  	; INITIALIZE DISK
+  1179 00000518 B91800                  	mov cx, 24                   ; TRY A FEW TIMES
+  1180                                  CHUSB_RESET1:
+  1181 0000051B B051                    	mov al, CH_CMD_DSKINIT       ; DISK INIT COMMAND
+  1182 0000051D E845FF                  	call CH_CMD                  ; SEND IT
+  1183                                  
+  1184 00000520 51                      	push cx
+  1185 00000521 B9204E                  	mov cx, 20000                ; 1 s delay
+  1186 00000524 E8(0000)                	call microsecond
+  1187 00000527 B9204E                  	mov cx, 20000
+  1188 0000052A E8(0000)                	call microsecond
+  1189 0000052D B9204E                  	mov cx, 20000
+  1190 00000530 E8(0000)                	call microsecond
+  1191 00000533 B9204E                  	mov cx, 20000
+  1192 00000536 E8(0000)                	call microsecond
+  1193 00000539 B9204E                  	mov cx, 20000
+  1194 0000053C E8(0000)                	call microsecond
+  1195 0000053F 59                      	pop cx
+  1196                                  
+  1197 00000540 E841FF                  	call CH_POLL                 ; WAIT FOR RESULT
+  1198                                  
+  1199 00000543 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1200 00000545 740F                    	je CHUSB_RESET2              ; IF SO, CHECK READY
+  1201 00000547 3C16                    	cmp al, 16h                  ; NO MEDIA
+  1202 00000549 7503E98300              	je CHUSB_NOMEDIA             ; HANDLE IT
+  1203                                  
+  1204 0000054E E8(0000)                	call wait12
+  1205 00000551 E2C8                    	loop CHUSB_RESET1            ; LOOP AS NEEDED
+  1206 00000553 E98700                  	jmp CHUSB_TO                 ; HANDLE TIMEOUT
+  1207                                  	;
+  1208                                  CHUSB_RESET2:
+  1209                                  	; USE OF CH376 DISK_MOUNT COMMAND SEEMS TO IMPROVE
+  1210                                  	; COMPATIBILITY WITH SOME OLDER USB THUMBDRIVES.
+  1211 00000556 E80400                  	call CHUSB_DSKMNT            ; IF SO, TRY MOUNT, IGNORE ERRS
+  1212 00000559 E81200                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
+  1213 0000055C C3                      	ret
+  1214                                  
+  1215                                  	;
+  1216                                  	; CH37X HELPER ROUTINES
+  1217                                  	;
+  1218                                  	;
+  1219                                  	; PERFORM DISK MOUNT
+  1220                                  	;
+  1221                                  CHUSB_DSKMNT:
+  1222 0000055D B031                    	mov al, CH_CMD_DSKMNT        ; DISK QUERY
+  1223 0000055F E803FF                  	call CH_CMD                  ; DO IT
+  1224 00000562 E81FFF                  	call CH_POLL                 ; WAIT FOR RESPONSE
+  1225                                  
+  1226 00000565 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1227 00000567 7402                    	je CHUSB_DSKMNTok
+  1228 00000569 F9                      	Error
+  1229 0000056A C3                      	ret
+  1230                                  CHUSB_DSKMNTok:
+  1231 0000056B 30E4                    	Okay
+  1232 0000056D C3                      	ret
+  1233                                  	;
+  1234                                  	; PERFORM DISK SIZE
+  1235                                  	;
+  1236                                  CHUSB_DSKSIZ:
+  1237 0000056E B053                    	mov al, CH_CMD_DSKSIZ        ; DISK SIZE COMMAND
+  1238 00000570 E8F2FE                  	call CH_CMD                  ; SEND IT
+  1239 00000573 E80EFF                  	call CH_POLL                 ; WAIT FOR RESULT
+  1240 00000576 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1241 00000578 755B                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1242 0000057A E82EFF                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+  1243 0000057D E8F6FE                  	call CH_RD                   ; GET RD DATA LEN
+  1244 00000580 3C08                    	cmp al, 08h                  ; MAKE SURE IT IS 8
+  1245 00000582 7551                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1246 00000584 E8EFFE                  	call CH_RD
+  1247 00000587 88C6                    	mov dh, al
+  1248 00000589 E8EAFE                  	call CH_RD
+  1249 0000058C 88C2                    	mov dl, al
+  1250 0000058E E8E5FE                  	call CH_RD
+  1251 00000591 88C5                    	mov ch, al
+  1252 00000593 E8E0FE                  	call CH_RD
+  1253 00000596 88C1                    	mov cl, al
+  1254 00000598 E8DBFE                  	call CH_RD
+  1255 0000059B E8D8FE                  	call CH_RD
+  1256 0000059E E8D5FE                  	call CH_RD
+  1257 000005A1 E8D2FE                  	call CH_RD
+  1258 000005A4 30E4                    	Okay
+  1259 000005A6 C3                      	ret                          ; AND DONE
+  1260                                  CHUSB_DSKINQ:
+  1261 000005A7 B058                    	mov al, CH_CMD_DSKINQ        ; DISK INQUIRY
+  1262 000005A9 E8B9FE                  	call CH_CMD                  ; SEND IT
+  1263 000005AC E8D5FE                  	call CH_POLL                 ; WAIT FOR RESULT
+  1264 000005AF 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1265 000005B1 7522                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1266 000005B3 E8F5FE                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+  1267 000005B6 E8BDFE                  	call CH_RD                   ; GET RD DATA LEN
+  1268 000005B9 88C1                    	mov cl, al
+  1269 000005BB 30ED                    	xor ch, ch                   ; put count in cx
+  1270 000005BD 89DF                    	mov di, bx
+  1271                                  .1:
+  1272 000005BF E8B4FE                  	call CH_RD
+  1273 000005C2 268805                  	es mov [di], al
+  1274 000005C5 83C701                  	add di, 1
+  1275 000005C8 E2F5                    	loop .1
+  1276 000005CA 26C60500                	es mov byte [di], 0
+  1277 000005CE 30E4                    	Okay
+  1278 000005D0 C3                      	ret                          ; AND DONE
+  1279                                  	;
+  1280                                  	; ERROR HANDLERS
+  1281                                  	;
+  1282                                  	;
+  1283                                  CHUSB_NOMEDIA:
+  1284 000005D1 B0FF                    	mov al, CHUSB_STNOMEDIA
+  1285 000005D3 EB10                    	jmp CHUSB_ERR
+  1286                                  	;
+  1287                                  CHUSB_CMDERR:
+  1288 000005D5 B0FE                    	mov al, CHUSB_STCMDERR
+  1289 000005D7 EB0C                    	jmp CHUSB_ERR
+  1290                                  	;
+  1291                                  CHUSB_IOERR:
+  1292 000005D9 B0FD                    	mov al, CHUSB_STIOERR
+  1293 000005DB EB08                    	jmp CHUSB_ERR
+  1294                                  	;
+  1295                                  CHUSB_TO:
+  1296 000005DD B0FC                    	mov al, CHUSB_STTO
+  1297 000005DF EB04                    	jmp CHUSB_ERR
+  1298                                  	;
+  1299                                  CHUSB_NOTSUP:
+  1300 000005E1 B0FB                    	mov al, CHUSB_STNOTSUP
+  1301 000005E3 EB00                    	jmp CHUSB_ERR
+  1302                                  	;
+  1303                                  CHUSB_ERR:
+  1304 000005E5 F9                      	Error
+  1305 000005E6 C3                      	ret

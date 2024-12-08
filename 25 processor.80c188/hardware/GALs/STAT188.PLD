@@ -23,11 +23,11 @@ PIN  9  = !MCS2                   ; /*                                 */
 PIN 10  = !MCS3                   ; /*                                 */
 PIN 11  = !PCS0                   ; /*                                 */
 PIN 13  =  BUSAK                  ; /* HLDA OUT FROM CPU               */
-PIN 21  =  BDREQ1                 ; /* BUS DMA REQUEST                 */
-PIN 14  =  BDREQ0
+PIN 21  = !DEN                    ;
+PIN 14  =  BDREQ0			;
 PIN 23  = !PCS1                   ; /*                                 */
-/*PIN     =                         ; /*                                 */
-/*PIN     =                         ; /*                                 */
+PIN 22  = !ONBIO                  ; /*                                 */
+/*PIN     =                       ; /*                                 */
 
 /* *************** OUTPUT PINS *********************/
 PIN 15  = !BUS_DREQ1              ; /*                                 */
@@ -36,7 +36,6 @@ PIN 17  = !MREQ_IO                ; /* INPUT/OUTPUT MAY TRI-STATE      */
 PIN 18  =  HALT                   ; /* SIGNAL HALT CONDITION           */
 PIN 19  = !IORQ                   ; /*                                 */
 PIN 20  = !G_DATA                 ; /* LS245 HANDLING DATA LINES TO BUS */
-PIN 22  =  !BUS_DREQ1              ; /* BUS DMA REQUEST                 */
 
 
 
@@ -44,26 +43,26 @@ PIN 22  =  !BUS_DREQ1              ; /* BUS DMA REQUEST                 */
 
 MEMOP	=	 ST2 & (!ST1 # !ST0) ;
 IDLE	=	 ST2 &  ST1  &  ST0  ;
-
 HALT	=      !ST2 &  ST1  &  ST0  ;
 IO_OP	=	!ST2 & (!ST1 # !ST0) ;	/* INCLUDES -INTA- */
 INTA	=	!ST2 & !ST1 & !ST0 ;
 
-MCS	=	MCS0 # MCS1 # MCS2 # MCS3 ;
-LCLMREQ =	!ALE & MEMOP ;
-EXTMREQ =	!ALE & MEMOP & !BUSAK & !UCS;	/* !ALE &  MCS & MEMOP & !BUSAK & !UCS;*/
-EXTIORQ =	!ALE & (PCS0 # PCS1) & !BUSAK  #
-		!ALE & INTA & !BUSAK ;
 
-CSMEM	=	LCLMREQ & !BUSAK  #  BUSAK & MREQ_IO ;
+LCLMREQ =	!ALE & MEMOP ;
+EXTMREQ =	!ALE & MEMOP & !BUSAK & !UCS;
+EXTIORQ =	!ALE & (PCS0 # PCS1);
+		/*!ALE & (PCS0 # PCS1) & !BUSAK  #*/
+		/*!ALE & INTA & !BUSAK ;*/
+
+
+
 
 /* *************** OUTPUT PINS *********************/
-BUS_DREQ1 =	BDREQ1 ;	/* SIMPLY INVERT */
 BUS_DREQ0 =	BDREQ0 ;	/* SIMPLY INVERT */
 
-CS0	=	!A19 & CSMEM ;
-CS1	=	 A19 & CSMEM & !UCS & !MCS ;
-G_DATA =	 EXTMREQ # EXTIORQ  ;
+G_DATA =	EXTMREQ # EXTIORQ  ;
+		/*DEN & !UCS & MEMOP  #
+		DEN & !ONBIO & IO_OP & INTA ;*/
 
 IORQ 		= EXTIORQ ;
 IORQ.OE		= !BUSAK ;

@@ -503,27 +503,33 @@
    220                              <1> FDC_DACK        equ	FDC+6
    221                              <1> FDC_DACK_TC     equ     FDC+7
    222                              <1> 
-   223                              <1> 
-   224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   225                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
-   226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   227                              <1> RTC	equ	IO_BASE+0094H
+   223                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   224                              <1> ; CH376 controller (Duodyne Multi IO)
+   225                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   226                              <1> CH376	        equ	IO_BASE+004EH
+   227                              <1> 
    228                              <1> 
-   229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   230                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> PPI	        equ	IO_BASE+0088H
-   233                              <1> 
-   234                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   235                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   236                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   237                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   238                              <1> 
-   239                              <1> portA           equ     PPI+0   ;
-   240                              <1> portB           equ     PPI+1   ;
-   241                              <1> portC           equ     PPI+2   ;
-   242                              <1> 
-   243                              <1> ; end CPUREGS.ASM
+   229                              <1> 
+   230                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   231                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   232                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   233                              <1> RTC	equ	IO_BASE+0094H
+   234                              <1> 
+   235                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   236                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   237                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   238                              <1> PPI	        equ	IO_BASE+0088H
+   239                              <1> 
+   240                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   241                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   242                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   243                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   244                              <1> 
+   245                              <1> portA           equ     PPI+0   ;
+   246                              <1> portB           equ     PPI+1   ;
+   247                              <1> portC           equ     PPI+2   ;
+   248                              <1> 
+   249                              <1> ; end CPUREGS.ASM
     28                                  %include	"equates.asm"
     29                              <1> ;========================================================================
     30                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
@@ -679,7 +685,7 @@
    121 00000016 ??                  <2> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
    122                              <2> ;;---------------[Keyboard data area]------------;
    123 00000017 ????                <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
-   124                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+   124                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
    125 00000019 ??                  <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
    126 0000001A ????                <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
    127 0000001C ????                <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
@@ -753,7 +759,7 @@
    195                              <2> ;;---------------[RTC/timer1 data]---------------------;
    196 00000098 ????????            <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
    197 0000009C ????????            <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
-   198 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   198 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
    199                              <2> ;;---------------[Cassette I/O stuff]------------------;
    200 000000A1 ??                  <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
    201 000000A2 ????                <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
@@ -792,13 +798,13 @@
    234 000000F4 ????                <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
    235 000000F6 ????                <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
    236                              <2> 
-   237 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   237 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
    238                              <2> 
    239 000000FA ????????            <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
    240                              <2> 
    241 000000FE ??                  <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
    242                              <2> 
-   243 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   243 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
    244                              <2> ;								   CPU clock is half of this
    245                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    246                              <2> ;
@@ -816,31 +822,11 @@
    258                              <2> %define PPIDE_driver 1
    259                              <2> %endif
    260                              <2> %if 0				;*/
-   261                              <2> #define DIDE_driver 0		/*
+   261                              <2> #define USB_driver 1		/*
    262                              <2> %else
-   263                              <2> %define DIDE_driver 0
+   263                              <2> %define USB_driver 1
    264                              <2> %endif
-   265                              <2> %if 0				;*/
-   266                              <2> #define DISKIO_driver 1		/*
-   267                              <2> %else
-   268                              <2> %define DISKIO_driver 1
-   269                              <2> %endif
-   270                              <2> %if 0				;*/
-   271                              <2> #define MFPIC_driver 1		/*
-   272                              <2> %else
-   273                              <2> %define MFPIC_driver 1
-   274                              <2> %endif
-   275                              <2> %if 0				;*/
-   276                              <2> #define DSD_driver 1		/*
-   277                              <2> %else
-   278                              <2> %define DSD_driver 1
-   279                              <2> %endif
-   280                              <2> %if 0				;*/
-   281                              <2> #define V3IDE8_driver (SBC188==3)		/*
-   282                              <2> %else
-   283                              <2> %define V3IDE8_driver (SBC188==3)
-   284                              <2> %endif
-   285                              <2> 				;*/
+   265                              <2> 				;*/
     77                              <1> 
     78                              <1> ;  this must be the same in EQUATES.H */
     79                              <1> %if SOFT_DEBUG

@@ -18,8 +18,8 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
+* Modified for Duodyne SBC80188 by Dan Werner 11/2024
 *************************************************************************/
-/* nvram.c */
 
 #include <stdlib.h>
 #include <string.h>
@@ -28,11 +28,10 @@
 #include "equates.h"
 #include "ds1302.h"
 #include "ide.h"
-#include "sdcard.h"
 #include "libc.h"
 
+
 #define	DBG 3
-#define CPM_FLOPPIES 0
 #define FLOPPY_MAX 2
 #define UART_CLOCK  1843200
 #define BAUDR	     9600
@@ -48,10 +47,20 @@
 #define BCD(x) (byte)((x)<100?(((x)/10)<<4)|((x)%10):0xFF)
 #define toupper(a) ((a)>='a'&&(a)<='z'?(a)-('a'-'A'):(a))
 
-enum {NO_disk=0, PPI_type=2, DIDE0_type=4, DIDE1_type=6, DSD_type=8,
+enum {NO_disk=0, PPI_type=2, USB_type=4, DIDE1_type=6, DSD_type=8,
 	V3IDE8_type=10, DISKIO_type=12, MFPIC_type=14 };
 
-/* FIXED_DISK_MAX = maximum number of fixed disk drives (bda.inc) */
+static const byte dpm0[12] = {31,30,31,30,31, 31,30,31,30,31, 31,28};
+static const char * const dow[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "???"};
+static const char * const month[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+const char * const rates[8] = {"1200", "2400", "4800", "9600", "19200", "38400", "57600", "115200"};
+
+static const word ftype_OK =	(1<<4) | (1<<3) | (1<<2) | (1<<1) | 1;
+
+extern char unique[];			/* in copyrght.asm */
+
 
 byte set_battery(byte force)
 {
@@ -114,14 +123,6 @@ byte set_battery(byte force)
     return state;
 }
 
-static const byte dpm0[12] = {31,30,31,30,31, 31,30,31,30,31, 31,28};
-static const char * const dow[8] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "???"};
-static const char * const month[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-
-/* Day of the Week calculation:  dow is [0..6] for  [Su..Sa] */
-
 int idow(int da, int mo, int yr)
 {
     int leap = 0;
@@ -151,7 +152,6 @@ int idow(int da, int mo, int yr)
 
     return (da % 7);
 }
-
 
 int Date(byte *ram)
 {
@@ -221,8 +221,6 @@ int Date(byte *ram)
     return (int)ce;
 }
 
-
-
 void Time(void)
 {
     char line[80];
@@ -261,10 +259,6 @@ void Time(void)
     return;
 }
 
-
-
-const char * const rates[8] = {"1200", "2400", "4800", "9600", "19200", "38400", "57600", "115200"};
-
 byte setup_serial (byte rate)
 {
 	byte line[10];
@@ -294,11 +288,6 @@ byte setup_serial (byte rate)
 }
 
 
-static const word ftype_OK =
-#if CPM_FLOPPIES
-				(1<<10) | (1<<9) | (1<<8) |
-#endif
-						(1<<4) | (1<<3) | (1<<2) | (1<<1) | 1;
 
 int floppy_ask(byte *ram, int i)
 {
@@ -333,12 +322,6 @@ void Floppy(byte *ram)
           "    2 = 1.2M 5.25\"\n"
           "    3 =  720K 3.5\"\n"
           "    4 = 1.44M 3.5\"\n"
-#if CPM_FLOPPIES
-	  "  (future) CP/M 77track, 128byte/sector:\n"
-          "    8 = 512k on 1.2M 5.25\"\n"
-          "    9 = 256k on  720K 3.5\"\n"
-          "   10 = 512k on 1.44M 3.5\"\n"
-#endif
 			 	);
    ftype = 1;
    for (i=0; ftype && i<FLOPPY_MAX; i++) {
@@ -348,47 +331,14 @@ void Floppy(byte *ram)
    else if (units) printf("Connect a single floppy with a cable with no twist.\n");
 }
 
-
-byte __fastcall stepCRC7(byte cksum, byte chr);	   /* in sdcard.asm */
-extern char unique[];			/* in copyrght.asm */
-
 int __fastcall nvram_check(void)
 {
-	int i;
+		int i;
 	byte checksum = 0;
-	char *str = unique;
-	byte chr;
 
-/* compute a seed value for the checksum */
-	while (chr=*str++)
-		checksum = stepCRC7(chr, checksum);
-
-	for (i = 0; i < RAM_checksum-1; i++) {
-		chr = rtc_get_loc(i | RAM);
-		checksum = stepCRC7(chr, checksum);
-	}
-	chr = rtc_get_loc(RAM_checksum | RAM);
-
-   printf("Checksum=%d(%d)\n\r",checksum,chr);
-
-	return checksum != chr;
-}
-
-
-int __fastcall compute_nvram_checksum(byte *ram)
-{
-	int i;
-	byte checksum = 0;
-	char *str = unique;
-	byte chr;
-
-/* compute a seed value for the checksum */
-	while (chr=*str++)
-		checksum = stepCRC7(chr, checksum);
-
-	for (i=0; i < RAM_checksum-1; i++)
-		checksum = stepCRC7(ram[i], checksum);
-	return (int)checksum;
+	for (i = 0; i < RAM_length; i++)
+		checksum += rtc_get_loc(i | RAM);
+	return checksum == NVRAM_MAGIC ? 0 : 1;
 }
 
 
@@ -399,7 +349,7 @@ int setup_ppide(int nfixed)
    int okay;
 
    do {
-      printf("Number (0..2) of [SBC-188] PPIDE fixed disks [%d]: ", nfixed);
+      printf("Number (0..2) of Duodyne DiskIO PPIDE fixed disks [%d]: ", nfixed);
       GETLINE(line);
       if (line[0]) nfixed = atoi(line);
       okay = (nfixed >= 0  &&  nfixed <= 2);
@@ -410,6 +360,26 @@ int setup_ppide(int nfixed)
 	return 0;
 #endif
 }
+
+int setup_usb(int nfixed)
+{
+#if USB_driver
+   char line[20];
+   int okay;
+
+   do {
+      printf("Number (0..2) of Duodyne USB fixed disks [%d]: ", nfixed);
+      GETLINE(line);
+      if (line[0]) nfixed = atoi(line);
+      okay = (nfixed >= 0  &&  nfixed <= 2);
+   } while (!okay);
+
+   return nfixed;
+#else
+	return 0;
+#endif
+}
+
 
 int setup_fixed_boot(byte ram[])
 {
@@ -430,7 +400,6 @@ int setup_fixed_boot(byte ram[])
 
     if (diskno > ndisks || diskno == 0) diskno = 1;
 
-/* DEBUG    i = 1;   */
     while (i) {
     	printf("Make disk [1..%d] the C: drive [%d]: ", ndisks, diskno);
     	GETLINE(line);
@@ -506,7 +475,7 @@ void putstring(byte *cp, int length)
 
 int __cdecl PPIDE_READ_ID(byte * far buffer, byte slave);
 /* PPIDE must be set in config.asm until this routine is moved to ppide.asm */
-
+int __cdecl USB_READ_ID(byte * far buffer, byte unit);
 
 EDD_DISK *p_bda_fx(byte code)
 {
@@ -531,14 +500,21 @@ void __fastcall setup_fixed_disk(char letter, byte code, byte type, byte slave)
    word heads, sectors;
    dword vector, cylinders, lba_sectors;
    IDENTIFY_DEVICE_DATA id;
+   byte *dbg;
 
    ms = slave << 4;
-   printf("   %s fixed disk %c:    (0x%x)\n",
-			type==PPI_type ? "PPIDE" :
-			"UNKNOWN",
+     printf("   %s fixed disk %c:    (0x%x)\n",
+			type==PPI_type ? "PPIDE" : type==USB_type ? "USB" : "UNKNOWN",
 			letter, (int)code);
 	if (type==PPI_type)
+   {
 	   PPIDE_READ_ID((void*)&id, ms);
+   }
+
+   if (type==USB_type)
+   {
+      USB_READ_ID((void*)&id, ms);
+   }
 
    printf("Model: "); PRINT(id.ModelNumber);
    printf("\nSerial: "); PRINT(id.SerialNumber);
@@ -604,250 +580,86 @@ void __fastcall setup_fixed_disk(char letter, byte code, byte type, byte slave)
    printf("\n");
 }
 
-//int __fastcall uart_putchar(int character);
-//int __fastcall SDinitcard(int unit);
-int __cdecl DSDgetInfo(int unit, byte buffer[36]);
 
 void put_char_array(byte *cp, byte n)
 {
 	while (n--) uart_putchar(*cp++);
 }
 
-int sd_info(int unit, byte code)
-{
-	dword nsec, serial;
-	EDD_DISK *fx;
-	byte buffer[40];
-	byte *bp = buffer;
-	byte *csd, *cid;
-	byte i, ms;
-	word yr, mo;
-	int err, err2, vers, class;
-	int lsec, lcyl, lhd, lsectors, tmp;
-
-	err = SDinitcard(unit);
-//	printf("SDinitcard = 0x%x\n", err);
-	err2 = DSDgetInfo(unit, buffer);
-//	printf("SDgetInfo = 0x%x\n", err2);
-
-	csd = buffer+4;
-	cid = csd+16;
-
-	printf("SD card[%d]:  ", unit);
-	if (err == -4) {
-		printf("no card\n\n");
-		return err;
-	}
-	put_char_array(cid+1, 2);
-	printf("  ");
-	put_char_array(cid+3, 5);
-	vers = SDcsd(CSD_STRUCTURE, csd) + 1;
-	printf("\nCSD version %d.0   ", vers);
-
-	class = SDcsd(CMD_CLASS, csd);
-	printf("Command Classes:  0x%03X (%05o)\n", class, class);
-
-	if (vers==2) { 	/* CSD is version 2 */
-#if 0
-		nsec = csd[5] & 0x3F;
-		nsec = (nsec<<8) + csd[6];
-		nsec = (nsec<<8) + csd[7];
-#else
-		nsec = ((dword)SDcsd(C_SIZE_hi2, csd) << 16) + SDcsd(C_SIZE_lo2, csd);
-#endif
-		nsec = (nsec+1) << 10;
-	}
-	else { 			/* CSD is version 1 */
-		nsec = SDcsd(C_SIZE, csd);
-		nsec <<= SDcsd(C_SIZE_MULT, csd) + 2;
-	}
-/* now fill in the BDA fx structure */
-	fx = p_bda_fx(code);
-	{
-		lsectors = log2(nsec);		/* log of the number of sectors */
-		if (lsectors > 28) {
-			lsectors = 28;  /* max disk is 128Gb (2**28 sectors) */
-			nsec =  0x0FFFFFFFuL;
-		}
-		tmp = lsectors - 10;			/* up to 1024 cylinders */
-		if (tmp > 12) tmp = 12;		/* hd=128, sec=32  (7+5) is the limit */
-		else if (tmp < 8) tmp = 8;	  /* hd=16, sec=16 (4+4) is low limit */
-		lcyl = lsectors - tmp;
-		lsec = tmp / 2;
-		if (lsec > 5) lsec = 5;		/* max(lsed) == 5 */
-		lhd = tmp - lsec;				/* max(lhd) == 7 */
-	}
-	fx->LBA_low = (word)nsec;
-	fx->LBA_high = (word)(nsec>>16);	/* limit to 28 bits */
-	fx->log_sectors = fx->phys_sectors = 1<<lsec;
-	fx->log_heads = fx->phys_heads = 1<<lhd;
-	fx->log_cylinders = fx->phys_cylinders = (word)(nsec>>tmp);
-	fx->drive_control = DC_ONES | DC_LBA | (unit ? DC_SLAVE : DC_MASTER);
-
-	serial = 0;
-	bp = cid+9;
-	for (i=0; i<4; i++) serial = (serial<<8) | *bp++;
-	yr = (cid[13]<<4) | (cid[14]>>4);
-	mo =  cid[14] & 15;
-
-	printf("s/n:%20ld   fmw:  %d.%d   d/c:  %d-%02d\n", serial,
-				(int)(cid[8]>>4), (int)(cid[8]&15), yr+2000, mo);
-	printf("LBASupported    UserAddressableSectors %ld\n", nsec);
-
-#if 1
-	printf("   C=%d   H=%d   S=%d\n", (int)fx->log_cylinders,
-		(int)fx->log_heads, (int)fx->log_sectors);
-#endif
-
-#if 0
-	if (unit > maxunit) maxunit = unit;
-#endif
-
-/* compute the checksum of the EDD_DISK table */
-   bp = (byte*)fx;
-   ms = 0;
-   for (i=0; i < sizeof(EDD_DISK)-1; i++) ms += *bp++;
-   fx->checksum = -ms;
-
-	printf("\n");
-	return err;
-}
-
-void __fastcall setup_SD_card(char letter, byte code, byte type, byte slave)
-{
-
-   printf("   %s fixed disk %c:    (0x%x)\n", "SDcard",
-			letter, (int)code);
-	sd_info(slave, code);
-}
-
-
 //extern const byte IDE_precedence;
 void __fastcall nvram_apply(void)
 {
 	int i, j, units = 0;
 	byte ftype;
-	word spp_port, spp_enab, b_divisor;
-	word n_ppi;
+	word n_ppi, n_usb;
 	union {
 		struct {
 			word ppide : 2;
-			word dide0 : 2;
-			word dide1 : 2;
-			word dsd   : 2;
-			word ide8  : 2;
-			word diskio: 2;
-			word mfpic : 2;
-			word unused : 2;
+			word usb : 2;
+			word unused : 12;
 		} bits;
 		word bdisk;
 	} num_disk;
-
-	printf("\n");
-
-#ifdef FLAG
-/* print the equipment flag */
-	printf("*** Equipment flag is 0x%04x ***\n", bios_data_area_ptr->parallel_ports[4] );
-#endif
 
 	for (i = 0; i < FLOPPY_MAX; i++) {
 		ftype = rtc_get_loc(RAM_floppy + i | RAM);
 		if (ftype==4) ftype |= 0x30;		/* type 3 (720K) also possible */
 		bios_data_area_ptr->fdc_type[i] = ftype;
 		if (ftype) {
-/***			bios_data_area_ptr->fdc_fd[i].status_sw = 1;  ***/
 			printf("Floppy %c: type %d\n", i + 'A', ftype & 0x0F);
 			units++;
-#if 0
-		} else {
-			bios_data_area_ptr->fdc_fd[i].status_sw = 0;
-#endif
 		}
 	}
+
 	bios_data_area_ptr->equipment_flag.has_floppy = units ? 1 : 0;
 	bios_data_area_ptr->equipment_flag.floppies = units ? units - 1 : 0;
-#ifdef FLAG
-/* print the equipment flag */
-	printf("*** Equipment flag is 0x%04x ***\n", bios_data_area_ptr->parallel_ports[4] );
-#endif
 
 /* the fixed disk setup */
 	num_disk.bdisk = 0;
+   units = rtc_get_loc(RAM_fx_usb | RAM);  /* get number of usb fixed disks */
+	n_usb = units & 3;
+	num_disk.bits.usb = n_usb;
    n_ppi = rtc_get_loc(RAM_fixed | RAM);  /* get number of PPIDE fixed disks */
 	n_ppi &= 3;
 	num_disk.bits.ppide = n_ppi;
+
    bios_data_area_ptr->n_fixed_disks = (byte)num_disk.bdisk;
-/*****
-	What was this idiocy ???
    bios_data_area_ptr->equipment_flag.printers = n_ppi ? 0 : 1;
- *****/
 
-	units = n_ppi ;
+	units = n_ppi + n_usb;
 
-	printf("PPI=%d  Units=%d   bdisk=%02x\n",
-		n_ppi,  units, num_disk.bdisk);
+	printf("\nPPI=%d  USB=%d  Units=%d   bdisk=%02x\n",
+		n_ppi, n_usb, units, num_disk.bdisk);
 
    printf("\n");
-#ifdef FLAG
-/* print the equipment flag */
-	printf("*** Equipment flag is 0x%04x ***\n", bios_data_area_ptr->parallel_ports[4] );
-#endif
 
 	if (units>FIXED_DISK_MAX) units=FIXED_DISK_MAX;
 
 	i = 0;
 	for (j=0; j<n_ppi && i<units; j++, i++)
 		bios_data_area_ptr->fixed_disk_tab[i] = PPI_type | j;
+	for (j=0; j<n_usb && i<units; j++, i++)
+		bios_data_area_ptr->fixed_disk_tab[i] = USB_type | j;
 	for (; i<FIXED_DISK_MAX; i++)
 		bios_data_area_ptr->fixed_disk_tab[i] = NO_disk;
+
+	i = 0;
+/* set up the PPIDE disks first, if they have highest precedence */
+	for (j=0; j<n_ppi && i<units; j++, i++)
+     	setup_fixed_disk('C'+i, 0x80+i, PPI_type, j);
+
+/* set up the USB disks   */
+	for (j=0; j<n_usb && i<units; j++, i++)
+      	setup_fixed_disk('C'+i, 0x80+i, USB_type, j);
+
 #if DBG>=3
-	printf("\Fixed_Disk_Tab1: ");
+	printf("\nFixed_Disk_Tab: ");
 	for (i=0; i<FIXED_DISK_MAX; i++) printf(" %02x",
 					(int)(bios_data_area_ptr->fixed_disk_tab[i]) );
 	printf("\n\n");
 #endif
 
-
-/* scramble the drives, if it was requested */
-	{
-#define  fx_tab   bios_data_area_ptr->fixed_disk_tab
-
-	    int diskno = rtc_get_loc(RAM_fx_boot | RAM);
-	    if (diskno > 1 && diskno <= units) {
-	    	diskno--;
-	    	i = fx_tab[diskno];
-	    	while (diskno) {
-	    	    fx_tab[diskno] = fx_tab[diskno-1];
-	    	    --diskno;
-	    	}
-	    	fx_tab[0] = i;
-	    }
-	}
-#if DBG>=2
-	printf("Fixed_Disk_Tab2: ");
-	for (i=0; i<FIXED_DISK_MAX; i++) printf(" %02x",
-					(int)(bios_data_area_ptr->fixed_disk_tab[i]) );
-	printf("\n\n");
-#endif
-
-	for (i=0; i<units; i++) {
-	    int disk_type = fx_tab[i];
-	    int slave = disk_type & 1;
-	    disk_type -= slave;
-
-	    if (disk_type == DSD_type)
-	    	setup_SD_card('C'+i, 0x80+i, disk_type, slave);
-	    else
-	        setup_fixed_disk('C'+i, 0x80+i, disk_type, slave);
-	}
-
-#undef  fx_tab
-#ifdef FLAG
-/* print the equipment flag */
-	printf("*** Equipment flag is 0x%04x ***\n", bios_data_area_ptr->parallel_ports[4] );
-#endif
 }
-
 
 void __fastcall nvram_setup(void)
 {
@@ -874,24 +686,24 @@ void __fastcall nvram_setup(void)
     rtc_WP(0);
     Date(ram);		/* RAM[1] is the century in BCD; e.g., 0x19 or 0x20 */
     Time();		/* show/set the time */
-    ram[RAM_trickle] = set_battery(0);	/* RAM[0] is the state of the trickle charger */
 
     Floppy(ram);
+    ram[RAM_trickle] = set_battery(0);	/* RAM[0] is the state of the trickle charger */
+
 	 printf("   Fixed Disk Setup\n");
-    ram[RAM_fixed] = setup_ppide(ram[RAM_fixed]);
-    ram[RAM_fx_boot] = setup_fixed_boot(ram);
+   ram[RAM_fixed] = setup_ppide(ram[RAM_fixed]);
+   ram[RAM_fx_usb] = setup_usb(ram[RAM_fx_usb]);
     ram[RAM_bits] = setup_boot_sig_check(ram[RAM_bits]);
 
     ram[RAM_serial] = setup_serial(ram[RAM_serial]);
 
-    ram[ RAM_checksum ] = compute_nvram_checksum(ram);
-
-    for (i=0; i<RAM_length; ++i) rtc_set_loc( i | RAM, ram[i]);
+    for (checksum=i=0; i<30; ++i) checksum -= ram[i];
+    ram[ RAM_checksum ] = checksum + NVRAM_MAGIC;
+    for (i=0; i<31; ++i) rtc_set_loc( i | RAM, ram[i]);
 
     rtc_WP(1);
 
 }
-
 int __fastcall nvram_get_video(int default_rate)
 {
 	int rate;

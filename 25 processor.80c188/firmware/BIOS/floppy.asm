@@ -26,9 +26,9 @@
 	%include "cpuregs.asm"
 	%include "equates.asm"
 
-	%define DUMP 1
-	%define DEBUG 1
-	%define SOFT_DEBUG 1
+	%define DUMP 0
+	%define DEBUG 0
+	%define SOFT_DEBUG 0
 	; sterilize SOFT_DEBUG for now
 	%if SOFT_DEBUG > 1
 	%undef SOFT_DEBUG
@@ -45,6 +45,7 @@
 	global fn00, fn02, fn03, fn04
 	global get_msr
 	global get_data
+	global put_data
 	global check_DL
 	global get_disk_type
 	global get_media
@@ -525,6 +526,16 @@ DTAB10: db 0AFh, 2, 25h, 0, 26, 21, 80h, 75, 0E5h, 0Fh, 8, 76, 00h
 	DTAB_max_cylinder equ DTAB_startup + 1
 	DTAB_control equ DTAB_max_cylinder + 1
 
+	;
+	; takes:
+	; AL = contents of FDC_DATA (Data Register)
+	;
+put_data:
+	push dx
+	mov dx, FDC_DATA
+	out dx, al
+	pop dx
+	ret
 
 	;
 	; Returns:
@@ -536,8 +547,6 @@ get_data:
 	in al, dx
 	pop dx
 	ret
-
-
 	;
 	; Returns:
 	; AL = contents of FDC_MSR (Main Status Register)
@@ -567,429 +576,12 @@ wait12:
 	call microsecond
 	pop cx
 	ret
-
-
 wait1000:
 	push cx
 	mov cx, 1000                 ; 1 ms delay
 	call microsecond
 	pop cx
 	ret
-
-	;
-	; Convention used below
-	; Flags: Meaning:
-	; C=1 error
-	; C=0, AH=0 okay
-	; C=0, AH=3 + complete
-	;
-	global fdc_ready_for_command
-fdc_ready_for_command:
-	push cx
-
-.0:
-	mov cx, 1000
-.1: call wait12
-	call get_msr
-	test al, RQM
-	loopz .1
-	; try to compensate for MSDOS anomaly with a BUSY test
-	jnz .req
-	test al, BUSY                ; How does MSDOS manage this???
-	jz .0
-	mov ah, ERR_89
-	jmp .err
-
-.req:
-	test al, DIO                 ; C=0, clear the carry
-	jz .2                        ; ready for input?
-	call get_data
-	%if SOFT_DEBUG & DUMP
-	cli
-	pushm ax, cx, dx, es
-	mov ah, 0f0h
-	push ax
-	push cs                      ; far pointer to ...
-	push fndio                   ; format
-	call _cprintf
-	add sp, 6
-	popm ax, cx, dx, es
-	sti                          ; Enable interrupts
-	%endif
-	jmp .1
-	;;mov ah, ERR_81 ; not ready for input
-.err: Error                   ; C=1, signal error
-	jmp .99
-
-.2:
-	Okay                         ; AH=0, C=0
-.99: pop cx
-	ret
-	; returns Error or Okay
-
-
-	global fdc_ready_for_result
-fdc_ready_for_result:
-	call wait12
-	call get_msr
-	test al, BUSY                ; controller busy?
-	jnz .0                       ; jump if busy
-	Complete                     ; not busy, return Complete
-	jmp .99
-.0:
-	call wait12
-.1: call get_msr
-	test al, RQM                 ; wait for RQM
-	jz .1
-
-	test al, DIO                 ; set C=0, Z - flag
-	jnz .5                       ; DIO==1 means output
-	mov ah, ERR_82
-	Error
-	jmp .99
-
-.5: Okay
-.99: ret
-	; returns Error, Okay, or Complete
-
-
-
-	; byte to output is in AL
-	; AH=0 and Carry=0 if all Okay
-	; Carry=1, AH=code if FDC not ready
-	global output_byte_to_fdc
-output_byte_to_fdc:
-	pushm dx
-
-	mov dl, al
-	call fdc_ready_for_command
-	mov al, dl
-	jc .8                        ; propagate error
-
-	mov dx, FDC_DATA
-	out dx, al
-	Okay                         ; C=0, AH=okay
-.8:
-	popm dx
-	ret                          ; C=0, AH=okay
-	; returns Error or Okay
-
-
-	global input_byte_from_fdc
-input_byte_from_fdc:
-	push dx
-	call fdc_ready_for_result
-	jc .9                        ; propagate error
-	jnz .9                       ; if (Complete) return Complete;
-
-	mov dx, FDC_DATA
-	in al, dx
-	Okay                         ; return Okay
-.9:
-	pop dx
-	ret                          ;
-	; returns Error, Okay, or Complete
-
-
-	; CX = length of command
-	; DX:SI = pointer to command (not DS:SI, we'll set this up)
-	;
-	global output_cmd_to_fdc
-output_cmd_to_fdc:
-	pushm si, es
-	mov es, dx                   ; DS:SI is now the source
-	cnop
-
-	%if SOFT_DEBUG & DUMP
-	es mov al, [si]              ; record two bytes of command
-	mov [fdc_op_start], al
-	es mov al, [si + 1]          ; first & second
-	mov [fdc_op_start + 1], al
-	%endif
-
-	call @disable
-.1:
-	es lodsb                     ; note segment override
-	call output_byte_to_fdc      ; returns error or okay
-	jc .7                        ; propagate any error
-	loop .1
-
-	Okay                         ; return ok
-	jmp .9
-
-.7: Error                     ; propagate error
-
-.9: call @enable
-	popm si, es
-	ret
-	; returns Error or Okay
-
-
-
-	; assumes DS points at BIOS Data Area
-	; preserves DI
-	global input_result_from_fdc
-input_result_from_fdc:
-	pushm di, cx
-	call @disable                ; lock the operation
-
-	mov di, fdc_ctrl_status      ; in BIOS Data Area
-	mov cx, 8                    ; 7 bytes input, then 'complete'
-
-.0: call input_byte_from_fdc
-	jc .9                        ; propagate error
-	jnz .8                       ; if complete, return okay
-
-	mov byte [di], al            ; store the result
-	inc di
-	loop .0
-
-	call wait12                  ;
-	call get_msr                 ; check for busy
-	test al, BUSY
-
-	mov ah, ERR_83
-	jnz .95                      ; return error if busy
-
-.8:
-	Okay                         ; return okay
-	jmp .99                      ; single return point
-
-.9:
-.95: Error                    ; return error;
-
-.99: call @enable             ; unlock the operation
-	popm di, cx
-	ret
-	; returns Error, Okay, or Complete
-
-
-	;__CHECKINT__________________________________________________________________________________________________________________________
-	;
-	; CHECK FOR ACTIVE FDC INTERRUPTS BEFORE GIVING I8272 COMMANDS
-	; POLL RQM FOR WHEN NOT BUSY AND THEN SEND FDC
-	; SENSE INTERRUPT COMMAND. IF IT RTSURNS WITH NON ZERO
-	; ERROR CODE, PASS BACK TO JSRING ROUTINE FOR HANDLING
-	;________________________________________________________________________________________________________________________________
-	;
-CHECKINT:
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bx, 0ffffh
-	push bx
-	push cs                      ; far pointer to ...
-	push fncheckint              ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-
-	mov cx, 100                  ; setup to allow timeout
-.1:
-	call get_msr
-	test al, RQM
-	jnz .2                       ; WAIT FOR RQM TO BE TRUE. WAIT UNTIL DONE
-	call wait12
-	loop .1
-	JMP ERRCLR
-.2:
-	call get_msr
-	test al, 040h                ; WAITING FOR INPUT?
-	jnz SENDINT
-	mov al, 00
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bx, 0h
-	push bx
-	push cs                      ; far pointer to ...
-	push fncheckint              ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-
-	pop cx
-	ret
-
-ERRCLR:
-	mov cx, 100h                 ; setup to allow timeout
-.1:
-	call get_data
-	call get_msr
-	test al, RQM
-	jnz .2                       ; WAIT FOR RQM TO BE TRUE. WAIT UNTIL DONE
-	call wait12
-	loop .1
-.2:
-	mov al, 0FFh
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bx, 00ffh
-	push bx
-	push cs                      ; far pointer to ...
-	push fncheckint              ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-	pop cx
-	ret
-
-	;__SENDINT__________________________________________________________________________________________________________________________
-	;
-	; SENSE INTERRUPT COMMAND
-	;________________________________________________________________________________________________________________________________
-	;
-SENDINT:
-	mov al, CMD_SENSE_INT_STATUS
-	call output_byte_to_fdc
-	jc .9                        ; quit if error
-
-	call input_result_from_fdc
-	jc .9
-
-	mov al, [fdc_ctrl_status]    ; get ST0
-	and al, 0C0h                 ; MASK OFF INTERRUPT STATUS BITS
-	cmp al, 080h                 ; CHECK IF INVALID COMMAND
-	jz .9
-	call input_result_from_fdc
-	jc .9
-	mov al, [fdc_ctrl_status]    ; get ST0
-	and al, 0C0h                 ; MASK OFF ALL BUT INTERRUPT CODE 00 IS NORMAL
-.9:
-ENDSENDINT:
-	ret                          ; ANYTHING ELSE IS AN ERROR
-
-
-	;__GFDATA__________________________________________________________________________________________________________________________
-	;
-	; GET DATA FROM FLOPPY CONTROLLER
-	;
-	; TRANSFERS ARE SYNCHONIZED BYT MSR D7 <RQM> AND D6 <DIO>
-	; RQM DIO
-	; 0 0 BUSY
-	; 1 0 WRITE TO DATA REGISTER PERMITTED
-	; 1 1 BYTE FOR READ BY HOST PENDING
-	; 0 1 BUSY
-	;
-	;________________________________________________________________________________________________________________________________
-	;
-	;GFDATA:
-	; LDY #$00
-	;!
-	; LDA FDC_MSR ; GET STATUS
-	; STA TMPSTORAGE ;
-	; ANDA #%10000000 ; NOT READY, WAIT
-	; BNE > ;
-	; INY
-	; BNE <
-	; LDA #$00
-	; RTS
-	;!
-	; LDA TMPSTORAGE
-	; ANDA #%01000000 ; ANY DATA FOR US?
-	; BEQ GFDATA1 ; NO, SKIP IT
-	; LDA FDC_DATA ; GET FDC DATA
-	;GFDATA1:
-	; RTS
-
-
-
-	%define INT_ENABLE 1
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;
-	; Floppy Disk Controller
-	; Interrupt Handler
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global fdc_interrupt_level
-fdc_interrupt_level:
-	; %if INT_ENABLE
-	; sti
-	; %endif
-	 pushm all, ds
-	 cld ; just be sure
-
-	 push bios_data_seg
-	 popm ds
-	 %if INT_ENABLE==0
-	 inc byte [lock_count] ; so we don't re - enable
-	 %endif
-	 call get_msr
-	 test al, BUSY ; test for controller busy
-	 jz .4
-	 ; BUSY is set
-	 call input_result_from_fdc
-	 sbb al, al ; carry to AL
-	 mov byte [fdc_status], al ; FF=error, 0=okay
-	 jmp .9 ; we got the results
-
-	 ;FDC not busy:
-	.4:
-	; xor bh, bh ; BH = false
-	.5: mov al, CMD_SENSE_INT_STATUS
-	 call output_byte_to_fdc
-	 jc .9 ; quit if error
-
-	 call input_result_from_fdc
-	 jc .9
-
-	 mov al, [fdc_ctrl_status] ; get ST0
-	 xor al, 80h ; IC= 10xxxxxxb (invalid)
-	 and al, ST0_IC ; isolate IC
-	 je .9 ; invalid command
-
-	 mov ax, [fdc_ctrl_status] ; get ST0 + PCN (present cylinder)
-	 test al, ST0_SE ; test Seek End condition
-	 jz .5
-
-	 mov di, ax ;
-	 and di, ST0_US ; isolate unit number
-	 mov [fdc_cylinder + di], ah ; set PCN from controller
-	 or byte [fdc_drv_calib], 04h ;POST Seek End seen
-	 jmp .5
-	.9:
-	 or byte [fdc_drv_calib], 01h ;POST end of FDC interrupt
-	 %if INT_ENABLE==0
-	 dec byte [lock_count] ; restore the lock count
-	 %endif
-	 ; signal EOI (End of Interrupt)
-	 mov dx, PIC_EOI ; EOI register
-	 mov ax, EOI_NSPEC ; non - specific
-	 out dx, ax ; signal it
-
-	 popm all, ds
-	 iret
-
-
-
-	global fdc_timer_hook
-	; called from Timer Tick code with DS - >BIOS data area
-	; Destroys AX and DX
-	global fdc_timer_hook
-fdc_timer_hook:
-	cmp byte [fdc_motor_ticks], 0
-	je .9
-	dec byte [fdc_motor_ticks]
-	jnz .9
-	; timer expired, stop the motors
-	and byte [fdc_motor_LDOR], ~( MOEN_MASK )
-	call out_LDOR_mem
-.9: ret
-
-
 
 	; FDC Operations Register operations
 	; put out the LDOR write - only register
@@ -1018,50 +610,213 @@ out_LDOR_mem:
 	ret
 
 
-	; wait until all seeking is done
-	; assumes DS is set to BIOS data area
+	;__CHECKINT__________________________________________________________________________________________________________________________
 	;
-	global fdc_wait_seek_done
-fdc_wait_seek_done:
+	; CHECK FOR ACTIVE FDC INTERRUPTS BEFORE GIVING I8272 COMMANDS
+	; POLL RQM FOR WHEN NOT BUSY AND THEN SEND FDC
+	; SENSE INTERRUPT COMMAND. IF IT RTSURNS WITH NON ZERO
+	; ERROR CODE, PASS BACK TO JSRING ROUTINE FOR HANDLING
+	;________________________________________________________________________________________________________________________________
+	;
+CHECKINT:
+	push cx
+
+	mov cx, 0F100h                  ; setup to allow timeout
 .1:
-	call wait12
 	call get_msr
-	test al, 0Fh                 ; test all the seek bits
-	jz .8
-	cmp byte [fdc_motor_ticks], 0
-	jnz .1
-	mov ah, ERR_disk_timeout
-.7: Error                     ; signal error
-	jmp .9
+	test al, RQM
+	jnz .2                       ; WAIT FOR RQM TO BE TRUE. WAIT UNTIL DONE
+	call wait12
+	loop .1
+	jmp ERRCLR
+.2:
+	call get_msr
+	test al, 040h                ; WAITING FOR INPUT?
+	jnz .3
+	call SENDINT
+.3:
+	okay
+	pop cx
+	ret
 
-.8:                           ; seek is done, check ST0 bits
-	test byte [fdc_drv_calib], 04h ; Seek End seen?
-	jnz .okay
+ERRCLR:
+	mov cx, 0F100h                 ; setup to allow timeout
+.1:
+	call get_data
+	call get_msr
+	test al, RQM
+	jnz .2                       ; WAIT FOR RQM TO BE TRUE. WAIT UNTIL DONE
+	call wait12
+	loop .1
+.2:
+	error
+	pop cx
+	ret
 
-	test byte [fdc_ctrl_status], ST0_IC ; interrupt code
-	mov ah, ERR_84
-	jnz .7
-	test byte [fdc_ctrl_status], ST0_SE ; Seek End
-	mov ah, ERR_seek_failed
-	jz .7
-.okay:
 
-	%if 0
-	; add settle time - - may not really be needed
-	mov al, [fdc_motor_ticks]
-	add al, 450 / 54
-	xchg al, [fdc_motor_ticks]
-.settle:
-	cmp [fdc_motor_ticks], al
-	ja .settle
-	%else
-	; add time for more revolutions if a seek occurs
-	cs mov al, [DTAB_turnoff_ticks + bx]
-	mov [fdc_motor_ticks], al
+
+	;__SENDINT__________________________________________________________________________________________________________________________
+	;
+	; SENSE INTERRUPT COMMAND
+	;________________________________________________________________________________________________________________________________
+	;
+SENDINT:
+	mov al, CMD_SENSE_DRIVE_STATUS ; SENSE INTERRUPT COMMAND
+	call PFDATA                  ; SEND IT
+	call wait12
+	call GFDATA                  ; GET RESULTS
+	mov [fdc_ctrl_status], al    ; STORE THAT
+	and al, 0C0h                 ; MASK OFF INTERRUPT STATUS BITS
+	cmp al, 80h                  ; CHECK IF INVALID COMMAND
+	jz .1                        ; YES, EXIT
+	call GFDATA                  ; GET ANOTHER (STATUS CODE 1)
+	mov al, [fdc_ctrl_status]    ; GET FIRST ONE
+	and al, 0C0h                 ; MASK OFF ALL BUT INTERRUPT CODE 00 IS NORMAL
+.1:
+	ret
+
+
+	;__GFDATA__________________________________________________________________________________________________________________________
+	;
+	; GET DATA FROM FLOPPY CONTROLLER
+	;
+	; TRANSFERS ARE SYNCHONIZED BYT MSR D7 <RQM> AND D6 <DIO>
+	; RQM DIO
+	; 0 0 BUSY
+	; 1 0 WRITE TO DATA REGISTER PERMITTED
+	; 1 1 BYTE FOR READ BY HOST PENDING
+	; 0 1 BUSY
+	;
+	;________________________________________________________________________________________________________________________________
+	;
+GFDATA:
+	mov cx, 0F100h
+.1:
+	call get_msr                 ; GET STATUS
+	test al, RQM
+	loopz .1                    ; NOT READY, WAIT
+	jnz .3                       ; ok, continue
+.2:
+
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	push cx
+	push ax
+	push cs                      ; far pointer to ...
+	push fngferr                 ; format
+	call _cprintf
+	add sp, 8
+	popm f                       ;, ax, bx, cx, dx, es
 	%endif
 
-	Okay                         ; IC==00 and SE=1
-	.9 ret
+	mov al, 0FFh                 ; timeout
+	ret
+.3:
+	test al, DIO                 ; ANY DATA FOR US?
+	jz .2                        ; NO, SKIP IT
+	call get_data
+	ret
+
+	;__PFDATA__________________________________________________________________________________________________________________________
+	;
+	; WRITE A COMMAND OR PARAMETER SEQUENCE
+	;
+	; TRANSFERS ARE SYNCHONIZED BY MSR D7 <RQM> AND D6 <DIO>
+	; RQM DIO
+	; 0 0 BUSY
+	; 1 0 WRITE TO DATA REGISTER PERMITTED
+	; 1 1 BYTE FOR READ BY HOST PENDING
+	; 0 1 BUSY
+	;
+	;________________________________________________________________________________________________________________________________
+	;
+PFDATA:
+	mov ah, al                   ; SAVE DATA BYTE
+	mov cx, 0F100h                ; set timeout
+.1:
+	call get_msr                 ; READ FDC STATUS
+	test al, RQM
+	loopz .1
+	jnz .2
+
+
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bx, ax
+	push bx
+	push cs                      ; far pointer to ...
+	push fnpferr                 ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
+
+
+	mov al, 0FFh
+	ret
+.2:
+	test al, DIO                 ; TEST DIO BIT
+	jnz .3                       ; FDC IS OUT OF SYNC
+	mov al, ah                   ; RESTORE DATA
+	call put_data                ; WRITE TO FDC
+	call wait12
+	ret
+.3:                           ; FDC IS OUT OF SYNC CLEAR IT OUT AND RE - TRY
+	call get_data                ; READ DATA REGISTER
+	JP .1                        ; AND CONTINUE
+
+	;__PFDATAS_________________________________________________________________________________________________________________________
+	;
+	; WRITE A COMMAND OR PARAMETER SEQUENCE (NO PAUSE)
+	;
+	; TRANSFERS ARE SYNCHONIZED BY MSR D7 <RQM> AND D6 <DIO>
+	; RQM DIO
+	; 0 0 BUSY
+	; 1 0 WRITE TO DATA REGISTER PERMITTED
+	; 1 1 BYTE FOR READ BY HOST PENDING
+	; 0 1 BUSY
+	;
+	;________________________________________________________________________________________________________________________________
+	;
+PFDATAS:
+	mov ah, al                   ; SAVE DATA BYTE
+	mov cx, 0100h                ; set timeout
+.1:
+	call get_msr                 ; READ FDC STATUS
+	test al, RQM
+	loopz .1
+	jnz .2
+	mov al, 0FFh
+	ret
+.2:
+	test al, DIO                 ; TEST DIO BIT
+	jnz .3                       ; FDC IS OUT OF SYNC
+	mov ah, al                   ; RESTORE DATA
+	call put_data                ; WRITE TO FDC
+	ret
+.3:                           ; FDC IS OUT OF SYNC CLEAR IT OUT AND RE - TRY
+	call get_data                ; READ DATA REGISTER
+	JP .1                        ; AND CONTINUE
+
+
+	global fdc_timer_hook
+	; called from Timer Tick code with DS - >BIOS data area
+	; Destroys AX and DX
+	global fdc_timer_hook
+fdc_timer_hook:
+	cmp byte [fdc_motor_ticks], 0
+	je .9
+	dec byte [fdc_motor_ticks]
+	jnz .9
+	; timer expired, stop the motors
+	and byte [fdc_motor_LDOR], ~( MOEN_MASK )
+	call out_LDOR_mem
+.9: ret
+
 
 	;
 	; power on init
@@ -1083,10 +838,6 @@ fdc_wait_seek_done:
 	;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 fn00:
-
-	mov ax, 0017h                ; LTM=1, MSK=0, PRI=7 (07h for LTM=0)
-	mov dx, fdc_int_control
-	out dx, ax                   ; enable interrupt controller
 
 	mov byte [wait12_count], 32  ; this is about the max.
 	call wait12                  ; wait 12 microseconds
@@ -1115,16 +866,6 @@ fn00:
 	out dx, al
 	%endif
 
-	; mov dx, DMA0 + DMACW
-	; %if 1
-	; mov ax, 4 ; set change bit
-	; %else
-	; in ax, dx
-	; and ax, ~2 ; clear the stop bit
-	; or ax, 4 ; set the change bit
-	; %endif
-	; out dx, ax
-
 	xor ax, ax
 	mov [fdc_motor_ticks], al    ; Zero the timer tick counter
 	mov [fdc_last_rate], al      ; force a specify command
@@ -1141,8 +882,6 @@ fn00:
 	xor dx, dx                   ; CX:DX is delay in usec
 	mov ah, 86h                  ; delay in microseconds
 	int 15h
-
-	call input_result_from_fdc
 
 	Okay                         ; signal good execution
 	ret                          ; end of FN00
@@ -1397,7 +1136,7 @@ rwv_common:
 	popm bx                      ; restor DTAB pointer (CS:BX)
 	;;; jc .exit ; AH is set to error code
 
-	call Check_RW_Status         ; get final return code
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; call Check_RW_Status ; get final return code
 
 .exit:
 	lea sp, [rwv_return + bp]
@@ -1517,47 +1256,12 @@ fn05:
 	popm bx                      ; restor DTAB pointer (CS:BX)
 	;;; jc .exit ; AH is set to error code
 
-	call Check_RW_Status         ; get final return code
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;call Check_RW_Status ; get final return code
 
 
 .exit:
 	lea sp, [rwv_return + bp]    ; restore stack location
 	ret
-
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global dma0_interrupt
-dma0_interrupt:
-	pushm ax, dx, ds
-
-	push bios_data_seg
-	popm ds
-
-	;%if SOFT_DEBUG
-	;or byte [fdc_drv_calib], 02h ;POST dma interrupt
-	;%endif
-
-	;%if 0
-	;mov dx, FDC_TC ; Terminal Count
-	;in al, dx ; pulse the line
-	;%endif
-
-	;%if 0
-	;mov dx, DMA0 + DMACW ; DMA0 control word
-	;in ax, dx
-	;mov [dma0_cw], ax ; post the resulting CW
-	;%endif
-
-	; signal EOI (End of Interrupt)
-	mov dx, PIC_EOI              ; EOI register
-	mov ax, EOI_NSPEC            ; non - specific
-	out dx, ax                   ; signal it
-
-	popm ax, dx, ds
-	iret
-
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	; Function 15h Get Disk Type
@@ -1857,34 +1561,20 @@ set_media_pointer:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Specify:
 	pushm ax, bx, dx, si
-	sub sp, 4                    ; allocate 4 bytes for command
-	mov si, sp
+	call CHECKINT                ;
+	mov al, CMD_SPECIFY          ; SPECIFY COMMAND
+	call PFDATA                  ; OUTPUT TO FDC
+	mov al, 7Fh                  ; 6 MS STEP, 480 MS HEAD UNLOAD
+	call PFDATA                  ; OUTPUT TO FDC
+	mov al, 05h                  ; 508 MS HEAD LOAD, NON - DMA MODE
+	call PFDATA                  ; OUTPUT TO FDC
 
-	es mov al, [DTAB_control + bx] ; clock bits
-	rol al, 2
-	mov dx, FDC_LDCR             ; Control Register
-	out dx, al
-
-	mov dl, 12                   ; 12 usec delay = T time
-	or al, al                    ; test for hi (00) or lo (80) data rate
-	jnz .3
-	shr dl, 1                    ; crystal has factor of 2 already
-.3:
-	mov al, [cpu_xtal]           ; 2x clock frequency
-	mul dl                       ; AX = 2xClock * T or 2xclock * T / 2 (80 or 00)
-	sub ax, 44                   ; overhead CPU clocks
-	mov dl, 20                   ; loop clock count
-	div dl
-	inc al                       ; for good measure
-	mov [wait12_count], al       ; save count
-
-	ss mov byte [si], CMD_SPECIFY
-	es mov ax, [DTAB_specify + bx] ; get two specify bytes
-	ss mov word [si + 1], ax
-	mov dx, ss
-	mov cx, 3                    ; length of command = 3
-	call output_cmd_to_fdc
-	add sp, 4
+	call CHECKINT                ; SEND SEVERAL INTERRUPTS TO ENSURE PROPER STATE
+	call CHECKINT                ;
+	call CHECKINT                ;
+	call CHECKINT                ;
+	call CHECKINT                ;
+	call CHECKINT                ;
 	popm ax, bx, dx, si
 	ret
 
@@ -1910,8 +1600,8 @@ motor_on:
 	mov ah, al                   ; MOENx - > AH
 	add ax, di                   ; MOENx + DSELx - > AL
 
-	mov cl, 182                  ;10 seconds
-	mov byte [fdc_motor_ticks], cl ; set long timer = 10 seconds
+	mov cl, 36                  ;2 seconds
+	mov byte [fdc_motor_ticks], cl ; set long timer = 2 seconds
 
 	test byte [fdc_motor_LDOR], ah ; motor already on?
 	mov ch, al
@@ -1982,29 +1672,29 @@ make_head_unit:
 xfer_read_sector:
 	pushm bx, cx, dx, si, ds, es
 
-	push cx
-	mov cx, 9                    ; 9 - byte FDC command
-	call output_cmd_to_fdc
-	pop cx
+	; push cx
+	; mov cx, 9 ; 9 - byte FDC command
+	; call output_cmd_to_fdc
+	; pop cx
 
-	mov si, ax
-	mov es, bx                   ; DS:SI is now the destination
+	; mov si, ax
+	; mov es, bx ; DS:SI is now the destination
 
-.1:
-	call get_msr                 ; get status
-
-	test al, 0b10000000
-	jnz .1                       ; FDC IS NOT READY, WAIT FOR IT
-
-	test al, 0b00100000
-	jz .timeout                  ; EXECUTION MODE? NO, ERROR
-
-	call get_data
-	es mov al, [si + 1]          ; record byte of data
-	loop .1
-
-	mov dx, FDC_TC
-	in al, dx
+	;.1:
+	; call get_msr ; get status
+	;
+	; test al, 0b10000000
+	; jnz .1 ; FDC IS NOT READY, WAIT FOR IT
+	;
+	; test al, 0b00100000
+	; jz .timeout ; EXECUTION MODE? NO, ERROR
+	;
+	; call get_data
+	; es mov al, [si + 1] ; record byte of data
+	; loop .1
+	;
+	; mov dx, FDC_TC
+	; in al, dx
 	Okay
 	jmp .99
 
@@ -2015,31 +1705,6 @@ xfer_read_sector:
 	popm bx, cx, dx, si, ds, es
 	ret
 
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; wait_operation_complete ; wait for disk operation
-	; ; to post a "complete" status
-	; Call with:
-	; DS = BIOS data area segment
-	;
-	; Return with:
-	; CY = 0 success
-	; CY = 1 timed out, AH=error code
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-wait_operation_complete:
-.1: test byte [fdc_drv_calib], 01h ; FDC interrupt posted "complete"?
-	jnz .okay
-	cmp byte [fdc_motor_ticks], 0
-	jne .1
-	jmp .timeout
-
-.okay: Okay
-	jmp .99
-
-.timeout:
-	mov ah, ERR_88               ; mark timeout
-	Error
-.99: ret
 
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2151,146 +1816,48 @@ xfer_verify_sector:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 recalibrate:
 	pushm cx, dx, si
+	;
+
+	%if SOFT_DEBUG & DUMP
+	pushm f                      ;, ax, bx, cx, dx, es
+	mov al, ah                   ; save AH in AL
+	lahf                         ; get flags
+	mov bh, ch
+	mov bl, [fdc_cylinder + di]
+	push bx
+	push cs                      ; far pointer to ...
+	push fnrecal                 ; format
+	call _cprintf
+	add sp, 6
+	popm f                       ;, ax, bx, cx, dx, es
+	%endif
 
 	call CHECKINT
-	cmp  al, 0FFh
-	jz   .9
-
+	jc .9
 
 	call motor_on
-
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 12h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
-	and byte [fdc_drv_calib], 00h ;POST no interrupts
-
+	mov al, CMD_RECALIBRATE      ; RECAL TO TRACK 0
+	call PFDATA                  ; SEND IT
 	mov al, ST0_US               ; mask to 2 drives
 	and ax, di                   ; unit number to AL
-	xchg al, ah                  ; AH is second byte of command
-	mov al, CMD_RECALIBRATE
-	push ax                      ; push 2 byte command
-	mov si, sp                   ; form command pointer
-	mov dx, ss                   ; DX:SI points at command
-	mov cx, 2
-	call output_cmd_to_fdc       ; output the command
-	jc .7
+	call PFDATA                  ; SEND THAT TOO
+	;
+	mov cx, 0F100h                 ;setup timeout
+.1:
+	call wait12
+	call CHECKINT
+	call get_msr                 ; READ SEEK STATUS
+	test al, 0fh                 ; ANY DRIVES SEEKING?
+	loopnz .1                    ; YES, WAIT FOR THEM
+	jnz .9
 
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 13h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
-	call wait_operation_complete
-	jc .7
-
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 14h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-;
-	call fdc_wait_seek_done
-	jc .7
-
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 15h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
-	pop ax                       ; get unit # to AH
-	mov al, CMD_SENSE_DRIVE_STATUS
-	push ax                      ; push 2 byte command again
-	mov cx, 2
-	mov si, sp
-	mov dx, ss                   ; DX:SI points at the 2 byte command
-	call output_cmd_to_fdc
-	jc .7
-
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 16h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
-	call input_byte_from_fdc     ; get ST3
-	jc .7
-
-;	%if SOFT_DEBUG & DUMP
-;	pushm f                      ;, ax, bx, cx, dx, es
-;	mov al, ah                   ; save AH in AL
-;	lahf                         ; get flags
-;	mov bh, 17h
-;	mov bl, [fdc_cylinder + di]
-;	push bx
-;	push cs                      ; far pointer to ...
-;	push fnseek                  ; format
-;	call _cprintf
-;	add sp, 6
-;	popm f                       ;, ax, bx, cx, dx, es
-;	%endif
-
-	mov [fdc_disk_state + di], al ; save ST3 for drive
-	mov ah, ERR_87               ; not on track 0
-	test al, ST3_TR00
-	Error                        ; signal error
-	jz .7                        ; Not on Track 00, C=1 error
-
-	mov byte [fdc_cylinder + di], 0 ; set present cylinder
-
-
+	mov byte [fdc_cylinder + di], 0 ; set new cylinder number
+.7:
 	Okay                         ;
-
-.7: pop si                    ; Command is still in the stack
 	popm cx, dx, si              ; restore
 	ret
 .9:
 	Error                        ; signal error
-	pop si                    ; Command is still in the stack
 	popm cx, dx, si              ; restore
 	ret
 
@@ -2313,66 +1880,68 @@ recalibrate:
 Seek:
 	pushm cx, dx, si
 
+;	cmp ch,00h
+;	je .dorecal
+
 	; check for a recalibration needed
-	mov al, [fdc_cylinder + di]  ; get present cylinder (0FFh forces recalibrate)
-	cs cmp al, [DTAB_max_cylinder + bx] ; compare to maximum
-	jbe .no_recal
+;	mov al, [fdc_cylinder + di]  ; get present cylinder (0FFh forces recalibrate)
+;	cmp al,0FFh
+;	je .dorecal
 
-	mov si, 2                    ; two recalibrates max.
+;	jmp .no_recal
 
-.rerecal:
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 01h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
+;.dorecal
+;	mov si, 2                    ; two recalibrates max.
 
-	call recalibrate
-	jnc .no_recal
-	dec si
-	Error
-	jz .exit                     ; two have failed
-	jmp .rerecal                 ; try again
+;.rerecal:
+;	call recalibrate
+;	jnc .no_recal
+;	dec si
+;	Error
+;	jz .exit                     ; two have failed
+;	jmp .rerecal                 ; try again
 
-.no_recal:
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 02h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-	cmp ch, [fdc_cylinder + di]  ; sought : present cylinder
-	je .okay
+;.no_recal:
+;
+;	cmp ch, [fdc_cylinder + di]  ; sought : present cylinder
+;	je .okay
 
 	; we are not on the cylinder we want
 
-	cs cmp ch, [DTAB_max_cylinder + bx] ; validate cylinder number
-	ja .invalid
+	;cs cmp ch, [DTAB_max_cylinder + bx] ; validate cylinder number
+	;ja .invalid
 
-.valid:
+;.valid:
+	; ANY INTERUPT PENDING
+	; IF YES FIND OUT WHY / CLEAR
+	mov [fdc_cylinder + di], ch  ; set new cylinder number
+
+	call CHECKINT
+	jc .err
+
+	call motor_on
+	mov al, CMD_SEEK             ; SEEK COMMAND
+	call PFDATA                  ; PUSH COMMAND
+	mov al, ST0_US               ; mask to 2 drives
+	and ax, di                   ; unit number to AL
+	call PFDATA                  ; SAY WHICH UNIT
+	mov al, [fdc_cylinder + di]  ; set new cylinder number
+	call PFDATA                  ; SEND THAT TOO
+	;
+	mov cx, 0f100h                 ;setup timeout
+.1:
+	call wait12
+	call CHECKINT
+	call get_msr                 ; READ SEEK STATUS
+	test al, 0fh                 ; ANY DRIVES SEEKING?
+	loopnz .1                    ; YES, WAIT FOR THEM
+	jnz .err
 
 	%if SOFT_DEBUG & DUMP
 	pushm f                      ;, ax, bx, cx, dx, es
 	mov al, ah                   ; save AH in AL
 	lahf                         ; get flags
-	mov bh, 03h
+	mov bh, ch
 	mov bl, [fdc_cylinder + di]
 	push bx
 	push cs                      ; far pointer to ...
@@ -2381,277 +1950,40 @@ Seek:
 	add sp, 6
 	popm f                       ;, ax, bx, cx, dx, es
 	%endif
-
-	and byte [fdc_drv_calib], 00h ;POST no interrupts
-
-	xchg cl, ch                  ; cylinder to CL
-	push cx                      ; CL = sought cylinder
-	call make_head_unit
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 04h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-	mov ah, CMD_SEEK             ; command byte
-	xchg al, ah                  ; command byte must be first in stack
-	push ax                      ; push 3 byte command
-	mov si, sp
-	mov dx, ss                   ; DX:SI points at command
-	mov cx, 3                    ; 3 byte command
-	call output_cmd_to_fdc
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 05h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-	popm si, cx                  ; fix stack; get CL=seek to cylinder
-	xchg cl, ch                  ; CH=seek to cylinder
-	jc .exit
-
-	call wait_operation_complete
-	jc .exit
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 06h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-
-	;;; mov [fdc_cylinder + di], ch ; set new cylinder number
-
-	call fdc_wait_seek_done      ; AH=error code if C=1
-	jc .exit
-
-	%if SOFT_DEBUG & DUMP
-	pushm f                      ;, ax, bx, cx, dx, es
-	mov al, ah                   ; save AH in AL
-	lahf                         ; get flags
-	mov bh, 07h
-	mov bl, [fdc_cylinder + di]
-	push bx
-	push cs                      ; far pointer to ...
-	push fnseek                  ; format
-	call _cprintf
-	add sp, 6
-	popm f                       ;, ax, bx, cx, dx, es
-	%endif
-
-
-	%if 0
-	; probably have to skip the following during Format
-	call read_track_id           ; just to be sure
-	jc .exit
-	%endif
-
-	mov ah, ERR_seek_failed
-	cmp ch, [fdc_cylinder + di]  ; PCN filled in
-	jne .err
-	;;; mov ah, ERR_8A
-	;;; cmp ch, [fdc_ctrl_status + 3] ; read cylinder number
-	;;; jne .err
-
-
 .okay:
 	Okay
 .exit:
 	popm cx, dx, si
 	ret
-
 .invalid:
 	; error - - the cylinder requested is invalid for this drive
 	mov ah, ERR_86
-.err: Error
+.err:   Error
+	mov byte [fdc_cylinder + di], 0ffh  ; set error cylinder number
 	jmp .exit                    ; jump WAY out
 
 
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; Check_RW_Status check ST0 & ST1 error bits
-	;
-	; Call with:
-	; CY = 0, 1 needs to be examined
-	;
-	; Return with:
-	; CY = 0, AH = 0 no error detected
-	;
-	; CY = 1, AH = final error code error in status bits
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global Check_RW_Status
-Check_RW_Status:
-	pushm bx, cx, dx, si, ds, es
-
 	%if SOFT_DEBUG & DUMP
-	xchg al, ah                  ; error code to AL
-	lahf                         ; flags to AH
-	push ax
-
-	xor ah, ah                   ; zero hi - byte
-	mov cx, 7
-	mov si, fdc_ctrl_status + 6  ; byte to start
-	.1 std
-	lodsb
-	push ax                      ; push argument
-	loop .1
-	cld
-	push cs
-	push fcrw
-	call _cprintf
-	add sp, 18
-
-	pop ax
-	sahf                         ; restore flags
-	xchg al, ah                  ; restore error code to AH
+fcrw:
+	db NL, "RW ST0 %02x ST1 %02x ST2 %02x C + %02x H + %02x S + %02x N %x", 0
+rwvc:
+	db NL, "VC AX %04x CHS %02x:%02x:%02x DL %02x ES:BX %04x:%04x", 0
+fnret:
+	db NL, "RET AH %02x CY %d CMD %02x %02x", NL, 0
+fnldor:
+	db NL, "LDOR = %02x ", NL, 0
+fnseek:
+	db NL, "SEEK = %04x ", NL, 0
+fnrecal:
+	db NL, "RECALIBRATE = %04x ", NL, 0
+fnmsr:
+	db NL, "MSR = %04x ", NL, 0
+fndio:
+	db NL, "DIO = %04x ", NL, 0
+fncheckint:
+	db NL, "Checkint = %04x ", NL, 0
+fnpferr:
+	db NL, "PFERR = %04x ", NL, 0
+fngferr:
+	db NL, "GFERR = %04x, %04x ", NL, 0
 	%endif
-
-	%if 1
-	jnc .no_err
-
-	mov byte [offset_AL + bp], 0 ; say nothing transferred
-
-	; Carry is set, what happened?
-	cmp ah, ERR_81               ; first of our new error codes
-	;;;
-	jmp .error                   ; for now
-	%endif
-
-
-.no_err:
-	mov ah, [fdc_ctrl_status]    ; get ST0 to AH
-	mov al, ah                   ; retain copy in AL
-	and ah, ST0_IC               ; check interrupt code
-	jz .exit                     ; Okay is set
-
-	mov ah, ERR_controller_failure
-	test al, ST0_EC
-	jnz .error
-
-	mov al, [fdc_ctrl_status + 1] ; get ST1 to AL
-	mov ah, ERR_address_mark_not_found
-	test al, ST1_MA              ; test Missing Address mark
-	jnz .error
-
-	inc ah                       ; Write Protect
-	test al, ST1_NW              ;
-	jnz .error
-
-	inc ah                       ; Sector not Found
-	test al, ST1_ND              ; No Data
-	jnz .error
-
-	mov ah, ERR_uncorrectable_CRC_error
-	test al, ST1_DE
-	jnz .error
-
-	mov ah, ERR_unknown          ; may be in ST2
-
-.error: Error                 ; code is in AH
-.exit:
-	popm bx, cx, dx, si, ds, es
-	ret
-
-
-	%if SOFT_DEBUG & DUMP
-	fcrw db NL, "RW ST0 %02x ST1 %02x ST2 %02x C + %02x H + %02x S + %02x N %x", 0
-	rwvc db NL, "VC AX %04x CHS %02x:%02x:%02x DL %02x ES:BX %04x:%04x", 0
-	fnret db NL, "RET AH %02x CY %d CMD %02x %02x", NL, 0
-	fnldor db NL, "LDOR = %02x ", NL, 0
-	fnseek db NL, "SEEK = %04x ", NL, 0
-	fnmsr db NL, "MSR = %04x ", NL, 0
-	fndio db NL, "DIO = %04x ", NL, 0
-	fncheckint db NL, "Checkint = %04x ", NL, 0
-	%endif
-
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; @enable / @disable Interrupt enable / disable
-	;
-	; On a @disable, increment the lock counter and CLI
-	; On an @enable, decrement the lock counter and if it goes to zero, STI
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	global @enable, @disable
-@disable:
-	pushm ax, ds
-	lahf                         ; save user flags
-	push bios_data_seg           ; universal addressing
-	popm ds
-	cli                          ; guarantee locked operation
-	inc byte [lock_count]
-	sahf                         ; restore user flags
-	popm ax, ds
-	ret
-
-@enable:
-	pushm ax, ds
-	lahf                         ; save user flags
-	push bios_data_seg
-	popm ds
-	dec byte [lock_count]        ; test the lock count
-	jnz .5
-	sti                          ; lock count went to zero, re - enable
-.5:
-	sahf                         ; restore user flags
-	popm ax, ds
-	ret
-
-
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	; read_track_id ; read address mark information
-	;
-	; Call with:
-	; DS = BIOS data segment
-	; DI = unit number
-	; DH = head number
-	;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-read_track_id:
-	pushm si, cx, dx
-
-	mov byte [fdc_drv_calib], 0  ; clear interrupt flags
-
-	call make_head_unit          ; head / un
-	mov ah, al                   ; move to AH (second byte of command)
-	mov al, CMD_READ_ID | CMD_MF
-	push ax                      ; push the 2 - byte command
-	mov si, sp
-	mov dx, ss                   ; DX:SI points at command
-	mov cx, 2                    ; 2 bytes to READ_ID
-	call output_cmd_to_fdc       ; issue the command
-	pop ax                       ; discard word in stack
-
-	call wait_operation_complete
-
-	popm si, cx, dx
-	ret
