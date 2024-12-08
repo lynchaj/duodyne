@@ -1,6 +1,6 @@
 Open Watcom Linker Version 1.9
 Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
-Created on:       24/12/08 03:56:06
+Created on:       24/12/08 04:01:15
 Executable Image: rbios.exe
 creating a DOS executable
 
@@ -12,7 +12,7 @@ creating a DOS executable
 Group                           Address              Size
 =====                           =======              ====
 
-DGROUP                          03df:0002            0000093e
+DGROUP                          03dd:000e            00000942
 
 
 
@@ -23,11 +23,11 @@ DGROUP                          03df:0002            0000093e
 Segment                Class          Group          Address         Size
 =======                =====          =====          =======         ====
 
-_TEXT                  CODE           AUTO           0000:0000       00003df1
-CONST                  DATA           DGROUP         03df:0002       000008b4
-CONST2                 DATA           DGROUP         046a:0006       00000080
-_DATA                  DATA           DGROUP         0473:0000       00000000
-_BSS                   BSS            DGROUP         0473:0000       00000000
+_TEXT                  CODE           AUTO           0000:0000       00003dde
+CONST                  DATA           DGROUP         03dd:000e       000008b4
+CONST2                 DATA           DGROUP         0469:0002       00000080
+_DATA                  DATA           DGROUP         0472:0000       00000000
+_BSS                   BSS            DGROUP         0472:0000       00000000
 
 
                         +----------------+
@@ -61,12 +61,12 @@ Module: rbios.obj(rbios.asm)
 0000:070c      @rtc_set_loc
 0000:070c      rtc_set_loc
 0000:073d*     lites
-03df:0130      _bios_data_area_ptr
+03dd:013c      _bios_data_area_ptr
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/cprintf.c)
 0000:0910*     nstring_
 0000:0942      _cprintf
 Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/firmware/BIOS/nvram.c)
-03df:0912+     _rates
+03dd:091e+     _rates
 0000:0c52+     set_battery_
 0000:0d81+     idow_
 0000:0e81+     Date_
@@ -138,7 +138,7 @@ Module: cbios.lib(/mnt/fileserver/Vintage/Projects/duodyne/25 processor.80c188/f
 0000:329b+     putline_
 0000:32af+     getchar_
 0000:32e1      getline_
-03df:0934+     _uart_echo
+03dd:0940+     _uart_echo
 Module: abios.lib(ppide.asm)
 0000:33a8      _PPIDE_READ_ID
 0000:33de*     _PPIDE_READ_SECTOR
@@ -166,6 +166,6 @@ cbios.lib
                         +-----------------------+
 
 Stack size:  0400 (1024.)
-Memory size:  4730 (18224.)
+Memory size:  4720 (18208.)
 Entry point address: 0000:0000
-Link time: 00:00.07
+Link time: 00:00.05

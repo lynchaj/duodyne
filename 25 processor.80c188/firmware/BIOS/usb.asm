@@ -1121,16 +1121,8 @@ CH_DETECT:
 	;
 CH_SETMODE:
 CH_SETMODE_USB:
-	;
-	; ACTIVATE USB MODE
-	mov al, CH_CMD_MODE          ; SET MODE COMMAND
-	call CH_CMD                  ; SEND IT
-	mov al, 6                    ; USB ENABLED, SEND SOF
-	call CH_WR                   ; SEND IT
-	call wait12                  ; SMALL WAIT
-	call CH_RD                   ; GET RESULT
-	call wait12                  ; SMALL WAIT
-        ret
+;	call CHUSB_RESET             ; FULL USB STACK RESET
+	ret                          ; DONE
 
 
 	;

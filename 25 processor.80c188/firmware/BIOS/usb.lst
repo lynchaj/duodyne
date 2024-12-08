@@ -1115,9 +1115,9 @@
    160 00000011 47                      	inc di
    161 00000012 E2F9                    	loop .1
    162                                  
-   163 00000014 E8E304                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
+   163 00000014 E8D004                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
    164                                  
-   165 00000017 E84D05                  	call CHUSB_DSKMNT            ; TRY MOUNT
+   165 00000017 E83A05                  	call CHUSB_DSKMNT            ; TRY MOUNT
    166                                  	; read the 36 byte data structure that is returned
    167                                  	; id.ModelNumber[40] 27 - 46
    168 0000001A E88804                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
@@ -1150,7 +1150,7 @@
    194                                  
    195 0000004C C45E04                  	les bx, ARG(1)
    196 0000004F 89DF                    	mov di, bx
-   197 00000051 E82405                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
+   197 00000051 E81105                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
    198                                  
    199 00000054 26C7456C0000            	es mov word [di + 108], 00   ; id.NumberOfCurrentCylinders
    200 0000005A 2689556E                	es mov [di + 110], dx        ; id.NumberOfCurrentHeads
@@ -1202,12 +1202,12 @@
    246                                  
    247 000000A9 B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
    248 000000AB E81B04                  	call CH_SETMODE              ; DO IT
-   249 000000AE 7303E92C05              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   249 000000AE 7303E91905              	jc CHUSB_CMDERR              ; HANDLE ERROR
    250                                  
    251 000000B3 8B4E08                  	mov cx, ARG(3)
    252 000000B6 8B560A                  	mov dx, ARG(4)
    253 000000B9 B054                    	mov al, CH_CMD_DSKRD         ; DISK READ COMMAND
-   254 000000BB E81F04                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   254 000000BB E80C04                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
    255                                  
    256 000000BE C45E04                  	les bx, ARG(1)
    257 000000C1 89DF                            mov di,bx
@@ -1217,11 +1217,11 @@
    261                                  CHUSB_READ1:
    262 000000C6 E8B803                  	call CH_POLL                 ; WAIT FOR DATA READY
    263 000000C9 3C1D                    	cmp al, 1Dh                  ; DATA READY TO READ?
-   264 000000CB 7403E91305              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   264 000000CB 7403E90005              	jne CHUSB_IOERR              ; HANDLE IO ERROR
    265 000000D0 E8D203                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
    266 000000D3 E89D03                  	call CH_RD                   ; READ DATA BLOCK LENGTH
    267 000000D6 3C40                    	cmp al, 64                   ; AS EXPECTED?
-   268 000000D8 7403E90605              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   268 000000D8 7403E9F304              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
    269                                  	;
    270                                  	; BYTE READ LOOP
    271 000000DD 51                      	push cx                      ; SAVE LOOP CONTROL
@@ -1242,7 +1242,7 @@
    286                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
    287 000000F4 E88A03                  	call CH_POLL                 ; WAIT FOR COMPLETION
    288 000000F7 3C14                    	cmp al, 14h                  ; SUCCESS?
-   289 000000F9 7403E9E504              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   289 000000F9 7403E9D204              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
    290                                  
    291 000000FE 31C0                    	xor ax, ax
    292 00000100 075B5F                  	popm es, bx, di
@@ -1273,12 +1273,12 @@
    317                                  
    318 00000115 B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
    319 00000117 E8AF03                  	call CH_SETMODE              ; DO IT
-   320 0000011A 7303E9C004              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   320 0000011A 7303E9AD04              	jc CHUSB_CMDERR              ; HANDLE ERROR
    321                                  
    322 0000011F 8B4E08                  	mov cx, ARG(3)
    323 00000122 8B560A                  	mov dx, ARG(4)
    324 00000125 B054                    	mov al, CH_CMD_DSKRD         ; DISK READ COMMAND
-   325 00000127 E8B303                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   325 00000127 E8A003                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
    326                                  
    327 0000012A C45E04                  	les bx, ARG(1)
    328 0000012D 89DF                            mov di,bx
@@ -1288,11 +1288,11 @@
    332                                  CHUSB_VERIFY1:
    333 00000132 E84C03                  	call CH_POLL                 ; WAIT FOR DATA READY
    334 00000135 3C1D                    	cmp al, 1Dh                  ; DATA READY TO READ?
-   335 00000137 7403E9A704              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   335 00000137 7403E99404              	jne CHUSB_IOERR              ; HANDLE IO ERROR
    336 0000013C E86603                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
    337 0000013F E83103                  	call CH_RD                   ; READ DATA BLOCK LENGTH
    338 00000142 3C40                    	cmp al, 64                   ; AS EXPECTED?
-   339 00000144 7403E99A04              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   339 00000144 7403E98704              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
    340                                  	;
    341                                  	; BYTE READ LOOP
    342 00000149 51                      	push cx                      ; SAVE LOOP CONTROL
@@ -1302,7 +1302,7 @@
    346 00000150 268A25                  	es mov ah,[di]
    347 00000153 83C701                  	add di, 1
    348 00000156 38C4                            cmp ah,al
-   349 00000158 7403E98604                      jne CHUSB_IOERR
+   349 00000158 7403E97304                      jne CHUSB_IOERR
    350 0000015D E2EE                    	loop CHUSB_VERIFY2             ; LOOP AS NEEDED
    351 0000015F 59                      	pop cx                       ; RESTORE LOOP CONTROL
    352                                  
@@ -1315,7 +1315,7 @@
    359                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
    360 00000167 E81703                  	call CH_POLL                 ; WAIT FOR COMPLETION
    361 0000016A 3C14                    	cmp al, 14h                  ; SUCCESS?
-   362 0000016C 7403E97204              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   362 0000016C 7403E95F04              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
    363                                  
    364 00000171 31C0                    	xor ax, ax
    365 00000173 075B5F                  	popm es, bx, di
@@ -1347,12 +1347,12 @@
    391                                  
    392 0000018C B001                    	mov Al, CH_MODE_USB          ; REQUEST USB MODE
    393 0000018E E83803                  	call CH_SETMODE              ; DO IT
-   394 00000191 7303E94904              	jc CHUSB_CMDERR              ; HANDLE ERROR
+   394 00000191 7303E93604              	jc CHUSB_CMDERR              ; HANDLE ERROR
    395                                  
    396 00000196 8B4E08                  	mov cx, ARG(3)
    397 00000199 8B560A                  	mov dx, ARG(4)
    398 0000019C B056                    	mov al, CH_CMD_DSKWR         ; DISK WRITE COMMAND
-   399 0000019E E83C03                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
+   399 0000019E E82903                  	call CHUSB_RWSTART           ; SEND CMD AND LBA(DX:CX)
    400                                  
    401 000001A1 C45E04                  	les bx, ARG(1)
    402 000001A4 89DF                            mov di,bx
@@ -1362,7 +1362,7 @@
    406                                  CHUSB_WRITE1:
    407 000001A9 E8D502                  	call CH_POLL                 ; WAIT FOR DATA READY
    408 000001AC 3C1E                    	cmp al, 1Eh                  ; DATA READY TO WRITE
-   409 000001AE 7403E93004              	jne CHUSB_IOERR              ; HANDLE IO ERROR
+   409 000001AE 7403E91D04              	jne CHUSB_IOERR              ; HANDLE IO ERROR
    410 000001B3 E8F302                  	call CH_CMD_WR               ; SEND WRITE USB DATA CMD
    411 000001B6 B040                    	mov al, 64                   ; 64 BYTE CHUNK
    412 000001B8 E8BF02                  	call CH_WR                   ; SEND DATA BLOCK LENGTH
@@ -1385,7 +1385,7 @@
    429                                  	; FINAL CHECK FOR COMPLETION & SUCCESS
    430 000001D2 E8AC02                  	call CH_POLL                 ; WAIT FOR COMPLETION
    431 000001D5 3C14                    	cmp al, 14h                  ; SUCCESS?
-   432 000001D7 7403E90704              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
+   432 000001D7 7403E9F403              	jne CHUSB_IOERR              ; IF NOT, HANDLE ERROR
    433                                  
    434 000001DC 31C0                    	xor ax, ax
    435                                  
@@ -1960,7 +1960,7 @@
   1004 0000045C C3                      	ret
   1005                                  	;
   1006                                  CH_INIT3:
-  1007 0000045D E89A00                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
+  1007 0000045D E88700                  	call CHUSB_RESET             ; RESET & DISCOVER MEDIA
   1008 00000460 7302                    	jnc CH_INIT3A                ; GO AHEAD IF CHIP FOUND
   1009 00000462 F9                      	Error
   1010 00000463 C3                      	ret                          ; ABORT ON FAILURE
@@ -2077,191 +2077,183 @@
   1121                                  	;
   1122                                  CH_SETMODE:
   1123                                  CH_SETMODE_USB:
-  1124                                  	;
-  1125                                  	; ACTIVATE USB MODE
-  1126 000004C9 B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
-  1127 000004CB E897FF                  	call CH_CMD                  ; SEND IT
-  1128 000004CE B006                    	mov al, 6                    ; USB ENABLED, SEND SOF
-  1129 000004D0 E8A7FF                  	call CH_WR                   ; SEND IT
-  1130 000004D3 E8(0000)                	call wait12                  ; SMALL WAIT
-  1131 000004D6 E89AFF                  	call CH_RD                   ; GET RESULT
-  1132 000004D9 E8(0000)                	call wait12                  ; SMALL WAIT
-  1133 000004DC C3                              ret
-  1134                                  
-  1135                                  
-  1136                                  	;
-  1137                                  	; INITIATE A DISK SECTOR READ / WRITE OPERATION
-  1138                                  	; A: READ OR WRITE OPCODE
-  1139                                  	;
-  1140                                  CHUSB_RWSTART:
-  1141 000004DD E885FF                  	call CH_CMD                  ; SEND R / W COMMAND
-  1142                                  	;
-  1143                                  	; SEND LBA, 4 BYTES, LITTLE ENDIAN
-  1144 000004E0 88C8                    	mov al, cl
-  1145 000004E2 E895FF                  	call CH_WR                   ; SEND BYTE
-  1146 000004E5 88E8                    	mov al, ch
-  1147 000004E7 E890FF                  	call CH_WR                   ; SEND BYTE
-  1148 000004EA 88D0                    	mov al, dl
-  1149 000004EC E88BFF                  	call CH_WR                   ; SEND BYTE
-  1150 000004EF 88F0                    	mov al, dh
-  1151 000004F1 E886FF                  	call CH_WR                   ; SEND BYTE
-  1152                                  	;
-  1153                                  	; REQUEST 1 SECTOR
-  1154 000004F4 B001                    	mov al, 1                    ; 1 SECTOR
-  1155 000004F6 E881FF                  	call CH_WR                   ; SEND IT
-  1156 000004F9 C3                      	ret
-  1157                                  	;
-  1158                                  	;
-  1159                                  	;
-  1160                                  	; RESET THE INTERFACE AND REDISCOVER MEDIA
-  1161                                  	;
-  1162                                  CHUSB_RESET:
-  1163                                  	;
-  1164                                  	; RESET THE BUS
-  1165 000004FA B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
-  1166 000004FC E866FF                  	call CH_CMD                  ; SEND IT
-  1167 000004FF B007                    	mov al, 7                    ; RESET BUS
-  1168 00000501 E876FF                  	call CH_WR                   ; SEND IT
-  1169 00000504 E8(0000)                	call wait12                  ; SMALL WAIT
-  1170 00000507 E869FF                  	call CH_RD                   ; GET RESULT
-  1171 0000050A E8(0000)                	call wait12                  ; SMALL WAIT
-  1172                                  	;
-  1173                                  	; ACTIVATE USB MODE
-  1174 0000050D B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
-  1175 0000050F E853FF                  	call CH_CMD                  ; SEND IT
-  1176 00000512 B006                    	mov al, 6                    ; USB ENABLED, SEND SOF
-  1177 00000514 E863FF                  	call CH_WR                   ; SEND IT
-  1178 00000517 E8(0000)                	call wait12                  ; SMALL WAIT
-  1179 0000051A E856FF                  	call CH_RD                   ; GET RESULT
-  1180 0000051D E8(0000)                	call wait12                  ; SMALL WAIT
-  1181                                  	;
-  1182 00000520 B001                    	mov al, CH_MODE_USB          ; WE ARE NOW IN USB MODE
-  1183                                  	;
-  1184                                  	; INITIALIZE DISK
-  1185 00000522 B91800                  	mov cx, 24                   ; TRY A FEW TIMES
-  1186                                  CHUSB_RESET1:
-  1187 00000525 B051                    	mov al, CH_CMD_DSKINIT       ; DISK INIT COMMAND
-  1188 00000527 E83BFF                  	call CH_CMD                  ; SEND IT
-  1189                                  
-  1190 0000052A 51                      	push cx
-  1191 0000052B B9204E                  	mov cx, 20000                ; 1 s delay
-  1192 0000052E E8(0000)                	call microsecond
-  1193 00000531 B9204E                  	mov cx, 20000
-  1194 00000534 E8(0000)                	call microsecond
-  1195 00000537 B9204E                  	mov cx, 20000
-  1196 0000053A E8(0000)                	call microsecond
-  1197 0000053D B9204E                  	mov cx, 20000
-  1198 00000540 E8(0000)                	call microsecond
-  1199 00000543 B9204E                  	mov cx, 20000
-  1200 00000546 E8(0000)                	call microsecond
-  1201 00000549 59                      	pop cx
-  1202                                  
-  1203 0000054A E834FF                  	call CH_POLL                 ; WAIT FOR RESULT
-  1204                                  
-  1205 0000054D 3C14                    	cmp al, 14h                  ; SUCCESS?
-  1206 0000054F 740F                    	je CHUSB_RESET2              ; IF SO, CHECK READY
-  1207 00000551 3C16                    	cmp al, 16h                  ; NO MEDIA
-  1208 00000553 7503E98300              	je CHUSB_NOMEDIA             ; HANDLE IT
-  1209                                  
-  1210 00000558 E8(0000)                	call wait12
-  1211 0000055B E2C8                    	loop CHUSB_RESET1            ; LOOP AS NEEDED
-  1212 0000055D E98700                  	jmp CHUSB_TO                 ; HANDLE TIMEOUT
+  1124                                  ;	call CHUSB_RESET             ; FULL USB STACK RESET
+  1125 000004C9 C3                      	ret                          ; DONE
+  1126                                  
+  1127                                  
+  1128                                  	;
+  1129                                  	; INITIATE A DISK SECTOR READ / WRITE OPERATION
+  1130                                  	; A: READ OR WRITE OPCODE
+  1131                                  	;
+  1132                                  CHUSB_RWSTART:
+  1133 000004CA E898FF                  	call CH_CMD                  ; SEND R / W COMMAND
+  1134                                  	;
+  1135                                  	; SEND LBA, 4 BYTES, LITTLE ENDIAN
+  1136 000004CD 88C8                    	mov al, cl
+  1137 000004CF E8A8FF                  	call CH_WR                   ; SEND BYTE
+  1138 000004D2 88E8                    	mov al, ch
+  1139 000004D4 E8A3FF                  	call CH_WR                   ; SEND BYTE
+  1140 000004D7 88D0                    	mov al, dl
+  1141 000004D9 E89EFF                  	call CH_WR                   ; SEND BYTE
+  1142 000004DC 88F0                    	mov al, dh
+  1143 000004DE E899FF                  	call CH_WR                   ; SEND BYTE
+  1144                                  	;
+  1145                                  	; REQUEST 1 SECTOR
+  1146 000004E1 B001                    	mov al, 1                    ; 1 SECTOR
+  1147 000004E3 E894FF                  	call CH_WR                   ; SEND IT
+  1148 000004E6 C3                      	ret
+  1149                                  	;
+  1150                                  	;
+  1151                                  	;
+  1152                                  	; RESET THE INTERFACE AND REDISCOVER MEDIA
+  1153                                  	;
+  1154                                  CHUSB_RESET:
+  1155                                  	;
+  1156                                  	; RESET THE BUS
+  1157 000004E7 B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
+  1158 000004E9 E879FF                  	call CH_CMD                  ; SEND IT
+  1159 000004EC B007                    	mov al, 7                    ; RESET BUS
+  1160 000004EE E889FF                  	call CH_WR                   ; SEND IT
+  1161 000004F1 E8(0000)                	call wait12                  ; SMALL WAIT
+  1162 000004F4 E87CFF                  	call CH_RD                   ; GET RESULT
+  1163 000004F7 E8(0000)                	call wait12                  ; SMALL WAIT
+  1164                                  	;
+  1165                                  	; ACTIVATE USB MODE
+  1166 000004FA B015                    	mov al, CH_CMD_MODE          ; SET MODE COMMAND
+  1167 000004FC E866FF                  	call CH_CMD                  ; SEND IT
+  1168 000004FF B006                    	mov al, 6                    ; USB ENABLED, SEND SOF
+  1169 00000501 E876FF                  	call CH_WR                   ; SEND IT
+  1170 00000504 E8(0000)                	call wait12                  ; SMALL WAIT
+  1171 00000507 E869FF                  	call CH_RD                   ; GET RESULT
+  1172 0000050A E8(0000)                	call wait12                  ; SMALL WAIT
+  1173                                  	;
+  1174 0000050D B001                    	mov al, CH_MODE_USB          ; WE ARE NOW IN USB MODE
+  1175                                  	;
+  1176                                  	; INITIALIZE DISK
+  1177 0000050F B91800                  	mov cx, 24                   ; TRY A FEW TIMES
+  1178                                  CHUSB_RESET1:
+  1179 00000512 B051                    	mov al, CH_CMD_DSKINIT       ; DISK INIT COMMAND
+  1180 00000514 E84EFF                  	call CH_CMD                  ; SEND IT
+  1181                                  
+  1182 00000517 51                      	push cx
+  1183 00000518 B9204E                  	mov cx, 20000                ; 1 s delay
+  1184 0000051B E8(0000)                	call microsecond
+  1185 0000051E B9204E                  	mov cx, 20000
+  1186 00000521 E8(0000)                	call microsecond
+  1187 00000524 B9204E                  	mov cx, 20000
+  1188 00000527 E8(0000)                	call microsecond
+  1189 0000052A B9204E                  	mov cx, 20000
+  1190 0000052D E8(0000)                	call microsecond
+  1191 00000530 B9204E                  	mov cx, 20000
+  1192 00000533 E8(0000)                	call microsecond
+  1193 00000536 59                      	pop cx
+  1194                                  
+  1195 00000537 E847FF                  	call CH_POLL                 ; WAIT FOR RESULT
+  1196                                  
+  1197 0000053A 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1198 0000053C 740F                    	je CHUSB_RESET2              ; IF SO, CHECK READY
+  1199 0000053E 3C16                    	cmp al, 16h                  ; NO MEDIA
+  1200 00000540 7503E98300              	je CHUSB_NOMEDIA             ; HANDLE IT
+  1201                                  
+  1202 00000545 E8(0000)                	call wait12
+  1203 00000548 E2C8                    	loop CHUSB_RESET1            ; LOOP AS NEEDED
+  1204 0000054A E98700                  	jmp CHUSB_TO                 ; HANDLE TIMEOUT
+  1205                                  	;
+  1206                                  CHUSB_RESET2:
+  1207                                  	; USE OF CH376 DISK_MOUNT COMMAND SEEMS TO IMPROVE
+  1208                                  	; COMPATIBILITY WITH SOME OLDER USB THUMBDRIVES.
+  1209 0000054D E80400                  	call CHUSB_DSKMNT            ; IF SO, TRY MOUNT, IGNORE ERRS
+  1210 00000550 E81200                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
+  1211 00000553 C3                      	ret
+  1212                                  
   1213                                  	;
-  1214                                  CHUSB_RESET2:
-  1215                                  	; USE OF CH376 DISK_MOUNT COMMAND SEEMS TO IMPROVE
-  1216                                  	; COMPATIBILITY WITH SOME OLDER USB THUMBDRIVES.
-  1217 00000560 E80400                  	call CHUSB_DSKMNT            ; IF SO, TRY MOUNT, IGNORE ERRS
-  1218 00000563 E81200                  	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
-  1219 00000566 C3                      	ret
-  1220                                  
-  1221                                  	;
-  1222                                  	; CH37X HELPER ROUTINES
-  1223                                  	;
-  1224                                  	;
-  1225                                  	; PERFORM DISK MOUNT
-  1226                                  	;
-  1227                                  CHUSB_DSKMNT:
-  1228 00000567 B031                    	mov al, CH_CMD_DSKMNT        ; DISK QUERY
-  1229 00000569 E8F9FE                  	call CH_CMD                  ; DO IT
-  1230 0000056C E812FF                  	call CH_POLL                 ; WAIT FOR RESPONSE
-  1231                                  
-  1232 0000056F 3C14                    	cmp al, 14h                  ; SUCCESS?
-  1233 00000571 7402                    	je CHUSB_DSKMNTok
-  1234 00000573 F9                      	Error
-  1235 00000574 C3                      	ret
-  1236                                  CHUSB_DSKMNTok:
-  1237 00000575 30E4                    	Okay
-  1238 00000577 C3                      	ret
-  1239                                  	;
-  1240                                  	; PERFORM DISK SIZE
-  1241                                  	;
-  1242                                  CHUSB_DSKSIZ:
-  1243 00000578 B053                    	mov al, CH_CMD_DSKSIZ        ; DISK SIZE COMMAND
-  1244 0000057A E8E8FE                  	call CH_CMD                  ; SEND IT
-  1245 0000057D E801FF                  	call CH_POLL                 ; WAIT FOR RESULT
-  1246 00000580 3C14                    	cmp al, 14h                  ; SUCCESS?
-  1247 00000582 755B                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
-  1248 00000584 E81EFF                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
-  1249 00000587 E8E9FE                  	call CH_RD                   ; GET RD DATA LEN
-  1250 0000058A 3C08                    	cmp al, 08h                  ; MAKE SURE IT IS 8
-  1251 0000058C 7551                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
-  1252 0000058E E8E2FE                  	call CH_RD
-  1253 00000591 88C6                    	mov dh, al
-  1254 00000593 E8DDFE                  	call CH_RD
-  1255 00000596 88C2                    	mov dl, al
-  1256 00000598 E8D8FE                  	call CH_RD
-  1257 0000059B 88C5                    	mov ch, al
-  1258 0000059D E8D3FE                  	call CH_RD
-  1259 000005A0 88C1                    	mov cl, al
-  1260 000005A2 E8CEFE                  	call CH_RD
-  1261 000005A5 E8CBFE                  	call CH_RD
-  1262 000005A8 E8C8FE                  	call CH_RD
-  1263 000005AB E8C5FE                  	call CH_RD
-  1264 000005AE 30E4                    	Okay
-  1265 000005B0 C3                      	ret                          ; AND DONE
-  1266                                  CHUSB_DSKINQ:
-  1267 000005B1 B058                    	mov al, CH_CMD_DSKINQ        ; DISK INQUIRY
-  1268 000005B3 E8AFFE                  	call CH_CMD                  ; SEND IT
-  1269 000005B6 E8C8FE                  	call CH_POLL                 ; WAIT FOR RESULT
-  1270 000005B9 3C14                    	cmp al, 14h                  ; SUCCESS?
-  1271 000005BB 7522                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
-  1272 000005BD E8E5FE                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
-  1273 000005C0 E8B0FE                  	call CH_RD                   ; GET RD DATA LEN
-  1274 000005C3 88C1                    	mov cl, al
-  1275 000005C5 30ED                    	xor ch, ch                   ; put count in cx
-  1276 000005C7 89DF                    	mov di, bx
-  1277                                  .1:
-  1278 000005C9 E8A7FE                  	call CH_RD
-  1279 000005CC 268805                  	es mov [di], al
-  1280 000005CF 83C701                  	add di, 1
-  1281 000005D2 E2F5                    	loop .1
-  1282 000005D4 26C60500                	es mov byte [di], 0
-  1283 000005D8 30E4                    	Okay
-  1284 000005DA C3                      	ret                          ; AND DONE
-  1285                                  	;
-  1286                                  	; ERROR HANDLERS
-  1287                                  	;
+  1214                                  	; CH37X HELPER ROUTINES
+  1215                                  	;
+  1216                                  	;
+  1217                                  	; PERFORM DISK MOUNT
+  1218                                  	;
+  1219                                  CHUSB_DSKMNT:
+  1220 00000554 B031                    	mov al, CH_CMD_DSKMNT        ; DISK QUERY
+  1221 00000556 E80CFF                  	call CH_CMD                  ; DO IT
+  1222 00000559 E825FF                  	call CH_POLL                 ; WAIT FOR RESPONSE
+  1223                                  
+  1224 0000055C 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1225 0000055E 7402                    	je CHUSB_DSKMNTok
+  1226 00000560 F9                      	Error
+  1227 00000561 C3                      	ret
+  1228                                  CHUSB_DSKMNTok:
+  1229 00000562 30E4                    	Okay
+  1230 00000564 C3                      	ret
+  1231                                  	;
+  1232                                  	; PERFORM DISK SIZE
+  1233                                  	;
+  1234                                  CHUSB_DSKSIZ:
+  1235 00000565 B053                    	mov al, CH_CMD_DSKSIZ        ; DISK SIZE COMMAND
+  1236 00000567 E8FBFE                  	call CH_CMD                  ; SEND IT
+  1237 0000056A E814FF                  	call CH_POLL                 ; WAIT FOR RESULT
+  1238 0000056D 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1239 0000056F 755B                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1240 00000571 E831FF                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+  1241 00000574 E8FCFE                  	call CH_RD                   ; GET RD DATA LEN
+  1242 00000577 3C08                    	cmp al, 08h                  ; MAKE SURE IT IS 8
+  1243 00000579 7551                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1244 0000057B E8F5FE                  	call CH_RD
+  1245 0000057E 88C6                    	mov dh, al
+  1246 00000580 E8F0FE                  	call CH_RD
+  1247 00000583 88C2                    	mov dl, al
+  1248 00000585 E8EBFE                  	call CH_RD
+  1249 00000588 88C5                    	mov ch, al
+  1250 0000058A E8E6FE                  	call CH_RD
+  1251 0000058D 88C1                    	mov cl, al
+  1252 0000058F E8E1FE                  	call CH_RD
+  1253 00000592 E8DEFE                  	call CH_RD
+  1254 00000595 E8DBFE                  	call CH_RD
+  1255 00000598 E8D8FE                  	call CH_RD
+  1256 0000059B 30E4                    	Okay
+  1257 0000059D C3                      	ret                          ; AND DONE
+  1258                                  CHUSB_DSKINQ:
+  1259 0000059E B058                    	mov al, CH_CMD_DSKINQ        ; DISK INQUIRY
+  1260 000005A0 E8C2FE                  	call CH_CMD                  ; SEND IT
+  1261 000005A3 E8DBFE                  	call CH_POLL                 ; WAIT FOR RESULT
+  1262 000005A6 3C14                    	cmp al, 14h                  ; SUCCESS?
+  1263 000005A8 7522                    	jne CHUSB_CMDERR             ; HANDLE CMD ERROR
+  1264 000005AA E8F8FE                  	call CH_CMD_RD               ; SEND READ USB DATA CMD
+  1265 000005AD E8C3FE                  	call CH_RD                   ; GET RD DATA LEN
+  1266 000005B0 88C1                    	mov cl, al
+  1267 000005B2 30ED                    	xor ch, ch                   ; put count in cx
+  1268 000005B4 89DF                    	mov di, bx
+  1269                                  .1:
+  1270 000005B6 E8BAFE                  	call CH_RD
+  1271 000005B9 268805                  	es mov [di], al
+  1272 000005BC 83C701                  	add di, 1
+  1273 000005BF E2F5                    	loop .1
+  1274 000005C1 26C60500                	es mov byte [di], 0
+  1275 000005C5 30E4                    	Okay
+  1276 000005C7 C3                      	ret                          ; AND DONE
+  1277                                  	;
+  1278                                  	; ERROR HANDLERS
+  1279                                  	;
+  1280                                  	;
+  1281                                  CHUSB_NOMEDIA:
+  1282 000005C8 B0FF                    	mov al, CHUSB_STNOMEDIA
+  1283 000005CA EB10                    	jmp CHUSB_ERR
+  1284                                  	;
+  1285                                  CHUSB_CMDERR:
+  1286 000005CC B0FE                    	mov al, CHUSB_STCMDERR
+  1287 000005CE EB0C                    	jmp CHUSB_ERR
   1288                                  	;
-  1289                                  CHUSB_NOMEDIA:
-  1290 000005DB B0FF                    	mov al, CHUSB_STNOMEDIA
-  1291 000005DD EB10                    	jmp CHUSB_ERR
+  1289                                  CHUSB_IOERR:
+  1290 000005D0 B0FD                    	mov al, CHUSB_STIOERR
+  1291 000005D2 EB08                    	jmp CHUSB_ERR
   1292                                  	;
-  1293                                  CHUSB_CMDERR:
-  1294 000005DF B0FE                    	mov al, CHUSB_STCMDERR
-  1295 000005E1 EB0C                    	jmp CHUSB_ERR
+  1293                                  CHUSB_TO:
+  1294 000005D4 B0FC                    	mov al, CHUSB_STTO
+  1295 000005D6 EB04                    	jmp CHUSB_ERR
   1296                                  	;
-  1297                                  CHUSB_IOERR:
-  1298 000005E3 B0FD                    	mov al, CHUSB_STIOERR
-  1299 000005E5 EB08                    	jmp CHUSB_ERR
+  1297                                  CHUSB_NOTSUP:
+  1298 000005D8 B0FB                    	mov al, CHUSB_STNOTSUP
+  1299 000005DA EB00                    	jmp CHUSB_ERR
   1300                                  	;
-  1301                                  CHUSB_TO:
-  1302 000005E7 B0FC                    	mov al, CHUSB_STTO
-  1303 000005E9 EB04                    	jmp CHUSB_ERR
-  1304                                  	;
-  1305                                  CHUSB_NOTSUP:
-  1306 000005EB B0FB                    	mov al, CHUSB_STNOTSUP
-  1307 000005ED EB00                    	jmp CHUSB_ERR
-  1308                                  	;
-  1309                                  CHUSB_ERR:
-  1310 000005EF F9                      	Error
-  1311 000005F0 C3                      	ret
+  1301                                  CHUSB_ERR:
+  1302 000005DC F9                      	Error
+  1303 000005DD C3                      	ret
