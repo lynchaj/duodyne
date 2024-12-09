@@ -534,32 +534,34 @@
    251                              <1> FDC_DACK_TC     equ     FDC+7
    252                              <1> 
    253                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   254                              <1> ; CH376 controller (Duodyne Multi IO)
+   254                              <1> ; Duodyne Multi IO
    255                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    256                              <1> CH376	        equ	IO_BASE+004EH
-   257                              <1> 
-   258                              <1> 
-   259                              <1> 
-   260                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   261                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   257                              <1> ParPrinter      equ	IO_BASE+0048H
+   258                              <1> DuoSerial       equ	IO_BASE+0070H
+   259                              <1> MultiIo8242     equ	IO_BASE+004CH
+   260                              <1> PrinterTimeout  equ 	020h
+   261                              <1> 
    262                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   263                              <1> RTC	equ	IO_BASE+0094H
-   264                              <1> 
-   265                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   266                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   263                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   264                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   265                              <1> RTC	equ	IO_BASE+0094H
+   266                              <1> 
    267                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   268                              <1> PPI	        equ	IO_BASE+0088H
-   269                              <1> 
-   270                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   271                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   272                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   273                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   274                              <1> 
-   275                              <1> portA           equ     PPI+0   ;
-   276                              <1> portB           equ     PPI+1   ;
-   277                              <1> portC           equ     PPI+2   ;
-   278                              <1> 
-   279                              <1> ; end CPUREGS.ASM
+   268                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   269                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   270                              <1> PPI	        equ	IO_BASE+0088H
+   271                              <1> 
+   272                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   273                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   274                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   275                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   276                              <1> 
+   277                              <1> portA           equ     PPI+0   ;
+   278                              <1> portB           equ     PPI+1   ;
+   279                              <1> portC           equ     PPI+2   ;
+   280                              <1> 
+   281                              <1> ; end CPUREGS.ASM
     58                                  %include	"ascii.asm"
     59                              <1> ; ascii.asm
     60                              <1> ;

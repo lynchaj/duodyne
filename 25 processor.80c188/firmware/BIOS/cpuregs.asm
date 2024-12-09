@@ -194,11 +194,13 @@ FDC_DACK        equ	FDC+6
 FDC_DACK_TC     equ     FDC+7
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; CH376 controller (Duodyne Multi IO)
+; Duodyne Multi IO
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CH376	        equ	IO_BASE+004EH
-
-
+ParPrinter      equ	IO_BASE+0048H
+DuoSerial       equ	IO_BASE+0070H
+MultiIo8242     equ	IO_BASE+004CH
+PrinterTimeout  equ 	020h
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;DS1302 RTC (Duodyne Ram/ROM Card)

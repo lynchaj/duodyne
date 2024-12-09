@@ -510,32 +510,34 @@
    227                              <1> FDC_DACK_TC     equ     FDC+7
    228                              <1> 
    229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   230                              <1> ; CH376 controller (Duodyne Multi IO)
+   230                              <1> ; Duodyne Multi IO
    231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    232                              <1> CH376	        equ	IO_BASE+004EH
-   233                              <1> 
-   234                              <1> 
-   235                              <1> 
-   236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   237                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   233                              <1> ParPrinter      equ	IO_BASE+0048H
+   234                              <1> DuoSerial       equ	IO_BASE+0070H
+   235                              <1> MultiIo8242     equ	IO_BASE+004CH
+   236                              <1> PrinterTimeout  equ 	020h
+   237                              <1> 
    238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   239                              <1> RTC	equ	IO_BASE+0094H
-   240                              <1> 
-   241                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   242                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   239                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   240                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   241                              <1> RTC	equ	IO_BASE+0094H
+   242                              <1> 
    243                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   244                              <1> PPI	        equ	IO_BASE+0088H
-   245                              <1> 
-   246                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   247                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   248                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   249                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   250                              <1> 
-   251                              <1> portA           equ     PPI+0   ;
-   252                              <1> portB           equ     PPI+1   ;
-   253                              <1> portC           equ     PPI+2   ;
-   254                              <1> 
-   255                              <1> ; end CPUREGS.ASM
+   244                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   245                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   246                              <1> PPI	        equ	IO_BASE+0088H
+   247                              <1> 
+   248                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   249                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   250                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   251                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   252                              <1> 
+   253                              <1> portA           equ     PPI+0   ;
+   254                              <1> portB           equ     PPI+1   ;
+   255                              <1> portC           equ     PPI+2   ;
+   256                              <1> 
+   257                              <1> ; end CPUREGS.ASM
     34                                  %include	"date.asm"
     35                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     36                              <1> ; date.asm
@@ -552,14 +554,14 @@
     47                              <1> ;
     48                              <1> ; Updated for the Duodyne 80c188 SBC
     49                              <1> 
-    50                              <1> %define DATE_STRING0	"10/27/24"
-    51                              <1> %define DATE_STRING1	"27-Oct-2024"
+    50                              <1> %define DATE_STRING0	"12/08/24"
+    51                              <1> %define DATE_STRING1	"08-DEC-2024"
     52                              <1> 
     53                              <1> %define VERSION_MAJOR		3
     54                              <1> %define VERSION_MINOR		5
     55                              <1> %define VERSION_REVISION	2
     56                              <1> %define VERSION_SUFFIX		""
-    57                              <1> %define VERSION_SEQUENCE	66
+    57                              <1> %define VERSION_SEQUENCE	70
     58                              <1> 
     59                              <1> %define VERSION_STRING		"3.5-D",VERSION_SUFFIX
     60                              <1> 
@@ -981,7 +983,7 @@
     63 0000012F 0D0A                            db      CR,LF
     64 00000131 00                      	db	0
     65                                  	
-    66 00000132 32372D4F63742D3230-     _unique:	db	DATE_STRING1, VERSION_STRING, 0
+    66 00000132 30382D4445432D3230-     _unique:	db	DATE_STRING1, VERSION_STRING, 0
     66 0000013B 3234332E352D4400   
     67                                  
     68                                  

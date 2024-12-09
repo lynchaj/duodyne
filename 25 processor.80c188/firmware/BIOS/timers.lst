@@ -503,32 +503,34 @@
    220                              <1> FDC_DACK_TC     equ     FDC+7
    221                              <1> 
    222                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   223                              <1> ; CH376 controller (Duodyne Multi IO)
+   223                              <1> ; Duodyne Multi IO
    224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    225                              <1> CH376	        equ	IO_BASE+004EH
-   226                              <1> 
-   227                              <1> 
-   228                              <1> 
-   229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   230                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   226                              <1> ParPrinter      equ	IO_BASE+0048H
+   227                              <1> DuoSerial       equ	IO_BASE+0070H
+   228                              <1> MultiIo8242     equ	IO_BASE+004CH
+   229                              <1> PrinterTimeout  equ 	020h
+   230                              <1> 
    231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> RTC	equ	IO_BASE+0094H
-   233                              <1> 
-   234                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   235                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   232                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   233                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   234                              <1> RTC	equ	IO_BASE+0094H
+   235                              <1> 
    236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   237                              <1> PPI	        equ	IO_BASE+0088H
-   238                              <1> 
-   239                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   240                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   241                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   242                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   243                              <1> 
-   244                              <1> portA           equ     PPI+0   ;
-   245                              <1> portB           equ     PPI+1   ;
-   246                              <1> portC           equ     PPI+2   ;
-   247                              <1> 
-   248                              <1> ; end CPUREGS.ASM
+   237                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   239                              <1> PPI	        equ	IO_BASE+0088H
+   240                              <1> 
+   241                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   242                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   243                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   244                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   245                              <1> 
+   246                              <1> portA           equ     PPI+0   ;
+   247                              <1> portB           equ     PPI+1   ;
+   248                              <1> portC           equ     PPI+2   ;
+   249                              <1> 
+   250                              <1> ; end CPUREGS.ASM
     27                                  %include        "equates.asm"
     28                              <1> ;========================================================================
     29                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
@@ -1115,348 +1117,350 @@
    253                                  ; the strategy below is that the most frequently travelled path
    254                                  ; is the fewest branches and the fewest number of instructions
    255 00000083 FE066C00                        inc     byte [timer_ticks]
-   256 00000087 7414                            jz      .2
+   256 00000087 7417                            jz      .2
    257 00000089 803E6C00D8                      cmp     byte [timer_ticks], ONE_DAY & 0FFh
-   258 0000008E 7413                            je      .3
+   258 0000008E 7416                            je      .3
    259                                  .9:
    260 00000090 CD1C                    	int	1Ch			; User timer tick interrupt
    261                                  
-   262                                  
-   263                                  ; signal EOI (End of Interrupt)
-   264 00000092 BA22FF                          mov     dx,PIC_EOI              ; EOI register
-   265 00000095 B80080                          mov     ax,EOI_NSPEC            ; non-specific
-   266 00000098 EF                              out     dx,ax                   ; signal it
-   267                                  
-   268 00000099 585A1F                          popm    ax,dx,ds
-   269 0000009C CF                      	iret
-   270                                  
-   271                                  ; the less frequent execution paths are below
-   272                                  .2:     ;  low byte == 0
-   273 0000009D FF066D00                        inc     word [timer_ticks+1]
-   274 000000A1 EBED                            jmp     .9
-   275                                  
-   276                                  .3:     ; AX = low word ONE_DAY
-   277 000000A3 813E6D000018                    cmp     word [timer_ticks+1], ONE_DAY >> 8
-   278 000000A9 75E5                            jne     .9
-   279                                  
-   280                                  ; a day has passed
-   281 000000AB C7066C000000                    mov     word [timer_ticks],0
-   282 000000B1 C7066E000000                    mov     word [timer_ticks+2],0  ; zero the high word
-   283 000000B7 C606700001                      mov     byte [timer_new_day],1   ; set flag
-   284 000000BC EBD2                            jmp     .9
-   285                                  
-   286                                  
+   262                                  	extern	multiio_kbd_hook
+   263 00000092 E8(0000)                	call	multiio_kbd_hook
+   264                                  
+   265                                  ; signal EOI (End of Interrupt)
+   266 00000095 BA22FF                          mov     dx,PIC_EOI              ; EOI register
+   267 00000098 B80080                          mov     ax,EOI_NSPEC            ; non-specific
+   268 0000009B EF                              out     dx,ax                   ; signal it
+   269                                  
+   270 0000009C 585A1F                          popm    ax,dx,ds
+   271 0000009F CF                      	iret
+   272                                  
+   273                                  ; the less frequent execution paths are below
+   274                                  .2:     ;  low byte == 0
+   275 000000A0 FF066D00                        inc     word [timer_ticks+1]
+   276 000000A4 EBEA                            jmp     .9
+   277                                  
+   278                                  .3:     ; AX = low word ONE_DAY
+   279 000000A6 813E6D000018                    cmp     word [timer_ticks+1], ONE_DAY >> 8
+   280 000000AC 75E2                            jne     .9
+   281                                  
+   282                                  ; a day has passed
+   283 000000AE C7066C000000                    mov     word [timer_ticks],0
+   284 000000B4 C7066E000000                    mov     word [timer_ticks+2],0  ; zero the high word
+   285 000000BA C606700001                      mov     byte [timer_new_day],1   ; set flag
+   286 000000BF EBCF                            jmp     .9
    287                                  
-   288                                  %else
-   289                                          %error "Timer interrupt service."
-   290                                  %endif
-   291                                  
-   292                                  
+   288                                  
+   289                                  
+   290                                  %else
+   291                                          %error "Timer interrupt service."
+   292                                  %endif
    293                                  
-   294                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   295                                  ;  BIOS_call_1Ah        software interrupt
-   296                                  ;
-   297                                  ;       Functions in AH:
-   298                                  ;               00      get tick count
-   299                                  ;               01      set tick count
-   300                                  ;               02      get time (from CMOS clock)
-   301                                  ;               03      set time (to CMOS clock)
-   302                                  ;               04      get date (from CMOS clock)
-   303                                  ;               05      set data (to CMOS clock)
-   304                                  ;               06      set alarm (we don't implement this one)
-   305                                  ;               07      reset alarm
-   306                                  ; we don't implement the following:
-   307                                  ;               0Ah     get day count [PS/2]
-   308                                  ;               0Bh     set day count [PS/2]
-   309                                  ;               80h     set sound source [PC only]
-   310                                  ;
-   311                                  ;
-   312                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   313                                  offset_BP       equ     0
-   314                                  offset_BX       equ     offset_BP+2
-   315                                  offset_AX       equ     offset_BX+2
-   316                                  offset_DS       equ     offset_AX+2
-   317                                  offset_IP       equ     offset_DS+2
-   318                                  offset_CS       equ     offset_IP+2
-   319                                  offset_FLAGS    equ     offset_CS+2
-   320                                  
-   321                                  BIOS_call_1Ah:                  ; int 1Ah  call
-   322 000000BE 1E                              pushm   ds
-   323 000000BF 50                              push    ax
-   324 000000C0 53                              push    bx
-   325                                  
-   326 000000C1 55                              push    bp              ; set to address stack
-   327 000000C2 89E5                            mov     bp,sp
-   328                                  
-   329 000000C4 6A40                            push    bios_data_seg
-   330 000000C6 1F                              popm    ds              ; establish addressability
-   331                                  
-   332 000000C7 88E3                            mov     bl,ah           ; set to index into dispatch table
-   333 000000C9 80FC08                          cmp     ah,max/2
-   334 000000CC 7319                            jae     undefined
-   335 000000CE 30FF                            xor     bh,bh
-   336 000000D0 D1E3                            shl     bx,1            ; index words
-   337                                  
-   338 000000D2 2EFFA7[D700]                cs  jmp     near [dispatch+bx]
+   294                                  
+   295                                  
+   296                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   297                                  ;  BIOS_call_1Ah        software interrupt
+   298                                  ;
+   299                                  ;       Functions in AH:
+   300                                  ;               00      get tick count
+   301                                  ;               01      set tick count
+   302                                  ;               02      get time (from CMOS clock)
+   303                                  ;               03      set time (to CMOS clock)
+   304                                  ;               04      get date (from CMOS clock)
+   305                                  ;               05      set data (to CMOS clock)
+   306                                  ;               06      set alarm (we don't implement this one)
+   307                                  ;               07      reset alarm
+   308                                  ; we don't implement the following:
+   309                                  ;               0Ah     get day count [PS/2]
+   310                                  ;               0Bh     set day count [PS/2]
+   311                                  ;               80h     set sound source [PC only]
+   312                                  ;
+   313                                  ;
+   314                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   315                                  offset_BP       equ     0
+   316                                  offset_BX       equ     offset_BP+2
+   317                                  offset_AX       equ     offset_BX+2
+   318                                  offset_DS       equ     offset_AX+2
+   319                                  offset_IP       equ     offset_DS+2
+   320                                  offset_CS       equ     offset_IP+2
+   321                                  offset_FLAGS    equ     offset_CS+2
+   322                                  
+   323                                  BIOS_call_1Ah:                  ; int 1Ah  call
+   324 000000C1 1E                              pushm   ds
+   325 000000C2 50                              push    ax
+   326 000000C3 53                              push    bx
+   327                                  
+   328 000000C4 55                              push    bp              ; set to address stack
+   329 000000C5 89E5                            mov     bp,sp
+   330                                  
+   331 000000C7 6A40                            push    bios_data_seg
+   332 000000C9 1F                              popm    ds              ; establish addressability
+   333                                  
+   334 000000CA 88E3                            mov     bl,ah           ; set to index into dispatch table
+   335 000000CC 80FC08                          cmp     ah,max/2
+   336 000000CF 7319                            jae     undefined
+   337 000000D1 30FF                            xor     bh,bh
+   338 000000D3 D1E3                            shl     bx,1            ; index words
    339                                  
-   340                                  
+   340 000000D5 2EFFA7[DA00]                cs  jmp     near [dispatch+bx]
    341                                  
    342                                  
-   343                                  dispatch:
-   344 000000D7 [3701]                          dw      fn0
-   345 000000D9 [4A01]                          dw      fn1
-   346 000000DB [5401]                          dw      fn2
-   347 000000DD [8E01]                          dw      fn3
-   348 000000DF [D101]                          dw      fn4
-   349 000000E1 [FE01]                          dw      fn5
-   350 000000E3 [E700]                          dw      fn6
-   351 000000E5 [E700]                          dw      fn7
-   352                                  max     equ     $-dispatch
-   353                                  
-   354                                  fn6:
-   355                                  fn7:
-   356                                  undefined:
-   357 000000E7 C64605FF                        mov     byte [bp+offset_AX+1],0FFh      ; error code?
-   358                                  set_carry:
-   359 000000EB 804E0C01                        or      byte [bp+offset_FLAGS],1        ; set the carry
-   360 000000EF EB04                            jmp     popall
-   361                                  good_exit:
-   362 000000F1 80660CFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry
-   363 000000F5 5D                      popall: pop     bp
-   364 000000F6 5B                              pop     bx              ; register restores
-   365 000000F7 58                              pop     ax
-   366 000000F8 1F                              popm    ds
-   367                                  BIOS_call_1Ch:
-   368 000000F9 CF                              iret
-   369                                  
-   370                                  ; update CMOS
-   371                                  ;       AL = ram address (0..29)
-   372                                  ;       DL = new contents of address
-   373                                  ;
-   374                                  ; the RAM location is updated with the new contents
-   375                                  ; and the checksum (location 30) is maintained at zero
-   376                                  ;
-   377                                  updateCMOS:
-   378 000000FA 5253                            pushm   bx,dx
-   379                                  
-   380 000000FC B480                            mov     ah,80h
-   381 000000FE 50                              push    ax
-   382 000000FF E8(0000)                        call    rtc_get_loc
-   383 00000102 93                              xchg    ax,bx
-   384 00000103 28D3                            sub     bl,dl           ; difference between contents
-   385 00000105 58                              pop     ax
-   386 00000106 7412                            jz      .5              ; jump if no change
-   387 00000108 E8(0000)                        call    rtc_set_loc     ; set DL, the changed value
-   388 0000010B B81E80                          mov     ax,8000h+30     ; get checksum location
-   389 0000010E 50                              push    ax              ; save address
-   390 0000010F E8(0000)                        call    rtc_get_loc
-   391 00000112 00D8                            add     al,bl           ; update checksum
-   392 00000114 88C2                            mov     dl,al
-   393 00000116 58                              pop     ax
-   394 00000117 E8(0000)                        call    rtc_set_loc
-   395                                  .5:
-   396 0000011A 5B5A                            popm    bx,dx
-   397 0000011C C3                              ret
-   398                                  
-   399                                  ; Write Enable the CMOS chip
-   400                                  ;
-   401                                  write_enable:
-   402 0000011D 5250                            pushm   ax,dx
-   403 0000011F B80700                          mov     ax,7            ;
-   404 00000122 B200                            mov     dl,0
-   405 00000124 E8(0000)                        call    rtc_set_loc
-   406 00000127 585A                            popm    ax,dx
-   407 00000129 C3                              ret
-   408                                  
-   409                                  ; Write Protect the CMOS chip
-   410                                  ;
-   411                                  write_protect:
-   412 0000012A 5250                            pushm   ax,dx
-   413 0000012C B80700                          mov     ax,7            ;
-   414 0000012F B280                            mov     dl,80h
-   415 00000131 E8(0000)                        call    rtc_set_loc
-   416 00000134 585A                            popm    ax,dx
-   417 00000136 C3                              ret
-   418                                  
-   419                                  
-   420                                  ;
-   421                                  ; Get Tick Count
-   422                                  ;       AL = rolled-over flag
-   423                                  ;       CX:DX = tick counter
-   424                                  ;
-   425                                  fn0:
-   426 00000137 31C0                            xor     ax,ax
-   427 00000139 86067000                        xchg    al,[timer_new_day]
-   428 0000013D 894604                          mov     [bp+offset_AX],ax
-   429 00000140 8B166C00                        mov     dx,[timer_ticks]
-   430 00000144 8B0E6E00                        mov     cx,[timer_ticks+2]
-   431 00000148 EBA7                            jmp     good_exit
-   432                                  
-   433                                  ;
-   434                                  ; Set Tick Count
-   435                                  ;   returns:
-   436                                  ;       CX:DX = tick counter
-   437                                  ;
-   438                                  fn1:
-   439 0000014A 89166C00                        mov     [timer_ticks],dx
-   440 0000014E 890E6E00                        mov     [timer_ticks+2],cx
-   441 00000152 EB9D                            jmp     good_exit
-   442                                  
-   443                                  
+   343                                  
+   344                                  
+   345                                  dispatch:
+   346 000000DA [3A01]                          dw      fn0
+   347 000000DC [4D01]                          dw      fn1
+   348 000000DE [5701]                          dw      fn2
+   349 000000E0 [9101]                          dw      fn3
+   350 000000E2 [D401]                          dw      fn4
+   351 000000E4 [0102]                          dw      fn5
+   352 000000E6 [EA00]                          dw      fn6
+   353 000000E8 [EA00]                          dw      fn7
+   354                                  max     equ     $-dispatch
+   355                                  
+   356                                  fn6:
+   357                                  fn7:
+   358                                  undefined:
+   359 000000EA C64605FF                        mov     byte [bp+offset_AX+1],0FFh      ; error code?
+   360                                  set_carry:
+   361 000000EE 804E0C01                        or      byte [bp+offset_FLAGS],1        ; set the carry
+   362 000000F2 EB04                            jmp     popall
+   363                                  good_exit:
+   364 000000F4 80660CFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry
+   365 000000F8 5D                      popall: pop     bp
+   366 000000F9 5B                              pop     bx              ; register restores
+   367 000000FA 58                              pop     ax
+   368 000000FB 1F                              popm    ds
+   369                                  BIOS_call_1Ch:
+   370 000000FC CF                              iret
+   371                                  
+   372                                  ; update CMOS
+   373                                  ;       AL = ram address (0..29)
+   374                                  ;       DL = new contents of address
+   375                                  ;
+   376                                  ; the RAM location is updated with the new contents
+   377                                  ; and the checksum (location 30) is maintained at zero
+   378                                  ;
+   379                                  updateCMOS:
+   380 000000FD 5253                            pushm   bx,dx
+   381                                  
+   382 000000FF B480                            mov     ah,80h
+   383 00000101 50                              push    ax
+   384 00000102 E8(0000)                        call    rtc_get_loc
+   385 00000105 93                              xchg    ax,bx
+   386 00000106 28D3                            sub     bl,dl           ; difference between contents
+   387 00000108 58                              pop     ax
+   388 00000109 7412                            jz      .5              ; jump if no change
+   389 0000010B E8(0000)                        call    rtc_set_loc     ; set DL, the changed value
+   390 0000010E B81E80                          mov     ax,8000h+30     ; get checksum location
+   391 00000111 50                              push    ax              ; save address
+   392 00000112 E8(0000)                        call    rtc_get_loc
+   393 00000115 00D8                            add     al,bl           ; update checksum
+   394 00000117 88C2                            mov     dl,al
+   395 00000119 58                              pop     ax
+   396 0000011A E8(0000)                        call    rtc_set_loc
+   397                                  .5:
+   398 0000011D 5B5A                            popm    bx,dx
+   399 0000011F C3                              ret
+   400                                  
+   401                                  ; Write Enable the CMOS chip
+   402                                  ;
+   403                                  write_enable:
+   404 00000120 5250                            pushm   ax,dx
+   405 00000122 B80700                          mov     ax,7            ;
+   406 00000125 B200                            mov     dl,0
+   407 00000127 E8(0000)                        call    rtc_set_loc
+   408 0000012A 585A                            popm    ax,dx
+   409 0000012C C3                              ret
+   410                                  
+   411                                  ; Write Protect the CMOS chip
+   412                                  ;
+   413                                  write_protect:
+   414 0000012D 5250                            pushm   ax,dx
+   415 0000012F B80700                          mov     ax,7            ;
+   416 00000132 B280                            mov     dl,80h
+   417 00000134 E8(0000)                        call    rtc_set_loc
+   418 00000137 585A                            popm    ax,dx
+   419 00000139 C3                              ret
+   420                                  
+   421                                  
+   422                                  ;
+   423                                  ; Get Tick Count
+   424                                  ;       AL = rolled-over flag
+   425                                  ;       CX:DX = tick counter
+   426                                  ;
+   427                                  fn0:
+   428 0000013A 31C0                            xor     ax,ax
+   429 0000013C 86067000                        xchg    al,[timer_new_day]
+   430 00000140 894604                          mov     [bp+offset_AX],ax
+   431 00000143 8B166C00                        mov     dx,[timer_ticks]
+   432 00000147 8B0E6E00                        mov     cx,[timer_ticks+2]
+   433 0000014B EBA7                            jmp     good_exit
+   434                                  
+   435                                  ;
+   436                                  ; Set Tick Count
+   437                                  ;   returns:
+   438                                  ;       CX:DX = tick counter
+   439                                  ;
+   440                                  fn1:
+   441 0000014D 89166C00                        mov     [timer_ticks],dx
+   442 00000151 890E6E00                        mov     [timer_ticks+2],cx
+   443 00000155 EB9D                            jmp     good_exit
    444                                  
-   445                                  ;
-   446                                  ; Get Time from CMOS clock
-   447                                  ;   returns:
-   448                                  ;       CH = hours in BCD
-   449                                  ;       CL = minutes in BCD
-   450                                  ;       DH = seconds in BCD
-   451                                  ;       DL = DST code (00=standard time, 01=daylight time)
-   452                                  ;
-   453                                  ;       Carry Clear if clock is running
+   445                                  
+   446                                  
+   447                                  ;
+   448                                  ; Get Time from CMOS clock
+   449                                  ;   returns:
+   450                                  ;       CH = hours in BCD
+   451                                  ;       CL = minutes in BCD
+   452                                  ;       DH = seconds in BCD
+   453                                  ;       DL = DST code (00=standard time, 01=daylight time)
    454                                  ;
-   455                                  ;       Carry Set if clock is stopped
+   455                                  ;       Carry Clear if clock is running
    456                                  ;
-   457                                  fn2:
-   458 00000154 B80480                          mov     ax,8004h        ; RAM_bits
-   459 00000157 E8(0000)                        call    rtc_get_loc
-   460 0000015A 88C2                            mov     dl,al
-   461 0000015C 80E201                          and     dl,1            ; RAM_bits_DST flag
-   462                                  
-   463                                  .2:
-   464 0000015F B80000                          mov     ax,0
-   465 00000162 E8(0000)                        call    rtc_get_loc
-   466 00000165 88C6                            mov     dh,al           ; seconds
-   467                                  
-   468 00000167 B80200                          mov     ax,2            ; hours (AH=0)
-   469 0000016A E8(0000)                        call    rtc_get_loc
-   470 0000016D 88C5                            mov     ch,al
-   471                                  
-   472 0000016F B80100                          mov     ax,1
-   473 00000172 E8(0000)                        call    rtc_get_loc
-   474 00000175 88C1                            mov     cl,al           ; minutes
-   475                                  
-   476 00000177 B80000                          mov     ax,0            ; seconds again
-   477 0000017A E8(0000)                        call    rtc_get_loc
-   478 0000017D 38C6                            cmp     dh,al
-   479 0000017F 75DE                            jne     .2
-   480                                  
-   481 00000181 80E67F                          and     dh,7Fh          ; clear the ClockHalt flag
+   457                                  ;       Carry Set if clock is stopped
+   458                                  ;
+   459                                  fn2:
+   460 00000157 B80480                          mov     ax,8004h        ; RAM_bits
+   461 0000015A E8(0000)                        call    rtc_get_loc
+   462 0000015D 88C2                            mov     dl,al
+   463 0000015F 80E201                          and     dl,1            ; RAM_bits_DST flag
+   464                                  
+   465                                  .2:
+   466 00000162 B80000                          mov     ax,0
+   467 00000165 E8(0000)                        call    rtc_get_loc
+   468 00000168 88C6                            mov     dh,al           ; seconds
+   469                                  
+   470 0000016A B80200                          mov     ax,2            ; hours (AH=0)
+   471 0000016D E8(0000)                        call    rtc_get_loc
+   472 00000170 88C5                            mov     ch,al
+   473                                  
+   474 00000172 B80100                          mov     ax,1
+   475 00000175 E8(0000)                        call    rtc_get_loc
+   476 00000178 88C1                            mov     cl,al           ; minutes
+   477                                  
+   478 0000017A B80000                          mov     ax,0            ; seconds again
+   479 0000017D E8(0000)                        call    rtc_get_loc
+   480 00000180 38C6                            cmp     dh,al
+   481 00000182 75DE                            jne     .2
    482                                  
-   483 00000184 A880                            test    al,80h          ; test the ClockHalt flag
-   484 00000186 7503E966FF                      jz      good_exit
-   485 0000018B E95DFF                          jmp     set_carry
-   486                                  
-   487                                  
+   483 00000184 80E67F                          and     dh,7Fh          ; clear the ClockHalt flag
+   484                                  
+   485 00000187 A880                            test    al,80h          ; test the ClockHalt flag
+   486 00000189 7503E966FF                      jz      good_exit
+   487 0000018E E95DFF                          jmp     set_carry
    488                                  
    489                                  
-   490                                  ;
-   491                                  ; Set Time into the CMOS clock
-   492                                  ;   enter with:
-   493                                  ;       CH = hours in BCD
-   494                                  ;       CL = minutes in BCD
-   495                                  ;       DH = seconds in BCD
-   496                                  ;       DL = DST flag (0=std time, 1=daylight time)
-   497                                  ;
-   498                                  fn3:
-   499 0000018E 5251                            pushm   cx,dx
-   500 00000190 E88AFF                          call    write_enable
-   501                                  
-   502 00000193 88D3                            mov     bl,dl           ; BL = DST flag
-   503 00000195 B280                            mov     dl,80h          ; Clock Halt flag
-   504 00000197 B80000                          mov     ax,0
-   505 0000019A E8(0000)                        call    rtc_set_loc     ; stop the clock
-   506 0000019D B80100                          mov     ax,1
-   507 000001A0 88CA                            mov     dl,cl           ; minutes to DL
-   508 000001A2 E8(0000)                        call    rtc_set_loc
-   509 000001A5 B80200                          mov     ax,2
-   510 000001A8 88EA                            mov     dl,ch           ; hours to DL
-   511 000001AA E8(0000)                        call    rtc_set_loc
-   512 000001AD B80000                          mov     ax,0
-   513 000001B0 88F2                            mov     dl,dh           ; start the clock
-   514 000001B2 E8(0000)                        call    rtc_set_loc
-   515                                  
-   516                                  
-   517 000001B5 B80480                          mov     ax,8000h | RAM_bits        ; RAM_bits location (4)
-   518 000001B8 E8(0000)                        call    rtc_get_loc
-   519 000001BB 24FE                            and     al,0FFh^RAM_bits_DST         ; RAM_bits_DST zeroed
-   520 000001BD 88DA                            mov     dl,bl           ; DST code to DL
-   521 000001BF 80E201                          and     dl,RAM_bits_DST ; mask to 1 bit
-   522 000001C2 08C2                            or      dl,al           ; preserve the other bits
-   523                                  
-   524 000001C4 B004                            mov     al,RAM_bits     ; DST flag is updated
-   525                                                                  ;   and the other flags are preserved
-   526 000001C6 E831FF                          call    updateCMOS      ; update loc. 4 & checksum
-   527                                  
-   528 000001C9 E85EFF                          call    write_protect
-   529 000001CC 595A                            popm    cx,dx
-   530                                  good_exit2:
-   531 000001CE E920FF                          jmp     good_exit
-   532                                  
-   533                                  
+   490                                  
+   491                                  
+   492                                  ;
+   493                                  ; Set Time into the CMOS clock
+   494                                  ;   enter with:
+   495                                  ;       CH = hours in BCD
+   496                                  ;       CL = minutes in BCD
+   497                                  ;       DH = seconds in BCD
+   498                                  ;       DL = DST flag (0=std time, 1=daylight time)
+   499                                  ;
+   500                                  fn3:
+   501 00000191 5251                            pushm   cx,dx
+   502 00000193 E88AFF                          call    write_enable
+   503                                  
+   504 00000196 88D3                            mov     bl,dl           ; BL = DST flag
+   505 00000198 B280                            mov     dl,80h          ; Clock Halt flag
+   506 0000019A B80000                          mov     ax,0
+   507 0000019D E8(0000)                        call    rtc_set_loc     ; stop the clock
+   508 000001A0 B80100                          mov     ax,1
+   509 000001A3 88CA                            mov     dl,cl           ; minutes to DL
+   510 000001A5 E8(0000)                        call    rtc_set_loc
+   511 000001A8 B80200                          mov     ax,2
+   512 000001AB 88EA                            mov     dl,ch           ; hours to DL
+   513 000001AD E8(0000)                        call    rtc_set_loc
+   514 000001B0 B80000                          mov     ax,0
+   515 000001B3 88F2                            mov     dl,dh           ; start the clock
+   516 000001B5 E8(0000)                        call    rtc_set_loc
+   517                                  
+   518                                  
+   519 000001B8 B80480                          mov     ax,8000h | RAM_bits        ; RAM_bits location (4)
+   520 000001BB E8(0000)                        call    rtc_get_loc
+   521 000001BE 24FE                            and     al,0FFh^RAM_bits_DST         ; RAM_bits_DST zeroed
+   522 000001C0 88DA                            mov     dl,bl           ; DST code to DL
+   523 000001C2 80E201                          and     dl,RAM_bits_DST ; mask to 1 bit
+   524 000001C5 08C2                            or      dl,al           ; preserve the other bits
+   525                                  
+   526 000001C7 B004                            mov     al,RAM_bits     ; DST flag is updated
+   527                                                                  ;   and the other flags are preserved
+   528 000001C9 E831FF                          call    updateCMOS      ; update loc. 4 & checksum
+   529                                  
+   530 000001CC E85EFF                          call    write_protect
+   531 000001CF 595A                            popm    cx,dx
+   532                                  good_exit2:
+   533 000001D1 E920FF                          jmp     good_exit
    534                                  
-   535                                  ;
-   536                                  ; Get Date
-   537                                  ;   return with:
-   538                                  ;       CH = century in BCD (19h or 20h)
-   539                                  ;       CL = year in BCD
-   540                                  ;       DH = month in BCD
-   541                                  ;       DL = day in BCD
-   542                                  ;
-   543                                  ;       Carry clear if clock is running, set if clock is stopped
+   535                                  
+   536                                  
+   537                                  ;
+   538                                  ; Get Date
+   539                                  ;   return with:
+   540                                  ;       CH = century in BCD (19h or 20h)
+   541                                  ;       CL = year in BCD
+   542                                  ;       DH = month in BCD
+   543                                  ;       DL = day in BCD
    544                                  ;
-   545                                  fn4:
-   546 000001D1 B80180                          mov     ax,8001h        ; century byte
-   547 000001D4 E8(0000)                        call    rtc_get_loc
-   548 000001D7 88C5                            mov     ch,al
-   549                                  
-   550 000001D9 B80600                          mov     ax,6            ; year
-   551 000001DC E8(0000)                        call    rtc_get_loc
-   552 000001DF 88C1                            mov     cl,al
-   553                                  
-   554 000001E1 B80400                          mov     ax,4            ; month
-   555 000001E4 E8(0000)                        call    rtc_get_loc
-   556 000001E7 88C6                            mov     dh,al
-   557                                  
-   558 000001E9 B80300                          mov     ax,3            ; day (date)
-   559 000001EC E8(0000)                        call    rtc_get_loc
-   560 000001EF 88C2                            mov     dl,al
-   561                                  
-   562 000001F1 B80000                          mov     ax,0
-   563 000001F4 E8(0000)                        call    rtc_get_loc
-   564 000001F7 A880                            test    al,80h
-   565 000001F9 74D3                            jz      good_exit2
-   566 000001FB E9EDFE                          jmp     set_carry
-   567                                  
-   568                                  
+   545                                  ;       Carry clear if clock is running, set if clock is stopped
+   546                                  ;
+   547                                  fn4:
+   548 000001D4 B80180                          mov     ax,8001h        ; century byte
+   549 000001D7 E8(0000)                        call    rtc_get_loc
+   550 000001DA 88C5                            mov     ch,al
+   551                                  
+   552 000001DC B80600                          mov     ax,6            ; year
+   553 000001DF E8(0000)                        call    rtc_get_loc
+   554 000001E2 88C1                            mov     cl,al
+   555                                  
+   556 000001E4 B80400                          mov     ax,4            ; month
+   557 000001E7 E8(0000)                        call    rtc_get_loc
+   558 000001EA 88C6                            mov     dh,al
+   559                                  
+   560 000001EC B80300                          mov     ax,3            ; day (date)
+   561 000001EF E8(0000)                        call    rtc_get_loc
+   562 000001F2 88C2                            mov     dl,al
+   563                                  
+   564 000001F4 B80000                          mov     ax,0
+   565 000001F7 E8(0000)                        call    rtc_get_loc
+   566 000001FA A880                            test    al,80h
+   567 000001FC 74D3                            jz      good_exit2
+   568 000001FE E9EDFE                          jmp     set_carry
    569                                  
    570                                  
-   571                                  ;
-   572                                  ; Set Date in the CMOS clock chip
-   573                                  ;   enter with:
-   574                                  ;       CH = century in BCD
-   575                                  ;       CL = year in BCD
-   576                                  ;       DH = month in BCD
-   577                                  ;       DL = day in BCD
-   578                                  ;
-   579                                  fn5:
-   580 000001FE 5251                            pushm   cx,dx
-   581 00000200 E81AFF                          call    write_enable
-   582                                  
-   583 00000203 B80300                          mov     ax,3            ; day
-   584 00000206 E8(0000)                        call    rtc_set_loc
-   585                                  
-   586 00000209 88F2                            mov     dl,dh
-   587 0000020B B80400                          mov     ax,4            ; month
-   588 0000020E E8(0000)                        call    rtc_set_loc
-   589                                  
-   590 00000211 88CA                            mov     dl,cl
-   591 00000213 B80600                          mov     ax,6            ; year
-   592 00000216 E8(0000)                        call    rtc_set_loc
-   593                                  
-   594 00000219 88EA                            mov     dl,ch           ; century
-   595 0000021B B001                            mov     al,1
-   596 0000021D E8DAFE                          call    updateCMOS      ; fix checksum, too
-   597                                  
-   598 00000220 E807FF                          call    write_protect
-   599 00000223 595A                            popm    cx,dx
-   600 00000225 E9C9FE                          jmp     good_exit
+   571                                  
+   572                                  
+   573                                  ;
+   574                                  ; Set Date in the CMOS clock chip
+   575                                  ;   enter with:
+   576                                  ;       CH = century in BCD
+   577                                  ;       CL = year in BCD
+   578                                  ;       DH = month in BCD
+   579                                  ;       DL = day in BCD
+   580                                  ;
+   581                                  fn5:
+   582 00000201 5251                            pushm   cx,dx
+   583 00000203 E81AFF                          call    write_enable
+   584                                  
+   585 00000206 B80300                          mov     ax,3            ; day
+   586 00000209 E8(0000)                        call    rtc_set_loc
+   587                                  
+   588 0000020C 88F2                            mov     dl,dh
+   589 0000020E B80400                          mov     ax,4            ; month
+   590 00000211 E8(0000)                        call    rtc_set_loc
+   591                                  
+   592 00000214 88CA                            mov     dl,cl
+   593 00000216 B80600                          mov     ax,6            ; year
+   594 00000219 E8(0000)                        call    rtc_set_loc
+   595                                  
+   596 0000021C 88EA                            mov     dl,ch           ; century
+   597 0000021E B001                            mov     al,1
+   598 00000220 E8DAFE                          call    updateCMOS      ; fix checksum, too
+   599                                  
+   600 00000223 E807FF                          call    write_protect
+   601 00000226 595A                            popm    cx,dx
+   602 00000228 E9C9FE                          jmp     good_exit

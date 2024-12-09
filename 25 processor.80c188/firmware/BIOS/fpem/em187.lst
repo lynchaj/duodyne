@@ -235,7 +235,7 @@
     69 00000016 ??                  <1> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
     70                              <1> ;;---------------[Keyboard data area]------------;
     71 00000017 ????                <1> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
-    72                              <1> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+    72                              <1> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
     73 00000019 ??                  <1> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
     74 0000001A ????                <1> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
     75 0000001C ????                <1> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
@@ -309,7 +309,7 @@
    143                              <1> ;;---------------[RTC/timer1 data]---------------------;
    144 00000098 ????????            <1> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
    145 0000009C ????????            <1> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
-   146 000000A0 ??                  <1> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   146 000000A0 ??                  <1> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
    147                              <1> ;;---------------[Cassette I/O stuff]------------------;
    148 000000A1 ??                  <1> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
    149 000000A2 ????                <1> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
@@ -348,13 +348,13 @@
    182 000000F4 ????                <1> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
    183 000000F6 ????                <1> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
    184                              <1> 
-   185 000000F8 ????                <1> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   185 000000F8 ????                <1> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
    186                              <1> 
    187 000000FA ????????            <1> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
    188                              <1> 
    189 000000FE ??                  <1> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
    190                              <1> 
-   191 000000FF ??                  <1> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   191 000000FF ??                  <1> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
    192                              <1> ;								   CPU clock is half of this
    193                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    194                              <1> ;
@@ -372,31 +372,11 @@
    206                              <1> %define PPIDE_driver 1
    207                              <1> %endif
    208                              <1> %if 0				;*/
-   209                              <1> #define DIDE_driver 0		/*
+   209                              <1> #define USB_driver 1		/*
    210                              <1> %else
-   211                              <1> %define DIDE_driver 0
+   211                              <1> %define USB_driver 1
    212                              <1> %endif
-   213                              <1> %if 0				;*/
-   214                              <1> #define DISKIO_driver 1		/*
-   215                              <1> %else
-   216                              <1> %define DISKIO_driver 1
-   217                              <1> %endif
-   218                              <1> %if 0				;*/
-   219                              <1> #define MFPIC_driver 1		/*
-   220                              <1> %else
-   221                              <1> %define MFPIC_driver 1
-   222                              <1> %endif
-   223                              <1> %if 0				;*/
-   224                              <1> #define DSD_driver 1		/*
-   225                              <1> %else
-   226                              <1> %define DSD_driver 1
-   227                              <1> %endif
-   228                              <1> %if 0				;*/
-   229                              <1> #define V3IDE8_driver (SBC188==3)		/*
-   230                              <1> %else
-   231                              <1> %define V3IDE8_driver (SBC188==3)
-   232                              <1> %endif
-   233                              <1> 				;*/
+   213                              <1> 				;*/
     25                                  %include  "em187d.asm"
     26                              <1> ; em187d.asm -- definitions for em187.asm
     27                              <1> 

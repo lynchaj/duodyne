@@ -512,32 +512,34 @@
    229                              <1> FDC_DACK_TC     equ     FDC+7
    230                              <1> 
    231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> ; CH376 controller (Duodyne Multi IO)
+   232                              <1> ; Duodyne Multi IO
    233                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    234                              <1> CH376	        equ	IO_BASE+004EH
-   235                              <1> 
-   236                              <1> 
-   237                              <1> 
-   238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   239                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   235                              <1> ParPrinter      equ	IO_BASE+0048H
+   236                              <1> DuoSerial       equ	IO_BASE+0070H
+   237                              <1> MultiIo8242     equ	IO_BASE+004CH
+   238                              <1> PrinterTimeout  equ 	020h
+   239                              <1> 
    240                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   241                              <1> RTC	equ	IO_BASE+0094H
-   242                              <1> 
-   243                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   244                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   241                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   242                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   243                              <1> RTC	equ	IO_BASE+0094H
+   244                              <1> 
    245                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   246                              <1> PPI	        equ	IO_BASE+0088H
-   247                              <1> 
-   248                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   249                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   250                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   251                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   252                              <1> 
-   253                              <1> portA           equ     PPI+0   ;
-   254                              <1> portB           equ     PPI+1   ;
-   255                              <1> portC           equ     PPI+2   ;
-   256                              <1> 
-   257                              <1> ; end CPUREGS.ASM
+   246                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   247                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   248                              <1> PPI	        equ	IO_BASE+0088H
+   249                              <1> 
+   250                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   251                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   252                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   253                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   254                              <1> 
+   255                              <1> portA           equ     PPI+0   ;
+   256                              <1> portB           equ     PPI+1   ;
+   257                              <1> portC           equ     PPI+2   ;
+   258                              <1> 
+   259                              <1> ; end CPUREGS.ASM
     36                                  	%include "date.asm"
     37                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     38                              <1> ; date.asm
@@ -554,14 +556,14 @@
     49                              <1> ;
     50                              <1> ; Updated for the Duodyne 80c188 SBC
     51                              <1> 
-    52                              <1> %define DATE_STRING0	"10/27/24"
-    53                              <1> %define DATE_STRING1	"27-Oct-2024"
+    52                              <1> %define DATE_STRING0	"12/08/24"
+    53                              <1> %define DATE_STRING1	"08-DEC-2024"
     54                              <1> 
     55                              <1> %define VERSION_MAJOR		3
     56                              <1> %define VERSION_MINOR		5
     57                              <1> %define VERSION_REVISION	2
     58                              <1> %define VERSION_SUFFIX		""
-    59                              <1> %define VERSION_SEQUENCE	66
+    59                              <1> %define VERSION_SEQUENCE	70
     60                              <1> 
     61                              <1> %define VERSION_STRING		"3.5-D",VERSION_SUFFIX
     62                              <1> 
@@ -1092,7 +1094,7 @@
    203                                  	CALL lites
    204                                  	%endif
    205                                  
-   206 0000006E 6A42                    	push VERSION_SEQUENCE
+   206 0000006E 6A46                    	push VERSION_SEQUENCE
    207 00000070 0E                      	push cs
    208 00000071 68[4206]                	push ident1
    209 00000074 E8(0000)                	call _cprintf
@@ -2711,10 +2713,10 @@
   1208 00000604 546869732042494F53-     	db "This BIOS copy was built at ", __TIME__, " ", TIMEZONE
   1208 0000060D 20636F707920776173-
   1208 00000616 206275696C74206174-
-  1208 0000061F 2032323A32363A3438-
+  1208 0000061F 2030313A31353A3136-
   1208 00000628 20435354           
   1209 0000062C 206F6E20323032342D-     	db " on ", __DATE__
-  1209 00000635 31322D3037         
+  1209 00000635 31322D3039         
   1210                                  	%endif
   1211                                  	%endif
   1212 0000063A 2E205B25645D0A          	db ". [%d]", NL
@@ -2765,8 +2767,8 @@
   1228 0000076A 202020202020202020-
   1228 00000773 202020202020202020-
   1228 0000077C 7C5F5F5F2F2020206F-
-  1228 00000785 6620202032372D4F63-
-  1228 0000078E 742D323032340A     
+  1228 00000785 6620202030382D4445-
+  1228 0000078E 432D323032340A     
   1229 00000795 202020202020202020-             db      "                                   ("
   1229 0000079E 202020202020202020-
   1229 000007A7 202020202020202020-

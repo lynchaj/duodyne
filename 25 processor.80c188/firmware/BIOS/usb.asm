@@ -167,6 +167,8 @@ _USB_READ_ID:
 	; id.ModelNumber[40] 27 - 46
 	call CH_CMD_RD               ; SEND READ USB DATA CMD
 	call CH_RD                   ; READ DATA BLOCK LENGTH
+	cmp al,36
+	jne .9
 	xor ah, ah
 	push ax
 	mov cx, 8                    ; ignore the first 8 bytes of data structure
@@ -186,7 +188,7 @@ _USB_READ_ID:
 	dec cx
 	jz .3a
 	call CH_RD
-	.3a
+.3a
 	es mov word [di], ax
 	inc di
 	inc di
@@ -195,7 +197,7 @@ _USB_READ_ID:
 	les bx, ARG(1)
 	mov di, bx
 	call CHUSB_DSKSIZ            ; GET AND RECORD DISK SIZE
-
+	jc .9
 	es mov word [di + 108], 00   ; id.NumberOfCurrentCylinders
 	es mov [di + 110], dx        ; id.NumberOfCurrentHeads
 	es mov [di + 112], cx        ; id.CurrentSectorsPerTrack
@@ -217,6 +219,11 @@ _USB_READ_ID:
 	mov di, bx
 	es mov word [di + 98], 0000001000000000b
 	xor ax, ax
+	popm es, bx
+	leave
+	ret
+.9
+	mov ax,0ffh
 	popm es, bx
 	leave
 	ret

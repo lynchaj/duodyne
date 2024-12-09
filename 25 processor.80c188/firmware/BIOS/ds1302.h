@@ -27,6 +27,7 @@
 
 /* leave a little room for expansion */
 
+
 #define RAM_checksum	30
 #define RAM_length	31
 

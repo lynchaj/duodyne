@@ -501,32 +501,34 @@
    218                              <1> FDC_DACK_TC     equ     FDC+7
    219                              <1> 
    220                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   221                              <1> ; CH376 controller (Duodyne Multi IO)
+   221                              <1> ; Duodyne Multi IO
    222                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    223                              <1> CH376	        equ	IO_BASE+004EH
-   224                              <1> 
-   225                              <1> 
-   226                              <1> 
-   227                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   228                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   224                              <1> ParPrinter      equ	IO_BASE+0048H
+   225                              <1> DuoSerial       equ	IO_BASE+0070H
+   226                              <1> MultiIo8242     equ	IO_BASE+004CH
+   227                              <1> PrinterTimeout  equ 	020h
+   228                              <1> 
    229                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   230                              <1> RTC	equ	IO_BASE+0094H
-   231                              <1> 
-   232                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   233                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   230                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   232                              <1> RTC	equ	IO_BASE+0094H
+   233                              <1> 
    234                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   235                              <1> PPI	        equ	IO_BASE+0088H
-   236                              <1> 
-   237                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   238                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   239                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   240                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   241                              <1> 
-   242                              <1> portA           equ     PPI+0   ;
-   243                              <1> portB           equ     PPI+1   ;
-   244                              <1> portC           equ     PPI+2   ;
-   245                              <1> 
-   246                              <1> ; end CPUREGS.ASM
+   235                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   237                              <1> PPI	        equ	IO_BASE+0088H
+   238                              <1> 
+   239                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   240                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   241                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   242                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   243                              <1> 
+   244                              <1> portA           equ     PPI+0   ;
+   245                              <1> portB           equ     PPI+1   ;
+   246                              <1> portC           equ     PPI+2   ;
+   247                              <1> 
+   248                              <1> ; end CPUREGS.ASM
     25                                  %include	"equates.asm"
     26                              <1> ;========================================================================
     27                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS

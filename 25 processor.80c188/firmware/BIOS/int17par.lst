@@ -1,30 +1,30 @@
-     1                                  ;========================================================================
-     2                                  ; int17ser.asm -- Parallel Port Print Services
-     3                                  ;========================================================================
-     4                                  ;
-     5                                  ; Compiles with NASM 2.14, might work with other versions
-     6                                  ;
-     7                                  ; Copyright (C) 2019 Richard Cini. Based on the code contained in the
-     8                                  ; "Generic XT BIOS" from Anonymous (1988)
-     9                                  ;
-    10                                  ; Provided for hobbyist use on the N8VEM SBC-188 board.
-    11                                  ;  
-    12                                  ; This program is free software: you can redistribute it and/or modify
-    13                                  ; it under the terms of the GNU General Public License as published by
-    14                                  ; the Free Software Foundation, either version 3 of the License, or
-    15                                  ; (at your option) any later version.
-    16                                  ;
-    17                                  ; This program is distributed in the hope that it will be useful,
-    18                                  ; but WITHOUT ANY WARRANTY; without even the implied warranty of
-    19                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    20                                  ; GNU General Public License for more details.
-    21                                  ;
-    22                                  ; You should have received a copy of the GNU General Public License
-    23                                  ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    24                                  ;
-    25                                  ;========================================================================
+     1                                  	;========================================================================
+     2                                  	; int17ser.asm - - Parallel Port Print Services
+     3                                  	;========================================================================
+     4                                  	;
+     5                                  	; Compiles with NASM 2.14, might work with other versions
+     6                                  	;
+     7                                  	; Based on the code contained in the "Generic XT BIOS" from Anonymous
+     8                                  	; (1988)
+     9                                  	;
+    10                                  	; Provided for hobbyist use on the N8VEM SBC - 188 board.
+    11                                  	;
+    12                                  	; This program is free software: you can redistribute it and / or modify
+    13                                  	; it under the terms of the GNU General Public License as published by
+    14                                  	; the Free Software Foundation, either version 3 of the License, or
+    15                                  	; (at your option) any later version.
+    16                                  	;
+    17                                  	; This program is distributed in the hope that it will be useful,
+    18                                  	; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    19                                  	; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    20                                  	; GNU General Public License for more details.
+    21                                  	;
+    22                                  	; You should have received a copy of the GNU General Public License
+    23                                  	; along with this program. If not, see <http: / / www.gnu.org / licenses / >.
+    24                                  	;
+    25                                  	;========================================================================
     26                                  
-    27                                  %include	"config.asm"
+    27                                  	%include "config.asm"
     28                              <1> ;/*
     29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     30                              <1> ; ANSI.CFG
@@ -191,7 +191,7 @@
    191                              <1> ; end of the Hardware configuration file
    192                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    193                              <1> ;*/
-    28                                  %include	"cpuregs.asm"
+    28                                  	%include "cpuregs.asm"
     29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     30                              <1> ; CPUREGS.ASM
     31                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -505,33 +505,35 @@
    222                              <1> FDC_DACK_TC     equ     FDC+7
    223                              <1> 
    224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   225                              <1> ; CH376 controller (Duodyne Multi IO)
+   225                              <1> ; Duodyne Multi IO
    226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    227                              <1> CH376	        equ	IO_BASE+004EH
-   228                              <1> 
-   229                              <1> 
-   230                              <1> 
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   228                              <1> ParPrinter      equ	IO_BASE+0048H
+   229                              <1> DuoSerial       equ	IO_BASE+0070H
+   230                              <1> MultiIo8242     equ	IO_BASE+004CH
+   231                              <1> PrinterTimeout  equ 	020h
+   232                              <1> 
    233                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   234                              <1> RTC	equ	IO_BASE+0094H
-   235                              <1> 
-   236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   237                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   234                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   235                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   236                              <1> RTC	equ	IO_BASE+0094H
+   237                              <1> 
    238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   239                              <1> PPI	        equ	IO_BASE+0088H
-   240                              <1> 
-   241                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   242                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   243                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   244                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   245                              <1> 
-   246                              <1> portA           equ     PPI+0   ;
-   247                              <1> portB           equ     PPI+1   ;
-   248                              <1> portC           equ     PPI+2   ;
-   249                              <1> 
-   250                              <1> ; end CPUREGS.ASM
-    29                                  %include	"equates.asm"
+   239                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   240                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   241                              <1> PPI	        equ	IO_BASE+0088H
+   242                              <1> 
+   243                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   244                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   245                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   246                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   247                              <1> 
+   248                              <1> portA           equ     PPI+0   ;
+   249                              <1> portB           equ     PPI+1   ;
+   250                              <1> portC           equ     PPI+2   ;
+   251                              <1> 
+   252                              <1> ; end CPUREGS.ASM
+    29                                  	%include "equates.asm"
     30                              <1> ;========================================================================
     31                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
     32                              <1> ;========================================================================
@@ -874,107 +876,96 @@
    121                              <1> 
    122                              <1> %endif
     30                                  
-    31                                  	SEGMENT	_TEXT
-    32                                  ;===============================================================================
-    33                                  ;  BIOS_call_17h  - Print services
-    34                                  ;
-    35                                  ;	Purpose:  INT 17h BIOS printer services.
-    36                                  ;	Entry  :	AH = 0		Print character in AL
-    37                                  ;			AH = 1		Initialize port
-    38                                  ;			AH = 2		Read printer port status to AH
-    39                                  ;			
-    40                                  ;			AL = 		character to print
-    41                                  ;			DX =		0-based port number
-    42                                  ;			All registers preserved except AX
-    43                                  ;
-    44                                  ;	Exit   :	AH =	Port Status
-    45                                  ;				|7|6|5|4|3|2|1|0|  AH (status)
-    46                                  ;	 			 | | | | | | | `----  time-out
-    47                                  ;	 			 | | | | | `-'------  unused
-    48                                  ;	 			 | | | | `--------  1 = I/O error (pin 15)
-    49                                  ;	 			 | | | `---------  1 = printer selected/on-line (pin 13)
-    50                                  ;	 			 | | `----------  1 = out of paper (pin 12)
-    51                                  ;	 			 | `-----------  1 = printer acknowledgment (pin 10)
-    52                                  ;	 			 `------------	1 = printer not busy (pin 11)
-    53                                  ;
-    54                                  ;===============================================================================
-    55                                  ;        ENTRY   0EFD2h				; IBM entry for parallel LPT
+    31                                  	SEGMENT _TEXT
+    32                                  	;===============================================================================
+    33                                  	; BIOS_call_17h - Print services
+    34                                  	;
+    35                                  	; Purpose: INT 17h BIOS printer services.
+    36                                  	; Entry : AH = 0 Print character in AL
+    37                                  	; AH = 1 Initialize port
+    38                                  	; AH = 2 Read printer port status to AH
+    39                                  	;
+    40                                  	; AL = character to print
+    41                                  	; DX = 0 - based port number
+    42                                  	; All registers preserved except AX
+    43                                  	;
+    44                                  	; Exit : AH = Port Status
+    45                                  	; |7|6|5|4|3|2|1|0| AH (status)
+    46                                  	; | | | | | | | ` - - - - time - out
+    47                                  	; | | | | | ` - ' - - - - - - unused
+    48                                  	; | | | | ` - - - - - - - - 1 = I / O error (pin 15)
+    49                                  	; | | | ` - - - - - - - - - 1 = printer selected / on - line (pin 13)
+    50                                  	; | | ` - - - - - - - - - - 1 = out of paper (pin 12)
+    51                                  	; | ` - - - - - - - - - - - 1 = printer acknowledgment (pin 10)
+    52                                  	; ` - - - - - - - - - - - - 1 = printer not busy (pin 11)
+    53                                  	;
+    54                                  	;===============================================================================
+    55                                  	; ENTRY 0EFD2h ; IBM entry for parallel LPT
     56                                  
-    57                                  	global	BIOS_call_17h
+    57                                  	global BIOS_call_17h
     58                                  
     59                                  BIOS_call_17h:
-    60                                  %if TRACE
-    61                                  	call	int_trace
-    62                                  %endif	; TRACE
-    63                                  	
-    64 00000000 FB                      	STI                                     ; Parallel printer services
-    65 00000001 1E                              PUSH    DS
-    66 00000002 53                              PUSH    BX
-    67 00000003 51                              PUSH    CX
-    68 00000004 52                              PUSH    DX
-    69 00000005 BB4000                          MOV     BX,40h
-    70 00000008 8EDB                            MOV     DS,BX
-    71 0000000A 89D3                            MOV     BX,DX                           ; DX is printer index (0 - 3)
-    72 0000000C D1E3                            SHL     BX,1                            ;  ...word index
-    73 0000000E 8B5708                          MOV     DX,[BX+8]                       ; Load printer port
-    74 00000011 09D2                            OR      DX,DX
-    75 00000013 740C                            JZ      LP_01                           ; Goes to black hole
-    76 00000015 08E4                            OR      AH,AH
-    77 00000017 740D                            JZ      LP_02                           ; Function is print, AH=0
-    78 00000019 FECC                            DEC     AH
-    79 0000001B 7439                            JZ      LP_INI                          ; Function is init , AH=1
-    80 0000001D FECC                            DEC     AH
-    81 0000001F 7429                            JZ      LP_STS                          ; Get the status   , AH=2
-    82                                  
-    83 00000021 5A                      LP_01:  POP     DX
-    84 00000022 59                              POP     CX
-    85 00000023 5B                              POP     BX
-    86 00000024 1F                              POP     DS
-    87 00000025 CF                              IRET
+    60 00000000 515352                  	pushm dx, bx, cx
+    61 00000003 FB                      	sti                          ; Printer Services - Support Duodyne Media Board LPT
+    62 00000004 80FC00                  	cmp ah, 0
+    63 00000007 740E                    	je LP_OUT                    ; Function is print, AH=0
+    64 00000009 80FC01                  	cmp ah, 1
+    65 0000000C 7438                    	je LP_INI                    ; Function is init, AH=1
+    66 0000000E 80FC02                  	cmp ah, 2
+    67 00000011 7443                    	je LP_STS                    ; Get the status, AH=2
+    68 00000013 5A5B59                  	popm dx, bx, cx
+    69 00000016 CF                      	iret
+    70                                  
+    71                                  LP_OUT:
+    72 00000017 BA4804                  	mov dx, ParPrinter
+    73 0000001A EE                      	out dx, al                   ; Char - - > data lines 0 - 7
+    74 0000001B BA4904                  	mov dx, ParPrinter + 1       ; Printer status port
+    75 0000001E B720                    	mov bh, PrinterTimeout       ; Load time out parameter
+    76 00000020 88C4                    	mov ah, al
+    77                                  
+    78                                  .1:
+    79 00000022 31C9                    	xor cx, cx                   ; Clear lo order time out
+    80                                  
+    81                                  .2:
+    82 00000024 EC                      	in al, dx                    ; Get line printer status
+    83 00000025 08C0                    	or al, al                    ; ...ready?
+    84 00000027 7812                    	js .3                        ; ...done if so
+    85 00000029 E2F9                    	loop .2
+    86 0000002B FECF                    	dec bh                       ; Decrement time out
+    87 0000002D 75F3                    	jnz .1
     88                                  
-    89 00000026 EE                      LP_02:  OUT     DX,AL                           ; Char --> data lines 0-7
-    90 00000027 42                              INC     DX                              ; Printer status port
-    91 00000028 8A7F78                          MOV     BH,[BX+78h]                     ; Load time out parameter
-    92 0000002B 88C4                            MOV     AH,AL
-    93                                  
-    94 0000002D 31C9                    LP_05:  XOR     CX,CX                           ; Clear lo order time out
-    95                                  
-    96 0000002F EC                      LP_POL: IN      AL,DX                           ; Get line printer status
-    97 00000030 08C0                            OR      AL,AL                           ;  ...ready?
-    98 00000032 780C                            JS      LP_DON                          ;  ...done if so
-    99 00000034 E2F9                            LOOP    LP_POL
-   100 00000036 FECF                            DEC     BH                              ; Decrement hi order time out
-   101 00000038 75F3                            JNZ     LP_05
-   102                                  
-   103 0000003A 0C01                            OR      AL,00000001b                    ; Set timeout in Status Byte
-   104 0000003C 24F9                            AND     AL,11111001b                    ;  ...bits returned to caller
-   105 0000003E EB10                            JMP     short LP_TOG
-   106                                  
-   107 00000040 42                      LP_DON: INC     DX                              ; Printer control port
-   108 00000041 B00D                            MOV     AL,00001101b                    ; Set output strobe hi
-   109 00000043 EE                              OUT     DX,AL                           ;  ...data lines 0-7 valid
+    89 0000002F 0C01                    	or al, 00000001b             ; Set timeout in Status Byte
+    90 00000031 24F9                    	and al, 11111001b            ; ...bits returned to caller
+    91 00000033 3448                    	xor al, 01001000b            ; ...toggle ERROR, ACKNOWLEDGE
+    92 00000035 86C4                    	xchg al, ah
+    93                                  	; Exit, AH=Status, AL=character
+    94 00000037 5A5B59                  	popm dx, bx, cx
+    95 0000003A CF                      	iret
+    96                                  
+    97                                  .3:
+    98 0000003B BA4A04                  	mov dx, ParPrinter + 2       ; Printer control port
+    99 0000003E B00D                    	mov al, 00001101b            ; Set output strobe hi
+   100 00000040 EE                      	out dx, al                   ; ...data lines 0 - 7 valid
+   101 00000041 B00C                    	mov al, 00001100b            ; Set output strobe lo
+   102 00000043 EE                      	out dx, al                   ; ...data lines 0 - 7 ?????
+   103 00000044 EB10                            jmp LP_STS
+   104                                  
+   105                                  LP_INI:
+   106 00000046 88C4                            mov ah,al                ; Initialize the line printer
+   107 00000048 BA4A04                  	mov dx, ParPrinter + 2       ; Printer control port
+   108 0000004B B008                    	mov al, 00001000b
+   109 0000004D EE                      	out dx, al                   ; Request initialize
    110                                  
-   111 00000044 B00C                    LP_STR: MOV     AL,00001100b                    ; Set output strobe lo
-   112 00000046 EE                              OUT     DX,AL                           ;  ...data lines 0-7 ?????
-   113 00000047 4A                              DEC     DX                              ; Printer status port
-   114 00000048 EB03                            JMP     short LP_ST1			; ...get line printer status
-   115                                  
-   116 0000004A 88C4                    LP_STS: MOV     AH,AL                           ; Save copy of character
-   117 0000004C 42                              INC     DX                              ; Printer status port
-   118                                  
-   119 0000004D EC                      LP_ST1: IN      AL,DX                           ; Read printer status
-   120 0000004E 24F8                            AND     AL,11111000b                    ;  ...bits returned to caller
-   121                                  
-   122 00000050 3448                    LP_TOG: XOR     AL,01001000b                    ;  ...toggle ERROR,ACKNOWLEDGE
-   123 00000052 86C4                            XCHG    AL,AH
-   124 00000054 EBCB                            JMP     LP_01                           ; Exit, AH=Status,AL=character
-   125                                  
-   126 00000056 88C4                    LP_INI: MOV     AH,AL                           ; Initialize the line printer
-   127 00000058 42                              INC     DX
-   128 00000059 42                              INC     DX
-   129 0000005A B008                            MOV     AL,00001000b
-   130 0000005C EE                              OUT     DX,AL                           ; Request initialize
-   131 0000005D B9DC05                          MOV     CX,5DCh                         ;  ...delay
-   132 00000060 E2FE                    LP_DLY: LOOP    LP_DLY
-   133 00000062 EBE0                            JMP     LP_STR                          ; Strobe the line printer
-   134                                  
+   111 0000004E B9DC05                  	mov cx, 5DCh                 ; ...delay
+   112                                  .4:
+   113 00000051 E2FE                            loop .4
+   114 00000053 B00C                    	mov al, 00001100b            ; Set output strobe lo
+   115 00000055 EE                      	out dx, al                   ; ...data lines 0 - 7 ?????
+   116                                  LP_STS:
+   117 00000056 BA4904                  	mov dx, ParPrinter + 1       ; Printer status port
+   118 00000059 EC                      	in al, dx                    ; Read printer status
+   119 0000005A 24F8                    	and al, 11111000b            ; ...bits returned to caller
+   120 0000005C 3448                    	xor al, 01001000b            ; ...toggle ERROR, ACKNOWLEDGE
+   121 0000005E 86C4                    	xchg al, ah
+   122 00000060 5A5B59                  	popm dx, bx, cx
+   123 00000063 CF                      	iret

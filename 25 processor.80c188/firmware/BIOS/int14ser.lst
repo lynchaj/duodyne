@@ -1,30 +1,30 @@
-     1                                  ;========================================================================
-     2                                  ; int14ser.asm -- Serial Port Services
-     3                                  ;========================================================================
-     4                                  ;
-     5                                  ; Compiles with NASM 2.14, might work with other versions
-     6                                  ;
-     7                                  ; Copyright (C) 2019 Richard Cini. Based on the code contained in the
-     8                                  ; "Generic XT BIOS" from Anonymous (1988)
-     9                                  ;
-    10                                  ; Provided for hobbyist use on the N8VEM SBC-188 board.
-    11                                  ;  
-    12                                  ; This program is free software: you can redistribute it and/or modify
-    13                                  ; it under the terms of the GNU General Public License as published by
-    14                                  ; the Free Software Foundation, either version 3 of the License, or
-    15                                  ; (at your option) any later version.
-    16                                  ;
-    17                                  ; This program is distributed in the hope that it will be useful,
-    18                                  ; but WITHOUT ANY WARRANTY; without even the implied warranty of
-    19                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    20                                  ; GNU General Public License for more details.
-    21                                  ;
-    22                                  ; You should have received a copy of the GNU General Public License
-    23                                  ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    24                                  ;
-    25                                  ;========================================================================
+     1                                  	;========================================================================
+     2                                  	; int14ser.asm - - Serial Port Services
+     3                                  	;========================================================================
+     4                                  	;
+     5                                  	; Compiles with NASM 2.14, might work with other versions
+     6                                  	;
+     7                                  	; Based on the code contained in the "Generic XT BIOS" from Anonymous
+     8                                  	; (1988)
+     9                                  	;
+    10                                  	; Provided for hobbyist use on the N8VEM SBC - 188 board.
+    11                                  	;
+    12                                  	; This program is free software: you can redistribute it and / or modify
+    13                                  	; it under the terms of the GNU General Public License as published by
+    14                                  	; the Free Software Foundation, either version 3 of the License, or
+    15                                  	; (at your option) any later version.
+    16                                  	;
+    17                                  	; This program is distributed in the hope that it will be useful,
+    18                                  	; but WITHOUT ANY WARRANTY; without even the implied warranty of
+    19                                  	; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    20                                  	; GNU General Public License for more details.
+    21                                  	;
+    22                                  	; You should have received a copy of the GNU General Public License
+    23                                  	; along with this program. If not, see <http: / / www.gnu.org / licenses / >.
+    24                                  	;
+    25                                  	;========================================================================
     26                                  
-    27                                  %include	"config.asm"
+    27                                  	%include "config.asm"
     28                              <1> ;/*
     29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     30                              <1> ; ANSI.CFG
@@ -191,7 +191,7 @@
    191                              <1> ; end of the Hardware configuration file
    192                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    193                              <1> ;*/
-    28                                  %include	"cpuregs.asm"
+    28                                  	%include "cpuregs.asm"
     29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     30                              <1> ; CPUREGS.ASM
     31                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -505,33 +505,35 @@
    222                              <1> FDC_DACK_TC     equ     FDC+7
    223                              <1> 
    224                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   225                              <1> ; CH376 controller (Duodyne Multi IO)
+   225                              <1> ; Duodyne Multi IO
    226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    227                              <1> CH376	        equ	IO_BASE+004EH
-   228                              <1> 
-   229                              <1> 
-   230                              <1> 
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   228                              <1> ParPrinter      equ	IO_BASE+0048H
+   229                              <1> DuoSerial       equ	IO_BASE+0070H
+   230                              <1> MultiIo8242     equ	IO_BASE+004CH
+   231                              <1> PrinterTimeout  equ 	020h
+   232                              <1> 
    233                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   234                              <1> RTC	equ	IO_BASE+0094H
-   235                              <1> 
-   236                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   237                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   234                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   235                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   236                              <1> RTC	equ	IO_BASE+0094H
+   237                              <1> 
    238                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   239                              <1> PPI	        equ	IO_BASE+0088H
-   240                              <1> 
-   241                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   242                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   243                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   244                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   245                              <1> 
-   246                              <1> portA           equ     PPI+0   ;
-   247                              <1> portB           equ     PPI+1   ;
-   248                              <1> portC           equ     PPI+2   ;
-   249                              <1> 
-   250                              <1> ; end CPUREGS.ASM
-    29                                  %include	"equates.asm"
+   239                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   240                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   241                              <1> PPI	        equ	IO_BASE+0088H
+   242                              <1> 
+   243                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   244                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   245                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   246                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   247                              <1> 
+   248                              <1> portA           equ     PPI+0   ;
+   249                              <1> portB           equ     PPI+1   ;
+   250                              <1> portC           equ     PPI+2   ;
+   251                              <1> 
+   252                              <1> ; end CPUREGS.ASM
+    29                                  	%include "equates.asm"
     30                              <1> ;========================================================================
     31                              <1> ; EQUATES.ASM -- Lots of Defintions for Relocatable BIOS
     32                              <1> ;========================================================================
@@ -875,290 +877,225 @@
    122                              <1> %endif
     30                                  
     31                                  
-    32                                  %define u_rbr	equ     0	;Rcvr Buffer / read only
-    33                                  %define u_thr	equ     0 	;Transmit Holding / write only
-    34                                  %define u_ier	equ     1	;Interrupt Enable
-    35                                  %define u_iir	equ     2	;Interrupt Ident / read only
-    36                                  %define u_fcr	equ     2	;FIFO Control / write only
-    37                                  %define u_lcr	equ     3	;Line Control
-    38                                  %define u_mcr	equ     4	;Modem Control
-    39                                  %define u_lsr	equ     5	;Line Status
-    40                                  %define u_msr	equ	6	;Modem Status
-    41                                  %define u_sr	equ	7	;Scratch
-    42                                  %define u_dll	equ     0	;Divisor Latch LS Byte
-    43                                  %define u_dlm 	equ     1	;Divisor Latch MS Byte
+    32                                  	%define u_rbr equ 0          ;Rcvr Buffer / read only
+    33                                  	%define u_thr equ 0          ;Transmit Holding / write only
+    34                                  	%define u_ier equ 1          ;Interrupt Enable
+    35                                  	%define u_iir equ 2          ;Interrupt Ident / read only
+    36                                  	%define u_fcr equ 2          ;FIFO Control / write only
+    37                                  	%define u_lcr equ 3          ;Line Control
+    38                                  	%define u_mcr equ 4          ;Modem Control
+    39                                  	%define u_lsr equ 5          ;Line Status
+    40                                  	%define u_msr equ 6          ;Modem Status
+    41                                  	%define u_sr equ 7           ;Scratch
+    42                                  	%define u_dll equ 0          ;Divisor Latch LS Byte
+    43                                  	%define u_dlm equ 1          ;Divisor Latch MS Byte
     44                                  
     45                                  
-    46                                  	SEGMENT	_TEXT
-    47                                  ;===============================================================================
-    48                                  ;  BIOS_call_14h  - Serial port communication services
-    49                                  ;
-    50                                  ;			Registers	Function
-    51                                  ;	Entry  :	AH = 0		Initialize port
-    52                                  ;			AH = 1		Send character in AL
-    53                                  ;			AH = 2		Receive character in AL
-    54                                  ;			AH = 3		Get serial port status
-    55                                  ;			
-    56                                  ;			AL = 		character to send or receive
-    57                                  ;			DX =		0-based port number
-    58                                  ;			All registers preserved except AX
-    59                                  ;
-    60                                  ;	Exit   :	AH =	Port Status
-    61                                  ;				|7|6|5|4|3|2|1|0|
-    62                                  ;		 		 | | | | | | | `---- data ready
-    63                                  ;				 | | | | | | `----- overrun error
-    64                                  ;	 			 | | | | | `------ parity error
-    65                                  ;	 			 | | | | `------- framing error
-    66                                  ;		 		 | | | `-------- break detect
-    67                                  ;	 			 | | `--------- transmit holding register empty
-    68                                  ;	 			 | `---------- transmit shift register empty
-    69                                  ;	 			 `----------- time out (N/A for functions 1 and 2)
-    70                                  ;			AL =	Modem Status
-    71                                  ;				|7|6|5|4|3|2|1|0|
-    72                                  ;		 		 | | | | | | | `---- clear to send status changed
-    73                                  ;		 		 | | | | | | `----- data set ready status changed
-    74                                  ;		 		 | | | | | `------ trailing edge ring indicator
-    75                                  ;		 		 | | | | `------- receive line signal changed
-    76                                  ;		 		 | | | `-------- clear to send
-    77                                  ;		 		 | | `--------- data set ready
-    78                                  ;		 		 | `---------- ring indicator
-    79                                  ;		 		 `----------- receive line signal detected
-    80                                  ;
-    81                                  ;===============================================================================
+    46                                  	SEGMENT _TEXT
+    47                                  	;===============================================================================
+    48                                  	; BIOS_call_14h - Serial port communication services
+    49                                  	;
+    50                                  	; Registers Function
+    51                                  	; Entry : AH = 0 Initialize port
+    52                                  	; AH = 1 Send character in AL
+    53                                  	; AH = 2 Receive character in AL
+    54                                  	; AH = 3 Get serial port status
+    55                                  	;
+    56                                  	; AL = character to send or receive
+    57                                  	; DX = 0 - based port number
+    58                                  	; All registers preserved except AX
+    59                                  	;
+    60                                  	; Exit : AH = Port Status
+    61                                  	; |7|6|5|4|3|2|1|0|
+    62                                  	; | | | | | | | ` - - - - data ready
+    63                                  	; | | | | | | ` - - - - - overrun error
+    64                                  	; | | | | | ` - - - - - - parity error
+    65                                  	; | | | | ` - - - - - - - framing error
+    66                                  	; | | | ` - - - - - - - - break detect
+    67                                  	; | | ` - - - - - - - - - transmit holding register empty
+    68                                  	; | ` - - - - - - - - - - transmit shift register empty
+    69                                  	; ` - - - - - - - - - - - time out (N / A for functions 1 and 2)
+    70                                  	; AL = Modem Status
+    71                                  	; |7|6|5|4|3|2|1|0|
+    72                                  	; | | | | | | | ` - - - - clear to send status changed
+    73                                  	; | | | | | | ` - - - - - data set ready status changed
+    74                                  	; | | | | | ` - - - - - - trailing edge ring indicator
+    75                                  	; | | | | ` - - - - - - - receive line signal changed
+    76                                  	; | | | ` - - - - - - - - clear to send
+    77                                  	; | | ` - - - - - - - - - data set ready
+    78                                  	; | ` - - - - - - - - - - ring indicator
+    79                                  	; ` - - - - - - - - - - - receive line signal detected
+    80                                  	;
+    81                                  	;===============================================================================
     82                                  
     83                                  	global BIOS_call_14h
     84                                  
     85                                  BIOS_call_14h:
-    86                                  %if TRACE
-    87                                  	call	int_trace
-    88                                  %endif	; TRACE
-    89                                  	
-    90 00000000 FB                      	STI                                     ; Serial com. RS232 services
-    91 00000001 1E                              PUSH    DS                              ;  ...thru IC 8250 uart (ugh)
-    92 00000002 52                              PUSH    DX                              ;  ...DX = COM device (0 - 3)
-    93 00000003 56                              PUSH    SI
-    94 00000004 57                              PUSH    DI
-    95 00000005 51                              PUSH    CX
-    96 00000006 53                              PUSH    BX
-    97 00000007 BB4000                          MOV     BX,40h
-    98 0000000A 8EDB                            MOV     DS,BX
-    99 0000000C 89D7                            MOV     DI,DX                           ;
-   100 0000000E 89D3                            MOV     BX,DX                           ; RS232 serial COM index (0-3)
-   101 00000010 D1E3                            SHL     BX,1                            ;  ...index by bytes
-   102 00000012 8B17                            MOV     DX,[BX]                         ; Convert index to port number
-   103 00000014 09D2                            OR      DX,DX                           ;  ...by indexing 40:0
-   104 00000016 7410                            JZ      COM_ND                          ;  ...no such COM device, exit
-   105 00000018 08E4                            OR      AH,AH                           ; Init on AH=0
-   106 0000001A 7423                            JZ      COMINI
-   107 0000001C FECC                            DEC     AH
-   108 0000001E 744A                            JZ      COMSND                          ; Send on AH=1
-   109 00000020 FECC                            DEC     AH
-   110 00000022 7463                            JZ      COMGET                          ; Rcvd on AH=2
-   111 00000024 FECC                            DEC     AH
-   112 00000026 7473                            JZ      COMSTS                          ; Stat on AH=3
-   113                                  
-   114 00000028 5B                      COM_ND: POP     BX                              ; End of COM service
-   115 00000029 59                              POP     CX
-   116 0000002A 5F                              POP     DI
-   117 0000002B 5E                              POP     SI
-   118 0000002C 5A                              POP     DX
-   119 0000002D 1F                              POP     DS
-   120 0000002E CF                              IRET
+    86                                  
+    87 00000000 FB                      	sti                          ; Serial com. RS232 services
+    88 00000001 1E                      	push DS                      ; ...thru IC 8250 uart (ugh)
+    89 00000002 52                      	push DX                      ; ...DX = MultiIO COM device (0 - 1)
+    90 00000003 56                      	push SI
+    91 00000004 57                      	push DI
+    92 00000005 51                      	push CX
+    93 00000006 53                      	push BX
+    94                                  
+    95 00000007 BA7004                  	mov dx, DuoSerial
+    96 0000000A 83FA00                  	cmp dx, 00
+    97 0000000D 740A                    	je .2
+    98                                  .1:
+    99 0000000F 83FA01                  	cmp dx, 01
+   100 00000012 7515                    	jne COM_ND                   ; ...no such COM device, exit
+   101 00000014 83C208                  	add dx, 8
+   102 00000017 EB00                    	jmp .2
+   103                                  .2:
+   104 00000019 08E4                    	or AH, AH                    ; Init on AH=0
+   105 0000001B 7423                    	jz COMINI
+   106 0000001D FECC                    	dec AH
+   107 0000001F 744A                    	jz COMSND                    ; Send on AH=1
+   108 00000021 FECC                    	dec AH
+   109 00000023 7463                    	jz COMGET                    ; Rcvd on AH=2
+   110 00000025 FECC                    	dec AH
+   111 00000027 7473                    	jz COMSTS                    ; Stat on AH=3
+   112                                  
+   113                                  COM_ND:
+   114 00000029 5B                              pop BX                ; End of COM service
+   115 0000002A 59                      	pop CX
+   116 0000002B 5F                              pop DI
+   117 0000002C 5E                      	pop SI
+   118 0000002D 5A                      	pop DX
+   119 0000002E 1F                      	pop DS
+   120 0000002F CF                      	iret
    121                                  
-   122                                  divisors:				; expanded to higher bit rates for SBC-188
-   123                                  					; limited to 8 slots
-   124                                  ;	dw	UART_OSC/16/300		; 300 Kbit/sec
-   125 0000002F 8001                    	dw	0180h
-   126                                  ;	dw	UART_OSC/16/1200	; 1200 Kbit/sec
-   127 00000031 6000                    	dw	0060h
-   128                                  ;	dw	UART_OSC/16/2400	; 2400 Kbit/sec
-   129 00000033 3000                    	dw	0030h
-   130                                  ;	dw	UART_OSC/16/9600	; 9600 Kbit/sec
-   131 00000035 0C00                    	dw	000Ch
-   132                                  ;	dw	UART_OSC/16/19200	; 19200 Kbit/sec
-   133 00000037 0600                    	dw	0006h
-   134                                  ;	dw	UART_OSC/16/38400	; 38400 Kbit/sec
-   135 00000039 0300                    	dw	0003h
-   136                                  ;	dw	UART_OSC/16/57600	; 57600 Kbit/sec
-   137 0000003B 0200                    	dw	0002h
-   138                                  ;	dw	UART_OSC/16/115200	; 115200 Kbit/sec
-   139 0000003D 0100                    	dw	0001h
-   140                                  	
-   141                                  	
-   142 0000003F 50                      COMINI: PUSH    AX                              ; Init COM port.  AL has data
-   143                                                                                  ; = (Word Length in Bits - 5)
-   144                                                                                  ;  +(1 iff two stop bits) *  4
-   145                                                                                  ;  +(1 iff parity enable) *  8
-   146                                                                                  ;  +(1 iff parity even  ) * 16
-   147                                                                                  ;  +(BAUD: select 0-7   ) * 32
-   148 00000040 88C3                            MOV     BL,AL
-   149 00000042 83C203                          ADD     DX,3                            ; Line Control Register (LCR)
-   150 00000045 B080                            MOV     AL,80h                          ;  ...index RS232_BASE + 3
-   151 00000047 EE                              OUT     DX,AL                           ; Tell LCR to set (latch) baud
-   152 00000048 B104                            MOV     CL,4
-   153 0000004A D2C3                            ROL     BL,CL                           ; Baud rate selects by words
-   154 0000004C 83E30E                          AND     BX,00001110b                    ;  ...mask off extraneous
-   155 0000004F 2E8B87[2F00]                cs  MOV     AX,Word [divisors + bx]		; Clock divisor in AX ***CS?
-   156 00000054 83EA03                          SUB     DX,3                            ; Load in lo order baud rate
-   157 00000057 EE                              OUT     DX,AL                           ;  ...index RS232_BASE + 0
-   158 00000058 42                              INC     DX                              ; Load in hi order baud rate
-   159 00000059 88E0                            MOV     AL,AH
-   160 0000005B EE                              OUT     DX,AL                           ;  ...index RS232_BASE + 1
-   161 0000005C 58                              POP     AX
-   162 0000005D 42                              INC     DX                              ; Find Line Control Register
-   163 0000005E 42                              INC     DX                              ;  ...index RS232_BASE + 3
-   164 0000005F 241F                            AND     AL,00011111b                    ; Mask out the baud rate
-   165 00000061 EE                              OUT     DX,AL                           ;  ...set (censored) init stat
-   166 00000062 B000                            MOV     AL,0
-   167 00000064 4A                              DEC     DX                              ; Interrupt Enable Reg. (IER)
-   168 00000065 4A                              DEC     DX                              ;  ...index RS232_BASE + 1
-   169 00000066 EE                              OUT     DX,AL                           ; Interrupt is disabled
-   170 00000067 4A                              DEC     DX
-   171 00000068 EB31                            JMP     short COMSTS                    ; Return current status
+   122                                  divisors:                     ; expanded to higher bit rates for Duodyne
+   123                                  	; limited to 8 slots
+   124                                  	; dw UART_OSC / 16 / 300 ; 300 Kbit / sec
+   125 00000030 8001                    	dw 0180h
+   126                                  	; dw UART_OSC / 16 / 1200 ; 1200 Kbit / sec
+   127 00000032 6000                    	dw 0060h
+   128                                  	; dw UART_OSC / 16 / 2400 ; 2400 Kbit / sec
+   129 00000034 3000                    	dw 0030h
+   130                                  	; dw UART_OSC / 16 / 9600 ; 9600 Kbit / sec
+   131 00000036 0C00                    	dw 000Ch
+   132                                  	; dw UART_OSC / 16 / 19200 ; 19200 Kbit / sec
+   133 00000038 0600                    	dw 0006h
+   134                                  	; dw UART_OSC / 16 / 38400 ; 38400 Kbit / sec
+   135 0000003A 0300                    	dw 0003h
+   136                                  	; dw UART_OSC / 16 / 57600 ; 57600 Kbit / sec
+   137 0000003C 0200                    	dw 0002h
+   138                                  	; dw UART_OSC / 16 / 115200 ; 115200 Kbit / sec
+   139 0000003E 0100                    	dw 0001h
+   140                                  
+   141                                  
+   142 00000040 50                      COMINI: PUSH AX               ; Init COM port. AL has data
+   143                                  	; = (Word Length in Bits - 5)
+   144                                  	; + (1 iff two stop bits) * 4
+   145                                  	; + (1 iff parity enable) * 8
+   146                                  	; + (1 iff parity even ) * 16
+   147                                  	; + (BAUD: select 0 - 7 ) * 32
+   148 00000041 88C3                    	MOV BL, AL
+   149 00000043 83C203                  	ADD DX, 3                    ; Line Control Register (LCR)
+   150 00000046 B080                    	MOV AL, 80h                  ; ...index RS232_BASE + 3
+   151 00000048 EE                      	OUT DX, AL                   ; Tell LCR to set (latch) baud
+   152 00000049 B104                    	MOV CL, 4
+   153 0000004B D2C3                    	ROL BL, CL                   ; Baud rate selects by words
+   154 0000004D 83E30E                  	AND BX, 00001110b            ; ...mask off extraneous
+   155 00000050 2E8B87[3000]            	cs MOV AX, Word [divisors + bx] ; Clock divisor in AX * * * CS?
+   156 00000055 83EA03                  	SUB DX, 3                    ; Load in lo order baud rate
+   157 00000058 EE                      	OUT DX, AL                   ; ...index RS232_BASE + 0
+   158 00000059 42                      	INC DX                       ; Load in hi order baud rate
+   159 0000005A 88E0                    	MOV AL, AH
+   160 0000005C EE                      	OUT DX, AL                   ; ...index RS232_BASE + 1
+   161 0000005D 58                      	POP AX
+   162 0000005E 42                      	INC DX                       ; Find Line Control Register
+   163 0000005F 42                      	INC DX                       ; ...index RS232_BASE + 3
+   164 00000060 241F                    	AND AL, 00011111b            ; Mask out the baud rate
+   165 00000062 EE                      	OUT DX, AL                   ; ...set (censored) init stat
+   166 00000063 B000                    	MOV AL, 0
+   167 00000065 4A                      	DEC DX                       ; Interrupt Enable Reg. (IER)
+   168 00000066 4A                      	DEC DX                       ; ...index RS232_BASE + 1
+   169 00000067 EE                      	OUT DX, AL                   ; Interrupt is disabled
+   170 00000068 4A                      	DEC DX
+   171 00000069 EB31                    	JMP short COMSTS             ; Return current status
    172                                  
-   173 0000006A 50                      COMSND: PUSH    AX                              ; Send AL thru COM port
-   174 0000006B B003                            MOV     AL,3
-   175 0000006D B730                            MOV     BH,00110000b                    ;(Data Set Ready,Clear To Send)
-   176 0000006F B320                            MOV     BL,00100000b                    ;  ..(Data Terminal Ready) wait
-   177 00000071 E84800                          CALL    WAITFR                          ; Wait for transmitter to idle
-   178 00000074 7509                            JNZ     HUNG                            ;  ...time-out error
-   179 00000076 83EA05                          SUB     DX,5                            ;  ...(xmit) index RS232_BASE
-   180 00000079 59                              POP     CX                              ; Restore char to CL register
-   181 0000007A 88C8                            MOV     AL,CL                           ;  ...get copy to load in uart
-   182 0000007C EE                              OUT     DX,AL                           ;  ...transmit char to IC 8250
-   183 0000007D EBA9                            JMP     COM_ND                          ;  ...AH register has status
+   173 0000006B 50                      COMSND: PUSH AX               ; Send AL thru COM port
+   174 0000006C B003                    	MOV AL, 3
+   175 0000006E B730                    	MOV BH, 00110000b            ;(Data Set Ready, Clear To Send)
+   176 00000070 B320                    	MOV BL, 00100000b            ; ..(Data Terminal Ready) wait
+   177 00000072 E84800                  	CALL WAITFR                  ; Wait for transmitter to idle
+   178 00000075 7509                    	JNZ HUNG                     ; ...time - out error
+   179 00000077 83EA05                  	SUB DX, 5                    ; ...(xmit) index RS232_BASE
+   180 0000007A 59                      	POP CX                       ; Restore char to CL register
+   181 0000007B 88C8                    	MOV AL, CL                   ; ...get copy to load in uart
+   182 0000007D EE                      	OUT DX, AL                   ; ...transmit char to IC 8250
+   183 0000007E EBA9                    	JMP COM_ND                   ; ...AH register has status
    184                                  
-   185 0000007F 59                      HUNG:   POP     CX                              ; Transmit error, restore char
-   186 00000080 88C8                            MOV     AL,CL                           ;  ...in AL for compatibility
-   187                                                                                  ;  ...fall thru to gen. error
-   188 00000082 80CC80                  HUNGG:  OR      AH,80h                          ; Set error (=sign) bit in AH
-   189 00000085 EBA1                            JMP     COM_ND                          ;  ...common exit
+   185 00000080 59                      HUNG: POP CX                  ; Transmit error, restore char
+   186 00000081 88C8                    	MOV AL, CL                   ; ...in AL for compatibility
+   187                                  	; ...fall thru to gen. error
+   188 00000083 80CC80                  HUNGG: OR AH, 80h             ; Set error (=sign) bit in AH
+   189 00000086 EBA1                    	JMP COM_ND                   ; ...common exit
    190                                  
-   191 00000087 B001                    COMGET: MOV     AL,1                            ; Get char. from COM port
-   192 00000089 B720                            MOV     BH,00100000b                    ; Wait on DSR (Data Set  Ready)
-   193 0000008B B301                            MOV     BL,00000001b                    ; Wait on DTR (Data Term.Ready)
-   194 0000008D E82C00                          CALL    WAITFR                          ;  ...wait for character
-   195 00000090 75F0                            JNZ     HUNGG                           ;  ...time-out error
-   196 00000092 80E41E                          AND     AH,00011110b                    ; Mask AH for error bits
-   197 00000095 83EA05                          SUB     DX,5                            ;  ...(rcvr) index RS232_BASE
-   198 00000098 EC                              IN      AL,DX                           ; Read the character
-   199 00000099 EB8D                            JMP     COM_ND                          ;  ...AH register has status
+   191 00000088 B001                    COMGET: MOV AL, 1             ; Get char. from COM port
+   192 0000008A B720                    	MOV BH, 00100000b            ; Wait on DSR (Data Set Ready)
+   193 0000008C B301                    	MOV BL, 00000001b            ; Wait on DTR (Data Term.Ready)
+   194 0000008E E82C00                  	CALL WAITFR                  ; ...wait for character
+   195 00000091 75F0                    	JNZ HUNGG                    ; ...time - out error
+   196 00000093 80E41E                  	AND AH, 00011110b            ; Mask AH for error bits
+   197 00000096 83EA05                  	SUB DX, 5                    ; ...(rcvr) index RS232_BASE
+   198 00000099 EC                      	IN AL, DX                    ; Read the character
+   199 0000009A EB8D                    	JMP COM_ND                   ; ...AH register has status
    200                                  
-   201 0000009B 83C205                  COMSTS: ADD     DX,5                            ; Calculate line control stat
-   202 0000009E EC                              IN      AL,DX                           ;  ...index RS232_BASE + 5
-   203 0000009F 88C4                            MOV     AH,AL                           ;  ...save high order status
-   204 000000A1 42                              INC     DX                              ; Calculate modem stat. reg.
-   205 000000A2 EC                              IN      AL,DX                           ;  ...index RS232_BASE + 6
-   206 000000A3 EB83                            JMP     COM_ND                          ;  ...save low  order status
-   207                                                                                  ;AX=(DEL Clear_To_Send) *    1
-   208                                                                                  ;   (DEL Data_Set_ready)*    2
-   209                                                                                  ;   (Trailing_Ring_Det.)*    4
-   210                                                                                  ;   (DEL Carrier_Detect)*    8
-   211                                                                                  ;   (    Clear_To_Send )*   16
-   212                                                                                  ;   (    Data_Set_Ready)*   32
-   213                                                                                  ;   (    Ring_Indicator)*   64
-   214                                                                                  ;   (    Carrier_Detect)*  128
-   215                                                                                  ;        **************
-   216                                                                                  ;   (    Char  received)*  256
-   217                                                                                  ;   (    Char smothered)*  512
-   218                                                                                  ;   (    Parity error  )* 1024
-   219                                                                                  ;   (    Framing error )* 2048
-   220                                                                                  ;   (    Break detected)* 4096
-   221                                                                                  ;   (    Able to xmit  )* 8192
-   222                                                                                  ;   (    Transmit idle )*16384
-   223                                                                                  ;   (    Time out error)*32768
+   201 0000009C 83C205                  COMSTS: ADD DX, 5             ; Calculate line control stat
+   202 0000009F EC                      	IN AL, DX                    ; ...index RS232_BASE + 5
+   203 000000A0 88C4                    	MOV AH, AL                   ; ...save high order status
+   204 000000A2 42                      	INC DX                       ; Calculate modem stat. reg.
+   205 000000A3 EC                      	IN AL, DX                    ; ...index RS232_BASE + 6
+   206 000000A4 EB83                    	JMP COM_ND                   ; ...save low order status
+   207                                  	;AX=(DEL Clear_To_Send) * 1
+   208                                  	; (DEL Data_Set_ready) * 2
+   209                                  	; (Trailing_Ring_Det.) * 4
+   210                                  	; (DEL Carrier_Detect) * 8
+   211                                  	; ( Clear_To_Send ) * 16
+   212                                  	; ( Data_Set_Ready) * 32
+   213                                  	; ( Ring_Indicator) * 64
+   214                                  	; ( Carrier_Detect) * 128
+   215                                  	; * * * * * * * * * * * * * *
+   216                                  	; ( Char received) * 256
+   217                                  	; ( Char smothered) * 512
+   218                                  	; ( Parity error ) * 1024
+   219                                  	; ( Framing error ) * 2048
+   220                                  	; ( Break detected) * 4096
+   221                                  	; ( Able to xmit ) * 8192
+   222                                  	; ( Transmit idle ) * 16384
+   223                                  	; ( Time out error) * 32768
    224                                  
-   225 000000A5 8A5D7C                  POLL:   MOV     BL,byte [DI+7Ch]		; Wait on BH in status or error
+   225 000000A6 8A5D7C                  POLL: MOV BL, byte [DI + 7Ch] ; Wait on BH in status or error
    226                                  
-   227 000000A8 29C9                    POLL_1: SUB     CX,CX                           ; Outer delay loop
-   228 000000AA EC                      POLL_2: IN      AL,DX                           ;  ...  inner loop
-   229 000000AB 88C4                            MOV     AH,AL
-   230 000000AD 20F8                            AND     AL,BH                           ; And status with user BH mask
-   231 000000AF 38F8                            CMP     AL,BH
-   232 000000B1 7408                            JZ      POLLXT                          ;  ...  jump if mask set
-   233 000000B3 E2F5                            LOOP    POLL_2                          ; Else try again
-   234 000000B5 FECB                            DEC     BL
-   235 000000B7 75EF                            JNZ     POLL_1
-   236 000000B9 08FF                            OR      BH,BH                           ; Clear mask to show timeout
+   227 000000A9 29C9                    POLL_1: SUB CX, CX            ; Outer delay loop
+   228 000000AB EC                      POLL_2: IN AL, DX             ; ... inner loop
+   229 000000AC 88C4                    	MOV AH, AL
+   230 000000AE 20F8                    	AND AL, BH                   ; And status with user BH mask
+   231 000000B0 38F8                    	CMP AL, BH
+   232 000000B2 7408                    	JZ POLLXT                    ; ... jump if mask set
+   233 000000B4 E2F5                    	LOOP POLL_2                  ; Else try again
+   234 000000B6 FECB                    	DEC BL
+   235 000000B8 75EF                    	JNZ POLL_1
+   236 000000BA 08FF                    	OR BH, BH                    ; Clear mask to show timeout
    237                                  
-   238 000000BB C3                      POLLXT: RET                                     ; Exit AH reg. Z flag status
+   238 000000BC C3                      POLLXT: RET                   ; Exit AH reg. Z flag status
    239                                  
-   240 000000BC 83C204                  WAITFR: ADD     DX,4                            ; Reset the Modem Control Reg.
-   241 000000BF EE                              OUT     DX,AL                           ;  ...index RS232_BASE + 4
-   242 000000C0 42                              INC     DX                              ; Calculate Modem Status Reg.
-   243 000000C1 42                              INC     DX                              ;  ...index RS232_BASE + 6
-   244 000000C2 53                              PUSH    BX                              ; Save masks (BH=MSR,BL=LSR)
-   245 000000C3 E8DFFF                          CALL    POLL                            ; ...wait on MSR modem status
-   246 000000C6 5B                              POP     BX                              ; ...restore wait masks BH,BL
-   247 000000C7 7506                            JNZ     WAITF1                          ; ..."Error Somewhere" by DEC
+   240 000000BD 83C204                  WAITFR: ADD DX, 4             ; Reset the Modem Control Reg.
+   241 000000C0 EE                      	OUT DX, AL                   ; ...index RS232_BASE + 4
+   242 000000C1 42                      	INC DX                       ; Calculate Modem Status Reg.
+   243 000000C2 42                      	INC DX                       ; ...index RS232_BASE + 6
+   244 000000C3 53                      	PUSH BX                      ; Save masks (BH=MSR, BL=LSR)
+   245 000000C4 E8DFFF                  	CALL POLL                    ; ...wait on MSR modem status
+   246 000000C7 5B                      	POP BX                       ; ...restore wait masks BH, BL
+   247 000000C8 7506                    	JNZ WAITF1                   ; ..."Error Somewhere" by DEC
    248                                  
-   249 000000C9 4A                              DEC     DX                              ; Calculate Line Status Reg.
-   250 000000CA 88DF                            MOV     BH,BL                           ;  ...index RS232_BASE + 5
-   251 000000CC E8D6FF                          CALL    POLL                            ;  ...wait on LSR line status
+   249 000000CA 4A                      	DEC DX                       ; Calculate Line Status Reg.
+   250 000000CB 88DF                    	MOV BH, BL                   ; ...index RS232_BASE + 5
+   251 000000CD E8D6FF                  	CALL POLL                    ; ...wait on LSR line status
    252                                  
-   253 000000CF C3                      WAITF1: RET                                     ; Status in AH reg. and Z flag
-   254                                  
-   255                                  
-   256                                  ;========================================================================
-   257                                  ; _spp_init - Initialize 16C552 controller chip
-   258                                  ;
-   259                                  ;  void __cdecl spp_init(word base, word divisor)
-   260                                  ;
-   261                                  ;  Enter with:
-   262                                  ;	arg1 = port address of board
-   263                                  ;	arg2 = initial baud rate divisor
-   264                                  ;
-   265                                  ;  Exit with:
-   266                                  ;	void
-   267                                  ;
-   268                                  ;  Uses:
-   269                                  ;
-   270                                  ;
-   271                                  ;
-   272                                  ;
-   273                                  ;========================================================================
-   274                                  	global	_spp_init
-   275                                  _spp_init:
-   276                                  
-   277 000000D0 55                      	push	bp
-   278 000000D1 89E5                    	mov	bp,sp
-   279 000000D3 525153                  	pushm	bx,cx,dx
-   280                                  
-   281 000000D6 8B5E06                  	mov	bx,ARG(2)		; get divisor
-   282 000000D9 8B5604                  	mov	dx,ARG(1)		; get base port
-   283 000000DC B080                    	mov	al,80h			; set divisor latch bit
-   284 000000DE 83C203                  	add	dx,3			; LCR
-   285 000000E1 EE                      	out	dx,al
-   286                                  
-   287 000000E2 88D8                    	mov	al,bl			; low byte
-   288 000000E4 8B5604                  	mov	dx,ARG(1)		; get base port
-   289 000000E7 EE                      	out	dx,al			; DLL
-   290                                  
-   291 000000E8 88F8                    	mov	al,bh			; high byte
-   292 000000EA 8B5604                  	mov	dx,ARG(1)		; get base port
-   293 000000ED 83C201                  	add	dx,1			; DLM
-   294 000000F0 EE                      	out	dx,al
-   295                                  
-   296                                  
-   297 000000F1 B003                    	mov	al,03h			; no parity, one stop bit, 8 data bits
-   298 000000F3 8B5604                  	mov	dx,ARG(1)		; get base port
-   299 000000F6 83C203                  	add	dx,3			; LCR
-   300 000000F9 EE                      	out	dx,al
-   301                                  
-   302 000000FA B007                    	mov	al,7
-   303 000000FC 8B5604                  	mov	dx,ARG(1)		; get base port
-   304 000000FF 83C204                  	add	dx,4			; MCR
-   305 00000102 EE                      	out	dx,al
-   306                                  
-   307 00000103 B000                    	mov	al,0			; disable interrupts for now
-   308 00000105 8B5604                  	mov	dx,ARG(1)		; get base port
-   309 00000108 83C201                  	add	dx,1			; IER
-   310 0000010B EE                      	out	dx,al
-   311                                  
-   312 0000010C 8B5604                  	mov	dx,ARG(1)		; get base port
-   313 0000010F 83C202                  	add	dx,2			; FCR-disable FIFO for now
-   314 00000112 EE                      	out	dx,al
-   315                                  
-   316 00000113 5B595A                  	popm	bx,cx,dx
-   317 00000116 C9                      	leave
-   318 00000117 C3                      	ret
+   253 000000D0 C3                      WAITF1: RET                   ; Status in AH reg. and Z flag

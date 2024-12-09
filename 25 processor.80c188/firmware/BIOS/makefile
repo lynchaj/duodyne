@@ -16,18 +16,9 @@
 #
 #
 SBC188 = 1
-#ROM = 64
 ROM = 32
 ETC = tbasic.hex -d26K  -d18k em187.hex
 CHIP = 64
-#CHIP = 128
-#TRC = -DTRACE=1
-#RED = -DTBASIC=0 -DFPEM=0
-#RED = -DSOFT_DEBUG=1 -DTBASIC=0 -DFPEM=0
-# use the following to allow for LED lights on debug board on Parallel Port
-#RED = -DSOFT_DEBUG=2 -DTBASIC=0 -DFPEM=0
-#TESTS = -DTESTS
-#indicate presence of FASTCALL
 FAST = -DHAS_FASTCALL=1
 V=$(SBC188)
 
@@ -59,10 +50,8 @@ NOPT = $(RED) $(FAST) -O9 -DSBC188=$(SBC188) $(TRC) $(ANSI) $(TESTS)
 LINK = wcl
 # Open Watcom liner options:
 # -lr   create a DOS real-mode program
-#LOPT = -mc -lr
 LOPT = -lr -q
 
-!ifdef __UNIX__
 RM=rm -f
 EXE2ROM=tools/exe2rom
 HEX2BIN=tools/hex2bin
@@ -74,19 +63,6 @@ PLUS=
 NULL=/dev/null
 ZIP=zip
 SEP=/
-!else
-RM=del
-EXE2ROM=tools\exe2rom.exe
-HEX2BIN=tools\hex2bin.exe
-BIN2HEX=tools\bin2hex.exe
-CP=copy
-CAT=copy/b
-OUT=
-PLUS=+
-NULL=NUL
-ZIP=pkzip
-SEP=\
-!endif
 
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
@@ -95,6 +71,7 @@ OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj usb.obj
 OBJECT3 = idelib.obj int14ser.obj int17par.obj
 OBJECT4 = fpem/em187.obj
 OBJECTC1 = cprintf.obj sio.obj nvram.obj strtoul.obj libc.obj debug.obj
+OBJECTC2 = kbd.obj
 
 OBJECTA = $(OBJECT1) $(OBJECT2) $(OBJECT3) $(OBJECT4)
 OBJECTC = $(OBJECTC1) $(OBJECTC2)
@@ -219,14 +196,6 @@ tbasic.hex:	tbasic.bin
 
 tbasic.bin:	tbasic.asm $(INCLUDES)
 
-
-
-#config.asm:     ansi.cfg wyse.cfg cvdu.cfg wcvdu.cfg vga3.cfg wvga3.cfg
-#	echo GUESSING THAT YOU WANT THE 'ANSI.CFG' COPIED TO 'CONFIG.ASM'
-#	echo ANY ONE OF THE '*.CFG' FILES MAY BE USED FOR THE CONFIGURATION
-#        $(CP)   ansi.cfg config.asm
-#	error
-
 config.obj:     config.asm
 	$(NASM) $(NOPT) -f obj -DMAKE_OBJECT_FILE config.asm
 
@@ -250,10 +219,11 @@ usb_sa.obj:      usb.asm $(INCLUDES)
 
 
 wbios.lib:      $(OBJECTS)
-        wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
+	wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
-        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
+	wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
 	wlib -q wbios.lib +debug.obj +strtoul.obj  +inttrace.obj +tests.obj
+	wlib -q wbios.lib +kbd.obj
 
 
 abios.lib:	$(OBJECTA)
@@ -262,7 +232,7 @@ abios.lib:	$(OBJECTA)
 	wlib -q    abios.lib  +idelib.obj  +fpem/em187.obj
 
 cbios.lib:	$(OBJECTC)
-	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj
+	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj +kbd.obj
 
 
 uart_det.obj:	uart_det.asm $(INCLUDES)
@@ -290,44 +260,44 @@ space64.bin:
 # Maintenance
 
 tidy:	.SYMBOLIC
-        echo foo >foo.err
-        echo foo >foo.lst
+	echo foo >foo.err
+	echo foo >foo.lst
 	echo foo >fpem/foo.lst
-        echo foo >foo.map
+	echo foo >foo.map
 	$(RM) *.lst
 	$(RM) *.map
 	$(RM) *.err
 	$(RM) fpem$(SEP)*.lst
 
 clean:	tidy .SYMBOLIC
-        echo foo >foo.bin
-        echo foo >foo.obj
+	echo foo >foo.bin
+	echo foo >foo.obj
 	echo foo >fpem$(SEP)foo.obj
-        echo foo >foo.exe
-        echo foo >foo.sys
+	echo foo >foo.exe
+	echo foo >foo.sys
 	echo foo >foo.hex
 	echo foo >xbios.lib
 	$(RM) *.bin
 	$(RM) *.obj
 	$(RM) fpem$(SEP)*.obj
 	$(RM) *.exe
-        $(RM) *.sys
+	$(RM) *.sys
 	$(RM) ?bios.lib
 	$(RM) *.hex
 
 spotless: clean .SYMBOLIC
-        echo foo >foo.lib
-        echo foo >foo.bak
-        echo foo >foo.bk0
-        echo foo >foo.foo
-        echo foo >goo.foo
+	echo foo >foo.lib
+	echo foo >foo.bak
+	echo foo >foo.bk0
+	echo foo >foo.foo
+	echo foo >goo.foo
 	echo foo >config.asm
 	$(RM) *.lib
 	$(RM) *.bak
 	$(RM) *.bk?
 	$(RM) foo*.*
 	$(RM) goo*.*
-        $(RM) config.asm
+	$(RM) config.asm
 
 # Dependencies
 sbc188.h:       mytypes.h
@@ -355,6 +325,7 @@ nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc libc.h
 libc.obj:	libc.c libc.h
 strtoul.obj:	strtoul.c sbc188.h mytypes.h libc.h
 debug.obj:      debug.c mytypes.h equates.h sio.h debug.h bda.inc
+kbd.obj:	kbd.c mytypes.h sbc188.h equates.h kbd_pc.h kbd_stat.h config.asm
 fdc8272.obj:	fdc8272.c mytypes.h sbc188.h io.h fdc8272.h wd37c65.h
 wd37c65.obj:	wd37c65.c mytypes.h sbc188.h io.h wd37c65.h
 ser_util.obj:	ser_util.c mytypes.h

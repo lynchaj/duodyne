@@ -46,7 +46,6 @@ offset_IP	equ	offset_DS+2
 offset_CS	equ	offset_IP+2
 offset_FLAGS	equ	offset_CS+2
 
-
 	SEGMENT	_TEXT
 ;========================================================================
 ; BIOS call entry for keyboard service
@@ -258,9 +257,58 @@ enqueue:
 .5:
 	mov	word [kbd_buffer_tail],bx
 	clc		; Return with carry clear if A-okay
-;;;.1:
 	ret
 
+
+;========================================================================
+; multiio_kbd_hook - examine keyboard on every timer tick
+;========================================================================
+	global	multiio_kbd_hook
+multiio_kbd_hook:
+	call	I8242GetValue_
+	jnc	.2
+	ret
+.2:
+	pushm	all,ds,es	; save EVERYTHING
+.1:
+	mov	AH,4Fh		; keyboard intercept
+	stc			; so we can respond with IRET
+	int	15h
+	jnc	.20		; scancode to be bypassed
+
+	push	DGROUP
+	popm	ds		; establish addressability
+	extern	@I8242process
+	call	@I8242process	; convert to scan code // character
+
+	push	bios_data_seg
+	popm	ds
+
+	or	ax,ax		; test for zero (unknown input)
+	jnz	.21
+
+.20:
+	call	I8242GetValue_
+	jc	.exit
+	jmp	.1
+.21:
+	cmp	al,0E0h		; enhanced keyboard?
+	jne	.3
+	xor	al,al		; old PC keyboard
+.3:
+	cmp	ax,1234h	; Ctrl-Alt-DEL
+	jne	.33
+	int	19h		; re-boot the system
+
+.33:
+	call	enqueue
+	mov	byte [uart_kbd_ctrl_R], 0
+
+.exit:
+
+;   Hook service
+	popm	all,ds,es
+	ret
 
 
 ;========================================================================
@@ -404,6 +452,10 @@ keyboard_init:
 	and	ax,~08h		; clear the mask bit
 	out	dx,ax
 %endif
+
+	extern	Init8242_
+	call	Init8242_
+
 	popm	all,ds,es
 	ret
 
@@ -420,4 +472,53 @@ keyboard_init:
 	mov	ah,0
 	int	16h
 	mov	ah,0
+	ret
+
+
+;========================================================================
+;  void I8242CommandPut(byte value);
+; Input:
+;	AL = command byte
+; Output:
+;	none
+;========================================================================
+	global I8242CommandPut_
+I8242CommandPut_:
+	push	dx
+	mov	ah,al		; save the command byte
+.1:	mov	dx,MultiIo8242+1
+	in	al,dx
+	test	al,2
+	jnz	.1
+	mov	dx,MultiIo8242+1
+	mov	al,ah
+	out	dx,al
+	pop	dx
+	ret
+
+
+;========================================================================
+;  int I8242GetValue(void);
+; Input:
+;	none
+; Output:
+;	AX = -1		no value available (C-flag set)
+;	AX = input byte	if available	   (C-flag clear)
+;
+;========================================================================
+	global	I8242GetValue_
+I8242GetValue_:
+	push	dx
+	mov	dx,MultiIo8242+1
+	in	al,dx
+	test	al,1
+	jz	.7
+	mov	dx,MultiIo8242
+	in	al,dx
+	xor	ah,ah		; clear high byte for 'int' return
+	jmp	.9
+.7:
+	mov	ax,-1
+	stc
+.9:	pop	dx
 	ret
