@@ -76,6 +76,7 @@ void Init8242(void)
 	I8242CommandPut(0xae);	/* enable keyboard */
 	PurgeQueue();
 	I8242CommandPut(0xaa);	/* self-test */
+
 	while(I8242GetValue() != 0x55) ;
 	I8242CommandPut(0x20);	/* read controller status as keycode */
 	PurgeQueue();

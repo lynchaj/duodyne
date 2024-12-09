@@ -1113,7 +1113,7 @@
    265                                  ;========================================================================
    266                                  	global	multiio_kbd_hook
    267                                  multiio_kbd_hook:
-   268 000000C2 E84B01                  	call	I8242GetValue_
+   268 000000C2 E85301                  	call	I8242GetValue_
    269 000000C5 7301                    	jnc	.2
    270 000000C7 C3                      	ret
    271                                  .2:
@@ -1136,7 +1136,7 @@
    288 000000DE 7507                    	jnz	.21
    289                                  
    290                                  .20:
-   291 000000E0 E82D01                  	call	I8242GetValue_
+   291 000000E0 E83501                  	call	I8242GetValue_
    292 000000E3 7217                    	jc	.exit
    293 000000E5 EBE4                    	jmp	.1
    294                                  .21:
@@ -1301,72 +1301,76 @@
    453 000001EE EF                      	out	dx,ax
    454                                  %endif
    455                                  
-   456                                  	extern	Init8242_
-   457 000001EF E8(0000)                	call	Init8242_
-   458                                  
-   459 000001F2 611F07                  	popm	all,ds,es
-   460 000001F5 C3                      	ret
-   461                                  
-   462                                  ;========================================================================
-   463                                  ; uart_getchar - Read char from buffer, wait if empty
-   464                                  ; Input:
-   465                                  ; 	none
-   466                                  ; Output:
-   467                                  ;	AL = character
-   468                                  ;	AH = 0
-   469                                  ;========================================================================
-   470                                  	global	@uart_getchar
-   471                                  @uart_getchar:
-   472 000001F6 B400                    	mov	ah,0
-   473 000001F8 CD16                    	int	16h
-   474 000001FA B400                    	mov	ah,0
-   475 000001FC C3                      	ret
-   476                                  
-   477                                  
-   478                                  ;========================================================================
-   479                                  ;  void I8242CommandPut(byte value);
-   480                                  ; Input:
-   481                                  ;	AL = command byte
-   482                                  ; Output:
-   483                                  ;	none
-   484                                  ;========================================================================
-   485                                  	global I8242CommandPut_
-   486                                  I8242CommandPut_:
-   487 000001FD 52                      	push	dx
-   488 000001FE 88C4                    	mov	ah,al		; save the command byte
-   489 00000200 BA4D04                  .1:	mov	dx,MultiIo8242+1
-   490 00000203 EC                      	in	al,dx
-   491 00000204 A802                    	test	al,2
-   492 00000206 75F8                    	jnz	.1
-   493 00000208 BA4D04                  	mov	dx,MultiIo8242+1
-   494 0000020B 88E0                    	mov	al,ah
-   495 0000020D EE                      	out	dx,al
-   496 0000020E 5A                      	pop	dx
-   497 0000020F C3                      	ret
-   498                                  
-   499                                  
-   500                                  ;========================================================================
-   501                                  ;  int I8242GetValue(void);
-   502                                  ; Input:
-   503                                  ;	none
-   504                                  ; Output:
-   505                                  ;	AX = -1		no value available (C-flag set)
-   506                                  ;	AX = input byte	if available	   (C-flag clear)
-   507                                  ;
-   508                                  ;========================================================================
-   509                                  	global	I8242GetValue_
-   510                                  I8242GetValue_:
-   511 00000210 52                      	push	dx
-   512 00000211 BA4D04                  	mov	dx,MultiIo8242+1
-   513 00000214 EC                      	in	al,dx
-   514 00000215 A801                    	test	al,1
-   515 00000217 7408                    	jz	.7
-   516 00000219 BA4C04                  	mov	dx,MultiIo8242
+   456 000001EF BA3006                  	mov dx,FRONT_PANEL_LED
+   457 000001F2 EC                      	in al, dx
+   458 000001F3 2480                    	and al,80h
+   459 000001F5 7403                    	jz .1
+   460                                  	extern	Init8242_
+   461 000001F7 E8(0000)                	call	Init8242_
+   462                                  .1:
+   463 000001FA 611F07                  	popm	all,ds,es
+   464 000001FD C3                      	ret
+   465                                  
+   466                                  ;========================================================================
+   467                                  ; uart_getchar - Read char from buffer, wait if empty
+   468                                  ; Input:
+   469                                  ; 	none
+   470                                  ; Output:
+   471                                  ;	AL = character
+   472                                  ;	AH = 0
+   473                                  ;========================================================================
+   474                                  	global	@uart_getchar
+   475                                  @uart_getchar:
+   476 000001FE B400                    	mov	ah,0
+   477 00000200 CD16                    	int	16h
+   478 00000202 B400                    	mov	ah,0
+   479 00000204 C3                      	ret
+   480                                  
+   481                                  
+   482                                  ;========================================================================
+   483                                  ;  void I8242CommandPut(byte value);
+   484                                  ; Input:
+   485                                  ;	AL = command byte
+   486                                  ; Output:
+   487                                  ;	none
+   488                                  ;========================================================================
+   489                                  	global I8242CommandPut_
+   490                                  I8242CommandPut_:
+   491 00000205 52                      	push	dx
+   492 00000206 88C4                    	mov	ah,al		; save the command byte
+   493 00000208 BA4D04                  .1:	mov	dx,MultiIo8242+1
+   494 0000020B EC                      	in	al,dx
+   495 0000020C A802                    	test	al,2
+   496 0000020E 75F8                    	jnz	.1
+   497 00000210 BA4D04                  	mov	dx,MultiIo8242+1
+   498 00000213 88E0                    	mov	al,ah
+   499 00000215 EE                      	out	dx,al
+   500 00000216 5A                      	pop	dx
+   501 00000217 C3                      	ret
+   502                                  
+   503                                  
+   504                                  ;========================================================================
+   505                                  ;  int I8242GetValue(void);
+   506                                  ; Input:
+   507                                  ;	none
+   508                                  ; Output:
+   509                                  ;	AX = -1		no value available (C-flag set)
+   510                                  ;	AX = input byte	if available	   (C-flag clear)
+   511                                  ;
+   512                                  ;========================================================================
+   513                                  	global	I8242GetValue_
+   514                                  I8242GetValue_:
+   515 00000218 52                      	push	dx
+   516 00000219 BA4D04                  	mov	dx,MultiIo8242+1
    517 0000021C EC                      	in	al,dx
-   518 0000021D 30E4                    	xor	ah,ah		; clear high byte for 'int' return
-   519 0000021F EB04                    	jmp	.9
-   520                                  .7:
-   521 00000221 B8FFFF                  	mov	ax,-1
-   522 00000224 F9                      	stc
-   523 00000225 5A                      .9:	pop	dx
-   524 00000226 C3                      	ret
+   518 0000021D A801                    	test	al,1
+   519 0000021F 7408                    	jz	.7
+   520 00000221 BA4C04                  	mov	dx,MultiIo8242
+   521 00000224 EC                      	in	al,dx
+   522 00000225 30E4                    	xor	ah,ah		; clear high byte for 'int' return
+   523 00000227 EB04                    	jmp	.9
+   524                                  .7:
+   525 00000229 B8FFFF                  	mov	ax,-1
+   526 0000022C F9                      	stc
+   527 0000022D 5A                      .9:	pop	dx
+   528 0000022E C3                      	ret

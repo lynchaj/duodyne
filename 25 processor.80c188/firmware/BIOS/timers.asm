@@ -259,9 +259,13 @@ timer0_interrupt:	; true timer 0 18.2Hz interrupt
 .9:
 	int	1Ch			; User timer tick interrupt
 
+	mov dx,FRONT_PANEL_LED
+	in al, dx
+	and al,80h
+	jz .91
 	extern	multiio_kbd_hook
 	call	multiio_kbd_hook
-
+.91:
 ; signal EOI (End of Interrupt)
         mov     dx,PIC_EOI              ; EOI register
         mov     ax,EOI_NSPEC            ; non-specific

@@ -453,9 +453,13 @@ keyboard_init:
 	out	dx,ax
 %endif
 
+	mov dx,FRONT_PANEL_LED
+	in al, dx
+	and al,80h
+	jz .1
 	extern	Init8242_
 	call	Init8242_
-
+.1:
 	popm	all,ds,es
 	ret
 
