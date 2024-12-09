@@ -36,15 +36,8 @@
         global  _cpu_speed
         extern  rtc_get_loc, rtc_set_loc
 
-%if NEED_TIMER_FIX
-; swap the timers in the intiialization table
-timer0          equ     TIM1
-timer1          equ     TIM0
-%else
-; timers are their true selves in the initialization table
 timer0          equ     TIM0
 timer1          equ     TIM1
-%endif
 
 %if 1
 ;/* definitions below are from "ds1302.h" */
@@ -227,7 +220,7 @@ timer2_interrupt:       ; int 19 = 13h
         iret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;  timer0_interrupt             (timer1, if NEED_TIMER_FIX)
+;  timer0_interrupt
 ;
 ;       This is the 18.2 Hz timer tick
 ;
@@ -239,21 +232,13 @@ ONE_DAY         equ     1573080         ; timer ticks in a day (compromise)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 one_day:        dd      ONE_DAY
 
-%if NEED_TIMER_FIX
-timer0_interrupt:
-%else
 timer1_interrupt:       ; int 18 = 12h 	Redirected from BIOS_call_12h
-%endif
 	int	70h	; IRQ8 -- 1024Hz RTC timer (rtc_interrupt)
 	iret
 
 
 
-%if NEED_TIMER_FIX
-timer1_interrupt:
-%else
 timer0_interrupt:	; true timer 0 18.2Hz interrupt
-%endif
 ; service the timer tick interrupt
         pushm   ax,dx,ds
 
@@ -274,7 +259,13 @@ timer0_interrupt:	; true timer 0 18.2Hz interrupt
 .9:
 	int	1Ch			; User timer tick interrupt
 
-
+	mov dx,FRONT_PANEL_LED
+	in al, dx
+	and al,80h
+	jz .91
+	extern	multiio_kbd_hook
+	call	multiio_kbd_hook
+.91:
 ; signal EOI (End of Interrupt)
         mov     dx,PIC_EOI              ; EOI register
         mov     ax,EOI_NSPEC            ; non-specific

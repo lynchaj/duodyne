@@ -88,18 +88,18 @@ ide_astatus	equ	ide_cs1_line + ide_a2_line + ide_a1_line + ide_a0_line
 
 
 	SEGMENT	_TEXT
-	
-;------------------------------------------------------------------------------------		
+
+;------------------------------------------------------------------------------------
 ; Parallel port IDE driver
-;	
 ;
-	
+;
 
 
 
-; -----------------------------------------------------------------------------	
+
+; -----------------------------------------------------------------------------
 ;  IDE_READ_ID
-; -----------------------------------------------------------------------------	
+; -----------------------------------------------------------------------------
 ; Read the 512 byte ID information from the attached drive
 ;
 ;  int IDE_READ_ID(far byte *buffer, byte slave);
@@ -132,10 +132,10 @@ _PPIDE_READ_ID:
 	ret
 
 
-	
-; -----------------------------------------------------------------------------	
+
+; -----------------------------------------------------------------------------
 ;  IDE_READ_SECTOR
-; -----------------------------------------------------------------------------	
+; -----------------------------------------------------------------------------
 	;read a sector, specified by the 4 bytes in "lba",
 	;Return, acc is zero on success, non-zero for an error
 ;
@@ -159,7 +159,7 @@ _PPIDE_READ_SECTOR:
         mov     dx,ARG(4)
         mov     cx,ARG(5)
 	call	wr_lba					;tell it which sector we want
-;	mvi		a, ide_command			;select IDE register 
+;	mvi		a, ide_command			;select IDE register
 ;	mvi		c, ide_cmd_read
         mov     al,ide_command
         mov     bl,ide_cmd_read
@@ -176,9 +176,9 @@ _PPIDE_READ_SECTOR:
 	ret
 
 
-; -----------------------------------------------------------------------------	
+; -----------------------------------------------------------------------------
 ;  IDE_VERIFY_SECTOR
-; -----------------------------------------------------------------------------	
+; -----------------------------------------------------------------------------
 	;read a sector, specified by the 4 bytes in "lba",
 	;Return, acc is zero on success, non-zero for an error
 ;
@@ -202,7 +202,7 @@ _PPIDE_VERIFY_SECTOR:
         mov     dx,ARG(2)
         mov     cx,ARG(3)
 	call	wr_lba					;tell it which sector we want
-;	mvi		a, ide_command			;select IDE register 
+;	mvi		a, ide_command			;select IDE register
 ;	mvi		c, ide_cmd_read
         mov     al,ide_command
         mov     bl,ide_cmd_read
@@ -258,7 +258,7 @@ _PPIDE_WRITE_SECTOR:
 	call	ide_wait_not_busy	;wait until the write is complete
 ;	mvi		a,0					;signal success
         xor     ax,ax
-        
+
         popm    es,bx
         leave
 	ret
@@ -275,7 +275,7 @@ _PPIDE_WRITE_SECTOR:
 ;  Exit with:
 ;       AX and DX are destroyed
 ;
-;-------------------------------------------------------------------------------------------	
+;-------------------------------------------------------------------------------------------
 ide_hard_reset:
         pushm   cx
 
@@ -296,11 +296,11 @@ ide_hard_reset:
 
 
 ;------------------------------------------------------------------------------
-; IDE INTERNAL SUBROUTINES 
+; IDE INTERNAL SUBROUTINES
 ;------------------------------------------------------------------------------
 
 
-	
+
 ;----------------------------------------------------------------------------
 ;  Get Error code
 ;
@@ -331,7 +331,7 @@ get_err:
 ;	mvi		a, 255
         jnz     .1
         dec     al      ; error code of 0 returned as 255
-.1:     
+.1:
         popm    bx,dx
 	ret
 
@@ -376,8 +376,8 @@ ide_wait_ready:
         mov     al,ide_status           ; read status
 	call	ide_read
 ;	mov		a,c
-;	ani		%11000000			
-;	xri		%01000000	
+;	ani		%11000000
+;	xri		%01000000
         mov     al,bl
         and     al,11000000b            ;Mask off busy and ready bits
         xor     al,01000000b            ;We want Busy(7) to be 0 and Ready(6) to be 1
@@ -496,7 +496,7 @@ write_data:
 ;	mvi		b,0
         mov     cx,256          ; 512 bytes = 256 words
         mov     si,bx           ; use SI for the loads
-wrblk2: 
+wrblk2:
 ;	push	b
 ;	mov		c, m	; lsb
 ;	inx		h
@@ -549,14 +549,14 @@ wr_lba:
         or      bl,al           ; Select Master/Slave
         mov     al,ide_head
 	call	ide_write
-	
+
 ;	lda		IDE_LBA0+2
 ;	mov		c,a
 ;	mvi		a,ide_cyl_msb
         pop     bx              ; get DL to BL
         mov     al,ide_cyl_msb
 	call	ide_write
-	
+
 ;	lda		IDE_LBA0+1
 ;	mov		c,a
 ;	mvi		a,ide_cyl_lsb
@@ -565,22 +565,22 @@ wr_lba:
         mov     bl,bh
         mov     al,ide_cyl_lsb
 	call	ide_write
-	
+
 ;	lda		IDE_LBA0+0			; LSB
 ;	mov		c,a
 ;	mvi		a,ide_sector
         pop     bx              ; get LSB to BL
         mov     al,ide_sector
 	call	ide_write
-	
+
 ;	mvi		c,1
 ;	mvi		a,ide_sec_cnt
         mov     bl,1
         mov     al,ide_sec_cnt
 	call	ide_write
-	
+
 	ret
-	
+
 ;-------------------------------------------------------------------------------
 
 ; Low Level I/O to the drive.  These are the routines that talk
@@ -602,7 +602,7 @@ ide_read:
         push    ax              ; save register address
 	call	set_ppi_rd		; setup for a read cycle
         pop     ax
-	
+
         mov     dl,IDECTL & 255
         out     dx,al                   ; drive address onto control lines
         or      al,ide_rd_line          ; assert RD pin
@@ -613,7 +613,7 @@ ide_read:
         in      ax,dx                   ; retrieve LSB and MSB
         mov     bx,ax                   ; return in BX
 
-	
+
         pop     ax                      ; restore register value
         xor     al,ide_rd_line          ; deassert RD signal
         mov     dl,IDECTL & 255
@@ -623,7 +623,7 @@ ide_read:
 
 	ret
 
-	
+
 
 
 ; Do a write bus cycle to the drive, via the 8255
@@ -662,14 +662,14 @@ ide_write:
 	ret
 
 
-;-----------------------------------------------------------------------------------	
+;-----------------------------------------------------------------------------------
 ; ppi setup routine to configure the appropriate PPI mode
 ;
 ; NOTE: these are the only two routines that set DH!!!!
 ;------------------------------------------------------------------------------------
 
 set_ppi_rd:
-;	mvi	a,rd_ide_8255			
+;	mvi	a,rd_ide_8255
 ;	out	PIO1CONT			;config 8255 chip, read mode
         mov     al,rd_ide_8255
         mov     dx,PIO1CONT
@@ -677,22 +677,22 @@ set_ppi_rd:
 	ret
 
 set_ppi_wr:
-;	mvi	a,wr_ide_8255			
+;	mvi	a,wr_ide_8255
 ;	out	PIO1CONT			;config 8255 chip, write mode
         mov     al,wr_ide_8255
         mov     dx,PIO1CONT
         out     dx,al                   ; configure 8255 chip, write mode
 	ret
-	
+
 
 
 ;-----------------------------------------------------------------------------
 ; End of PPIDE disk driver
 ;
 ; Begin SBC-188 BIOS code
-;------------------------------------------------------------------------------------	
+;------------------------------------------------------------------------------------
 %ifndef STANDALONE
-	
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -794,7 +794,7 @@ exit_pops:
 
 dispatch:
         dw      fn00    ; Reset Disk System
-        dw      fn01    ; 
+        dw      fn01    ;
         dw      fn02
         dw      fn03
         dw      fn04
@@ -982,7 +982,7 @@ fn04:
 
 ; Enter here on Read, Write, Verify or
 ;     extended  Read, Write, Verify, Seek
-RWV: 
+RWV:
         inc     ch                      ; zero is valid for no transfer
         jmp     .6              ; enter loop at the bottom
 ; the read/write/verify loop
@@ -1015,7 +1015,7 @@ RWV:
 ; CHS call is required
 .7:     call    undefined
 
-.8:     
+.8:
         xor     ah,ah
         jmp     exit_sequence
 
@@ -1063,7 +1063,7 @@ fn08:           ; Get Drive Parameters
         jmp     exit_sequence
 
 
-        
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; fn15 -- Get Disk Type
 ;
@@ -1174,7 +1174,7 @@ fn47:
         jmp     RWV             ; common read/write/verify code
 
 
-        
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; fn48 -- Get Drive Parameters
 ;
@@ -1210,16 +1210,16 @@ fn48:
    es   mov     word [bx + pkt_info], 000011b   ; DMA bound/ Geom OK
 
         mov     ax,[fx_phys_cylinders - fx80 + si]      ; cylinders
-   es   mov     [bx + pkt_phys_cyl],ax  
+   es   mov     [bx + pkt_phys_cyl],ax
    es   mov     [bx + pkt_phys_cyl+2],cx
 
         mov     al,[fx_phys_heads - fx80 + si]          ; heads
         mov     ah,ch
-   es   mov     [bx + pkt_phys_hds],ax  
+   es   mov     [bx + pkt_phys_hds],ax
    es   mov     [bx + pkt_phys_hds+2],cx
 
         mov     al,[fx_phys_sectors - fx80 + si]        ; sectors
-   es   mov     [bx + pkt_phys_spt],ax  
+   es   mov     [bx + pkt_phys_spt],ax
    es   mov     [bx + pkt_phys_spt+2],cx
 
         mov     ax,[fx_LBA_low - fx80 + si]             ; total LBA sectors
@@ -1234,7 +1234,7 @@ fn48:
 
 
 
-        
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; fn4E -- set hardware configuration
 ;
@@ -1261,5 +1261,3 @@ fn4E:
 
 
 %endif  ; STANDALONE
-
-

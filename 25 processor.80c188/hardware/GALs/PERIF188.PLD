@@ -30,7 +30,7 @@ PIN 17  = !UART_CS                ; /* SERIAL I/O = UART               */
 PIN 16  = !I2C_CS                 ; /* PCF CS                          */
 PIN 15  = !I2C_CS_WR              ; /* PCF WR                          */
 PIN 14  = !WR_LS259               ; /* WRITE ONLY ADDRESSABLE LATCH    */
-PIN 21  = !PIC_CS                 ; /* INTERRUPT CONTROLLER CS         */
+PIN 21  = !ONBIO                  ; /* ON BOARD IO                     */
 PIN 22  = !DELAY                  ; /* DELAY LINE                      */
 
 
@@ -54,6 +54,8 @@ I2C_CS     	=	PCS4 & !ALE & AD4 ;
 I2C_CS_WR 	=   DELAYIN ;
 DELAY       =	PCS4 & !ALE & AD4 & WR ;
 PIC_CS     	=	PCS4 & !ALE & AD3 ;
+
+ONBIO      =   PCS4 # PCS5 # PCS6 ;
 
     /* 74LS259 8-BIT ADDRESSABLE LATCH (WRITE ONLY)  */
 WR_LS259	=	PCS4 & !ALE & AD7 & WR ;

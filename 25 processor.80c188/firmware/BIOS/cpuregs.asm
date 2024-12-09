@@ -29,8 +29,6 @@
 ;
 ; IBM model byte -- must be less than a 286
 ;
-;MODEL_BYTE		equ	0FEh	; PC-XT
-;SUBMODEL_BYTE		equ	0FFh	; not used
 
 MODEL_BYTE		equ	0FEh	; PC-XT
 SUBMODEL_BYTE		equ	00h	;  "
@@ -185,16 +183,24 @@ FRONT_PANEL_LED	equ	IO_BASE+0230H
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Floppy controller (Duodyne Disk IO)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-FDC	        equ	IO_BASE+0200H
+FDC	        equ	IO_BASE+0080H
 FDC_MSR         equ     FDC
-FDC_DATA        equ     FDC_MSR+1
-FDC_DACK        equ	FDC+10H
-FDC_LDOR	equ	FDC+20H
-FDC_LDCR	equ	FDC+30H
-FDC_TC	        equ	FDC+40H
-FDC_RES	        equ	FDC+40H
-FDC_DACK_TC     equ     FDC_DACK | FDC_TC
+FDC_DATA        equ     FDC+1
+FDC_TC	        equ	FDC+2
+FDC_RES	        equ	FDC+3
+FDC_LDCR	equ	FDC+5
+FDC_LDOR	equ	FDC+6
+FDC_DACK        equ	FDC+6
+FDC_DACK_TC     equ     FDC+7
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Duodyne Multi IO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CH376	        equ	IO_BASE+004EH
+ParPrinter      equ	IO_BASE+0048H
+DuoSerial       equ	IO_BASE+0070H
+MultiIo8242     equ	IO_BASE+004CH
+PrinterTimeout  equ 	020h
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;DS1302 RTC (Duodyne Ram/ROM Card)

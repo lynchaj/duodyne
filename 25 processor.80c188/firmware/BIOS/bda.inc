@@ -45,7 +45,7 @@ IPL_errors      resb    1	;*/	byte	IPL_errors;	/* 40:15 IPL errors<-table/scratc
 sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
 ;;---------------[Keyboard data area]------------;
 keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
-keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
 keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
 kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
 kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
@@ -119,7 +119,7 @@ kbd_flag_2	resb	1	;*/	byte kbd_flag_2;	/* 40:97 kbd ???
 ;;---------------[RTC/timer1 data]---------------------;
 user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
 rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
-rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
 ;;---------------[Cassette I/O stuff]------------------;
 last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
 crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
@@ -158,13 +158,13 @@ EBDA_paragraph  resw    1       ;*/	word EBDA_paragraph;	/* lowest EBDA paragrap
 dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
 dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
 
-fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
 
 debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
 
 n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
 
-cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
 ;								   CPU clock is half of this
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -182,28 +182,8 @@ cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in 
 %define PPIDE_driver 1
 %endif
 %if 0				;*/
-#define DIDE_driver 0		/*
+#define USB_driver 1		/*
 %else
-%define DIDE_driver 0
-%endif
-%if 0				;*/
-#define DISKIO_driver 1		/*
-%else
-%define DISKIO_driver 1
-%endif
-%if 0				;*/
-#define MFPIC_driver 1		/*
-%else
-%define MFPIC_driver 1
-%endif
-%if 0				;*/
-#define DSD_driver 1		/*
-%else
-%define DSD_driver 1
-%endif
-%if 0				;*/
-#define V3IDE8_driver (SBC188==3)		/*
-%else
-%define V3IDE8_driver (SBC188==3)
+%define USB_driver 1
 %endif
 				;*/

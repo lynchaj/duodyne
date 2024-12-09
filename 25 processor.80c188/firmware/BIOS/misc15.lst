@@ -110,101 +110,86 @@
    110                              <1> FPEM            equ     1               ; default is 1
    111                              <1> %endif
    112                              <1> 
-   113                              <1> ; Define the maximum number of EMM (4MEM) boards supported
-   114                              <1> EMM_BOARDS      equ     0
-   115                              <1> 
-   116                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
-   117                              <1> ; or at locations 0280h..3FFh in low memory?
-   118                              <1> %if SOFT_DEBUG
-   119                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
-   120                              <1> %else
-   121                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
-   122                              <1> %endif
-   123                              <1> 
-   124                              <1> ; Define the size of the EPROM that is to be installed on the system
-   125                              <1> ; It may be larger than the actual ROM image to be generated.
-   126                              <1> %ifndef CHIP
-   127                              <1> CHIP            equ     64
-   128                              <1> %endif
+   113                              <1> ; Should the Floating Point Emulator use temporary storage in the EBDA
+   114                              <1> ; or at locations 0280h..3FFh in low memory?
+   115                              <1> %if SOFT_DEBUG
+   116                              <1> FPEM_USE_EBDA   equ     FPEM            ; default is 0
+   117                              <1> %else
+   118                              <1> FPEM_USE_EBDA   equ     0; FPEM            ; default is 0
+   119                              <1> %endif
+   120                              <1> 
+   121                              <1> ; Define the size of the EPROM that is to be installed on the system
+   122                              <1> ; It may be larger than the actual ROM image to be generated.
+   123                              <1> %ifndef CHIP
+   124                              <1> CHIP            equ     64
+   125                              <1> %endif
+   126                              <1> 
+   127                              <1> ; Define the UART oscillator speed
+   128                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
    129                              <1> 
-   130                              <1> ; Does the SBC-188 00.4 board have the LS138/LS08 piggyback fix
-   131                              <1> ; Set to 1 for the SBC-188 v1.0 and later production boards
-   132                              <1> ;FDC_PIGGYBACK_FIX       equ     0       ; Fix not installed
-   133                              <1> FDC_PIGGYBACK_FIX       equ     1       ; fix  IS  installed
-   134                              <1> 
-   135                              <1> ; On SBC-188 rev 00.4 board, there is a published hardware fix (2010-09-18).
-   136                              <1> ; If the wiring update is installed, or you have a later board, then
-   137                              <1> ; set this to 0.  If you are using the software workaround, then set this
-   138                              <1> ; to 1.  The rev 1.0 board has this fix already.
-   139                              <1> NEED_TIMER_FIX  equ     0               ; have revised hardware
-   140                              <1> ;NEED_TIMER_FIX  equ     1               ; use workaround
-   141                              <1> 
-   142                              <1> ; Define the UART oscillator speed
-   143                              <1> UART_OSC        equ     1843200         ; 1.8432 Mhz is specified
+   130                              <1> 
+   131                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   132                              <1> ; end of the User configuration
+   133                              <1> ;       Do Not modify anything below this point
+   134                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   135                              <1> 
+   136                              <1> ; Define existence of any uart chip
+   137                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
+   138                              <1> startuplength   equ     512                     ; may be up to 1024
+   139                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
+   140                              <1> highrom         equ     (ROM*400h)&0FFFFh
+   141                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
+   142                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
+   143                              <1> 
    144                              <1> 
-   145                              <1> 
-   146                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   147                              <1> ; end of the User configuration
-   148                              <1> ;       Do Not modify anything below this point
-   149                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   150                              <1> 
-   151                              <1> ; Define existence of any uart chip
-   152                              <1> UART		equ	TTY+DUMB+ANSI+WYSE
-   153                              <1> startuplength   equ     512                     ; may be up to 1024
-   154                              <1> startseg        equ     0FFFFh - (ROM*64) + 1
-   155                              <1> highrom         equ     (ROM*400h)&0FFFFh
-   156                              <1> startupseg      equ     0FFFFh - (startuplength>>4) + 1
-   157                              <1> bios_data_seg   equ     040h            ; segment of BIOS data area
-   158                              <1> 
-   159                              <1> 
-   160                              <1> %define ARG(n) [bp+2+(n)*2]
-   161                              <1> 
-   162                              <1> %macro  check   1.nolist
-   163                              <1>  %if (%1)
-   164                              <1>    %error Check Failure: %1
-   165                              <1>  %endif
-   166                              <1> %endm
-   167                              <1> %macro  range   3.nolist
-   168                              <1>  %if (%1)<(%2)
-   169                              <1>    %error Out of Range: %1
-   170                              <1>  %elif (%1)>(%3)
-   171                              <1>    %error Out of Range: %1
-   172                              <1>  %endif
-   173                              <1> %endm
-   174                              <1> _terminal equ UART
-   175                              <1>  check   RAM_DOS&15
-   176                              <1>  check   RAM&(RAM-1)
-   177                              <1>  check   ROM&(ROM-1)
-   178                              <1>  range   RAM,32,512
-   179                              <1>  range   ROM,32,256
-   180                              <1>  range   RAM_WS,0,3
-   181                              <1>  range   ROM_WS,0,3
-   182                              <1>  range   RAM_DOS,RAM,(1024-ROM)
-   183                              <1>  range   LCL_IO_WS,0,3
-   184                              <1>  range   BUS_IO_WS,0,3
-   185                              <1>  range   UART_OSC,500000,16000000
-   186                              <1>  range   UART_RATE,0,7
-   187                              <1>  range	 UART,0,1
-   188                              <1>  range	 _terminal,1,2
-   189                              <1> 
-   190                              <1> %ifndef SOFT_DEBUG
-   191                              <1> %define SOFT_DEBUG 0
-   192                              <1> %endif
-   193                              <1> 
-   194                              <1> %ifndef TRACE
-   195                              <1> %define TRACE 0
-   196                              <1> %endif
-   197                              <1> 
-   198                              <1> %ifdef MAKE_OBJECT_FILE
-   199                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
-   200                              <1>         export _ROMsize
-   201                              <1>         export _CHIPsize
-   202                              <1> _ROMsize        dw      ROM
-   203                              <1> _CHIPsize       dw      CHIP
-   204                              <1> %endif
-   205                              <1> ; end of the Hardware configuration file
-   206                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   207                              <1> ;*/
+   145                              <1> %define ARG(n) [bp+2+(n)*2]
+   146                              <1> 
+   147                              <1> %macro  check   1.nolist
+   148                              <1>  %if (%1)
+   149                              <1>    %error Check Failure: %1
+   150                              <1>  %endif
+   151                              <1> %endm
+   152                              <1> %macro  range   3.nolist
+   153                              <1>  %if (%1)<(%2)
+   154                              <1>    %error Out of Range: %1
+   155                              <1>  %elif (%1)>(%3)
+   156                              <1>    %error Out of Range: %1
+   157                              <1>  %endif
+   158                              <1> %endm
+   159                              <1> _terminal equ UART
+   160                              <1>  check   RAM_DOS&15
+   161                              <1>  check   RAM&(RAM-1)
+   162                              <1>  check   ROM&(ROM-1)
+   163                              <1>  range   RAM,32,512
+   164                              <1>  range   ROM,32,256
+   165                              <1>  range   RAM_WS,0,3
+   166                              <1>  range   ROM_WS,0,3
+   167                              <1>  range   RAM_DOS,RAM,(1024-ROM)
+   168                              <1>  range   LCL_IO_WS,0,3
+   169                              <1>  range   BUS_IO_WS,0,3
+   170                              <1>  range   UART_OSC,500000,16000000
+   171                              <1>  range   UART_RATE,0,7
+   172                              <1>  range	 UART,0,1
+   173                              <1>  range	 _terminal,1,2
+   174                              <1> 
+   175                              <1> %ifndef SOFT_DEBUG
+   176                              <1> %define SOFT_DEBUG 0
+   177                              <1> %endif
+   178                              <1> 
+   179                              <1> %ifndef TRACE
+   180                              <1> %define TRACE 0
+   181                              <1> %endif
+   182                              <1> 
+   183                              <1> %ifdef MAKE_OBJECT_FILE
+   184                              <1>         segment _DATA WORD PUBLIC CLASS=DATA
+   185                              <1>         export _ROMsize
+   186                              <1>         export _CHIPsize
+   187                              <1> _ROMsize        dw      ROM
+   188                              <1> _CHIPsize       dw      CHIP
+   189                              <1> %endif
+   190                              <1> ; end of the Hardware configuration file
+   191                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   192                              <1> ;*/
     27                                  %include        "cpuregs.asm"
     28                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     29                              <1> ; CPUREGS.ASM
@@ -354,193 +339,199 @@
     56                              <1> ;
     57                              <1> ; IBM model byte -- must be less than a 286
     58                              <1> ;
-    59                              <1> ;MODEL_BYTE		equ	0FEh	; PC-XT
-    60                              <1> ;SUBMODEL_BYTE		equ	0FFh	; not used
-    61                              <1> 
-    62                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
-    63                              <1> SUBMODEL_BYTE		equ	00h	;  "
-    64                              <1> 
-    65                              <1> 
-    66                              <1> ; 80188 peripheral control register block address
-    67                              <1> CPU_CSCR	        equ	0FF00h
+    59                              <1> 
+    60                              <1> MODEL_BYTE		equ	0FEh	; PC-XT
+    61                              <1> SUBMODEL_BYTE		equ	00h	;  "
+    62                              <1> 
+    63                              <1> 
+    64                              <1> ; 80188 peripheral control register block address
+    65                              <1> CPU_CSCR	        equ	0FF00h
+    66                              <1> 
+    67                              <1> ; Compatible Mode registers
     68                              <1> 
-    69                              <1> ; Compatible Mode registers
+    69                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
     70                              <1> 
-    71                              <1> cpu_relocation          equ     CPU_CSCR+0FEh
+    71                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
     72                              <1> 
-    73                              <1> ; The memory and peripheral chip select register offsets from 0FF00h
-    74                              <1> 
-    75                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
-    76                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
-    77                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
-    78                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
-    79                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    73                              <1> cpu_umcs                equ     CPU_CSCR+0A0h          ; Upper memory select
+    74                              <1> cpu_lmcs                equ     CPU_CSCR+0A2h          ; Lower memory select
+    75                              <1> cpu_pacs                equ     CPU_CSCR+0A4h          ; Peripheral select
+    76                              <1> cpu_mmcs                equ     CPU_CSCR+0A6h          ; Middle memory base
+    77                              <1> cpu_mpcs                equ     CPU_CSCR+0A8h          ; Mid mem. & peripherals
+    78                              <1> 
+    79                              <1> ; Enhanced Mode registers
     80                              <1> 
-    81                              <1> ; Enhanced Mode registers
-    82                              <1> 
-    83                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
-    84                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
-    85                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
-    86                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
-    87                              <1> 
-    88                              <1> 
-    89                              <1> ; On-board internal peripheral equates
-    90                              <1> ; Programmable Interrupt Controller
-    91                              <1> PIC	        equ	CPU_CSCR+020H
-    92                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
-    93                              <1> PIC_POLLR	equ	PIC+4
-    94                              <1> PIC_POLLSR	equ	PIC+6
-    95                              <1> PIC_IMASK	equ	PIC+8
-    96                              <1> PIC_PMREG	equ	PIC+0AH
-    97                              <1> PIC_SRVR	equ	PIC+0CH
-    98                              <1> PIC_IRQR	equ	PIC+0EH
-    99                              <1> PIC_IRQSR	equ	PIC+10H
-   100                              <1> PIC_TCR	        equ	PIC+12H
-   101                              <1> PIC_DMA0CR	equ	PIC+14H
-   102                              <1> PIC_DMA1CR	equ	PIC+16H
-   103                              <1> PIC_I0CON	equ	PIC+18H
-   104                              <1> PIC_I1CON	equ	PIC+1AH
-   105                              <1> PIC_I2CON	equ	PIC+1CH
-   106                              <1> PIC_I3CON	equ	PIC+1EH
+    81                              <1> cpu_mdram               equ     CPU_CSCR+0E0h          ; memory partition reg.
+    82                              <1> cpu_cdram               equ     CPU_CSCR+0E2h          ; clock prescaler
+    83                              <1> cpu_edram               equ     CPU_CSCR+0E4h          ; Enable refresh reg.
+    84                              <1> cpu_pdcon               equ     CPU_CSCR+0F0h          ; Power-Save control
+    85                              <1> 
+    86                              <1> 
+    87                              <1> ; On-board internal peripheral equates
+    88                              <1> ; Programmable Interrupt Controller
+    89                              <1> PIC	        equ	CPU_CSCR+020H
+    90                              <1> PIC_EOI	        equ	PIC+2           ; End Of Interrupt
+    91                              <1> PIC_POLLR	equ	PIC+4
+    92                              <1> PIC_POLLSR	equ	PIC+6
+    93                              <1> PIC_IMASK	equ	PIC+8
+    94                              <1> PIC_PMREG	equ	PIC+0AH
+    95                              <1> PIC_SRVR	equ	PIC+0CH
+    96                              <1> PIC_IRQR	equ	PIC+0EH
+    97                              <1> PIC_IRQSR	equ	PIC+10H
+    98                              <1> PIC_TCR	        equ	PIC+12H
+    99                              <1> PIC_DMA0CR	equ	PIC+14H
+   100                              <1> PIC_DMA1CR	equ	PIC+16H
+   101                              <1> PIC_I0CON	equ	PIC+18H
+   102                              <1> PIC_I1CON	equ	PIC+1AH
+   103                              <1> PIC_I2CON	equ	PIC+1CH
+   104                              <1> PIC_I3CON	equ	PIC+1EH
+   105                              <1> 
+   106                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
    107                              <1> 
-   108                              <1> EOI_NSPEC       equ     8000h           ; Non-Specific EOI
-   109                              <1> 
-   110                              <1> ; Interrupt masks (Master Mode)
-   111                              <1> ;
-   112                              <1> mask_timer_all          equ     0001h
-   113                              <1> mask_dma0               equ     0004h
-   114                              <1> mask_dma1               equ     0008h
-   115                              <1> mask_int0               equ     0010h
-   116                              <1> mask_int1               equ     0020h
-   117                              <1> mask_int2               equ     0040h
-   118                              <1> mask_int3               equ     0080h
+   108                              <1> ; Interrupt masks (Master Mode)
+   109                              <1> ;
+   110                              <1> mask_timer_all          equ     0001h
+   111                              <1> mask_dma0               equ     0004h
+   112                              <1> mask_dma1               equ     0008h
+   113                              <1> mask_int0               equ     0010h
+   114                              <1> mask_int1               equ     0020h
+   115                              <1> mask_int2               equ     0040h
+   116                              <1> mask_int3               equ     0080h
+   117                              <1> 
+   118                              <1> 
    119                              <1> 
-   120                              <1> 
-   121                              <1> 
-   122                              <1> ; Timers
-   123                              <1> TIM0	        equ	CPU_CSCR+050H
-   124                              <1> TIM1	        equ	CPU_CSCR+058H
-   125                              <1> TIM2	        equ	CPU_CSCR+060H
-   126                              <1> 
-   127                              <1> TCNT	        equ	0	; count register
-   128                              <1> CMPA	        equ	2	; max count A
-   129                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
-   130                              <1> TCON	        equ	6	; mode/control word
-   131                              <1> 
-   132                              <1> ; Timer control bits:
-   133                              <1> tc_EN           equ     8000h   ; Enable bit
-   134                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
-   135                              <1> tc_INT          equ     2000h   ; Interrupt Enable
-   136                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
-   137                              <1> tc_MC           equ     0020h   ; Maximum Count reached
-   138                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
-   139                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
-   140                              <1> tc_EXT          equ     0004h   ; External clock
-   141                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
-   142                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   120                              <1> ; Timers
+   121                              <1> TIM0	        equ	CPU_CSCR+050H
+   122                              <1> TIM1	        equ	CPU_CSCR+058H
+   123                              <1> TIM2	        equ	CPU_CSCR+060H
+   124                              <1> 
+   125                              <1> TCNT	        equ	0	; count register
+   126                              <1> CMPA	        equ	2	; max count A
+   127                              <1> CMPB	        equ	4	; max count B (not present on TIM2)
+   128                              <1> TCON	        equ	6	; mode/control word
+   129                              <1> 
+   130                              <1> ; Timer control bits:
+   131                              <1> tc_EN           equ     8000h   ; Enable bit
+   132                              <1> tc_nINH         equ     4000h   ; not Inhibit Enable
+   133                              <1> tc_INT          equ     2000h   ; Interrupt Enable
+   134                              <1> tc_RIU          equ     1000h   ; Register A/B (0/1) in Use
+   135                              <1> tc_MC           equ     0020h   ; Maximum Count reached
+   136                              <1> tc_RTG          equ     0010h   ; Retrigger (internal source)
+   137                              <1> tc_P            equ     0008h   ; Prescale internal clock (timers 0 & 1 only)
+   138                              <1> tc_EXT          equ     0004h   ; External clock
+   139                              <1> tc_ALT          equ     0002h   ; Alternate between A & B max count registers
+   140                              <1> tc_CONT         equ     0001h   ; Continuous: continue after max count
+   141                              <1> 
+   142                              <1> 
    143                              <1> 
    144                              <1> 
-   145                              <1> 
-   146                              <1> 
-   147                              <1> ; DMA
-   148                              <1> DMA0	        equ	CPU_CSCR+0C0H
-   149                              <1> DMA1	        equ	CPU_CSCR+0D0H
-   150                              <1> DMASPL	        equ	0	; source pointer low
-   151                              <1> DMASPU	        equ	2	; source pointer high
-   152                              <1> DMADPL	        equ	4	; destination pointer low
-   153                              <1> DMADPU	        equ	6	; destination pointer high
-   154                              <1> DMATC	        equ	8	; terminal count
-   155                              <1> DMACW	        equ	0AH	; control word
+   145                              <1> ; DMA
+   146                              <1> DMA0	        equ	CPU_CSCR+0C0H
+   147                              <1> DMA1	        equ	CPU_CSCR+0D0H
+   148                              <1> DMASPL	        equ	0	; source pointer low
+   149                              <1> DMASPU	        equ	2	; source pointer high
+   150                              <1> DMADPL	        equ	4	; destination pointer low
+   151                              <1> DMADPU	        equ	6	; destination pointer high
+   152                              <1> DMATC	        equ	8	; terminal count
+   153                              <1> DMACW	        equ	0AH	; control word
+   154                              <1> 
+   155                              <1> 
    156                              <1> 
    157                              <1> 
    158                              <1> 
-   159                              <1> 
-   160                              <1> 
-   161                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   159                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   160                              <1> ;
+   161                              <1> ;       SBC-188 external devices
    162                              <1> ;
-   163                              <1> ;       SBC-188 external devices
-   164                              <1> ;
-   165                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   163                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   164                              <1> 
+   165                              <1> IO_BASE			equ	0400h
    166                              <1> 
-   167                              <1> IO_BASE			equ	0400h
+   167                              <1> 
    168                              <1> 
-   169                              <1> 
-   170                              <1> 
+   169                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   170                              <1> ; The UART registers (Duodyne SBC 80c188 Console port)
    171                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   172                              <1> ; The UART registers (Duodyne SBC 80c188 Console port)
-   173                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   174                              <1> 
-   175                              <1> uart_base               equ     IO_BASE+0280h
-   176                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
-   177                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
-   178                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
-   179                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
-   180                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
-   181                              <1> uart_lcr                equ     uart_base+3     ;Line Control
-   182                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
-   183                              <1> uart_lsr                equ     uart_base+5     ;Line Status
-   184                              <1> uart_msr                equ     uart_base+6     ;Modem Status
-   185                              <1> uart_sr			equ	uart_base+7	;Scratch
-   186                              <1> 
-   187                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
-   188                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
-   189                              <1> 
+   172                              <1> 
+   173                              <1> uart_base               equ     IO_BASE+0280h
+   174                              <1> uart_rbr                equ     uart_base       ;Rcvr Buffer / read only
+   175                              <1> uart_thr                equ     uart_base       ;Transmit Holding / write only
+   176                              <1> uart_ier                equ     uart_base+1     ;Interrupt Enable
+   177                              <1> uart_iir                equ     uart_base+2     ;Interrupt Ident / read only
+   178                              <1> uart_fcr                equ     uart_base+2     ;FIFO Control / write only
+   179                              <1> uart_lcr                equ     uart_base+3     ;Line Control
+   180                              <1> uart_mcr                equ     uart_base+4     ;Modem Control
+   181                              <1> uart_lsr                equ     uart_base+5     ;Line Status
+   182                              <1> uart_msr                equ     uart_base+6     ;Modem Status
+   183                              <1> uart_sr			equ	uart_base+7	;Scratch
+   184                              <1> 
+   185                              <1> uart_dll                equ     uart_base       ;Divisor Latch LS Byte
+   186                              <1> uart_dlm                equ     uart_base+1     ;Divisor Latch MS Byte
+   187                              <1> 
+   188                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   189                              <1> ; CONTROL LS259 PORT  (DuoDyne 80C188)
    190                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   191                              <1> ; CONTROL LS259 PORT  (DuoDyne 80C188)
-   192                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   193                              <1> CTRL259		equ	IO_BASE+0238H
-   194                              <1> ; LEDS are at addresses 0..3
-   195                              <1> ; other control ports on 4..7
-   196                              <1> LED0		equ	CTRL259+0
-   197                              <1> LED1		equ	LED0+1
-   198                              <1> LED2		equ	LED0+2
-   199                              <1> LED3		equ	LED0+3
-   200                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
-   201                              <1> ;unused		equ	CTRL259+5
-   202                              <1> ;unused		equ	CTRL259+6
-   203                              <1> ;unused		equ	CTRL259+7
-   204                              <1> 
+   191                              <1> CTRL259		equ	IO_BASE+0238H
+   192                              <1> ; LEDS are at addresses 0..3
+   193                              <1> ; other control ports on 4..7
+   194                              <1> LED0		equ	CTRL259+0
+   195                              <1> LED1		equ	LED0+1
+   196                              <1> LED2		equ	LED0+2
+   197                              <1> LED3		equ	LED0+3
+   198                              <1> T1OSC18		equ	CTRL259+4	; ON=1.8432mhz, OFF="1" (for use of TIMER2)
+   199                              <1> ;unused		equ	CTRL259+5
+   200                              <1> ;unused		equ	CTRL259+6
+   201                              <1> ;unused		equ	CTRL259+7
+   202                              <1> 
+   203                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   204                              <1> ; Front Panel Connector  (DuoDyne 80C188)
    205                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   206                              <1> ; Front Panel Connector  (DuoDyne 80C188)
-   207                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   208                              <1> FRONT_PANEL_LED	equ	IO_BASE+0230H
+   206                              <1> FRONT_PANEL_LED	equ	IO_BASE+0230H
+   207                              <1> 
+   208                              <1> 
    209                              <1> 
-   210                              <1> 
-   211                              <1> 
+   210                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   211                              <1> ; Floppy controller (Duodyne Disk IO)
    212                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   213                              <1> ; Floppy controller (Duodyne Disk IO)
-   214                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   215                              <1> FDC	        equ	IO_BASE+0200H
-   216                              <1> FDC_MSR         equ     FDC
-   217                              <1> FDC_DATA        equ     FDC_MSR+1
-   218                              <1> FDC_DACK        equ	FDC+10H
-   219                              <1> FDC_LDOR	equ	FDC+20H
-   220                              <1> FDC_LDCR	equ	FDC+30H
-   221                              <1> FDC_TC	        equ	FDC+40H
-   222                              <1> FDC_RES	        equ	FDC+40H
-   223                              <1> FDC_DACK_TC     equ     FDC_DACK | FDC_TC
-   224                              <1> 
-   225                              <1> 
-   226                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   227                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
-   228                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   229                              <1> RTC	equ	IO_BASE+0094H
-   230                              <1> 
-   231                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   232                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
-   233                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   234                              <1> PPI	        equ	IO_BASE+0088H
-   235                              <1> 
-   236                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
-   237                              <1> PIO_B	        equ	PPI+1	; (INPUT)
-   238                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
-   239                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
-   240                              <1> 
-   241                              <1> portA           equ     PPI+0   ;
-   242                              <1> portB           equ     PPI+1   ;
-   243                              <1> portC           equ     PPI+2   ;
-   244                              <1> 
-   245                              <1> ; end CPUREGS.ASM
+   213                              <1> FDC	        equ	IO_BASE+0080H
+   214                              <1> FDC_MSR         equ     FDC
+   215                              <1> FDC_DATA        equ     FDC+1
+   216                              <1> FDC_TC	        equ	FDC+2
+   217                              <1> FDC_RES	        equ	FDC+3
+   218                              <1> FDC_LDCR	equ	FDC+5
+   219                              <1> FDC_LDOR	equ	FDC+6
+   220                              <1> FDC_DACK        equ	FDC+6
+   221                              <1> FDC_DACK_TC     equ     FDC+7
+   222                              <1> 
+   223                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   224                              <1> ; Duodyne Multi IO
+   225                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   226                              <1> CH376	        equ	IO_BASE+004EH
+   227                              <1> ParPrinter      equ	IO_BASE+0048H
+   228                              <1> DuoSerial       equ	IO_BASE+0070H
+   229                              <1> MultiIo8242     equ	IO_BASE+004CH
+   230                              <1> PrinterTimeout  equ 	020h
+   231                              <1> 
+   232                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   233                              <1> ;DS1302 RTC (Duodyne Ram/ROM Card)
+   234                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   235                              <1> RTC	equ	IO_BASE+0094H
+   236                              <1> 
+   237                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   238                              <1> ; PIO 82C55 I/O  (Duodyne Disk IO)
+   239                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   240                              <1> PPI	        equ	IO_BASE+0088H
+   241                              <1> 
+   242                              <1> PIO_A	        equ	PPI+0	; (OUTPUT)
+   243                              <1> PIO_B	        equ	PPI+1	; (INPUT)
+   244                              <1> PIO_C	        equ	PPI+2	; (CENTRONICS control low nibble)
+   245                              <1> PIO_CTRL	equ	PPI+3	; CONTROL BYTE PIO 82C55
+   246                              <1> 
+   247                              <1> portA           equ     PPI+0   ;
+   248                              <1> portB           equ     PPI+1   ;
+   249                              <1> portC           equ     PPI+2   ;
+   250                              <1> 
+   251                              <1> ; end CPUREGS.ASM
     28                                  %include	"date.asm"
     29                              <1> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     30                              <1> ; date.asm
@@ -557,14 +548,14 @@
     41                              <1> ;
     42                              <1> ; Updated for the Duodyne 80c188 SBC
     43                              <1> 
-    44                              <1> %define DATE_STRING0	"10/27/24"
-    45                              <1> %define DATE_STRING1	"27-Oct-2024"
+    44                              <1> %define DATE_STRING0	"12/08/24"
+    45                              <1> %define DATE_STRING1	"08-DEC-2024"
     46                              <1> 
     47                              <1> %define VERSION_MAJOR		3
     48                              <1> %define VERSION_MINOR		5
     49                              <1> %define VERSION_REVISION	2
     50                              <1> %define VERSION_SUFFIX		""
-    51                              <1> %define VERSION_SEQUENCE	66
+    51                              <1> %define VERSION_SEQUENCE	70
     52                              <1> 
     53                              <1> %define VERSION_STRING		"3.5-D",VERSION_SUFFIX
     54                              <1> 
@@ -740,7 +731,7 @@
    122 00000016 ??                  <2> sbc188_rev       resb    1	;*/	byte	sbc188_rev;	/* was 'unused_01' before BIOS047
    123                              <2> ;;---------------[Keyboard data area]------------;
    124 00000017 ????                <2> keyboard_flags_0 resw   1	;*/	word	keyboard_flags_0;  /* 40:17 Shift/Alt/etc. keyboard flags
-   125                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;  
+   125                              <2> keyboard_flags_1 equ	$-1	;     2nd byte	keyboard_flags_1;
    126 00000019 ??                  <2> keypad_char	resb	1	;*/	byte	keypad_char;	/* 40:19 Alt-KEYPAD char. goes here
    127 0000001A ????                <2> kbd_buffer_head resw    1	;*/	word	kbd_buffer_head;   /* 40:1A --> keyboard buffer head
    128 0000001C ????                <2> kbd_buffer_tail resw    1	;*/	word	kbd_buffer_tail;   /* 40:1C --> keyboard buffer tail
@@ -814,7 +805,7 @@
    196                              <2> ;;---------------[RTC/timer1 data]---------------------;
    197 00000098 ????????            <2> user_semaphore	resw	2	;*/	byte *user_semaphore;	/* 40:98 User semaphore in (bit 7)
    198 0000009C ????????            <2> rtc_count	resd	1	;*/	dword rtc_count;	/* 40:9C RTC tick counter
-   199 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h, 
+   199 000000A0 ??                  <2> rtc_wait_active	resb	1	;*/	byte rtc_wait_active;	/* 40:A0 Busy=01, Posted=80h,
    200                              <2> ;;---------------[Cassette I/O stuff]------------------;
    201 000000A1 ??                  <2> last_val	resb	1	;*/	byte last_val;		/* 40:A1 Last byte read value
    202 000000A2 ????                <2> crc_reg		resw	1	;*/	word crc_reg;		/* 40:A2 CRC accumulation area
@@ -853,13 +844,13 @@
    235 000000F4 ????                <2> dma0_cw         resw    1       ;*/	word dma0_cw;		/* end of dma control word
    236 000000F6 ????                <2> dma1_cw         resw    1       ;*/	word dma1_cw;		/*   ditto
    237                              <2> 
-   238 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib 
+   238 000000F8 ????                <2> fdc_type	resb	2	;*/	byte fdc_type[2];	/* disk type in low nibble, alternate in hi nib
    239                              <2> 
    240 000000FA ????????            <2> debug_static_ptr  resw	2	;*/	void *debug_static_ptr;	/* pointer to debug static area
    241                              <2> 
    242 000000FE ??                  <2> n_fixed_disks   resb    1       ;*/	byte n_fixed_disks;	/* number of fixed disks
    243                              <2> 
-   244 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz 
+   244 000000FF ??                  <2> cpu_xtal        resb    1       ;*/	byte cpu_xtal;		/* CPU crystal frequency in Mhz
    245                              <2> ;								   CPU clock is half of this
    246                              <2> ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    247                              <2> ;
@@ -877,31 +868,11 @@
    259                              <2> %define PPIDE_driver 1
    260                              <2> %endif
    261                              <2> %if 0				;*/
-   262                              <2> #define DIDE_driver 0		/*
+   262                              <2> #define USB_driver 1		/*
    263                              <2> %else
-   264                              <2> %define DIDE_driver 0
+   264                              <2> %define USB_driver 1
    265                              <2> %endif
-   266                              <2> %if 0				;*/
-   267                              <2> #define DISKIO_driver 1		/*
-   268                              <2> %else
-   269                              <2> %define DISKIO_driver 1
-   270                              <2> %endif
-   271                              <2> %if 0				;*/
-   272                              <2> #define MFPIC_driver 1		/*
-   273                              <2> %else
-   274                              <2> %define MFPIC_driver 1
-   275                              <2> %endif
-   276                              <2> %if 0				;*/
-   277                              <2> #define DSD_driver 1		/*
-   278                              <2> %else
-   279                              <2> %define DSD_driver 1
-   280                              <2> %endif
-   281                              <2> %if 0				;*/
-   282                              <2> #define V3IDE8_driver (SBC188==3)		/*
-   283                              <2> %else
-   284                              <2> %define V3IDE8_driver (SBC188==3)
-   285                              <2> %endif
-   286                              <2> 				;*/
+   266                              <2> 				;*/
     78                              <1> 
     79                              <1> ;  this must be the same in EQUATES.H */
     80                              <1> %if SOFT_DEBUG
@@ -949,566 +920,560 @@
    122                              <1> %endif
     30                                  
     31                                  
-    32                                  %if NEED_TIMER_FIX
-    33                                  ; swap the timers in the intiialization table
-    34                                  timer0          equ     TIM1
-    35                                  timer1          equ     TIM0
-    36                                  %else
-    37                                  ; timers are their true selves in the initialization table
-    38                                  timer0          equ     TIM0
-    39                                  timer1          equ     TIM1
-    40                                  %endif
-    41                                  
-    42                                  
-    43                                  	SEGMENT	_TEXT
-    44                                  
-    45                                          global  BIOS_call_15h
-    46                                  
-    47                                  ; The stack offsets
-    48                                  offset_BP       equ     0
-    49                                  offset_AX       equ     offset_BP+2
-    50                                  ;offset_AL	equ	offset_AX+0
-    51                                  offset_AH       equ     offset_AX+1
-    52                                  offset_BX       equ     offset_AX+2
-    53                                  offset_DX	equ	offset_BX+2	; added for cassette I/O
-    54                                  offset_DS       equ     offset_DX+2
-    55                                  offset_IP       equ     offset_DS+2
-    56                                  offset_CS       equ     offset_IP+2
-    57                                  offset_FLAGS    equ     offset_CS+2
-    58                                  
-    59                                  
-    60                                  BIOS_call_15h:
-    61 00000000 80FC4F                  	cmp     ah,04Fh         ; null keyboard intercept handler
-    62 00000003 7501                            jne	.1
-    63 00000005 CF                              iret			; carry was set by the call
-    64                                  .1:
-    65 00000006 1E52535055                      pushm   bp,ax,bx,dx,ds
-    66 0000000B 89E5                            mov     bp,sp           ; establish stack frame addressing
-    67                                  
-    68                                  %if 0
-    69                                  	cmp     ah,04Fh         ; null keyboard intercept handler
-    70                                          je      bye_bye		; was 'set_carry'
-    71                                  
-    72                                  	cmp	ah,0		; cassette motor on command
-    73                                  	je	fn00
-    74                                  	cmp	ah,1		; cassette motor off
-    75                                  	je	fn01
-    76                                  	cmp	ah,2		; cassette read block
-    77                                  	je	fn02
-    78                                  	cmp	ah,3		; cassette write block
-    79                                  	je	fn03
-    80                                  	cmp	ah,4		; cassette GPIO2 on command
-    81                                  	je	fn04
-    82                                  	cmp	ah,5		; cassette GPIO2 off command
-    83                                  	je	fn05
-    84                                  %else
-    85 0000000D 88E3                            mov     bl,ah
-    86 0000000F 30FF                            xor     bh,bh
-    87 00000011 80FB06                          cmp     bl,fn00max/2
-    88 00000014 7307                            jae     try_fn80
-    89                                  
-    90 00000016 01DB                            add     bx,bx
-    91 00000018 2EFFA7[5500]                cs  jmp     near [int15fn00+bx]     ; dispatch
-    92                                  %endif
+    32                                  
+    33                                  timer0          equ     TIM0
+    34                                  timer1          equ     TIM1
+    35                                  
+    36                                  
+    37                                  	SEGMENT	_TEXT
+    38                                  
+    39                                          global  BIOS_call_15h
+    40                                  
+    41                                  ; The stack offsets
+    42                                  offset_BP       equ     0
+    43                                  offset_AX       equ     offset_BP+2
+    44                                  ;offset_AL	equ	offset_AX+0
+    45                                  offset_AH       equ     offset_AX+1
+    46                                  offset_BX       equ     offset_AX+2
+    47                                  offset_DX	equ	offset_BX+2	; added for cassette I/O
+    48                                  offset_DS       equ     offset_DX+2
+    49                                  offset_IP       equ     offset_DS+2
+    50                                  offset_CS       equ     offset_IP+2
+    51                                  offset_FLAGS    equ     offset_CS+2
+    52                                  
+    53                                  
+    54                                  BIOS_call_15h:
+    55 00000000 80FC4F                  	cmp     ah,04Fh         ; null keyboard intercept handler
+    56 00000003 7501                            jne	.1
+    57 00000005 CF                              iret			; carry was set by the call
+    58                                  .1:
+    59 00000006 1E52535055                      pushm   bp,ax,bx,dx,ds
+    60 0000000B 89E5                            mov     bp,sp           ; establish stack frame addressing
+    61                                  
+    62                                  %if 0
+    63                                  	cmp     ah,04Fh         ; null keyboard intercept handler
+    64                                          je      bye_bye		; was 'set_carry'
+    65                                  
+    66                                  	cmp	ah,0		; cassette motor on command
+    67                                  	je	fn00
+    68                                  	cmp	ah,1		; cassette motor off
+    69                                  	je	fn01
+    70                                  	cmp	ah,2		; cassette read block
+    71                                  	je	fn02
+    72                                  	cmp	ah,3		; cassette write block
+    73                                  	je	fn03
+    74                                  	cmp	ah,4		; cassette GPIO2 on command
+    75                                  	je	fn04
+    76                                  	cmp	ah,5		; cassette GPIO2 off command
+    77                                  	je	fn05
+    78                                  %else
+    79 0000000D 88E3                            mov     bl,ah
+    80 0000000F 30FF                            xor     bh,bh
+    81 00000011 80FB06                          cmp     bl,fn00max/2
+    82 00000014 7307                            jae     try_fn80
+    83                                  
+    84 00000016 01DB                            add     bx,bx
+    85 00000018 2EFFA7[5500]                cs  jmp     near [int15fn00+bx]     ; dispatch
+    86                                  %endif
+    87                                  
+    88                                  try_fn80:
+    89 0000001D 80FCC0                  	cmp     ah,0C0h
+    90 00000020 747E                            je      fnC0
+    91 00000022 80FCC1                          cmp     ah,0C1h
+    92 00000025 7503E98100                      je      fnC1
     93                                  
-    94                                  try_fn80:
-    95 0000001D 80FCC0                  	cmp     ah,0C0h
-    96 00000020 747E                            je      fnC0
-    97 00000022 80FCC1                          cmp     ah,0C1h
-    98 00000025 7503E98100                      je      fnC1
-    99                                  
-   100 0000002A 88E3                            mov     bl,ah
-   101 0000002C 30FF                            xor     bh,bh
-   102                                  
-   103 0000002E 80EB80                          sub     bl,80h          ; miscellaneous Int15 functions
-   104 00000031 80FB11                          cmp     bl,fn80max/2
-   105 00000034 7307                            jae     unknown
-   106                                  
-   107 00000036 01DB                            add     bx,bx
-   108 00000038 2EFFA7[6100]                cs  jmp     near [int15fn80+bx]     ; dispatch
-   109                                  
+    94 0000002A 88E3                            mov     bl,ah
+    95 0000002C 30FF                            xor     bh,bh
+    96                                  
+    97 0000002E 80EB80                          sub     bl,80h          ; miscellaneous Int15 functions
+    98 00000031 80FB11                          cmp     bl,fn80max/2
+    99 00000034 7307                            jae     unknown
+   100                                  
+   101 00000036 01DB                            add     bx,bx
+   102 00000038 2EFFA7[6100]                cs  jmp     near [int15fn80+bx]     ; dispatch
+   103                                  
+   104                                  
+   105                                  unknown:
+   106 0000003D C64603FF                	mov	byte [offset_AH+bp],0FFh	; flag error
+   107                                  set_carry:
+   108 00000041 804E0E01                        or      byte [bp+offset_FLAGS],1        ; set the carry bit
+   109 00000045 EB08                            jmp     bye_bye
    110                                  
-   111                                  unknown:
-   112 0000003D C64603FF                	mov	byte [offset_AH+bp],0FFh	; flag error
-   113                                  set_carry:
-   114 00000041 804E0E01                        or      byte [bp+offset_FLAGS],1        ; set the carry bit
-   115 00000045 EB08                            jmp     bye_bye
-   116                                  
-   117                                  okay:
-   118 00000047 C6460300                	mov	byte [offset_AH+bp],00h		; flag dummy okay
-   119                                  clear_carry:
-   120 0000004B 80660EFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry flag
-   121                                  bye_bye:
-   122 0000004F 5D585B5A1F                      popm    bp,ax,bx,dx,ds
-   123 00000054 CF                              iret
-   124                                  
-   125                                  
-   126                                  int15fn00:
-   127 00000055 [9E00]                  	dw	fn00		; cassette motor on command
-   128 00000057 [9E00]                  	dw	fn01		; cassette motor off
-   129 00000059 [9E00]                  	dw	fn02		; cassette read block
-   130 0000005B [9E00]                  	dw	fn03		; cassette write block
-   131 0000005D [9E00]                  	dw	fn04		; cassette GPIO2 on command
-   132 0000005F [9E00]                  	dw	fn05		; cassette GPIO2 off command
-   133                                  fn00max         equ     $-int15fn00
-   134                                  
-   135                                  int15fn80:
-   136 00000061 [4700]                          dw      fn80            ; device open
-   137 00000063 [4700]                          dw      fn81            ; device close
-   138 00000065 [4700]                          dw      fn82            ; process termination
-   139 00000067 [F100]                          dw      fn83            ; event wait
-   140 00000069 [3D00]                          dw      fn84            ; read joystick
-   141 0000006B [4700]                          dw      fn85            ; SysReq key
-   142 0000006D [3A01]                          dw      fn86            ; delay
-   143 0000006F [3D00]                          dw      fn87            ; move extended memory block
-   144 00000071 [8300]                          dw      fn88            ; get extended memory size
-   145 00000073 [3D00]                          dw      fn89            ; enter protected mode
-   146                                  %if TBASIC
-   147 00000075 [8A00]                          dw      fn8a            ; getline code
-   148                                  %else
-   149                                  	dw	unknown		; no TBASIC, so no call
-   150                                  %endif
-   151 00000077 [3D00]                  	dw	fn8b
-   152 00000079 [3D00]                  	dw	fn8c
-   153 0000007B [3D00]                  	dw	fn8e
-   154 0000007D [3D00]                  	dw	fn8f
-   155 0000007F [4700]                  	dw	fn90		; Device Wait
-   156 00000081 [4700]                  	dw	fn91		; Device Post
-   157                                  fn80max         equ     $-int15fn80
+   111                                  okay:
+   112 00000047 C6460300                	mov	byte [offset_AH+bp],00h		; flag dummy okay
+   113                                  clear_carry:
+   114 0000004B 80660EFE                        and     byte [bp+offset_FLAGS],~1       ; clear the carry flag
+   115                                  bye_bye:
+   116 0000004F 5D585B5A1F                      popm    bp,ax,bx,dx,ds
+   117 00000054 CF                              iret
+   118                                  
+   119                                  
+   120                                  int15fn00:
+   121 00000055 [9E00]                  	dw	fn00		; cassette motor on command
+   122 00000057 [9E00]                  	dw	fn01		; cassette motor off
+   123 00000059 [9E00]                  	dw	fn02		; cassette read block
+   124 0000005B [9E00]                  	dw	fn03		; cassette write block
+   125 0000005D [9E00]                  	dw	fn04		; cassette GPIO2 on command
+   126 0000005F [9E00]                  	dw	fn05		; cassette GPIO2 off command
+   127                                  fn00max         equ     $-int15fn00
+   128                                  
+   129                                  int15fn80:
+   130 00000061 [4700]                          dw      fn80            ; device open
+   131 00000063 [4700]                          dw      fn81            ; device close
+   132 00000065 [4700]                          dw      fn82            ; process termination
+   133 00000067 [F100]                          dw      fn83            ; event wait
+   134 00000069 [3D00]                          dw      fn84            ; read joystick
+   135 0000006B [4700]                          dw      fn85            ; SysReq key
+   136 0000006D [3A01]                          dw      fn86            ; delay
+   137 0000006F [3D00]                          dw      fn87            ; move extended memory block
+   138 00000071 [8300]                          dw      fn88            ; get extended memory size
+   139 00000073 [3D00]                          dw      fn89            ; enter protected mode
+   140                                  %if TBASIC
+   141 00000075 [8A00]                          dw      fn8a            ; getline code
+   142                                  %else
+   143                                  	dw	unknown		; no TBASIC, so no call
+   144                                  %endif
+   145 00000077 [3D00]                  	dw	fn8b
+   146 00000079 [3D00]                  	dw	fn8c
+   147 0000007B [3D00]                  	dw	fn8e
+   148 0000007D [3D00]                  	dw	fn8f
+   149 0000007F [4700]                  	dw	fn90		; Device Wait
+   150 00000081 [4700]                  	dw	fn91		; Device Post
+   151                                  fn80max         equ     $-int15fn80
+   152                                  
+   153                                  
+   154                                  ; Dummy routines for the following:
+   155                                  fn80    equ     okay		; Device Open
+   156                                  fn81    equ     okay		; Device Close
+   157                                  fn82    equ     okay		; Process Termination
    158                                  
-   159                                  
-   160                                  ; Dummy routines for the following:
-   161                                  fn80    equ     okay		; Device Open
-   162                                  fn81    equ     okay		; Device Close
-   163                                  fn82    equ     okay		; Process Termination
+   159                                  fn84    equ     unknown		; Read Joystick
+   160                                  fn85    equ     okay		; SysReq Key make/break
+   161                                  
+   162                                  fn87    equ     unknown		; Move Extended Memory Block
+   163                                  fn89    equ     unknown		; Enter Protected Mode
    164                                  
-   165                                  fn84    equ     unknown		; Read Joystick
-   166                                  fn85    equ     okay		; SysReq Key make/break
-   167                                  
-   168                                  fn87    equ     unknown		; Move Extended Memory Block
-   169                                  fn89    equ     unknown		; Enter Protected Mode
+   165                                  fn8b	equ	unknown
+   166                                  fn8c	equ	unknown
+   167                                  fn8d	equ	unknown
+   168                                  fn8e	equ	unknown
+   169                                  fn8f	equ	unknown
    170                                  
-   171                                  fn8b	equ	unknown
-   172                                  fn8c	equ	unknown
-   173                                  fn8d	equ	unknown
-   174                                  fn8e	equ	unknown
-   175                                  fn8f	equ	unknown
-   176                                  
-   177                                  fn90	equ	okay		; Device Wait
-   178                                  fn91	equ	okay		; Device Post
-   179                                  
-   180                                  ;
-   181                                  ; Get Extended Memory size
-   182                                  ;
-   183                                  ;       There is No high memory on an 80186/8
-   184                                  ;       Always return 0
-   185                                  ;
-   186                                  fn88:
-   187 00000083 C746020000                      mov     word [bp+offset_AX],0
-   188 00000088 EBC1                            jmp     clear_carry
-   189                                  
-   190                                  
-   191                                  
-   192                                  %if TBASIC
-   193                                  ; Get Line (direct access to SIO.C 'getline' routine)
-   194                                  ;
-   195                                  ;  Enter with:
-   196                                  ;       CX      length of buffer
-   197                                  ;       DS:DX   pointer to the buffer
-   198                                  ;
-   199                                  ;  Return with:
-   200                                  ;       Buffer of length-1 characters (maximum), NUL terminated
-   201                                  ;
-   202                                  fn8a:
-   203 0000008A FB                              sti                             ; enable interrupts
-   204 0000008B 5251                            pushm   cx,dx
-   205                                  
-   206 0000008D 89D0                            mov     ax,dx                   ; DX:AX is pointer argument
-   207 0000008F 8CDA                            mov     dx,ds                   ; **
-   208 00000091 89CB                            mov     bx,cx                   ; BX is second argument
-   209                                  
-   210 00000093 68[ssss]                        push    DGROUP                  ; for the C-code
-   211 00000096 1F                              popm    ds
-   212                                          extern  getline_                ; this is a __fastcall entry
-   213 00000097 E8(0000)                        call    getline_
+   171                                  fn90	equ	okay		; Device Wait
+   172                                  fn91	equ	okay		; Device Post
+   173                                  
+   174                                  ;
+   175                                  ; Get Extended Memory size
+   176                                  ;
+   177                                  ;       There is No high memory on an 80186/8
+   178                                  ;       Always return 0
+   179                                  ;
+   180                                  fn88:
+   181 00000083 C746020000                      mov     word [bp+offset_AX],0
+   182 00000088 EBC1                            jmp     clear_carry
+   183                                  
+   184                                  
+   185                                  
+   186                                  %if TBASIC
+   187                                  ; Get Line (direct access to SIO.C 'getline' routine)
+   188                                  ;
+   189                                  ;  Enter with:
+   190                                  ;       CX      length of buffer
+   191                                  ;       DS:DX   pointer to the buffer
+   192                                  ;
+   193                                  ;  Return with:
+   194                                  ;       Buffer of length-1 characters (maximum), NUL terminated
+   195                                  ;
+   196                                  fn8a:
+   197 0000008A FB                              sti                             ; enable interrupts
+   198 0000008B 5251                            pushm   cx,dx
+   199                                  
+   200 0000008D 89D0                            mov     ax,dx                   ; DX:AX is pointer argument
+   201 0000008F 8CDA                            mov     dx,ds                   ; **
+   202 00000091 89CB                            mov     bx,cx                   ; BX is second argument
+   203                                  
+   204 00000093 68[ssss]                        push    DGROUP                  ; for the C-code
+   205 00000096 1F                              popm    ds
+   206                                          extern  getline_                ; this is a __fastcall entry
+   207 00000097 E8(0000)                        call    getline_
+   208                                  
+   209 0000009A 595A                            popm    cx,dx
+   210 0000009C EBAD                            jmp     clear_carry
+   211                                  %endif
+   212                                  
+   213                                  
    214                                  
-   215 0000009A 595A                            popm    cx,dx
-   216 0000009C EBAD                            jmp     clear_carry
-   217                                  %endif
-   218                                  
-   219                                  
-   220                                  
-   221                                  %if 0
-   222                                  %include "cassette.asm"
-   223                                  ;--------------------------------------------------------
-   224                                  ; Cassette support routines
-   225                                  ;	(AH) = 0 TURN CASSETTE MOTOR ON
-   226                                  ;	(AH) = 1 TURN CASSETTE MOTOR OFF
-   227                                  ;	(AH) = 2 READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
-   228                                  ;		(ES,BX) = POINTER TO DATA BUFFER
-   229                                  ;		(CX) = COUNT OF BYTES TO READ
-   230                                  ;		ON EXIT:
-   231                                  ;  		(ES,BX) = POINTER TO LAST BYTE READ + 1
-   232                                  ;  		(DX) = COUNT OF BYTES ACTUALLY READ
-   233                                  ;  		(CY) = 0 IF NO ERROR OCCURRED
-   234                                  ;  		     = 1 IF ERROR OCCURRED
-   235                                  ;  		(AH) = ERROR RETURN IF (CY)= 1
-   236                                  ;  			= 01 IF CRC ERROR WAS DETECTED
-   237                                  ;  			= 02 IF DATA TRANSITIONS ARE LOST
-   238                                  ;  			= 04 IF NO DATA WAS FOUND
-   239                                  ;  	(AH) = 3 WRITE 1 OR MORE 256 BYTE BLOCKS TO CASSETTE
-   240                                  ;  		(ES,BX) = POINTER TO DATA BUFFER
-   241                                  ;  		(CX) = COUNT OF BYTES TO WRITE
-   242                                  ;  		ON EXIT:
-   243                                  ;		(EX,BX) = POINTER TO LAST BYTE WRITTEN + 1
-   244                                  ;		(CX) = 0
-   245                                  ;	(AH) = 4 TURN GPIO2 ON
-   246                                  ;	(AH) = 5 TURN GPIO2 OFF
-   247                                  ;	(AH) = ANY OTHER THAN ABOVE VALUES CAUSES (CY)= 1
-   248                                  ;		AND (AH)= 80 TO BE RETURNED (INVALID COMMAND).
-   249                                  ;--------------------------------------------------------
-   250                                  ; PURPOSE:
-   251                                  ;  TO TURN ON CASSETTE MOTOR
-   252                                  ;  16550 I/O pins are active low so we need to add
-   253                                  ;  an inverter (7400) before the 75452 to make this work.
-   254                                  ;  Cassette motor connected to OUT1* on 16550, which is
-   255                                  ;  bit2 of MCR.
-   256                                  ;--------------------------------------------------------
-   257                                  fn00:
-   258                                  	mov	dx,cuart_mcr			; get device code
-   259                                  	in	al,dx				;read cassette uart mcr
-   260                                  	or	al,04H				; SET BIT TO TURN ON
-   261                                  W3:	out	dx,al				;WRITE IT OUT
-   262                                  	mov	word [bp+offset_AX],0000h	; signal success to caller
-   263                                  	jmp	clear_carry
-   264                                  
-   265                                  
-   266                                  ;----------------------------------
-   267                                  ; PURPOSE:
-   268                                  ;  TO TURN CASSETTE MOTOR OFF
-   269                                  ;-----------------------------------
-   270                                  fn01:
-   271                                  	mov	dx,cuart_mcr			; get device code
-   272                                  	in	al,dx				;read cassette uart mcr
-   273                                  	and	al,~04h				; clear bit to turn off motor
-   274                                  	jmp	W3				;write it, clear error, return
-   275                                  
-   276                                  
-   277                                  ;--------------------------------------------
-   278                                  ; PURPOSE:
-   279                                  ;  TO READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
-   280                                  ;
-   281                                  ; ON ENTRY:
-   282                                  ;  ES IS SEGMENT FOR MEMORY BUFFER (FOR COMPACT CODE)
-   283                                  ;  BX POINTS TO START OF MEMORY BUFFER
-   284                                  ;  CX CONTAINS NUMBER OF BYTES TO READ
-   285                                  ; ON EXIT:
-   286                                  ;  BX POINTS 1 BYTE PAST LAST BYTE PUT IN MEM
-   287                                  ;  CX CONTAINS DECREMENTED BYTE COUNT
-   288                                  ;  DX CONTAINS NUMBER OF BYTES ACTUALLY READ
-   289                                  ;
-   290                                  ;  CARRY FLAG IS CLEAR IF NO ERROR DETECTED
-   291                                  ;  CARRY FLAG IS SET IF CRC ERROR DETECTED
+   215                                  %if 0
+   216                                  %include "cassette.asm"
+   217                                  ;--------------------------------------------------------
+   218                                  ; Cassette support routines
+   219                                  ;	(AH) = 0 TURN CASSETTE MOTOR ON
+   220                                  ;	(AH) = 1 TURN CASSETTE MOTOR OFF
+   221                                  ;	(AH) = 2 READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
+   222                                  ;		(ES,BX) = POINTER TO DATA BUFFER
+   223                                  ;		(CX) = COUNT OF BYTES TO READ
+   224                                  ;		ON EXIT:
+   225                                  ;  		(ES,BX) = POINTER TO LAST BYTE READ + 1
+   226                                  ;  		(DX) = COUNT OF BYTES ACTUALLY READ
+   227                                  ;  		(CY) = 0 IF NO ERROR OCCURRED
+   228                                  ;  		     = 1 IF ERROR OCCURRED
+   229                                  ;  		(AH) = ERROR RETURN IF (CY)= 1
+   230                                  ;  			= 01 IF CRC ERROR WAS DETECTED
+   231                                  ;  			= 02 IF DATA TRANSITIONS ARE LOST
+   232                                  ;  			= 04 IF NO DATA WAS FOUND
+   233                                  ;  	(AH) = 3 WRITE 1 OR MORE 256 BYTE BLOCKS TO CASSETTE
+   234                                  ;  		(ES,BX) = POINTER TO DATA BUFFER
+   235                                  ;  		(CX) = COUNT OF BYTES TO WRITE
+   236                                  ;  		ON EXIT:
+   237                                  ;		(EX,BX) = POINTER TO LAST BYTE WRITTEN + 1
+   238                                  ;		(CX) = 0
+   239                                  ;	(AH) = 4 TURN GPIO2 ON
+   240                                  ;	(AH) = 5 TURN GPIO2 OFF
+   241                                  ;	(AH) = ANY OTHER THAN ABOVE VALUES CAUSES (CY)= 1
+   242                                  ;		AND (AH)= 80 TO BE RETURNED (INVALID COMMAND).
+   243                                  ;--------------------------------------------------------
+   244                                  ; PURPOSE:
+   245                                  ;  TO TURN ON CASSETTE MOTOR
+   246                                  ;  16550 I/O pins are active low so we need to add
+   247                                  ;  an inverter (7400) before the 75452 to make this work.
+   248                                  ;  Cassette motor connected to OUT1* on 16550, which is
+   249                                  ;  bit2 of MCR.
+   250                                  ;--------------------------------------------------------
+   251                                  fn00:
+   252                                  	mov	dx,cuart_mcr			; get device code
+   253                                  	in	al,dx				;read cassette uart mcr
+   254                                  	or	al,04H				; SET BIT TO TURN ON
+   255                                  W3:	out	dx,al				;WRITE IT OUT
+   256                                  	mov	word [bp+offset_AX],0000h	; signal success to caller
+   257                                  	jmp	clear_carry
+   258                                  
+   259                                  
+   260                                  ;----------------------------------
+   261                                  ; PURPOSE:
+   262                                  ;  TO TURN CASSETTE MOTOR OFF
+   263                                  ;-----------------------------------
+   264                                  fn01:
+   265                                  	mov	dx,cuart_mcr			; get device code
+   266                                  	in	al,dx				;read cassette uart mcr
+   267                                  	and	al,~04h				; clear bit to turn off motor
+   268                                  	jmp	W3				;write it, clear error, return
+   269                                  
+   270                                  
+   271                                  ;--------------------------------------------
+   272                                  ; PURPOSE:
+   273                                  ;  TO READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
+   274                                  ;
+   275                                  ; ON ENTRY:
+   276                                  ;  ES IS SEGMENT FOR MEMORY BUFFER (FOR COMPACT CODE)
+   277                                  ;  BX POINTS TO START OF MEMORY BUFFER
+   278                                  ;  CX CONTAINS NUMBER OF BYTES TO READ
+   279                                  ; ON EXIT:
+   280                                  ;  BX POINTS 1 BYTE PAST LAST BYTE PUT IN MEM
+   281                                  ;  CX CONTAINS DECREMENTED BYTE COUNT
+   282                                  ;  DX CONTAINS NUMBER OF BYTES ACTUALLY READ
+   283                                  ;
+   284                                  ;  CARRY FLAG IS CLEAR IF NO ERROR DETECTED
+   285                                  ;  CARRY FLAG IS SET IF CRC ERROR DETECTED
+   286                                  ;--------------------------------------------
+   287                                  fn02:
+   288                                  	mov	word [bp+offset_AX],80ffh	; return error code to caller
+   289                                  	jmp	set_carry
+   290                                  
+   291                                  
    292                                  ;--------------------------------------------
-   293                                  fn02:
-   294                                  	mov	word [bp+offset_AX],80ffh	; return error code to caller
-   295                                  	jmp	set_carry
-   296                                  
-   297                                  
-   298                                  ;--------------------------------------------
-   299                                  ;  READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
-   300                                  ;
-   301                                  ; ON ENTRY:
-   302                                  ;  ES IS SEGMENT FOR MEMORY BUFFER (FOR COMPACT CODE)
-   303                                  ;  BX POINTS TO START OF MEMORY BUFFER
-   304                                  ;  CX CONTAINS NUMBER OF BYTES TO READ
-   305                                  ; ON EXIT:
-   306                                  ;  BX POINTS 1 BYTE PAST LAST BYTE PUT IN MEM
-   307                                  ;  CX CONTAINS DECREMENTED BYTE COUNT
-   308                                  ;  DX CONTAINS NUMBER OF BYTES ACTUALLY READ
-   309                                  ;--------------------------------------------
-   310                                  fn03:
-   311                                  	mov	word [bp+offset_AX],80ffh	; return error code to caller
-   312                                  	jmp	set_carry
-   313                                  
-   314                                  
+   293                                  ;  READ 1 OR MORE 256 BYTE BLOCKS FROM CASSETTE
+   294                                  ;
+   295                                  ; ON ENTRY:
+   296                                  ;  ES IS SEGMENT FOR MEMORY BUFFER (FOR COMPACT CODE)
+   297                                  ;  BX POINTS TO START OF MEMORY BUFFER
+   298                                  ;  CX CONTAINS NUMBER OF BYTES TO READ
+   299                                  ; ON EXIT:
+   300                                  ;  BX POINTS 1 BYTE PAST LAST BYTE PUT IN MEM
+   301                                  ;  CX CONTAINS DECREMENTED BYTE COUNT
+   302                                  ;  DX CONTAINS NUMBER OF BYTES ACTUALLY READ
+   303                                  ;--------------------------------------------
+   304                                  fn03:
+   305                                  	mov	word [bp+offset_AX],80ffh	; return error code to caller
+   306                                  	jmp	set_carry
+   307                                  
+   308                                  
+   309                                  ;--------------------------------------------------------
+   310                                  ; PURPOSE:
+   311                                  ;  TO TURN CASSETTE GPIO2 ON
+   312                                  ;  16550 I/O pins are active low so we need to add
+   313                                  ;  an inverter (7400) before the 75452 to make this work.
+   314                                  ;  GPIO2 is OUT2* on 16550, which is bit3 of MCR.
    315                                  ;--------------------------------------------------------
-   316                                  ; PURPOSE:
-   317                                  ;  TO TURN CASSETTE GPIO2 ON
-   318                                  ;  16550 I/O pins are active low so we need to add
-   319                                  ;  an inverter (7400) before the 75452 to make this work.
-   320                                  ;  GPIO2 is OUT2* on 16550, which is bit3 of MCR.
-   321                                  ;--------------------------------------------------------
-   322                                  fn04:
-   323                                  	mov	dx,cuart_mcr			; get device code
-   324                                  	in	al,dx   			;read cassette uart mcr
-   325                                  	or	al,08h				; set bit to turn on
-   326                                  W4:	out	dx,al				;write it out
-   327                                  	mov	word [bp+offset_AX],0000h	; signal success to caller
-   328                                  	jmp	clear_carry
-   329                                  
-   330                                  
-   331                                  ;----------------------------------
-   332                                  ; PURPOSE:
-   333                                  ;  TO TURN CASSETTE GPIO2 OFF
-   334                                  ;-----------------------------------
-   335                                  fn05:
-   336                                  	mov	dx,cuart_mcr			; get device code
-   337                                  	in	al,dx				;read cassette uart mcr
-   338                                  	and	al,~08h				; clear bit to turn off motor
-   339                                  	jmp	W4				;write it, clear error, return
-   340                                  
-   341                                  %else
-   342                                  fn00:
-   343                                  fn01:
-   344                                  fn02:
-   345                                  fn03:
-   346                                  fn04:
-   347                                  fn05:
-   348 0000009E EBA1                    jmp	set_carry
-   349                                  %endif
-   350                                  
-   351                                  
-   352                                          SEGMENT CONST
-   353                                  env_table:
-   354 00000000 0800                            dw      len_env_table
-   355 00000002 FE                      	db	MODEL_BYTE	; PC/XT
-   356 00000003 00                      	db	SUBMODEL_BYTE	; rev 1		CPUREGS.ASM
-   357 00000004 03                      	db	VERSION_MAJOR	; BIOS revision level  DATE.ASM
-   358 00000005 24                              db      00100100b
-   359                                  				; DMA ch 3 used = 0             7
-   360                                                                  ; slave 8259 present = 0        6
-   361                                                                  ; RTC available = 1             5
-   362                                                                  ; KBD intercept available (int 15h, fn4F) = 0
-   363                                                                  ; Wait for Event avail. = 0     3
-   364                                                                  ; Extended BIOS data area alloc. = 1   (FPEM will use)
-   365                                                                  ; Micro Channel = 0             1
-   366                                                                  ; reserved bit = 0              0
-   367 00000006 00                              db      0       ; unknown usage
-   368 00000007 00                              db      0       ; unknown usage
-   369                                  len_env_table   equ     $-env_table
-   370 00000008 0000                            db      0,0     ; just in case
-   371                                  
-   372                                  
-   373                                  	SEGMENT	_TEXT
-   374                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   375                                  ; Get System Environment
-   376                                  ;   Input:
-   377                                  ;	AH = 0C0h	function code
-   378                                  ;   Returns:
-   379                                  ;	ES:BX		pointer to the environment table above
-   380                                  ;	Carry clear	success
-   381                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   382                                  fnC0:
-   383 000000A0 C74604[0000]                    mov     word [bp+offset_BX],env_table
-   384 000000A5 68[ssss]                        push    DGROUP
-   385 000000A8 07                              popm    es                              ; return ES:BX
-   386                                  ;;;	mov     byte [bp+offset_AH],0           ; signal no error
-   387 000000A9 EBA0                            jmp     clear_carry
-   388                                  
-   389                                  
-   390                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   391                                  ; Get Extended BIOS Data Area Address
-   392                                  ;   Input:
-   393                                  ;	AH = 0C1h	function code
-   394                                  ;   Returns:
-   395                                  ;	ES		set to the EBDA segment address
-   396                                  ;	Carry clear	success
-   397                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   398                                  fnC1:
-   399 000000AB 6A40                            push    bios_data_seg
-   400 000000AD 1F                              popm    ds
-   401 000000AE 8E06F200                        mov     es,[EBDA_paragraph]
-   402 000000B2 EB97                            jmp     clear_carry
-   403                                  
-   404                                  
-   405                                  ; Disable timer1 interrupts
-   406                                  ;
-   407                                  ;	uses AX & DX
-   408                                  ;	exits with AX=0
-   409                                  ;
-   410                                  timer_disable:
-   411 000000B4 BA5EFF                  	mov	dx,timer1+TCON
-   412 000000B7 ED                      	in	ax,dx		; get control register
-   413 000000B8 25FF7F                  	and	ax,(~tc_EN)&0FFFFh  ; disable timer
-   414 000000BB 0D0040                  	or	ax,tc_nINH		; change enable flag
-   415 000000BE EF                      	out	dx,ax		; disable the timer
-   416                                  
-   417 000000BF 31C0                    	xor	ax,ax
-   418 000000C1 BA58FF                  	mov	dx,timer1+TCNT		; zero the count
-   419 000000C4 EF                      	out	dx,ax
-   420 000000C5 C3                       	ret
-   421                                  
-   422                                  ; Enable timer1 interrupts
-   423                                  ;
-   424                                  ;	uses AX & DX
-   425                                  ;
-   426                                  timer_enable:
-   427 000000C6 BA5EFF                  	mov	dx,timer1+TCON
-   428 000000C9 ED                      	in	ax,dx		; get control register
-   429 000000CA 0D00E0                  	or	ax,tc_EN+tc_nINH+tc_INT		; enable timer & interrupts
-   430 000000CD EF                      	out	dx,ax		; enable the timer
-   431 000000CE C3                       	ret
-   432                                  
-   433                                  	global set_count
-   434                                  set_count:
-   435 000000CF 31DB                    	xor	bx,bx
-   436                                  ; wait in microseconds in BX:CX:DX
-   437                                  
-   438                                  ;  to divide by 976 microseconds, the resolution of the timer
-   439                                  ;  we divide by 1000000/1024 == 15625/16
-   440                                  ;  OR we multiply by 16, then divide by 15625
-   441                                  
-   442 000000D1 51                      	pushm	cx
-   443 000000D2 89C8                    	mov	ax,cx		; BX:AX:DX is microsecond count
-   444 000000D4 B90400                  	mov	cx,4
-   445 000000D7 D1E2                    .4:	shl	dx,1		; * 16 is left shift by 4
-   446 000000D9 D1D0                    	rcl	ax,1
-   447 000000DB D1D3                    	rcl	bx,1
-   448 000000DD E2F8                    	loop	.4
-   449 000000DF B9093D                  	mov	cx,15625	; divisor
-   450 000000E2 87DA                    	xchg	bx,dx		; DX:AX:BX is count
-   451 000000E4 F7F1                    	div	cx
-   452 000000E6 A39E00                  	mov	word [rtc_count+2],ax	; AX is high quotient
-   453 000000E9 93                      	xchg	ax,bx		; and DX is remainder
-   454 000000EA F7F1                    	div	cx		; DX:AX is low dividend
-   455 000000EC 59                      	popm	cx
-   456                                  
-   457                                  %if 0
-   458                                  ; since count goes to -1, there will always be at least 1 tick
-   459                                  	or	bx,ax		; test for zero tick count
-   460                                  	jnz	.5
-   461                                  	inc	ax		; wait at least 1 tick
-   462                                  .5:
-   463                                  %endif
-   464 000000ED A39C00                  	mov	word [rtc_count],ax	; AX is final low quotient
-   465 000000F0 C3                      	ret
-   466                                  
-   467                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   468                                  ; fn83 -- Event Wait
-   469                                  ;   Input:
-   470                                  ;	AH = 83h
-   471                                  ;
-   472                                  ;   Subfucntion:
-   473                                  ;	AL = 01h	Cancel event wait
-   474                                  ;   Output:
-   475                                  ;	nothing
-   476                                  ;
-   477                                  ;   Subfunction:
-   478                                  ;	AL = 00h	Request Event Wait
-   479                                  ;	CX:DX = delay in microseconds
-   480                                  ;	ES:BX = address of semaphore byte
-   481                                  ;		the semaphore bit 7 is set at the end of the inverval
-   482                                  ;   Output:
-   483                                  ;	Carry flag clear if timer started
-   484                                  ;	Carry flag set if function unsuccessful (event wait already active)
-   485                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   486                                  fn83:		; BP,AX,BX,DX,DS already saved
-   487 000000F1 6A40                    	push	bios_data_seg
-   488 000000F3 1F                      	popm	ds
-   489 000000F4 08C0                    	or	al,al		; test for zero
-   490 000000F6 741C                    	jz	.set_wait
-   491                                  
-   492 000000F8 FEC8                    	dec	al		; test for one
-   493 000000FA 7403E942FF              	jnz	set_carry	; error on illegal subfunction
-   494                                  ; cancel wait
-   495 000000FF E8B2FF                  	call	timer_disable
-   496                                  ;	xor	ax,ax		; side effect of 'timer_disable'
-   497 00000102 A2A000                  	mov	byte [rtc_wait_active],al
-   498 00000105 A39E00                  	mov	word [rtc_count+2],ax
-   499 00000108 A39C00                  	mov	word [rtc_count],ax
-   500 0000010B A39A00                  	mov	word [user_semaphore+2],ax
-   501 0000010E A39800                  	mov	word [user_semaphore],ax
-   502 00000111 E937FF                  	jmp	clear_carry
-   503                                  
-   504                                  .set_wait:
-   505 00000114 F606A00001              	test	byte [rtc_wait_active],01h	; any wait in progress
-   506 00000119 7403E923FF              	jnz	set_carry
+   316                                  fn04:
+   317                                  	mov	dx,cuart_mcr			; get device code
+   318                                  	in	al,dx   			;read cassette uart mcr
+   319                                  	or	al,08h				; set bit to turn on
+   320                                  W4:	out	dx,al				;write it out
+   321                                  	mov	word [bp+offset_AX],0000h	; signal success to caller
+   322                                  	jmp	clear_carry
+   323                                  
+   324                                  
+   325                                  ;----------------------------------
+   326                                  ; PURPOSE:
+   327                                  ;  TO TURN CASSETTE GPIO2 OFF
+   328                                  ;-----------------------------------
+   329                                  fn05:
+   330                                  	mov	dx,cuart_mcr			; get device code
+   331                                  	in	al,dx				;read cassette uart mcr
+   332                                  	and	al,~08h				; clear bit to turn off motor
+   333                                  	jmp	W4				;write it, clear error, return
+   334                                  
+   335                                  %else
+   336                                  fn00:
+   337                                  fn01:
+   338                                  fn02:
+   339                                  fn03:
+   340                                  fn04:
+   341                                  fn05:
+   342 0000009E EBA1                    jmp	set_carry
+   343                                  %endif
+   344                                  
+   345                                  
+   346                                          SEGMENT CONST
+   347                                  env_table:
+   348 00000000 0800                            dw      len_env_table
+   349 00000002 FE                      	db	MODEL_BYTE	; PC/XT
+   350 00000003 00                      	db	SUBMODEL_BYTE	; rev 1		CPUREGS.ASM
+   351 00000004 03                      	db	VERSION_MAJOR	; BIOS revision level  DATE.ASM
+   352 00000005 24                              db      00100100b
+   353                                  				; DMA ch 3 used = 0             7
+   354                                                                  ; slave 8259 present = 0        6
+   355                                                                  ; RTC available = 1             5
+   356                                                                  ; KBD intercept available (int 15h, fn4F) = 0
+   357                                                                  ; Wait for Event avail. = 0     3
+   358                                                                  ; Extended BIOS data area alloc. = 1   (FPEM will use)
+   359                                                                  ; Micro Channel = 0             1
+   360                                                                  ; reserved bit = 0              0
+   361 00000006 00                              db      0       ; unknown usage
+   362 00000007 00                              db      0       ; unknown usage
+   363                                  len_env_table   equ     $-env_table
+   364 00000008 0000                            db      0,0     ; just in case
+   365                                  
+   366                                  
+   367                                  	SEGMENT	_TEXT
+   368                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   369                                  ; Get System Environment
+   370                                  ;   Input:
+   371                                  ;	AH = 0C0h	function code
+   372                                  ;   Returns:
+   373                                  ;	ES:BX		pointer to the environment table above
+   374                                  ;	Carry clear	success
+   375                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   376                                  fnC0:
+   377 000000A0 C74604[0000]                    mov     word [bp+offset_BX],env_table
+   378 000000A5 68[ssss]                        push    DGROUP
+   379 000000A8 07                              popm    es                              ; return ES:BX
+   380                                  ;;;	mov     byte [bp+offset_AH],0           ; signal no error
+   381 000000A9 EBA0                            jmp     clear_carry
+   382                                  
+   383                                  
+   384                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   385                                  ; Get Extended BIOS Data Area Address
+   386                                  ;   Input:
+   387                                  ;	AH = 0C1h	function code
+   388                                  ;   Returns:
+   389                                  ;	ES		set to the EBDA segment address
+   390                                  ;	Carry clear	success
+   391                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   392                                  fnC1:
+   393 000000AB 6A40                            push    bios_data_seg
+   394 000000AD 1F                              popm    ds
+   395 000000AE 8E06F200                        mov     es,[EBDA_paragraph]
+   396 000000B2 EB97                            jmp     clear_carry
+   397                                  
+   398                                  
+   399                                  ; Disable timer1 interrupts
+   400                                  ;
+   401                                  ;	uses AX & DX
+   402                                  ;	exits with AX=0
+   403                                  ;
+   404                                  timer_disable:
+   405 000000B4 BA5EFF                  	mov	dx,timer1+TCON
+   406 000000B7 ED                      	in	ax,dx		; get control register
+   407 000000B8 25FF7F                  	and	ax,(~tc_EN)&0FFFFh  ; disable timer
+   408 000000BB 0D0040                  	or	ax,tc_nINH		; change enable flag
+   409 000000BE EF                      	out	dx,ax		; disable the timer
+   410                                  
+   411 000000BF 31C0                    	xor	ax,ax
+   412 000000C1 BA58FF                  	mov	dx,timer1+TCNT		; zero the count
+   413 000000C4 EF                      	out	dx,ax
+   414 000000C5 C3                       	ret
+   415                                  
+   416                                  ; Enable timer1 interrupts
+   417                                  ;
+   418                                  ;	uses AX & DX
+   419                                  ;
+   420                                  timer_enable:
+   421 000000C6 BA5EFF                  	mov	dx,timer1+TCON
+   422 000000C9 ED                      	in	ax,dx		; get control register
+   423 000000CA 0D00E0                  	or	ax,tc_EN+tc_nINH+tc_INT		; enable timer & interrupts
+   424 000000CD EF                      	out	dx,ax		; enable the timer
+   425 000000CE C3                       	ret
+   426                                  
+   427                                  	global set_count
+   428                                  set_count:
+   429 000000CF 31DB                    	xor	bx,bx
+   430                                  ; wait in microseconds in BX:CX:DX
+   431                                  
+   432                                  ;  to divide by 976 microseconds, the resolution of the timer
+   433                                  ;  we divide by 1000000/1024 == 15625/16
+   434                                  ;  OR we multiply by 16, then divide by 15625
+   435                                  
+   436 000000D1 51                      	pushm	cx
+   437 000000D2 89C8                    	mov	ax,cx		; BX:AX:DX is microsecond count
+   438 000000D4 B90400                  	mov	cx,4
+   439 000000D7 D1E2                    .4:	shl	dx,1		; * 16 is left shift by 4
+   440 000000D9 D1D0                    	rcl	ax,1
+   441 000000DB D1D3                    	rcl	bx,1
+   442 000000DD E2F8                    	loop	.4
+   443 000000DF B9093D                  	mov	cx,15625	; divisor
+   444 000000E2 87DA                    	xchg	bx,dx		; DX:AX:BX is count
+   445 000000E4 F7F1                    	div	cx
+   446 000000E6 A39E00                  	mov	word [rtc_count+2],ax	; AX is high quotient
+   447 000000E9 93                      	xchg	ax,bx		; and DX is remainder
+   448 000000EA F7F1                    	div	cx		; DX:AX is low dividend
+   449 000000EC 59                      	popm	cx
+   450                                  
+   451                                  %if 0
+   452                                  ; since count goes to -1, there will always be at least 1 tick
+   453                                  	or	bx,ax		; test for zero tick count
+   454                                  	jnz	.5
+   455                                  	inc	ax		; wait at least 1 tick
+   456                                  .5:
+   457                                  %endif
+   458 000000ED A39C00                  	mov	word [rtc_count],ax	; AX is final low quotient
+   459 000000F0 C3                      	ret
+   460                                  
+   461                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   462                                  ; fn83 -- Event Wait
+   463                                  ;   Input:
+   464                                  ;	AH = 83h
+   465                                  ;
+   466                                  ;   Subfucntion:
+   467                                  ;	AL = 01h	Cancel event wait
+   468                                  ;   Output:
+   469                                  ;	nothing
+   470                                  ;
+   471                                  ;   Subfunction:
+   472                                  ;	AL = 00h	Request Event Wait
+   473                                  ;	CX:DX = delay in microseconds
+   474                                  ;	ES:BX = address of semaphore byte
+   475                                  ;		the semaphore bit 7 is set at the end of the inverval
+   476                                  ;   Output:
+   477                                  ;	Carry flag clear if timer started
+   478                                  ;	Carry flag set if function unsuccessful (event wait already active)
+   479                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   480                                  fn83:		; BP,AX,BX,DX,DS already saved
+   481 000000F1 6A40                    	push	bios_data_seg
+   482 000000F3 1F                      	popm	ds
+   483 000000F4 08C0                    	or	al,al		; test for zero
+   484 000000F6 741C                    	jz	.set_wait
+   485                                  
+   486 000000F8 FEC8                    	dec	al		; test for one
+   487 000000FA 7403E942FF              	jnz	set_carry	; error on illegal subfunction
+   488                                  ; cancel wait
+   489 000000FF E8B2FF                  	call	timer_disable
+   490                                  ;	xor	ax,ax		; side effect of 'timer_disable'
+   491 00000102 A2A000                  	mov	byte [rtc_wait_active],al
+   492 00000105 A39E00                  	mov	word [rtc_count+2],ax
+   493 00000108 A39C00                  	mov	word [rtc_count],ax
+   494 0000010B A39A00                  	mov	word [user_semaphore+2],ax
+   495 0000010E A39800                  	mov	word [user_semaphore],ax
+   496 00000111 E937FF                  	jmp	clear_carry
+   497                                  
+   498                                  .set_wait:
+   499 00000114 F606A00001              	test	byte [rtc_wait_active],01h	; any wait in progress
+   500 00000119 7403E923FF              	jnz	set_carry
+   501                                  
+   502 0000011E 8B5E04                  	mov	bx,[offset_BX+bp]	; restore BX
+   503 00000121 8C069A00                	mov	word [user_semaphore+2],es
+   504 00000125 891E9800                	mov	word [user_semaphore],bx
+   505                                  
+   506 00000129 E8A3FF                  	call	set_count
    507                                  
-   508 0000011E 8B5E04                  	mov	bx,[offset_BX+bp]	; restore BX
-   509 00000121 8C069A00                	mov	word [user_semaphore+2],es
-   510 00000125 891E9800                	mov	word [user_semaphore],bx
-   511                                  
-   512 00000129 E8A3FF                  	call	set_count
+   508 0000012C E897FF                  	call	timer_enable
+   509 0000012F C606A00001              	mov	byte [rtc_wait_active],01h	; flag wait active
+   510 00000134 B80083                  	mov	ax,8300h
+   511 00000137 E911FF                  	jmp	clear_carry
+   512                                  
    513                                  
-   514 0000012C E897FF                  	call	timer_enable
-   515 0000012F C606A00001              	mov	byte [rtc_wait_active],01h	; flag wait active
-   516 00000134 B80083                  	mov	ax,8300h
-   517 00000137 E911FF                  	jmp	clear_carry
-   518                                  
-   519                                  
-   520                                  
-   521                                  
-   522                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   523                                  ; fn86 -- Delay
-   524                                  ;   Input:
-   525                                  ;	AH = 86h
-   526                                  ;	CX:DX = delay in microseconds
-   527                                  ;
-   528                                  ;   Output:
-   529                                  ;	Carry flag clear if delay occurred
-   530                                  ;	Carry flag set if timer busy; no delay occurred
-   531                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   532                                  fn86:		; BP,AX,BX,DX,DS already saved
-   533 0000013A 6A40                    	push	bios_data_seg
-   534 0000013C 1F                      	popm	ds
-   535 0000013D F606A00001              	test	byte [rtc_wait_active],01h	; is a wait active?
-   536 00000142 7403E9FAFE              	jnz	set_carry		; perform no wait, we're busy
-   537                                  
-   538 00000147 E885FF                  	call	set_count
-   539 0000014A C606A00001              	mov	byte [rtc_wait_active],01h		; mark timer active
-   540                                  
-   541 0000014F 31DB                    	xor	bx,bx
-   542 00000151 891E9800                	mov	word [user_semaphore],bx
-   543 00000155 891E9A00                	mov	word [user_semaphore+2],bx
-   544                                  
-   545 00000159 E86AFF                  	call	timer_enable
-   546 0000015C FB                      	sti					; don't forget to enable interrupts
-   547 0000015D EB01                    	jmp	.3
-   548                                  
-   549                                  
-   550 0000015F F4                      .wait:	hlt
-   551 00000160 F606A00080              .3:	test	byte [rtc_wait_active],80h		; wait for posting
-   552 00000165 74F8                    	jz	.wait
-   553                                  
-   554 00000167 C606A00000              	mov	byte [rtc_wait_active],0		; mark not in use
-   555 0000016C E9DCFE                  	jmp	clear_carry
-   556                                  
-   557                                  
-   558                                  	global	rtc_interrupt
-   559                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   560                                  ;  rtc_interrupt             (timer0, if NEED_TIMER_FIX)
-   561                                  ;
-   562                                  ;       This is the 1024 Hz timer tick from INT 70h
-   563                                  ;
-   564                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   565                                  rtc_interrupt:
-   566 0000016F 1E565250                	pushm	ax,dx,si,ds
+   514                                  
+   515                                  
+   516                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   517                                  ; fn86 -- Delay
+   518                                  ;   Input:
+   519                                  ;	AH = 86h
+   520                                  ;	CX:DX = delay in microseconds
+   521                                  ;
+   522                                  ;   Output:
+   523                                  ;	Carry flag clear if delay occurred
+   524                                  ;	Carry flag set if timer busy; no delay occurred
+   525                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   526                                  fn86:		; BP,AX,BX,DX,DS already saved
+   527 0000013A 6A40                    	push	bios_data_seg
+   528 0000013C 1F                      	popm	ds
+   529 0000013D F606A00001              	test	byte [rtc_wait_active],01h	; is a wait active?
+   530 00000142 7403E9FAFE              	jnz	set_carry		; perform no wait, we're busy
+   531                                  
+   532 00000147 E885FF                  	call	set_count
+   533 0000014A C606A00001              	mov	byte [rtc_wait_active],01h		; mark timer active
+   534                                  
+   535 0000014F 31DB                    	xor	bx,bx
+   536 00000151 891E9800                	mov	word [user_semaphore],bx
+   537 00000155 891E9A00                	mov	word [user_semaphore+2],bx
+   538                                  
+   539 00000159 E86AFF                  	call	timer_enable
+   540 0000015C FB                      	sti					; don't forget to enable interrupts
+   541 0000015D EB01                    	jmp	.3
+   542                                  
+   543                                  
+   544 0000015F F4                      .wait:	hlt
+   545 00000160 F606A00080              .3:	test	byte [rtc_wait_active],80h		; wait for posting
+   546 00000165 74F8                    	jz	.wait
+   547                                  
+   548 00000167 C606A00000              	mov	byte [rtc_wait_active],0		; mark not in use
+   549 0000016C E9DCFE                  	jmp	clear_carry
+   550                                  
+   551                                  
+   552                                  	global	rtc_interrupt
+   553                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   554                                  ;  rtc_interrupt
+   555                                  ;
+   556                                  ;       This is the 1024 Hz timer tick from INT 70h
+   557                                  ;
+   558                                  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   559                                  rtc_interrupt:
+   560 0000016F 1E565250                	pushm	ax,dx,si,ds
+   561                                  
+   562 00000173 6A40                    	push	bios_data_seg
+   563 00000175 1F                      	popm	ds
+   564                                  
+   565 00000176 F606A00001              	test	byte [rtc_wait_active],01h	; test active bit
+   566 0000017B 7421                    	jz	.dismiss
    567                                  
-   568 00000173 6A40                    	push	bios_data_seg
-   569 00000175 1F                      	popm	ds
-   570                                  
-   571 00000176 F606A00001              	test	byte [rtc_wait_active],01h	; test active bit
-   572 0000017B 7421                    	jz	.dismiss
-   573                                  
-   574 0000017D 832E9C0001              	sub	word [rtc_count],1
-   575 00000182 831E9E0000              	sbb	word [rtc_count+2],0
-   576 00000187 7315                    	jnc	.dismiss		; counted down by 1
-   577                                  
-   578                                  ; counted down to -1, post the event
-   579 00000189 C606A00080              	mov	byte [rtc_wait_active],80h	; mark posted, inactive
-   580 0000018E C5369800                	lds	si,[user_semaphore]
-   581 00000192 8CD8                    	mov	ax,ds			; check for null pointer
-   582 00000194 09F0                    	or	ax,si			; **
-   583 00000196 7403                    	jz	.2
-   584 00000198 800C80                  	or	byte [si],80h			; post event
-   585 0000019B E816FF                  .2:	call	timer_disable
+   568 0000017D 832E9C0001              	sub	word [rtc_count],1
+   569 00000182 831E9E0000              	sbb	word [rtc_count+2],0
+   570 00000187 7315                    	jnc	.dismiss		; counted down by 1
+   571                                  
+   572                                  ; counted down to -1, post the event
+   573 00000189 C606A00080              	mov	byte [rtc_wait_active],80h	; mark posted, inactive
+   574 0000018E C5369800                	lds	si,[user_semaphore]
+   575 00000192 8CD8                    	mov	ax,ds			; check for null pointer
+   576 00000194 09F0                    	or	ax,si			; **
+   577 00000196 7403                    	jz	.2
+   578 00000198 800C80                  	or	byte [si],80h			; post event
+   579 0000019B E816FF                  .2:	call	timer_disable
+   580                                  
+   581                                  .dismiss:
+   582                                  ; signal EOI (End of Interrupt)
+   583 0000019E BA22FF                          mov     dx,PIC_EOI              ; EOI register
+   584 000001A1 B80080                          mov     ax,EOI_NSPEC            ; non-specific
+   585 000001A4 EF                              out     dx,ax                   ; signal it
    586                                  
-   587                                  .dismiss:
-   588                                  ; signal EOI (End of Interrupt)
-   589 0000019E BA22FF                          mov     dx,PIC_EOI              ; EOI register
-   590 000001A1 B80080                          mov     ax,EOI_NSPEC            ; non-specific
-   591 000001A4 EF                              out     dx,ax                   ; signal it
-   592                                  
-   593 000001A5 585A5E1F                	popm	ax,dx,si,ds
-   594 000001A9 CF                              iret
+   587 000001A5 585A5E1F                	popm	ax,dx,si,ds
+   588 000001A9 CF                              iret

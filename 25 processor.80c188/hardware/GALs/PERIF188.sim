@@ -10,10 +10,10 @@ PIN  20 = !FP_LATCH_RD
 PIN  19 =  FP_LATCH_WR 
 PIN  16 = !I2C_CS 
 PIN  15 = !I2C_CS_WR 
+PIN  21 = !ONBIO 
 PIN   2 = !PCS4 
 PIN   3 = !PCS5 
 PIN   4 = !PCS6 
-PIN  21 = !PIC_CS 
 PIN   9 = !RD 
 PIN  18 = !RESET_OUT 
 PIN  17 = !UART_CS 
@@ -70,8 +70,13 @@ I2C_CS =>
 I2C_CS_WR =>
     DELAYIN
 
+ONBIO =>
+    !PCS4
+  # !PCS5
+  # !PCS6
+
 PIC_CS =>
-    A3 & A4 & !A5 & !A6 & !ALE & !PCS4
+    A3 & A4 & !A5 & !A6 & !ALE & PCS4
 
 RESET_OUT =>
     A3 & !A4 & A5 & !A6 & !ALE & !PCS4 & !WR
@@ -100,7 +105,7 @@ I2C_CS.oe  =>
 I2C_CS_WR.oe  =>
     1 
 
-PIC_CS.oe  =>
+ONBIO.oe  =>
     1 
 
 RESET_OUT.oe  =>

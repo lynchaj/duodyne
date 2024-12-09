@@ -16,18 +16,9 @@
 #
 #
 SBC188 = 1
-#ROM = 64
 ROM = 32
 ETC = tbasic.hex -d26K  -d18k em187.hex
 CHIP = 64
-#CHIP = 128
-#TRC = -DTRACE=1
-#RED = -DTBASIC=0 -DFPEM=0
-#RED = -DSOFT_DEBUG=1 -DTBASIC=0 -DFPEM=0
-# use the following to allow for LED lights on debug board on Parallel Port
-#RED = -DSOFT_DEBUG=2 -DTBASIC=0 -DFPEM=0
-#TESTS = -DTESTS
-#indicate presence of FASTCALL
 FAST = -DHAS_FASTCALL=1
 V=$(SBC188)
 
@@ -59,10 +50,8 @@ NOPT = $(RED) $(FAST) -O9 -DSBC188=$(SBC188) $(TRC) $(ANSI) $(TESTS)
 LINK = wcl
 # Open Watcom liner options:
 # -lr   create a DOS real-mode program
-#LOPT = -mc -lr
 LOPT = -lr -q
 
-!ifdef __UNIX__
 RM=rm -f
 EXE2ROM=tools/exe2rom
 HEX2BIN=tools/hex2bin
@@ -74,27 +63,15 @@ PLUS=
 NULL=/dev/null
 ZIP=zip
 SEP=/
-!else
-RM=del
-EXE2ROM=tools\exe2rom.exe
-HEX2BIN=tools\hex2bin.exe
-BIN2HEX=tools\bin2hex.exe
-CP=copy
-CAT=copy/b
-OUT=
-PLUS=+
-NULL=NUL
-ZIP=pkzip
-SEP=\
-!endif
 
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
-OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj
-OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj
-OBJECT3 = sdcard.obj idelib.obj int14ser.obj int17par.obj
+OBJECT1 = floppy.obj int10ser.obj int16.obj misc15.obj ide.obj
+OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj usb.obj
+OBJECT3 = idelib.obj int14ser.obj int17par.obj
 OBJECT4 = fpem/em187.obj
 OBJECTC1 = cprintf.obj sio.obj nvram.obj strtoul.obj libc.obj debug.obj
+OBJECTC2 = kbd.obj
 
 OBJECTA = $(OBJECT1) $(OBJECT2) $(OBJECT3) $(OBJECT4)
 OBJECTC = $(OBJECTC1) $(OBJECTC2)
@@ -196,10 +173,13 @@ fdc:	wd37c65.obj fdc8272.obj	.SYMBOLIC
 
 bios064.bin:	rbios.hex tbasic.hex em187.hex
 	$(HEX2BIN) -o bios064.bin -R64K rbios.hex $(ETC)
+	$(CP) bios064.bin ../../bin/bios064.bin
 bios128.bin:	space64.bin bios064.bin
 	$(CAT) space64.bin $(PLUS) bios064.bin $(OUT) bios128.bin
+	$(CP) bios128.bin ../../bin/bios128.bin
 bios256.bin:	space64.bin bios128.bin
 	$(CAT) space64.bin $(PLUS) space64.bin $(PLUS) bios128.bin $(OUT) bios256.bin
+	$(CP) bios256.bin ../../bin/bios256.bin
 
 rbios.hex:	rbios.bin
 	$(BIN2HEX) -o rbios.hex rbios.bin
@@ -215,14 +195,6 @@ tbasic.hex:	tbasic.bin
 	$(BIN2HEX) -o tbasic.hex tbasic.bin
 
 tbasic.bin:	tbasic.asm $(INCLUDES)
-
-
-
-#config.asm:     ansi.cfg wyse.cfg cvdu.cfg wcvdu.cfg vga3.cfg wvga3.cfg
-#	echo GUESSING THAT YOU WANT THE 'ANSI.CFG' COPIED TO 'CONFIG.ASM'
-#	echo ANY ONE OF THE '*.CFG' FILES MAY BE USED FOR THE CONFIGURATION
-#        $(CP)   ansi.cfg config.asm
-#	error
 
 config.obj:     config.asm
 	$(NASM) $(NOPT) -f obj -DMAKE_OBJECT_FILE config.asm
@@ -242,20 +214,25 @@ fpem/em187.obj:	 fpem/makefile
 ppide_sa.obj:      ppide.asm $(INCLUDES)
 	$(NASM) $(NOPT) -DSTANDALONE -f obj -o $@ -l ppide_sa.lst ppide.asm
 
+usb_sa.obj:      usb.asm $(INCLUDES)
+	$(NASM) $(NOPT) -DSTANDALONE -f obj -o $@ -l usb_sa.lst usb.asm
+
+
 wbios.lib:      $(OBJECTS)
-        wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj
+	wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
-        wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
+	wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
 	wlib -q wbios.lib +debug.obj +strtoul.obj  +inttrace.obj +tests.obj
+	wlib -q wbios.lib +kbd.obj
 
 
 abios.lib:	$(OBJECTA)
-	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj
-	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +sdcard.obj
+	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16.obj +int17par.obj +misc15.obj +ide.obj
+	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +usb.obj
 	wlib -q    abios.lib  +idelib.obj  +fpem/em187.obj
 
 cbios.lib:	$(OBJECTC)
-	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj
+	wlib -q -n cbios.lib +cprintf.obj +sio.obj +nvram.obj +libc.obj +strtoul.obj +debug.obj +kbd.obj
 
 
 uart_det.obj:	uart_det.asm $(INCLUDES)
@@ -283,44 +260,44 @@ space64.bin:
 # Maintenance
 
 tidy:	.SYMBOLIC
-        echo foo >foo.err
-        echo foo >foo.lst
+	echo foo >foo.err
+	echo foo >foo.lst
 	echo foo >fpem/foo.lst
-        echo foo >foo.map
+	echo foo >foo.map
 	$(RM) *.lst
 	$(RM) *.map
 	$(RM) *.err
 	$(RM) fpem$(SEP)*.lst
 
 clean:	tidy .SYMBOLIC
-        echo foo >foo.bin
-        echo foo >foo.obj
+	echo foo >foo.bin
+	echo foo >foo.obj
 	echo foo >fpem$(SEP)foo.obj
-        echo foo >foo.exe
-        echo foo >foo.sys
+	echo foo >foo.exe
+	echo foo >foo.sys
 	echo foo >foo.hex
 	echo foo >xbios.lib
 	$(RM) *.bin
 	$(RM) *.obj
 	$(RM) fpem$(SEP)*.obj
 	$(RM) *.exe
-        $(RM) *.sys
+	$(RM) *.sys
 	$(RM) ?bios.lib
 	$(RM) *.hex
 
 spotless: clean .SYMBOLIC
-        echo foo >foo.lib
-        echo foo >foo.bak
-        echo foo >foo.bk0
-        echo foo >foo.foo
-        echo foo >goo.foo
+	echo foo >foo.lib
+	echo foo >foo.bak
+	echo foo >foo.bk0
+	echo foo >foo.foo
+	echo foo >goo.foo
 	echo foo >config.asm
 	$(RM) *.lib
 	$(RM) *.bak
 	$(RM) *.bk?
 	$(RM) foo*.*
 	$(RM) goo*.*
-        $(RM) config.asm
+	$(RM) config.asm
 
 # Dependencies
 sbc188.h:       mytypes.h
@@ -330,31 +307,32 @@ rbios.obj:      rbios.asm $(INCLUDES) memory.asm ds1302.asm makefile
 startup.bin:    startup.asm $(INCLUDES) date.asm post.asm makefile
 timers.obj:     timers.asm $(INCLUDES)
 floppy.obj:     floppy.asm $(INCLUDES)
-int16ser.obj:     int16ser.asm $(INCLUDES)
-int10ser.obj:     int10ser.asm $(INCLUDES) uart_det.asm
+int16.obj:      int16.asm $(INCLUDES)
+int10ser.obj:   int10ser.asm $(INCLUDES) uart_det.asm
 int14ser.obj:	int14ser.asm $(INCLUDES)
 int17par.obj:	int17par.asm $(INCLUDES)
 inttrace.obj:	inttrace.asm $(INCLUDES)
 misc15.obj:     misc15.asm $(INCLUDES) cassette.asm
 ide.obj:	ide.asm $(INCLUDES)
 ppide.obj:      ppide.asm $(INCLUDES)
+usb.obj:        usb.asm $(INCLUDES)
 idelib.obj:	idelib.asm $(INCLUDES)
-sdcard.obj:	sdcard.asm sdcard.inc crc16tab.inc $(INCLUDES)
 1Ah_time.obj:	1Ah_time.asm $(INCLUDES)
 
 cprintf.obj:    cprintf.c sbc188.h
 sio.obj:	sio.c sbc188.h sio.h
-nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc sdcard.h libc.h
+nvram.obj:      nvram.c sbc188.h ds1302.h sio.h equates.h ide.h bda.inc libc.h
 libc.obj:	libc.c libc.h
 strtoul.obj:	strtoul.c sbc188.h mytypes.h libc.h
 debug.obj:      debug.c mytypes.h equates.h sio.h debug.h bda.inc
+kbd.obj:	kbd.c mytypes.h sbc188.h equates.h kbd_pc.h kbd_stat.h config.asm
 fdc8272.obj:	fdc8272.c mytypes.h sbc188.h io.h fdc8272.h wd37c65.h
 wd37c65.obj:	wd37c65.c mytypes.h sbc188.h io.h wd37c65.h
 ser_util.obj:	ser_util.c mytypes.h
 test.obj:	test.c mytypes.h bda.inc
 
 
-int16ser.as1:     int16ser.asm $(INCLUDES)
+int16.as1:     int16.asm $(INCLUDES)
 	$(NASM) -E $(NOPT) $(SIZE)  -f obj $*.asm >$*.as1
 int10ser.as1:     int10ser.asm $(INCLUDES) uart_det.asm
 	$(NASM) -E $(NOPT) $(SIZE)  -f obj $*.asm >$*.as1

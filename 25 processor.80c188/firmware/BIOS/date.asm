@@ -13,14 +13,14 @@
 ;
 ; Updated for the Duodyne 80c188 SBC
 
-%define DATE_STRING0	"10/27/24"
-%define DATE_STRING1	"27-Oct-2024"
+%define DATE_STRING0	"12/08/24"
+%define DATE_STRING1	"08-DEC-2024"
 
 %define VERSION_MAJOR		3
 %define VERSION_MINOR		5
 %define VERSION_REVISION	2
 %define VERSION_SUFFIX		""
-%define VERSION_SEQUENCE	66
+%define VERSION_SEQUENCE	70
 
 %define VERSION_STRING		"3.5-D",VERSION_SUFFIX
 
