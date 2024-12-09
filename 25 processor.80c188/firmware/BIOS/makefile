@@ -66,7 +66,7 @@ SEP=/
 
 INCLUDES = config.asm cpuregs.asm equates.asm date.asm segdef.asm ascii.asm bda.inc disk.inc macros.inc
 
-OBJECT1 = floppy.obj int10ser.obj int16ser.obj misc15.obj ide.obj
+OBJECT1 = floppy.obj int10ser.obj int16.obj misc15.obj ide.obj
 OBJECT2 = timers.obj inttrace.obj tests.obj ppide.obj usb.obj
 OBJECT3 = idelib.obj int14ser.obj int17par.obj
 OBJECT4 = fpem/em187.obj
@@ -219,7 +219,7 @@ usb_sa.obj:      usb.asm $(INCLUDES)
 
 
 wbios.lib:      $(OBJECTS)
-	wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
+	wlib -q -n wbios.lib +int10ser.obj +int14ser.obj +int16.obj +int17par.obj +timers.obj +ppide.obj +usb.obj
 	wlib -q wbios.lib +sio.obj +nvram.obj +floppy.obj +misc15.obj +diskio.obj
 	wlib -q wbios.lib +cprintf.obj +libc.obj +fpem/em187.obj
 	wlib -q wbios.lib +debug.obj +strtoul.obj  +inttrace.obj +tests.obj
@@ -227,7 +227,7 @@ wbios.lib:      $(OBJECTS)
 
 
 abios.lib:	$(OBJECTA)
-	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16ser.obj +int17par.obj +misc15.obj +ide.obj
+	wlib -q -n abios.lib +floppy.obj +int10ser.obj +int14ser.obj +int16.obj +int17par.obj +misc15.obj +ide.obj
 	wlib -q    abios.lib +timers.obj +inttrace.obj +tests.obj +ppide.obj  +usb.obj
 	wlib -q    abios.lib  +idelib.obj  +fpem/em187.obj
 
@@ -307,8 +307,8 @@ rbios.obj:      rbios.asm $(INCLUDES) memory.asm ds1302.asm makefile
 startup.bin:    startup.asm $(INCLUDES) date.asm post.asm makefile
 timers.obj:     timers.asm $(INCLUDES)
 floppy.obj:     floppy.asm $(INCLUDES)
-int16ser.obj:     int16ser.asm $(INCLUDES)
-int10ser.obj:     int10ser.asm $(INCLUDES) uart_det.asm
+int16.obj:      int16.asm $(INCLUDES)
+int10ser.obj:   int10ser.asm $(INCLUDES) uart_det.asm
 int14ser.obj:	int14ser.asm $(INCLUDES)
 int17par.obj:	int17par.asm $(INCLUDES)
 inttrace.obj:	inttrace.asm $(INCLUDES)
@@ -332,7 +332,7 @@ ser_util.obj:	ser_util.c mytypes.h
 test.obj:	test.c mytypes.h bda.inc
 
 
-int16ser.as1:     int16ser.asm $(INCLUDES)
+int16.as1:     int16.asm $(INCLUDES)
 	$(NASM) -E $(NOPT) $(SIZE)  -f obj $*.asm >$*.as1
 int10ser.as1:     int10ser.asm $(INCLUDES) uart_det.asm
 	$(NASM) -E $(NOPT) $(SIZE)  -f obj $*.asm >$*.as1
