@@ -1,1 +1,0 @@
-This board provides video and audio capabilities using a V9938/V9958 VDP for video and PSG for multi-channel sound.  GAL information is notional and should be replaced with project specifics using Digital
