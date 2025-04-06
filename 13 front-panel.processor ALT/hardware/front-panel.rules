@@ -1,0 +1,106 @@
+
+(rules PCB front-panel
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 1351)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 4.7)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.3)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.0)
+    (clear 125.0 (type smd_to_turn_gap))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-Power" "Via[0-1]_800:400_um" Power
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    Power "Via[0-1]_800:400_um-Power"
+  )
+  (class default
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    "I2C_SDA_1" "I2C_SCL_1" "Net-(D1-K)" "Net-(D1-A)" "Net-(D2-K)" "Net-(D2-A)" "Net-(D3-A)" "Net-(D3-K)"
+    "Net-(D4-K)" "Net-(D4-A)" "Net-(D5-A)" "Net-(D6-A)" "Net-(D6-K)" "Net-(D7-A)" "Net-(D7-K)" "Net-(D8-K)"
+    /LED0 "/FP-D0" /LED1 "/FP-D1" /LED2 "/FP-D2" /LED3 "/FP-D3"
+    /LED4 "/FP-D4" /LED5 "/FP-D5" /LED6 "/FP-D6" /LED7 "/FP-D7"
+    "I2C_SDA" "I2C_SCL" "~{EXT_RES}" "~{IM2-EN}" ~{RTS} "~{IM2-EN-OE}" "unconnected-(J1-Pin_29-Pad29)" "~{INT0-EN}"
+    RX ~{INT0} TX "~{WAIT-EN}" ~{CTS} ~{WAIT} "Net-(D8-A)" "Net-(D9-K)"
+    "Net-(D9-A)" DO CS "unconnected-(J3-Pin_1-Pad1)" DI CLK "unconnected-(J3-Pin_8-Pad8)" "unconnected-(SW1-C-Pad3)"
+    "unconnected-(SW2-C-Pad3)" "unconnected-(SW3-C-Pad3)" "unconnected-(SW4-C-Pad3)" "unconnected-(SW5-C-Pad3)" "unconnected-(SW6-C-Pad3)" "unconnected-(SW7-C-Pad3)" "unconnected-(SW8-C-Pad3)" "unconnected-(SW10-C-Pad3)"
+    "unconnected-(SW11-C-Pad3)" "unconnected-(SW12-C-Pad3)" "unconnected-(J2-Pin_3-Pad3)" "unconnected-(U2-GPIO20{slash}USB_D+-Pad26)" "~{RTS_WIFI}" "unconnected-(U2-GPIO12{slash}ADC2_CH1-Pad18)" "unconnected-(U2-GPIO16{slash}ADC2_CH5{slash}32K_N-Pad9)" "unconnected-(U2-GPIO48-Pad29)"
+    "unconnected-(U2-GPIO9{slash}ADC1_CH8-Pad15)" "TX_WIFI" "unconnected-(U2-GPIO15{slash}ADC2_CH4{slash}32K_P-Pad8)" "unconnected-(U2-GPIO17{slash}ADC2_CH6-Pad10)" "unconnected-(U2-GPIO44{slash}U0RXD-Pad42)" "unconnected-(U2-GPIO7{slash}ADC1_CH6-Pad7)" "unconnected-(U2-GPIO43{slash}U0TXD-Pad43)" "unconnected-(U2-GPIO14{slash}ADC2_CH3-Pad20)"
+    "unconnected-(U2-GPIO18{slash}ADC2_CH7-Pad11)" "unconnected-(U2-GPIO19{slash}USB_D--Pad25)" "unconnected-(U2-GPIO41{slash}MTDI-Pad38)" "unconnected-(U2-GPIO13{slash}ADC2_CH2-Pad19)" "unconnected-(U2-GPIO40{slash}MTDO-Pad37)" "~{CTS_WIFI}" "unconnected-(U2-GPIO8{slash}ADC1_CH7-Pad12)" "unconnected-(U2-CHIP_PU-Pad3)"
+    "unconnected-(U2-GPIO11{slash}ADC2_CH0-Pad17)" "unconnected-(U2-GPIO42{slash}MTMS-Pad39)" "unconnected-(U2-3V3-Pad1)" "unconnected-(U2-GPIO10{slash}ADC1_CH9-Pad16)" "unconnected-(U2-GPIO39{slash}MTCK-Pad36)" "unconnected-(U2-3V3-Pad1)_1" "unconnected-(U2-GPIO1{slash}ADC1_CH0-Pad41)" "RX_WIFI"
+    "unconnected-(U2-GPIO0-Pad31)" "unconnected-(U2-GPIO2{slash}ADC1_CH1-Pad40)" "unconnected-(U2-GPIO43{slash}U0TXD-Pad43)_1" "unconnected-(U2-GPIO40{slash}MTDO-Pad37)_1" "unconnected-(U2-GPIO39{slash}MTCK-Pad36)_1" "unconnected-(U2-GPIO44{slash}U0RXD-Pad42)_1" "unconnected-(U2-GPIO41{slash}MTDI-Pad38)_1" "unconnected-(U2-GPIO1{slash}ADC1_CH0-Pad41)_1"
+    "unconnected-(U2-GPIO42{slash}MTMS-Pad39)_1" "unconnected-(U2-GPIO2{slash}ADC1_CH1-Pad40)_1" "unconnected-(U2-GPIO48-Pad29)_1" "unconnected-(U2-GPIO20{slash}USB_D+-Pad26)_1" "unconnected-(U2-GPIO0-Pad31)_1" "unconnected-(U2-GPIO19{slash}USB_D--Pad25)_1" "unconnected-(J5-DAT1-Pad8)" "unconnected-(J5-DAT2-Pad1)"
+    "LV_I2C_SCL" "LV_I2C_SDA" "LV_TX_WIFI" "LV_I2C_SCL_1" "~{LV_CTS_WIFI}" "LV_RX_WIFI" "~{LV_RTS_WIFI}" "LV_I2C_SDA_1"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class Power
+    GND VCC +3.3V
+    (clearance_class Power)
+    (via_rule Power)
+    (rule
+      (width 1000.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

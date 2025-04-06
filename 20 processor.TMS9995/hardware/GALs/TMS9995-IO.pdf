@@ -1,11 +1,11 @@
-{COMPONENT N:\VINTAGE\PROJECTS\DUODYNE\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-IO.SYM
+{COMPONENT P:\DUODYNE\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-IO.SYM
 
  {ENVIRONMENT
   {PDIFvrev 3.00}
   {Program "CUPL(WM) Version 5.0a"}
   {DBtype "Schematic"}
   {DBvrev 1.01}
-  {DBtime "Sat Jan 20 11:53:10 2024 "}
+  {DBtime "Mon Mar 31 08:48:39 2025 "}
   {DBunit "MIL"}
   {DBgrid 10}
   {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
@@ -45,11 +45,12 @@
    {P CPUA3 {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
    {P CPUA2 {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
    {P CPU_IORQ {Pt "I/O"}{Lq 0}{Ploc 330 20}}
-   {P WAIT {Pt "I/O"}{Lq 0}{Ploc 330 40}}
-   {P 9902SEL {Pt "I/O"}{Lq 0}{Ploc 330 60}}
-   {P MAPSEL {Pt "I/O"}{Lq 0}{Ploc 330 80}}
-   {P CFSEL {Pt "I/O"}{Lq 0}{Ploc 330 100}}
-   {P ONBOARD_ {Pt "I/O"}{Lq 0}{Ploc 330 120}}
+   {P RESET {Pt "I/O"}{Lq 0}{Ploc 330 40}}
+   {P WAIT {Pt "I/O"}{Lq 0}{Ploc 330 60}}
+   {P 9902SEL {Pt "I/O"}{Lq 0}{Ploc 330 80}}
+   {P MAPSEL {Pt "I/O"}{Lq 0}{Ploc 330 100}}
+   {P CFSEL {Pt "I/O"}{Lq 0}{Ploc 330 120}}
+   {P ONBOARD_ {Pt "I/O"}{Lq 0}{Ploc 330 140}}
   }
 
   {PKG
@@ -78,8 +79,9 @@
    {Pnl 310 90}
    {Pnl 310 110}
    {Pnl 310 130}
+   {Pnl 310 150}
 
-   {Sd A 1 2 3 4 5 6 7 8 10 11 13 15 17 18 20 21 23}
+   {Sd A 1 2 3 4 5 6 7 8 10 11 13 15 16 17 18 20 21 23}
   }
 
   {PIC
@@ -104,6 +106,7 @@
    {L 300 80 330 80}
    {L 300 100 330 100}
    {L 300 120 330 120}
+   {L 300 140 330 140}
    [Ly "PINNAM"]
    [Tj "LC"]
    {T "MEMEN" 140 240}
@@ -119,11 +122,12 @@
    {T "CPUA2" 140 20}
    [Tj "RC"]
    {T "CPU_IORQ" 290 20}
-   {T "WAIT" 290 40}
-   {T "9902SEL" 290 60}
-   {T "MAPSEL" 290 80}
-   {T "CFSEL" 290 100}
-   {T "ONBOARD_" 290 120}
+   {T "RESET" 290 40}
+   {T "WAIT" 290 60}
+   {T "9902SEL" 290 80}
+   {T "MAPSEL" 290 100}
+   {T "CFSEL" 290 120}
+   {T "ONBOARD_" 290 140}
    [Ly "DEVICE"]
    [Tj "CT"]
    {T "G22V10" 215 -10}
@@ -137,7 +141,7 @@
    {EX
     [Ly "ATTR2"]
     [Ts 12][Tj "CT"][Tr 0][Tm "N"]
-    {At PLD N:\VINTAGE\PROJECTS\DUODYNE\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-IO 215 260}
+    {At PLD P:\DUODYNE\20 PROCESSOR.TMS9995\HARDWARE\GALS\TMS9995-IO 215 260}
    }
   }
  }
@@ -170,6 +174,8 @@
    {N CPUA2
    }
    {N CPU_IORQ
+   }
+   {N RESET
    }
    {N WAIT
    }
